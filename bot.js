@@ -205,7 +205,7 @@ function messageChecker(oldMessage, newMessage) {
                 default:
                     if (command.startsWith("uinfo")) {
                         command = command.substr(6);
-                        command = command.replace("<", "").replace(">", "").replace("@", "");
+                        command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
                         console.log(command);
                         
                         client.fetchUser(command).then(function(user) {
