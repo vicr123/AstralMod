@@ -46,7 +46,7 @@ function messageChecker(oldMessage, newMessage) {
     
     if (expletiveFilter) {
         //Check for expletives
-        var exp = msg.search(/(\s|^|.)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot)(\s|$|.)/i);
+        var exp = msg.search(/(\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard)(\s|$|\.|\,)/i);
         if (exp != -1) { //Gah! They're not supposed to say that!
             console.log("Expletive caught at " + parseInt(exp));
             switch (Math.floor(Math.random() * 1000) % 5) {
@@ -189,35 +189,36 @@ function messageChecker(oldMessage, newMessage) {
                 case "help":
                     message.channel.send(
                         "```\n" +
-                        "ping  pong        Asks AstralMod to reply with a message\n" +
+                        "ping|pong         Asks AstralMod to reply with a message\n" +
                         "filter [on|off]   Queries the chat filter.\n" +
                         "                  PARAMETER 1 (OPTIONAL)\n" + 
                         "                  Type on to set the filter on.\n" +
                         "                  Type off to set the filter off.\n" +
+                        "uinfo user        Gets information about a user.\n" +
+                        "                  PARAMETER 1\n" +
+                        "                  User ID. This can be obtained by tagging\n" +
+                        "                  the user.\n" +
                         "help              Prints this help message.\n" +
                         "reboot            Asks AstralMod to reconnect.\n" +
                         "poweroff          Asks AstralMod to leave the server.\n" +
                         "```")
                 default:
                     if (command.startsWith("uinfo")) {
-                        /*if (message.channel.id == 277923386959855626) {
-                            command = command.substr(6);
-                            console.log(command);
-                            client.fetchUser(command).then(function(user) {
-                                embed = new Discord.RichEmbed();
-                                embed.setAuthor(user.username, user.displayAvatarURL);
-                                embed.setColor("#FF0000");
-                                var message = "Discriminator:" + user.discriminator + "\n" + 
-                                              "Created at: " + user.createdAt.toUTCString();
-                                embed.setDescription(message);
-                                message.channel.sendEmbed(quoteofday)
-                            }).catch(function() {
-                                message.channel.send(':no_entry_sign: That didn\'t work. You might want to try again.');
-                            });
-                        } else {
-                            message.channel.send(':no_entry_sign: NO: Unable to use this command in this channel.');
-                        }*/
-                            message.channel.send(':no_entry_sign: Not working yet. Check back later.');
+                        command = command.substr(6);
+                        command = command.replace("<", "").replace(">", "").replace("@", "");
+                        console.log(command);
+                        
+                        client.fetchUser(command).then(function(user) {
+                            embed = new Discord.RichEmbed();
+                            embed.setAuthor(user.username, user.displayAvatarURL);
+                            embed.setColor("#FF0000");
+                            var msg = "Discriminator: " + user.discriminator + "\n" + 
+                                        "Created at: " + user.createdAt.toUTCString();
+                            embed.setDescription(msg);
+                            message.channel.sendEmbed(embed);
+                        }).catch(function(reason) {
+                            message.channel.send(':no_entry_sign: That didn\'t work. You might want to try again.');
+                        });
                     }
             }
             
@@ -250,9 +251,6 @@ function messageChecker(oldMessage, newMessage) {
 
 client.on('message', messageChecker);
 client.on('messageUpdate', messageChecker);
-
-client.on('guildMemberAdd', usr => {
-});
 
 client.login('MjgyMDQ4NTk5NTc0MDUyODY0.C4g2Pw.yFGdUuMlZITH99tWEic0JxIUGJ4').catch(
   function() {
