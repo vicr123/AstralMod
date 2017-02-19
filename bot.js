@@ -117,6 +117,27 @@ function messageChecker(oldMessage, newMessage) {
                     return;
                 }
             }
+            
+            //Check for caps
+            if (msg.match(/[A-Z]/gm) != null && msg.match(/[A-Z]/gm).length > (parseFloat(msg.length) * 0.8)) {
+                console.log("Caps filter kicking in!");
+                switch (Math.floor(Math.random() * 1000) % 4) {
+                    case 0:
+                        message.reply("Shh...");
+                        break;
+                    case 1:
+                        message.reply("The community likes peace and quiet.");
+                        break;
+                    case 2:
+                        message.reply("Isn't it weird when you're reading... and then you see a bunch of caps?");
+                        break;
+                    case 3:
+                        message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
+                        break;
+                }
+                message.delete();
+                return;
+            }
         }
         
         //Universal friendly checks:
@@ -243,12 +264,13 @@ function messageChecker(oldMessage, newMessage) {
                             command = command.substr(6);
                             command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
                             
-                            client.fetchUser(command).then(function(user) {
+                            message.guild.fetchMember(command).then(function(member) {
                                 embed = new Discord.RichEmbed();
-                                embed.setAuthor(user.username, user.displayAvatarURL);
+                                embed.setAuthor(member.displayName, member.user.displayAvatarURL);
                                 embed.setColor("#FF0000");
-                                var msg = "Discriminator: " + user.discriminator + "\n" + 
-                                            "Created at: " + user.createdAt.toUTCString();
+                                var msg = "Discriminator: " + member.user.discriminator + "\n" + 
+                                            "Created at: " + member.user.createdAt.toUTCString() + "\n" +
+                                            "Joined at: " + member.joinedAt.toUTCString();
                                 embed.setDescription(msg);
                                 message.channel.sendEmbed(embed);
                             }).catch(function(reason) {
@@ -385,7 +407,8 @@ client.on('messageUpdate', messageChecker);
 
 client.on('guildMemberUpdate', function(oldUser, newUser) {
     if (newUser.guild.id == 277922530973581312) {
-        if (!oldUser.roles.find("name", "I Broke The Rules!") && newUser.roles.find("name", "I Broke The Rules!")) {
+        if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "I Broke The Rules!")) {
+            console.log("Someone broke the rules!");
             client.channels.get("277943393231831040").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are now in jail. Appeal here to get out of jail. If you do not appeal successfully within 24 hours, an admin will **ban** you from the server.\n\n" + 
             "Additionally, if you leave and rejoin this server in an attempt to break out of jail, you will be **banned.**\n\n" + 
             "Timestamp: " + new Date().toUTCString());
