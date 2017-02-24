@@ -1,20 +1,59 @@
 const Discord = require('discord.js');
+const fs = require('fs');
 const client = new Discord.Client();
 
 var expletiveFilter = false;
+var doModeration = {};
 var lastMessages = {};
 var sameMessageCount = {};
 var smallMessageCount = {};
 var poweroff = false;
 var jailMember = null;
 
-function randomnum(min, max) { 
-    return Math.random() * (max - min) + min;
+function setGame() {
+    var presence = {};
+    presence.game = {};
+    presence.status = "online";
+    presence.afk = false;
+    
+    
+    switch (Math.floor(Math.random() * 1000) % 5) {
+        case 0:
+            presence.game.name = "with ban buttons";
+            break;
+        case 1:
+            presence.game.name = "ShiftOS";
+            break;
+        case 2:
+            presence.game.name = "Annoy Victor";
+            break;
+        case 3:
+            presence.game.name = "with an internal bug";
+            break;
+        case 4:
+            presence.game.name = "around";
+            break;
+    }
+    client.user.setPresence(presence);
 }
 
 client.on('ready', () => {
     console.log("AstralMod is now ready!");
+    client.setInterval(setGame, 300000);
+    setGame();
 });
+
+function getBoshyTime(guild) {
+    if (guild.id == 277922530973581312) { //AstralPhaser
+        return "<:vtBoshyTime:280178631886635008>";
+    } else if (guild.id == 234414439330349056) {
+        return "<:vtBoshyTime:280542032261545984>";
+    } else {
+        return "<:vtBoshyTime:283186465020706818>";
+    }
+}
+
+//var prank = true;
 
 function messageChecker(oldMessage, newMessage) {
     var message;
@@ -25,83 +64,35 @@ function messageChecker(oldMessage, newMessage) {
     }
     var msg = message.content;
     
+    if (doModeration[message.guild.id] == null) {
+        doModeration[message.guild.id] = true;
+    }
+    
+    /*if (message.channel.id == 277943393231831040) {
+        var line = "[" + message.createdAt.toUTCString() + " - " + message.member.displayName + "] " + msg + "\n";
+        fs.appendFile("brokerules.txt", line, function(err) {
+            
+        });
+    }*/
+    
     if (message.author.id != 280495817901473793 && message.author.id != 282048599574052864) {
         //Server Detection:
         //AstralPhaser Central: 277922530973581312
         //Michael's Stuff     : 234414439330349056
         
-        if (expletiveFilter && message.guild.id == 277922530973581312) { //Check for expletives only if on AstralPhaser Central
-            //Check for expletives
-            var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
-            if (exp != -1) { //Gah! They're not supposed to say that!
-                console.log("Expletive caught at " + parseInt(exp));
-                switch (Math.floor(Math.random() * 1000) % 5) {
-                    case 0:
-                        message.reply("I'm very disappointed in you. This is me <:angryvt:282006699802361856>");
-                        break;
-                    case 1:
-                        message.reply("Hey! Let's not have any of that please.");
-                        break;
-                    case 2:
-                        message.reply("Did you just...");
-                        break;
-                    case 3:
-                        message.reply("Cool. Now let's not forget the rules.");
-                        break;
-                    case 4:
-                        message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
-                        break;
-                }
-                
-                message.delete();
-                return;
-            }
-            
-            //Check for links
-            exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
-            if (exp != -1) { //This is a link.
-                console.log("Link caught at " + parseInt(exp));
-                switch (Math.floor(Math.random() * 1000) % 5) {
-                    case 0:
-                        message.reply("I've replaced your link with a not-so-link-like link: click here");
-                        break;
-                    case 1:
-                        message.reply("Whatever that link was... I hope it didn't contain some bad stuff...");
-                        break;
-                    case 2:
-                        message.reply("Did you just...");
-                        break;
-                    case 3:
-                        message.reply("Cool. Now let's not forget the rules.");
-                        break;
-                    case 4:
-                        message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
-                        break;
-                }
-                
-                message.delete();
-                return;
-            }
-            
-            //Check for images.
-            //Other attachments are ok.
-            if (message.attachments != null) {
-                var block = false;
-                for (let [key, attachment] of message.attachments) {
-                    if (attachment.height != null) {
-                        block = true;
-                        break;
-                    }
-                }
-                
-                if (block) {
-                    console.log("Image caught");
+
+        if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
+            if ((expletiveFilter && message.guild.id == 277922530973581312) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
+                //Check for expletives
+                var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
+                if (exp != -1) { //Gah! They're not supposed to say that!
+                    console.log("Expletive caught at " + parseInt(exp));
                     switch (Math.floor(Math.random() * 1000) % 5) {
                         case 0:
-                            message.reply("A picture says a thousand words. That picture said about fifteen words. These exact words.");
+                            message.reply("I'm very disappointed in you. This is me <:angryvt:282006699802361856>");
                             break;
                         case 1:
-                            message.reply("Let's not make all the other things disappear...");
+                            message.reply("Hey! Let's not have any of that please.");
                             break;
                         case 2:
                             message.reply("Did you just...");
@@ -113,46 +104,115 @@ function messageChecker(oldMessage, newMessage) {
                             message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
                             break;
                     }
+                    
                     message.delete();
                     return;
                 }
+                
+                
+                //Continue only if on AstralPhaser
+                if (message.guild.id == 277922530973581312) {
+                    //Check for links
+                    exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
+                    if (exp != -1) { //This is a link.
+                        console.log("Link caught at " + parseInt(exp));
+                        switch (Math.floor(Math.random() * 1000) % 5) {
+                            case 0:
+                                message.reply("I've replaced your link with a not-so-link-like link: click here");
+                                break;
+                            case 1:
+                                message.reply("Whatever that link was... I hope it didn't contain some bad stuff...");
+                                break;
+                            case 2:
+                                message.reply("Did you just...");
+                                break;
+                            case 3:
+                                message.reply("Cool. Now let's not forget the rules.");
+                                break;
+                            case 4:
+                                message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
+                                break;
+                        }
+                        
+                        message.delete();
+                        return;
+                    }
+                    
+                    //Check for images.
+                    //Other attachments are ok.
+                    if (message.attachments != null) {
+                        var block = false;
+                        for (let [key, attachment] of message.attachments) {
+                            if (attachment.height != null) {
+                                block = true;
+                                break;
+                            }
+                        }
+                        
+                        if (block) {
+                            console.log("Image caught");
+                            switch (Math.floor(Math.random() * 1000) % 5) {
+                                case 0:
+                                    message.reply("A picture says a thousand words. That picture said about fifteen words. These exact words.");
+                                    break;
+                                case 1:
+                                    message.reply("Let's not make all the other things disappear...");
+                                    break;
+                                case 2:
+                                    message.reply("Did you just...");
+                                    break;
+                                case 3:
+                                    message.reply("Cool. Now let's not forget the rules.");
+                                    break;
+                                case 4:
+                                    message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
+                                    break;
+                            }
+                            message.delete();
+                            return;
+                        }
+                    }
+                    
+                    //Check for caps
+                    if (msg.match(/[A-Z]/gm) != null && msg.match(/[A-Z]/gm).length > (parseFloat(msg.length) * 0.8)) {
+                        console.log("Caps filter kicking in!");
+                        switch (Math.floor(Math.random() * 1000) % 4) {
+                            case 0:
+                                message.reply("Shh...");
+                                break;
+                            case 1:
+                                message.reply("The community likes peace and quiet.");
+                                break;
+                            case 2:
+                                message.reply("Isn't it weird when you're reading... and then you see a bunch of caps?");
+                                break;
+                            case 3:
+                                message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
+                                break;
+                        }
+                        message.delete();
+                        return;
+                    }
+                }
             }
             
-            //Check for caps
-            if (msg.match(/[A-Z]/gm) != null && msg.match(/[A-Z]/gm).length > (parseFloat(msg.length) * 0.8)) {
-                console.log("Caps filter kicking in!");
-                switch (Math.floor(Math.random() * 1000) % 4) {
-                    case 0:
-                        message.reply("Shh...");
-                        break;
-                    case 1:
-                        message.reply("The community likes peace and quiet.");
-                        break;
-                    case 2:
-                        message.reply("Isn't it weird when you're reading... and then you see a bunch of caps?");
-                        break;
-                    case 3:
-                        message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
-                        break;
+            //Universal friendly checks:
+            //BotWarnings:
+            //AstralPhaser Central: 282513354118004747
+            //ShiftOS             : 282513112257658880
+            //theShell            : 283184634400079872
+            if (message.author.id != 282048599574052864 && msg.search(/\bkys\b/i) != -1) {
+                var auth = message.author;
+                if (message.guild.id == 277922530973581312) { //AstralPhaser
+                    client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                } else if (message.guild.id == 234414439330349056) { //ShiftOS
+                    client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                } else {
+                    client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 }
+                message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
-                return;
             }
-        }
-        
-        //Universal friendly checks:
-        //BotWarnings:
-        //AstralPhaser Central: 282513354118004747
-        //ShiftOS             : 282513112257658880
-        if (message.author.id != 282048599574052864 && msg.search(/\bkys\b/i) != -1) {
-            var auth = message.author;
-            if (message.guild.id == 277922530973581312) { //AstralPhaser
-                client.channels.get("282513354118004747").sendMessage("<:vtBoshyTime:280178631886635008> PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
-            } else { //ShiftOS
-                client.channels.get("282513112257658880").sendMessage("<:vtBoshyTime:280542032261545984> PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
-            }
-            message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
-            message.delete();
         }
         
         if (msg.startsWith("mod:")) {
@@ -164,10 +224,10 @@ function messageChecker(oldMessage, newMessage) {
                 var command = msg.substr(4);
                 switch (command) {
                     case "ping":
-                        message.channel.send('<:vtBoshyTime:280178631886635008> PONG! I want to play pong too... :\'(');
+                        message.channel.send(getBoshyTime(message.guild) + ' PONG! I want to play pong too... :\'(');
                         break;
                     case "pong":
-                        message.channel.send('<:vtBoshyTime:280178631886635008> PING!');
+                        message.channel.send(getBoshyTime(message.guild) + ' PING!');
                         break;
                     case "filter":
                         if (message.guild.id != 277922530973581312) {
@@ -209,6 +269,34 @@ function messageChecker(oldMessage, newMessage) {
                             message.delete();
                         }
                         break;
+                    case "mod":
+                        if (doModeration[message.guild.id]) {
+                            message.channel.send(':arrow_forward: Moderation: on');
+                        } else {
+                            message.channel.send(':arrow_forward: Moderation: off');
+                        }
+                        message.delete();
+                        break;
+                    case "mod on":
+                        if (doModeration[message.guild.id]) {
+                            message.channel.send(':arrow_forward: Moderation is already on.');
+                        } else {
+                            doModeration[message.guild.id] = true;
+                            message.channel.send(':white_check_mark: Moderation is now turned on.');
+                            console.log("Moderation is now on.");
+                        }
+                        message.delete();
+                        break;
+                    case "mod off":
+                        if (doModeration[message.guild.id]) {
+                            doModeration[message.guild.id] = false;
+                            message.channel.send(':white_check_mark: Moderation is now turned off. All messages on this server, spam, profane or whatever will be allowed through.');
+                            console.log("Moderation is now off.");
+                        } else {
+                            message.channel.send(':arrow_forward: Moderation is already off.');
+                        }
+                        message.delete();
+                        break;
                     case "time":
                         message.channel.send(':arrow_forward: The time now is ' + new Date().toUTCString());
                         message.delete();
@@ -241,24 +329,41 @@ function messageChecker(oldMessage, newMessage) {
                         break;
                     case "help":
                         message.channel.send(
-                            "```\n" +
+                            "Here are some things you can try:\n```\n" +
                             "ping|pong         Asks AstralMod to reply with a message\n" +
                             "time              Gets the time at UTC +00:00.\n" + 
-                            "                  Useful for checking jail time.\n" +
+                            "                  Useful for checking jail time.\n\n" +
+                            "mod    [on|off]   Queries moderation status.\n" +
+                            "                  PARAMETER 1 (OPTIONAL)\n" + 
+                            "                  Type on to start moderating the server.\n" +
+                            "                  Type off to stop moderating the server.\n\n" +
                             "filter [on|off]   Queries the chat filter.\n" +
                             "                  PARAMETER 1 (OPTIONAL)\n" + 
                             "                  Type on to set the filter on.\n" +
-                            "                  Type off to set the filter off.\n" +
+                            "                  Type off to set the filter off.\n\n" +
                             "uinfo user        Gets information about a user.\n" +
                             "                  PARAMETER 1\n" +
                             "                  User ID. This can be obtained by tagging\n" +
-                            "                  the user.\n" +
+                            "                  the user.\n\n" +
                             "jail user         Places a user in jail.\n" +
+                            "cancel            Cancels a pending operation.\n" +
                             "help              Prints this help message.\n" +
                             "reboot            Asks AstralMod to reconnect.\n" +
                             "poweroff          Asks AstralMod to leave the server.\n" +
                             "```")
                         break;
+                    case "cancel":
+                        if (poweroff) {
+                            poweroff = false;
+                            message.channel.send(':white_check_mark: OK, I won\'t leave... yet.')
+                        } else if (jailMember != null) {
+                            message.channel.send(':white_check_mark: OK, I won\'t jail ' + jailMember.displayName);
+                            jailMember = null;
+                        } else {
+                            message.reply(':no_entry_sign: ERROR: Nothing to cancel.');
+                        }
+                        message.delete();
+                        return;
                     default:
                         if (command.startsWith("uinfo")) {
                             command = command.substr(6);
@@ -300,13 +405,13 @@ function messageChecker(oldMessage, newMessage) {
                 
                 if (command == "poweroff") {
                     if (poweroff) {
-                        message.channel.send(':white_check_mark: WAIT! Please! What have I ever done!? NOOO...').then(function() {
+                        message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!').then(function() {
                             process.exit(0);
                         }).catch(function() {
                             process.exit(0);
                         });
                     } else {
-                        message.channel.send(':information_source: To power off AstralMod, type in mod:poweroff again.');
+                        message.channel.send(':information_source: If you\'re just trying to stop AstralMod from moderating, use mod:mod off instead. Otherwise, to power off AstralMod, type in mod:poweroff again.');
                         poweroff = true;
                     }
                 } else {
@@ -321,83 +426,90 @@ function messageChecker(oldMessage, newMessage) {
             }
         }
         
-        //Spam limiting
-        if (lastMessages[message.author.id] != msg) {
-            sameMessageCount[message.author.id] = 0;
-        }
-        lastMessages[message.author.id] = msg
-        sameMessageCount[message.author.id] += 1;
-        
-        if (smallMessageCount[message.author.id] == null) {
-            smallMessageCount[message.author.id] = 0;
-        }
-        
-        if (msg.length < 5 || msg.indexOf(" ") == -1) {
-            smallMessageCount[message.author.id] += 1;
-        } else {
-            smallMessageCount[message.author.id] = 0;
-        }
-        
-        if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] == 10) {
-            var auth = message.author;
-            if (message.guild.id == 277922530973581312) { //AstralPhaser
-                client.channels.get("282513354118004747").sendMessage("<:vtBoshyTime:280178631886635008> PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
-            } else { //ShiftOS
-                client.channels.get("282513112257658880").sendMessage("<:vtBoshyTime:280542032261545984> PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+        if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
+            //Spam limiting
+            if (lastMessages[message.author.id] != msg) {
+                sameMessageCount[message.author.id] = 0;
             }
-            message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
-            message.delete();
-        } else if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] > 10) {
-            message.delete();
-        } else if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] > 3) {
-            console.log("Spam limits kicking in!");
-            switch (Math.floor(Math.random() * 1000) % 4) {
-                case 0:
-                    message.reply("Well... We all heard you.");
-                    break;
-                case 1:
-                    message.reply("Stop typing the same thing! You're like a broken record!");
-                    break;
-                case 2:
-                    message.reply("Hmm... Not sure if you'd actually say the same thing more than three times in public.");
-                    break;
-                case 3:
-                    message.reply("Is that the only phrase you know? Can you try typing something else?");
-                    break;
+            lastMessages[message.author.id] = msg
+            sameMessageCount[message.author.id] += 1;
+            
+            /*if (smallMessageCount[message.author.id] == null) {
+                smallMessageCount[message.author.id] = 0;
             }
             
-            message.delete();
-            return;
-        } else if (smallMessageCount[message.author.id] == 10) {
-            var auth = message.author;
-            if (message.guild.id == 277922530973581312) { //AstralPhaser
-                client.channels.get("282513354118004747").sendMessage("<:vtBoshyTime:280178631886635008> PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
-            } else { //ShiftOS
-                client.channels.get("282513112257658880").sendMessage("<:vtBoshyTime:280542032261545984> PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
-            }
-            message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
-            message.delete();
-        } else if (smallMessageCount[message.author.id] > 10) {
-            message.delete();
-        } else if (smallMessageCount[message.author.id] > 5) {
-            console.log("Spam limits kicking in!");
-            switch (Math.floor(Math.random() * 1000) % 4) {
-                case 0:
-                    message.reply("This looks like spam. And we don't like spam.");
-                    break;
-                case 1:
-                    message.reply("Cut it out.");
-                    break;
-                case 2:
-                    message.reply("Very... scribbly...");
-                    break;
-                case 3:
-                    message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
-                    break;
-            }
+            if (msg.length < 5 || msg.indexOf(" ") == -1) {
+                smallMessageCount[message.author.id] += 1;
+            } else {
+                smallMessageCount[message.author.id] = 0;
+            }*/
             
-            message.delete();
-            return;
+            if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] == 10) {
+                var auth = message.author;
+                if (message.guild.id == 277922530973581312) { //AstralPhaser
+                    client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 234414439330349056) { //ShiftOS
+                    client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else {
+                    client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                }
+                
+                message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
+                message.delete();
+            } else if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] > 10) {
+                message.delete();
+            } else if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] > 3) {
+                console.log("Spam limits kicking in!");
+                switch (Math.floor(Math.random() * 1000) % 4) {
+                    case 0:
+                        message.reply("Well... We all heard you.");
+                        break;
+                    case 1:
+                        message.reply("Stop typing the same thing! You're like a broken record!");
+                        break;
+                    case 2:
+                        message.reply("Hmm... Not sure if you'd actually say the same thing more than three times in public.");
+                        break;
+                    case 3:
+                        message.reply("Is that the only phrase you know? Can you try typing something else?");
+                        break;
+                }
+                
+                message.delete();
+                return;
+            } else if (smallMessageCount[message.author.id] == 10) {
+                var auth = message.author;
+                if (message.guild.id == 277922530973581312) { //AstralPhaser
+                    client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 234414439330349056) { //ShiftOS
+                    client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else {
+                    client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                }
+                message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
+                message.delete();
+            } else if (smallMessageCount[message.author.id] > 10) {
+                message.delete();
+            } else if (smallMessageCount[message.author.id] > 5) {
+                console.log("Spam limits kicking in!");
+                switch (Math.floor(Math.random() * 1000) % 4) {
+                    case 0:
+                        message.reply("This looks like spam. And we don't like spam.");
+                        break;
+                    case 1:
+                        message.reply("Cut it out.");
+                        break;
+                    case 2:
+                        message.reply("Very... scribbly...");
+                        break;
+                    case 3:
+                        message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
+                        break;
+                }
+                
+                message.delete();
+                return;
+            }
         }
     }
 }
