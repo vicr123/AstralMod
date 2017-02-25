@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const api = require('./keys.js');
 const fs = require('fs');
 const client = new Discord.Client();
 
@@ -517,6 +518,30 @@ function messageChecker(oldMessage, newMessage) {
 client.on('message', messageChecker);
 client.on('messageUpdate', messageChecker);
 
+client.on('guildMemberAdd', function(guildMember) {
+    if (guildMember.guild.id == 234414439330349056 || guildMember.guild.id == 277922530973581312) {
+        var channel;
+        if (guildMember.guild.id == 277922530973581312) {
+            channel = client.channels.get("284837615830695936");
+        } else {
+            channel = client.channels.get("284826899413467136");
+        }
+        
+        channel.sendMessage("<@" + guildMember.user.id + "> has just joined the server.");
+        
+        embed = new Discord.RichEmbed();
+        embed.setAuthor(guildMember.displayName, guildMember.user.displayAvatarURL);
+        embed.setColor("#FF0000");
+        var msg = "Discriminator: " + guildMember.user.discriminator + "\n" + 
+                    "Created at: " + guildMember.user.createdAt.toUTCString() + "\n" +
+                    "Joined at: " + guildMember.joinedAt.toUTCString();
+        embed.setDescription(msg);
+        channel.sendEmbed(embed);
+        
+        //if (guildMember.joinedAt - guildMember.createdAt
+    }
+});
+
 client.on('guildMemberUpdate', function(oldUser, newUser) {
     if (newUser.guild.id == 277922530973581312) {
         if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "I Broke The Rules!")) {
@@ -528,6 +553,6 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
     }
 });
 
-client.login('MjgyMDQ4NTk5NTc0MDUyODY0.C4g2Pw.yFGdUuMlZITH99tWEic0JxIUGJ4').catch(function() {
+client.login(api.key).catch(function() {
     console.log("[ERROR] Login failed.");
 });
