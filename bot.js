@@ -523,8 +523,10 @@ client.on('guildMemberAdd', function(guildMember) {
         var channel;
         if (guildMember.guild.id == 277922530973581312) {
             channel = client.channels.get("284837615830695936");
+            console.log(guildMember.displayName + " joined AstralPhaser Central");
         } else {
             channel = client.channels.get("284826899413467136");
+            console.log(guildMember.displayName + " joined ShiftOS");
         }
         
         channel.sendMessage("<@" + guildMember.user.id + "> has just joined the server.");
@@ -533,10 +535,20 @@ client.on('guildMemberAdd', function(guildMember) {
         embed.setAuthor(guildMember.displayName, guildMember.user.displayAvatarURL);
         embed.setColor("#FF0000");
         var msg = "Discriminator: " + guildMember.user.discriminator + "\n" + 
-                    "Created at: " + guildMember.user.createdAt.toUTCString() + "\n" +
-                    "Joined at: " + guildMember.joinedAt.toUTCString();
+                    "Created at: " + guildMember.user.createdAt.toUTCString() + "\n";
+        if (guildMember.joinedAt.getTime() == 0) {
+            msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
+        } else {
+            msg += "Joined at: " + guildMember.joinedAt.toUTCString();
+        }
         embed.setDescription(msg);
         channel.sendEmbed(embed);
+        
+        /*if (guildMember.user.createdAt.getTime() < 1487962800000) {
+            channel.sendMessage("This user was created **before** the suspected raid and a ban is probably not necessary.");
+        } else {
+            channel.sendMessage("This user was created **after** the suspected raid.");
+        }*/
         
         //if (guildMember.joinedAt - guildMember.createdAt
     }
