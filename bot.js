@@ -5,6 +5,7 @@ const client = new Discord.Client();
 
 var expletiveFilter = false;
 var doModeration = {};
+var panicMode = {};
 var lastMessages = {};
 var sameMessageCount = {};
 var smallMessageCount = {};
@@ -65,8 +66,26 @@ function messageChecker(oldMessage, newMessage) {
     }
     var msg = message.content;
     
+    if (message.guild == null) return;
+    
     if (doModeration[message.guild.id] == null) {
         doModeration[message.guild.id] = true;
+    }
+    
+    if (panicMode[message.guild.id] == null) {
+        panicMode[message.guild.id] = false;
+    }
+    
+    if (panicMode[message.guild.id]) {
+        if (msg == "mod:panic" && message.member.roles.find("name", "Admin")) {
+            message.channel.send(':rotating_light: Panic mode is now off.');
+            panicMode[message.guild.id] = false;
+                        console.log("Panic is now on.");
+            message.delete();
+            return;
+        } else {
+            message.delete();
+        }
     }
     
     /*if (message.channel.id == 277943393231831040) {
@@ -298,6 +317,18 @@ function messageChecker(oldMessage, newMessage) {
                         }
                         message.delete();
                         break;
+                    case "panic":
+                        if (message.member.roles.find("name", "Admin")) {
+                            message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
+                                panicMode[message.guild.id] = true;
+                            });
+                            console.log("Panic is now on.");
+                            message.delete();
+                        } else {
+                            message.reply(':no_entry_sign: NO: This is an admin only command.');
+                            message.delete();
+                        }
+                        break;
                     case "time":
                         message.channel.send(':arrow_forward: The time now is ' + new Date().toUTCString());
                         message.delete();
@@ -347,10 +378,13 @@ function messageChecker(oldMessage, newMessage) {
                             "                  User ID. This can be obtained by tagging\n" +
                             "                  the user.\n\n" +
                             "jail user         Places a user in jail.\n" +
+                            "panic       -     Toggles panic mode.\n" +
                             "cancel            Cancels a pending operation.\n" +
                             "help              Prints this help message.\n" +
                             "reboot            Asks AstralMod to reconnect.\n" +
                             "poweroff          Asks AstralMod to leave the server.\n" +
+                            "\n" +
+                            "- denotes an admin only command\n" +
                             "```")
                         break;
                     case "cancel":
@@ -424,6 +458,7 @@ function messageChecker(oldMessage, newMessage) {
                 }
             } else {
                 message.reply(':no_entry_sign: NO: What? You\'re not a member of the staff! Why would you be allowed to type that!?');
+                message.delete();
             }
         }
         
@@ -561,6 +596,15 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
             client.channels.get("277943393231831040").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are now in jail. Appeal here to get out of jail. If you do not appeal successfully within 24 hours, an admin will **ban** you from the server.\n\n" + 
             "Additionally, if you leave and rejoin this server in an attempt to break out of jail, you will be **banned.**\n\n" + 
             "Timestamp: " + new Date().toUTCString());
+        }
+        
+        if (newUser.nickname != oldUser.nickname) {
+            var channel = client.channels.get("285668975390621697"); //Admin Bot warnings
+            if (newUser.nickname == null) {
+                channel.send(oldUser.user.username + " has cleared his nickname");
+            } else {
+                channel.send(oldUser.user.username + " has changed his nickname to " + newUser.nickname);
+            }
         }
     }
 });
