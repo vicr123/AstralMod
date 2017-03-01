@@ -50,8 +50,10 @@ function getBoshyTime(guild) {
         return "<:vtBoshyTime:280178631886635008>";
     } else if (guild.id == 234414439330349056) {
         return "<:vtBoshyTime:280542032261545984>";
-    } else {
+    } else if (guild.id == 278824407743463424) {
         return "<:vtBoshyTime:283186465020706818>";
+    } else {
+        return ":warning:";
     }
 }
 
@@ -80,12 +82,11 @@ function messageChecker(oldMessage, newMessage) {
         if (msg == "mod:panic" && message.member.roles.find("name", "Admin")) {
             message.channel.send(':rotating_light: Panic mode is now off.');
             panicMode[message.guild.id] = false;
-                        console.log("Panic is now on.");
+            console.log("Panic is now off.");
             message.delete();
             return;
-        } else {
-            message.delete();
         }
+        message.delete();
     }
     
     /*if (message.channel.id == 277943393231831040) {
@@ -99,7 +100,7 @@ function messageChecker(oldMessage, newMessage) {
         //Server Detection:
         //AstralPhaser Central: 277922530973581312
         //Michael's Stuff     : 234414439330349056
-        
+        //AKidFromTheUK       : 285740807854751754
 
         if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
             if ((expletiveFilter && message.guild.id == 277922530973581312) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
@@ -133,29 +134,32 @@ function messageChecker(oldMessage, newMessage) {
                 //Continue only if on AstralPhaser
                 if (message.guild.id == 277922530973581312) {
                     //Check for links
-                    exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
-                    if (exp != -1) { //This is a link.
-                        console.log("Link caught at " + parseInt(exp));
-                        switch (Math.floor(Math.random() * 1000) % 5) {
-                            case 0:
-                                message.reply("I've replaced your link with a not-so-link-like link: click here");
-                                break;
-                            case 1:
-                                message.reply("Whatever that link was... I hope it didn't contain some bad stuff...");
-                                break;
-                            case 2:
-                                message.reply("Did you just...");
-                                break;
-                            case 3:
-                                message.reply("Cool. Now let's not forget the rules.");
-                                break;
-                            case 4:
-                                message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
-                                break;
+                    
+                    if (!(message.member.roles.find("name", "Patron Tier 1ne") || message.member.roles.find("name", "Patron Tier 2wo") || message.member.roles.find("name", "Patron Tier 3hree") ||message.member.roles.find("name", "Patron Tier 4our"))) {
+                        exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
+                        if (exp != -1) { //This is a link.
+                            console.log("Link caught at " + parseInt(exp));
+                            switch (Math.floor(Math.random() * 1000) % 5) {
+                                case 0:
+                                    message.reply("I've replaced your link with a not-so-link-like link: click here");
+                                    break;
+                                case 1:
+                                    message.reply("Whatever that link was... I hope it didn't contain some bad stuff...");
+                                    break;
+                                case 2:
+                                    message.reply("Did you just...");
+                                    break;
+                                case 3:
+                                    message.reply("Cool. Now let's not forget the rules.");
+                                    break;
+                                case 4:
+                                    message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
+                                    break;
+                            }
+                            
+                            message.delete();
+                            return;
                         }
-                        
-                        message.delete();
-                        return;
                     }
                     
                     //Check for images.
@@ -221,14 +225,17 @@ function messageChecker(oldMessage, newMessage) {
             //AstralPhaser Central: 282513354118004747
             //ShiftOS             : 282513112257658880
             //theShell            : 283184634400079872
+            //AKidFromTheUK       : 285740807854751754
             if (message.author.id != 282048599574052864 && msg.search(/\bkys\b/i) != -1) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
                     client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
                     client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
-                } else {
+                } else if (message.guild.id == 278824407743463424) { //theShell {
                     client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
+                    client.channels.get("285740807854751754").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
@@ -486,8 +493,10 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
                     client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
-                } else {
+                } else if (message.guild.id == 278824407743463424) { //theShell
                     client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
+                    client.channels.get("285722047060115456").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 }
                 
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
@@ -519,8 +528,10 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
                     client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
-                } else {
+                } else if (message.guild.id == 278824407743463424) { //theShell
                     client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
+                    client.channels.get("285722047060115456").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 }
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
                 message.delete();
