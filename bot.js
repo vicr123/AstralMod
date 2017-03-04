@@ -130,7 +130,7 @@ function messageChecker(oldMessage, newMessage) {
                 var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
                 if (exp != -1) { //Gah! They're not supposed to say that!
                     console.log("Expletive caught at " + parseInt(exp));
-                    switch (Math.floor(Math.random() * 1000) % 5) {
+                    switch (Math.floor(Math.random() * 1000) % 6) {
                         case 0:
                             message.reply("I'm very disappointed in you. This is me <:angryvt:282006699802361856>");
                             break;
@@ -145,6 +145,9 @@ function messageChecker(oldMessage, newMessage) {
                             break;
                         case 4:
                             message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
+                            break;
+                        case 5:
+                            message.reply("Hey! That was a swear! No!");
                             break;
                     }
                     
@@ -161,7 +164,7 @@ function messageChecker(oldMessage, newMessage) {
                         exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
                         if (exp != -1) { //This is a link.
                             console.log("Link caught at " + parseInt(exp));
-                            switch (Math.floor(Math.random() * 1000) % 5) {
+                            switch (Math.floor(Math.random() * 1000) % 6) {
                                 case 0:
                                     message.reply("I've replaced your link with a not-so-link-like link: click here");
                                     break;
@@ -176,6 +179,9 @@ function messageChecker(oldMessage, newMessage) {
                                     break;
                                 case 4:
                                     message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
+                                    break;
+                                case 5:
+                                    message.reply("We dont want to download your FREE RAM.");
                                     break;
                             }
                             
@@ -222,7 +228,7 @@ function messageChecker(oldMessage, newMessage) {
                     //Check for caps
                     if (msg.match(/[A-Z]/gm) != null && msg.match(/[A-Z]/gm).length > (parseFloat(msg.length) * 0.8)) {
                         console.log("Caps filter kicking in!");
-                        switch (Math.floor(Math.random() * 1000) % 4) {
+                        switch (Math.floor(Math.random() * 1000) % 5) {
                             case 0:
                                 message.reply("Shh...");
                                 break;
@@ -234,6 +240,9 @@ function messageChecker(oldMessage, newMessage) {
                                 break;
                             case 3:
                                 message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
+                                break;
+                            case 4:
+                                message.reply("DONT SHOUT IN HERE K");
                                 break;
                         }
                         message.delete();
@@ -273,10 +282,36 @@ function messageChecker(oldMessage, newMessage) {
                 var command = msg.substr(4);
                 switch (command) {
                     case "ping":
-                        message.channel.send(getBoshyTime(message.guild) + ' PONG! I want to play pong too... :\'(');
+                        switch (Math.floor(Math.random() * 1000) % 4) {
+                            case 0:
+                                message.channel.send(getBoshyTime(message.guild) + ' PONG! I want to play pong too... :\'(');
+                                break;
+                            case 1:
+                                message.channel.send(getBoshyTime(message.guild) + ' PONG! I love playing pong!'); 
+                                break;
+                            case 2:
+                                message.channel.send(getBoshyTime(message.guild) + ' PONG! Thanks for playing pong with me!');
+                                break;
+                            case 3:
+                                message.channel.send(getBoshyTime(message.guild) + ' PONG!');
+                                break;
+                        }
                         break;
                     case "pong":
-                        message.channel.send(getBoshyTime(message.guild) + ' PING!');
+                        switch (Math.floor(Math.random() * 1000) % 4) {
+                            case 0:
+                                message.channel.send(getBoshyTime(message.guild) + ' PING! Pings are also cool!');
+                                break;
+                            case 1:
+                                message.channel.send(getBoshyTime(message.guild) + ' PING! Do you like playing pong?'); 
+                                break;
+                            case 2:
+                                message.channel.send(getBoshyTime(message.guild) + ' PING! Here\'s the test message you wanted!');
+                                break;
+                            case 3:
+                                message.channel.send(getBoshyTime(message.guild) + ' PING!');
+                                break;
+                        }
                         break;
                     case "filter":
                         if (message.guild.id != 277922530973581312) {
