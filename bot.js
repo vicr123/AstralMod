@@ -19,7 +19,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 5) {
+    switch (Math.floor(Math.random() * 1000) % 12) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
