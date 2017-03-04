@@ -19,10 +19,10 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 5) {
+    switch (Math.floor(Math.random() * 1000) % 12) {
         case 0:
             presence.game.name = "with ban buttons";
-            break;
+            break; //SCRUATCHO
         case 1:
             presence.game.name = "ShiftOS";
             break;
@@ -35,6 +35,28 @@ function setGame() {
         case 4:
             presence.game.name = "around";
             break;
+        case 5:
+            presence.game.name = "bot games";
+            break;
+        case 6:
+            presence.game.name = "with ones and zeroes";
+            break;
+        case 7:
+            presence.game.name = "being a stepswitcher";
+            break;
+        case 8:
+            presence.game.name = "activating supa weapon";
+            break;
+        case 9:
+            presence.game.name = "solving puzzles";
+            break;
+        case 10:
+            presence.game.name = "rewinding time";
+            break;
+        case 11:
+            presence.game.name = "checking archives";
+            break;
+
     }
     client.user.setPresence(presence);
 }
