@@ -504,7 +504,7 @@ function messageChecker(oldMessage, newMessage) {
                         var hours = parseInt(command);
                         
                         var localtime = new Date();
-                        var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours) * 60000);
+                        var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
                         message.channel.send(':arrow_forward: The time now at UTC ' + command + ' is ' + date.toString());
                         message.delete();
                     }
