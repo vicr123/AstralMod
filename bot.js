@@ -499,7 +499,15 @@ function messageChecker(oldMessage, newMessage) {
                                 });
                             }
                             message.delete();
-                        }
+                    } else if (command.startsWith("time")) {
+                        command = command.substr(5);
+                        var hours = parseInt(command);
+                        
+                        var localtime = new Date();
+                        var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours) * 60000);
+                        message.channel.send(':arrow_forward: The time now at UTC ' + command + ' is ' + date.toString());
+                        message.delete();
+                    }
                 }
                 
                 if (command == "poweroff") {
