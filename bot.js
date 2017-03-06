@@ -160,7 +160,7 @@ function messageChecker(oldMessage, newMessage) {
                 if (message.guild.id == 277922530973581312) {
                     //Check for links
                     
-                    if (!(message.member.roles.find("name", "Patron Tier 1ne") || message.member.roles.find("name", "Patron Tier 2wo") || message.member.roles.find("name", "Patron Tier 3hree") ||message.member.roles.find("name", "Patron Tier 4our"))) {
+                    if (message.member != null && !(message.member.roles.find("name", "Patron Tier 1ne") || message.member.roles.find("name", "Patron Tier 2wo") || message.member.roles.find("name", "Patron Tier 3hree") ||message.member.roles.find("name", "Patron Tier 4our"))) {
                         exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
                         if (exp != -1) { //This is a link.
                             console.log("Link caught at " + parseInt(exp));
