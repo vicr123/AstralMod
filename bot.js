@@ -307,6 +307,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
                     client.channels.get("285740807854751754").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                } else if (message.guild.id == 281066689892974592) { //LE
+                    client.channels.get("288272065109295104").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
@@ -615,8 +617,12 @@ function messageChecker(oldMessage, newMessage) {
                                 embed.setAuthor(member.displayName, member.user.displayAvatarURL);
                                 embed.setColor("#FF0000");
                                 var msg = "Discriminator: " + member.user.discriminator + "\n" + 
-                                            "Created at: " + member.user.createdAt.toUTCString() + "\n" +
-                                            "Joined at: " + member.joinedAt.toUTCString();
+                                            "Created at: " + member.user.createdAt.toUTCString() + "\n";
+                                if (member.joinedAt.getTime() == 0) {
+                                    msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                                } else {
+                                    msg += "Joined at: " + member.joinedAt.toUTCString();
+                                }
                                 embed.setDescription(msg);
                                 message.channel.sendEmbed(embed);
                             }).catch(function(reason) {
@@ -709,6 +715,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
                     client.channels.get("285722047060115456").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 281066689892974592) { //LE
+                    client.channels.get("288272065109295104").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 }
                 
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
@@ -744,6 +752,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
                     client.channels.get("285722047060115456").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 281066689892974592) { //LE
+                    client.channels.get("288272065109295104").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 }
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
                 message.delete();
