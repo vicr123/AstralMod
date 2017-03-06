@@ -1,3 +1,23 @@
+/****************************************
+ * 
+ *   AstralMod: Moderation bot for AstralPhaser Central and other Discord servers
+ *   Copyright (C) 2017 Victor Tran and Rylan [undisclosed surname]
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * *************************************/
+
 const Discord = require('discord.js');
 const api = require('./keys.js');
 const fs = require('fs');
@@ -11,6 +31,7 @@ var sameMessageCount = {};
 var smallMessageCount = {};
 var poweroff = false;
 var jailMember = null;
+var bulletinTimeout;
 
 function setGame() {
     var presence = {};
@@ -81,6 +102,25 @@ function getBoshyTime(guild) {
 
 //var prank = true;
 
+function postBulletin() {
+    var channel = client.channels.get("277922530973581312");
+    
+    switch (Math.floor(Math.random() * 1000) % 4) {
+        case 0:
+            channel.send("<:vtBoshyTime:280178631886635008> PING! Don't forget, the **no expletive** rule is now in effect. Thanks!");
+            break;
+        case 1:
+            channel.send("<:vtBoshyTime:280178631886635008> PING! If you missed out, don't forget to check out the AstralPhaser channel for a review of the chat!");
+            break;
+        case 2:
+            channel.send("<:vtBoshyTime:280178631886635008> PING! Thanks for coming to the chat everyone!");
+            break;
+        case 3:
+            channel.send("<:vtBoshyTime:280178631886635008> PING! Welcome to AstralPhaser Central!");
+            break;
+    }
+}
+
 function messageChecker(oldMessage, newMessage) {
     var message;
     if (newMessage == null) {
@@ -127,7 +167,7 @@ function messageChecker(oldMessage, newMessage) {
         if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
             if ((expletiveFilter && message.guild.id == 277922530973581312) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
                 //Check for expletives
-                var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
+                var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
                 if (exp != -1) { //Gah! They're not supposed to say that!
                     console.log("Expletive caught at " + parseInt(exp));
                     switch (Math.floor(Math.random() * 1000) % 6) {
@@ -273,7 +313,109 @@ function messageChecker(oldMessage, newMessage) {
             }
         }
         
-        if (msg.startsWith("mod:")) {
+        var commandProcessed = false;
+        if (msg.startsWith("mod:") || msg.startsWith("bot:")) {
+            var command = msg.substr(4);
+            switch (command) {
+                case "time":
+                    message.channel.send(':arrow_forward: The time now is ' + new Date().toUTCString());
+                    message.delete();
+                    commandProcessed = true;
+                    break;
+                case "help":
+                    message.channel.send(
+                        "Here are some things you can try:\n```\n" +
+                        "time   [tz]       Gets the time at UTC +00:00.\n" + 
+                        "                  Useful for checking jail time.\n" +
+                        "                  PARAMETER 1 (OPTIONAL)\n" + 
+                        "                  A timezone to query, for example, +10 or -5.\n\n" +
+                        "about             Tells you about AstralMod\n" + 
+                        "copyright         Tells you about AstralMod\n" + 
+                        "license           Tells you about AstralMod\n" + 
+                        "warranty          Tells you about AstralMod\n" + 
+                        "These commands need to be prefixed with bot:\n" +
+                        "```")
+                    break;
+                case "about":
+                case "license":
+                    message.author.sendMessage(
+                        "AstralMod - Copyright © Victor Tran and Rylan [undisclosed surname] 2017. Licensed under the GNU General Public License, version 3 (or any later version). For more info, type in bot:copyright in a channel with AstralMod.\n" +
+                        "https://github.com/vicr123/AstralMod"
+                    );
+                    commandProcessed = true;
+                    break;
+                case "copyright":
+                    message.author.sendMessage(
+                        "Copyright (C) 2017 Victor Tran and Rylan [undisclosed surname]\n\n" +
+
+                        "This program is free software: you can redistribute it and/or modify\n" +
+                        "it under the terms of the GNU General Public License as published by\n" +
+                        "the Free Software Foundation, either version 3 of the License, or\n" +
+                        "(at your option) any later version.\n\n" +
+                        
+                        "This program is distributed in the hope that it will be useful,\n" +
+                        "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" +
+                        "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" +
+                        "GNU General Public License for more details.\n\n" +
+
+                        "You should have received a copy of the GNU General Public License\n" +
+                        "along with this program.  If not, see <http://www.gnu.org/licenses/>"
+                    );
+                    commandProcessed = true;
+                    break;
+                case "warranty":
+                    message.author.sendMessage(
+                        "This program is distributed in the hope that it will be useful,\n" +
+                        "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" +
+                        "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" +
+                        "GNU General Public License for more details.\n"
+                    );
+                    commandProcessed = true;
+                    break;
+                default:
+                     if (command.startsWith("time")) {
+                        command = command.substr(5);
+                        var hours;
+                        
+                        switch (command.toLowerCase()) {
+                            case "sydney":
+                            case "vicr123":
+                            case "victor":
+                            case "victor tran":
+                            case "philip":
+                            case "phil":
+                                hours = +11;
+                                break;
+                            case "aren":
+                                hours = +1;
+                                break;
+                            case "michael":
+                            case "wowmom98":
+                            case "rylan":
+                                hours = -5;
+                                break;
+                            default:
+                                hours = parseInt(command);
+                                command = "UTC " + command + ":00";
+                        }
+                        
+                        var localtime = new Date();
+                        var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
+                        var dateString = date.toString();
+                        if (dateString == "Invalid Date") {
+                            message.channel.send(":no_entry_sign: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
+                        } else {
+                            dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+                            dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+                            message.channel.send(':arrow_forward: The time now at ' + command + ' is ' + dateString);
+                        }
+                        message.delete();
+                        commandProcessed = true;
+                    }
+            }
+        } 
+        
+        if (msg.startsWith("mod:") && !commandProcessed) {
             //Check for moderator/admin permission
             
             //Moderator ID: 282068037664768001
@@ -335,6 +477,7 @@ function messageChecker(oldMessage, newMessage) {
                                 expletiveFilter = true;
                                 message.channel.send(':white_check_mark: Expletive Filter is now turned on.');
                                 console.log("Expletive Filter is now on.");
+                                bulletinTimeout = client.setInterval(postBulletin, 30000);
                             }
                             message.delete();
                         }
@@ -347,6 +490,7 @@ function messageChecker(oldMessage, newMessage) {
                                 expletiveFilter = false;
                                 message.channel.send(':white_check_mark: Expletive Filter is now turned off.');
                                 console.log("Expletive Filter is now off.");
+                                client.clearInterval(bulletinTimeout);
                             } else {
                                 message.channel.send(':arrow_forward: Expletive Filter is already off.');
                             }
@@ -393,10 +537,6 @@ function messageChecker(oldMessage, newMessage) {
                             message.delete();
                         }
                         break;
-                    case "time":
-                        message.channel.send(':arrow_forward: The time now is ' + new Date().toUTCString());
-                        message.delete();
-                        break;
                     case "reboot":
                         message.channel.send(":white_check_mark: We'll be back in a bit.").then(function() {
                             client.destroy();
@@ -425,10 +565,8 @@ function messageChecker(oldMessage, newMessage) {
                         break;
                     case "help":
                         message.channel.send(
-                            "Here are some things you can try:\n```\n" +
+                            "And here are the mod only commands:\n```\n" +
                             "ping|pong         Asks AstralMod to reply with a message\n" +
-                            "time              Gets the time at UTC +00:00.\n" + 
-                            "                  Useful for checking jail time.\n\n" +
                             "mod    [on|off]   Queries moderation status.\n" +
                             "                  PARAMETER 1 (OPTIONAL)\n" + 
                             "                  Type on to start moderating the server.\n" +
@@ -449,6 +587,7 @@ function messageChecker(oldMessage, newMessage) {
                             "poweroff          Asks AstralMod to leave the server.\n" +
                             "\n" +
                             "- denotes an admin only command\n" +
+                            "These commands need to be prefixed with mod:\n" +
                             "```")
                         break;
                     case "cancel":
@@ -499,14 +638,6 @@ function messageChecker(oldMessage, newMessage) {
                                 });
                             }
                             message.delete();
-                    } else if (command.startsWith("time")) {
-                        command = command.substr(5);
-                        var hours = parseInt(command);
-                        
-                        var localtime = new Date();
-                        var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
-                        message.channel.send(':arrow_forward: The time now at UTC ' + command + ' is ' + date.toString());
-                        message.delete();
                     }
                 }
                 
@@ -647,7 +778,7 @@ client.on('guildMemberAdd', function(guildMember) {
         embed.setColor("#FF0000");
         var msg = "Discriminator: " + guildMember.user.discriminator + "\n" + 
                     "Created at: " + guildMember.user.createdAt.toUTCString() + "\n";
-        if (guildMember.joinedAt.getTime() == 0) {
+        if (guildMember.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
             msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
         } else {
             msg += "Joined at: " + guildMember.joinedAt.toUTCString();
