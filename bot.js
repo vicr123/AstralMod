@@ -395,7 +395,7 @@ function messageChecker(oldMessage, newMessage) {
                                 hours = -5;
                                 break;
                             default:
-                                hours = parseInt(command);
+                                hours = parseFloat(command);
                                 command = "UTC " + command + ":00";
                         }
                         
@@ -403,7 +403,7 @@ function messageChecker(oldMessage, newMessage) {
                         var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
                         var dateString = date.toString();
                         if (dateString == "Invalid Date") {
-                            message.channel.send(":no_entry_sign: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
+                            message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
                         } else {
                             dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                             dateString = dateString.substring(0, dateString.lastIndexOf(" "));
@@ -575,6 +575,9 @@ function messageChecker(oldMessage, newMessage) {
                             "                  PARAMETER 1 (OPTIONAL)\n" + 
                             "                  Type on to set the filter on.\n" +
                             "                  Type off to set the filter off.\n\n" +
+                            "rm num            Deletes a number of messages.\n" +
+                            "                  PARAMETER 1\n" +
+                            "                  Number of messages to delete.\n\n" +
                             "uinfo user        Gets information about a user.\n" +
                             "                  PARAMETER 1\n" +
                             "                  User ID. This can be obtained by tagging\n" +
@@ -617,7 +620,7 @@ function messageChecker(oldMessage, newMessage) {
                                 embed.setDescription(msg);
                                 message.channel.sendEmbed(embed);
                             }).catch(function(reason) {
-                                message.channel.send(':no_entry_sign: That didn\'t work. You might want to try again.');
+                                message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
                             });
                         } else if (command.startsWith("jail")) {
                             if (message.guild.id != 277922530973581312) {
@@ -638,7 +641,20 @@ function messageChecker(oldMessage, newMessage) {
                                 });
                             }
                             message.delete();
-                    }
+                        } else if (command.startsWith("rm")) {
+                            command = command.substr(3);
+                            var num = parseInt(command);
+                            if (num != command) {
+                                message.channel.send(":no_entry_sign: ERROR: That's not a number...");
+                            } else {
+                                num++; //Also remove the mod:rm command
+                                message.channel.bulkDelete(command).then(function() {
+                                message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
+                                }).catch(function() {
+                                message.channel.send(":no_entry_sign: ERROR: That didn't work... You might want to try again.");
+                                });
+                            }
+                        }
                 }
                 
                 if (command == "poweroff") {
