@@ -401,15 +401,19 @@ function messageChecker(oldMessage, newMessage) {
                                 command = "UTC " + command + ":00";
                         }
                         
-                        var localtime = new Date();
-                        var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
-                        var dateString = date.toString();
-                        if (dateString == "Invalid Date") {
-                            message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
+                        if (hours > -14 && hours < 14) {
+                            var localtime = new Date();
+                            var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
+                            var dateString = date.toString();
+                            if (dateString == "Invalid Date") {
+                                message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
+                            } else {
+                                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+                                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+                                message.channel.send(':arrow_forward: The time now at ' + command + ' is ' + dateString);
+                            }
                         } else {
-                            dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                            dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                            message.channel.send(':arrow_forward: The time now at ' + command + ' is ' + dateString);
+                            message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
                         }
                         message.delete();
                         commandProcessed = true;
