@@ -319,6 +319,38 @@ function messageChecker(oldMessage, newMessage) {
         if (msg.startsWith("mod:") || msg.startsWith("bot:")) {
             var command = msg.substr(4);
             switch (command) {
+                case "ping":
+                    switch (Math.floor(Math.random() * 1000) % 4) {
+                        case 0:
+                            message.channel.send(getBoshyTime(message.guild) + ' PONG! I want to play pong too... :\'(');
+                            break;
+                        case 1:
+                            message.channel.send(getBoshyTime(message.guild) + ' PONG! I love playing pong!'); 
+                            break;
+                        case 2:
+                            message.channel.send(getBoshyTime(message.guild) + ' PONG! Thanks for playing pong with me!');
+                            break;
+                        case 3:
+                            message.channel.send(getBoshyTime(message.guild) + ' PONG!');
+                            break;
+                    }
+                    break;
+                case "pong":
+                    switch (Math.floor(Math.random() * 1000) % 4) {
+                        case 0:
+                            message.channel.send(getBoshyTime(message.guild) + ' PING! Pings are also cool!');
+                            break;
+                        case 1:
+                            message.channel.send(getBoshyTime(message.guild) + ' PING! Do you like playing pong?'); 
+                            break;
+                        case 2:
+                            message.channel.send(getBoshyTime(message.guild) + ' PING! Here\'s the test message you wanted!');
+                            break;
+                        case 3:
+                            message.channel.send(getBoshyTime(message.guild) + ' PING!');
+                            break;
+                    }
+                    break;
                 case "time":
                     message.channel.send(':arrow_forward: The time now is ' + new Date().toUTCString());
                     message.delete();
@@ -334,7 +366,8 @@ function messageChecker(oldMessage, newMessage) {
                         "about             Tells you about AstralMod\n" + 
                         "copyright         Tells you about AstralMod\n" + 
                         "license           Tells you about AstralMod\n" + 
-                        "warranty          Tells you about AstralMod\n" + 
+                        "warranty          Tells you about AstralMod\n\n" + 
+                        "ping|pong         Asks AstralMod to reply with a message\n\n" +
                         "These commands need to be prefixed with bot:\n" +
                         "```")
                     break;
@@ -429,38 +462,6 @@ function messageChecker(oldMessage, newMessage) {
             if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator")) { //Thanks Aren! :D
                 var command = msg.substr(4);
                 switch (command) {
-                    case "ping":
-                        switch (Math.floor(Math.random() * 1000) % 4) {
-                            case 0:
-                                message.channel.send(getBoshyTime(message.guild) + ' PONG! I want to play pong too... :\'(');
-                                break;
-                            case 1:
-                                message.channel.send(getBoshyTime(message.guild) + ' PONG! I love playing pong!'); 
-                                break;
-                            case 2:
-                                message.channel.send(getBoshyTime(message.guild) + ' PONG! Thanks for playing pong with me!');
-                                break;
-                            case 3:
-                                message.channel.send(getBoshyTime(message.guild) + ' PONG!');
-                                break;
-                        }
-                        break;
-                    case "pong":
-                        switch (Math.floor(Math.random() * 1000) % 4) {
-                            case 0:
-                                message.channel.send(getBoshyTime(message.guild) + ' PING! Pings are also cool!');
-                                break;
-                            case 1:
-                                message.channel.send(getBoshyTime(message.guild) + ' PING! Do you like playing pong?'); 
-                                break;
-                            case 2:
-                                message.channel.send(getBoshyTime(message.guild) + ' PING! Here\'s the test message you wanted!');
-                                break;
-                            case 3:
-                                message.channel.send(getBoshyTime(message.guild) + ' PING!');
-                                break;
-                        }
-                        break;
                     case "filter":
                         if (message.guild.id != 277922530973581312) {
                             message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
@@ -572,7 +573,6 @@ function messageChecker(oldMessage, newMessage) {
                     case "help":
                         message.channel.send(
                             "And here are the mod only commands:\n```\n" +
-                            "ping|pong         Asks AstralMod to reply with a message\n" +
                             "mod    [on|off]   Queries moderation status.\n" +
                             "                  PARAMETER 1 (OPTIONAL)\n" + 
                             "                  Type on to start moderating the server.\n" +
