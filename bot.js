@@ -1,7 +1,7 @@
 /****************************************
  * 
  *   AstralMod: Moderation bot for AstralPhaser Central and other Discord servers
- *   Copyright (C) 2017 Victor Tran and Rylan [undisclosed surname]
+ *   Copyright (C) 2017 Victor Tran and Rylan Arbour
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -334,6 +334,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.channel.send(getBoshyTime(message.guild) + ' PONG!');
                             break;
                     }
+                    commandProcessed = true;
                     break;
                 case "pong":
                     switch (Math.floor(Math.random() * 1000) % 4) {
@@ -350,6 +351,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.channel.send(getBoshyTime(message.guild) + ' PING!');
                             break;
                     }
+                    commandProcessed = true;
                     break;
                 case "time":
                     message.channel.send(':arrow_forward: The time now is ' + new Date().toUTCString());
@@ -374,14 +376,14 @@ function messageChecker(oldMessage, newMessage) {
                 case "about":
                 case "license":
                     message.author.sendMessage(
-                        "AstralMod - Copyright © Victor Tran and Rylan [undisclosed surname] 2017. Licensed under the GNU General Public License, version 3 (or any later version). For more info, type in bot:copyright in a channel with AstralMod.\n" +
+                        "AstralMod - Copyright © Victor Tran and Rylan Arbour 2017. Licensed under the GNU General Public License, version 3 (or any later version). For more info, type in bot:copyright in a channel with AstralMod.\n" +
                         "https://github.com/vicr123/AstralMod"
                     );
                     commandProcessed = true;
                     break;
                 case "copyright":
                     message.author.sendMessage(
-                        "Copyright (C) 2017 Victor Tran and Rylan [undisclosed surname]\n\n" +
+                        "Copyright (C) 2017 Victor Tran and Rylan Arbour\n\n" +
 
                         "This program is free software: you can redistribute it and/or modify\n" +
                         "it under the terms of the GNU General Public License as published by\n" +
