@@ -316,7 +316,7 @@ function messageChecker(oldMessage, newMessage) {
         }
         
         var commandProcessed = false;
-        if (msg.startsWith("mod:") || msg.startsWith("bot:")) {
+        if (msg.toLowerCase().startsWith("mod:") || msg.toLowerCase().startsWith("bot:")) {
             var command = msg.substr(4);
             switch (command) {
                 case "ping":
@@ -456,7 +456,7 @@ function messageChecker(oldMessage, newMessage) {
             }
         } 
         
-        if (msg.startsWith("mod:") && !commandProcessed) {
+        if (msg.toLowerCase().startsWith("mod:") && !commandProcessed) {
             //Check for moderator/admin permission
             
             //Moderator ID: 282068037664768001
