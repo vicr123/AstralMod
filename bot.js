@@ -105,7 +105,7 @@ function getBoshyTime(guild) {
 function postBulletin() {
     var channel = client.channels.get("277922530973581312");
     
-    switch (Math.floor(Math.random() * 1000) % 4) {
+    switch (Math.floor(Math.random() * 1000) % 6) {
         case 0:
             channel.send("<:vtBoshyTime:280178631886635008> PING! Don't forget, the **no expletive** rule is now in effect. Thanks!");
             break;
@@ -117,6 +117,12 @@ function postBulletin() {
             break;
         case 3:
             channel.send("<:vtBoshyTime:280178631886635008> PING! Welcome to AstralPhaser Central!");
+            break;
+        case 4:
+            channel.send("<:vtBoshyTime:280178631886635008> PING! For anyone who asks: we're not doing rotations!");
+            break;
+        case 5:
+            channel.send("<:vtBoshyTime:280178631886635008> PING! Hip Hip Hooray for the mods!");
             break;
     }
 }
@@ -486,7 +492,7 @@ function messageChecker(oldMessage, newMessage) {
                                 expletiveFilter = true;
                                 message.channel.send(':white_check_mark: Expletive Filter is now turned on.');
                                 console.log("Expletive Filter is now on.");
-                                bulletinTimeout = client.setInterval(postBulletin, 30000);
+                                bulletinTimeout = client.setInterval(postBulletin, 60000);
                             }
                             message.delete();
                         }
@@ -659,7 +665,7 @@ function messageChecker(oldMessage, newMessage) {
                             if (num != command) {
                                 message.channel.send(":no_entry_sign: ERROR: That's not a number...");
                             } else {
-                                num++; //Also remove the mod:rm command
+                                num = num + 1; //Also remove the mod:rm command
                                 message.channel.bulkDelete(command).then(function() {
                                 message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
                                 }).catch(function() {
@@ -845,6 +851,52 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
                 channel.send(oldUser.user.username + " has changed his nickname to " + newUser.nickname);
             }
         }
+    }
+});
+
+client.on('messageDelete', function(message) {
+    var channel = null;
+    if (message.guild != null) {
+        if (message.guild.id == 277922530973581312) { //AstralPhaser Central
+            channel = client.channels.get("290439711258968065");
+        } else if (message.guild.id == 234414439330349056) { //ShiftOS
+            channel = client.channels.get("290442327158292480");
+        } else if (message.guild.id == 278824407743463424) { //theShell
+            channel = client.channels.get("290444399731671040");
+        }
+    }
+    
+    if (channel != null) {
+        channel.sendMessage(":wastebasket: Message by <@" + message.author.id + "> in <#" + message.channel.id + "> at " + message.createdAt.toUTCString() + " was deleted.\n" +
+            "```\n" +
+            message.cleanContent + "\n" +
+            "```"
+        );
+    }
+});
+
+client.on('messageUpdate', function(oldMessage, newMessage) {
+    var channel = null;
+    if (oldMessage.guild != null) {
+        if (oldMessage.guild.id == 277922530973581312) { //AstralPhaser Central
+            channel = client.channels.get("290439711258968065");
+        } else if (oldMessage.guild.id == 234414439330349056) { //ShiftOS
+            channel = client.channels.get("290442327158292480");
+        } else if (oldMessage.guild.id == 278824407743463424) { //theShell
+            channel = client.channels.get("290444399731671040");
+        }
+    }
+    
+    if (channel != null) {
+        channel.sendMessage(":pencil2: Message by <@" + oldMessage.author.id + "> in <#" + oldMessage.channel.id + "> at " + oldMessage.createdAt.toUTCString() + " was edited.\n" +
+            "```\n" +
+            oldMessage.cleanContent + "\n" +
+            "```" +
+            ":arrow_down:\n" +
+            "```\n" +
+            newMessage.cleanContent + "\n" +
+            "```\n"
+        );
     }
 });
 
