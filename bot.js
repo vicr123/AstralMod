@@ -676,15 +676,19 @@ function messageChecker(oldMessage, newMessage) {
                 }
                 
                 if (command == "poweroff") {
-                    if (poweroff) {
-                        message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!').then(function() {
-                            process.exit(0);
-                        }).catch(function() {
-                            process.exit(0);
-                        });
+                    if (message.author.id == 278805875978928128 || message.author.id == 175760550070845451) {
+                        if (poweroff) {
+                            message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!').then(function() {
+                                process.exit(0);
+                            }).catch(function() {
+                                process.exit(0);
+                            });
+                        } else {
+                            message.channel.send(':information_source: If you\'re just trying to stop AstralMod from moderating, use `mod:mod off` instead. Otherwise, to power off AstralMod, type in `mod:poweroff` again.');
+                            poweroff = true;
+                        }
                     } else {
-                        message.channel.send(':information_source: If you\'re just trying to stop AstralMod from moderating, use mod:mod off instead. Otherwise, to power off AstralMod, type in mod:poweroff again.');
-                        poweroff = true;
+                        message.reply(':no_entry_sign: NO: Only 2 special people are allowed to power off the bot. To turn off moderation, use `mod:mod off`.');
                     }
                 } else {
                     poweroff = false;
@@ -852,6 +856,22 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
             }
         }
     }
+});
+
+client.on('userUpdate', function(oldUser, newUser) {
+    if (newUser.guild.id == 277922530973581312) {
+        if (newUser.username != oldUser.username) {
+            var channel = client.channels.get("285668975390621697"); //Admin Bot warnings
+            channel.send(oldUser.user.username + " has changed his username in all servers to " + newUser.username);
+        }
+    }
+});
+
+client.on('guildMemberRemove', function(user) {
+        if (user.roles.find("name", "I Broke The Rules!")) {
+            console.log("Someone left jail!");
+            client.channels.get("277943393231831040").sendMessage(":arrow_left: <@" + user.id + "> has left the server in jail.");
+        }
 });
 
 client.on('messageDelete', function(message) {
