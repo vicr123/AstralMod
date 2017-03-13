@@ -421,21 +421,66 @@ function messageChecker(oldMessage, newMessage) {
                         var hours;
                         
                         switch (command.toLowerCase()) {
+                            case "nzdt":
+                            case "auckland":
+                            case "christchurch":
+                            case "new zealand":
+                            case "nz":
+                                hours = +13;
+                                break;
                             case "sydney":
+                            case "canberra":
                             case "vicr123":
                             case "victor":
                             case "victor tran":
                             case "philip":
                             case "phil":
+                            case "mightyeagle73":
+                            case "aedt":
                                 hours = +11;
                                 break;
+                            case "aest:":
+                                hours = +10;
+                                break;
+                            case "acdt":
+                            case "adelaide":
+                                hours = +10.5;
+                                break;
                             case "aren":
+                            case "amsterdam":
+                            case "berlin":
                                 hours = +1;
+                                break;
+                            case "gmt":
+                            case "utc":
+                            case "london":
+                            case "uk":
+                                hours = 0;
+                                break;
+                            case "brt":
+                            case "vrabble":
+                            case "vrabbers":
+                                hours = -3;
                                 break;
                             case "michael":
                             case "wowmom98":
                             case "rylan":
+                            case "edt":
+                                hours = -4;
+                                break;
+                            case "est":
                                 hours = -5;
+                                break;
+                            case "cst":
+                            case "mdt":
+                                hours = -6;
+                                break;
+                            case "mst":
+                            case "pdt":
+                                hours = -7;
+                                break;
+                            case "pst":
+                                hours = -8;
                                 break;
                             default:
                                 hours = parseFloat(command);
@@ -813,7 +858,7 @@ client.on('guildMemberAdd', function(guildMember) {
             console.log(guildMember.displayName + " joined ShiftOS");
         }
         
-        channel.sendMessage("<@" + guildMember.user.id + "> has just joined the server.");
+        channel.sendMessage(":arrow_right: <@" + guildMember.user.id + ">");
         
         embed = new Discord.RichEmbed();
         embed.setAuthor(guildMember.displayName, guildMember.user.displayAvatarURL);
@@ -859,24 +904,43 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
 });
 
 client.on('userUpdate', function(oldUser, newUser) {
-    if (newUser.guild.id == 277922530973581312) {
-        if (newUser.username != oldUser.username) {
-            var channel = client.channels.get("285668975390621697"); //Admin Bot warnings
-            channel.send(oldUser.user.username + " has changed his username in all servers to " + newUser.username);
+    if (newUser.guild != null) {
+        if (newUser.guild.id == 277922530973581312) {
+            if (newUser.username != oldUser.username) {
+                var channel = client.channels.get("285668975390621697"); //Admin Bot warnings
+                channel.send(oldUser.user.username + " has changed his username in all servers to " + newUser.username);
+            }
         }
     }
 });
 
 client.on('guildMemberRemove', function(user) {
-        if (user.roles.find("name", "I Broke The Rules!")) {
-            console.log("Someone left jail!");
-            client.channels.get("277943393231831040").sendMessage(":arrow_left: <@" + user.id + "> has left the server in jail.");
+    if (user.roles.find("name", "I Broke The Rules!")) {
+        console.log("Someone left jail!");
+        client.channels.get("277943393231831040").sendMessage(":arrow_left: <@" + user.id + "> has left the server in jail.");
+    }
+    
+    if (user.guild != null) {
+        var channel;
+        if (user.guild.id == 277922530973581312) {
+            channel = client.channels.get("284837615830695936");
+            console.log(user.displayName + " left AstralPhaser Central");
+        } else {
+            channel = client.channels.get("284826899413467136");
+            console.log(user.displayName + " left ShiftOS");
         }
+        
+        channel.sendMessage(":arrow_left: <@" + user.user.id + ">");
+    }
 });
 
 client.on('messageDelete', function(message) {
+    if (message.content.startsWith("bot:") || message.content.startsWith("mod:")) return; //Don't want to warn about AstralMod deleted messages
+    if (message.author.id == 277949276540239873) return; //Ignore AstralPlayer
     var channel = null;
     if (message.guild != null) {
+        if (panicMode[message.guild.id]) return; //Don't want to be doing this in panic mode!
+          
         if (message.guild.id == 277922530973581312) { //AstralPhaser Central
             channel = client.channels.get("290439711258968065");
         } else if (message.guild.id == 234414439330349056) { //ShiftOS
@@ -896,6 +960,7 @@ client.on('messageDelete', function(message) {
 });
 
 client.on('messageUpdate', function(oldMessage, newMessage) {
+    if (oldMessage.cleanContent == newMessage.cleanContent) return; //Ignore
     var channel = null;
     if (oldMessage.guild != null) {
         if (oldMessage.guild.id == 277922530973581312) { //AstralPhaser Central
@@ -912,7 +977,6 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
             "```\n" +
             oldMessage.cleanContent + "\n" +
             "```" +
-            ":arrow_down:\n" +
             "```\n" +
             newMessage.cleanContent + "\n" +
             "```\n"
