@@ -455,6 +455,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "utc":
                             case "london":
                             case "uk":
+                            case "jed":
                                 hours = 0;
                                 break;
                             case "brt":
