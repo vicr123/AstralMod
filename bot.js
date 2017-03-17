@@ -415,9 +415,20 @@ function messageChecker(oldMessage, newMessage) {
                     );
                     commandProcessed = true;
                     break;
+                case "honeyfry":
+                case "honeyfries":
+                    if (message.guild.id == 277922530973581312) {
+                        message.channel.send('<:honeyfry:291805507428286475> The verdict is YES. GO HONEYFRIES! WOO!\nDon\'t you dare react with a negative emoji Stefan. *I\'m watching you...*');
+                    } else {
+                        message.channel.send(':no_entry_sign: Honeyfries have nothing to do with this server. Carry on...');
+                    }
+                    message.delete();
+                    commandProcessed = true;
+                    break;
                 default:
                      if (command.startsWith("time")) {
                         command = command.substr(5);
+                        
                         var hours;
                         
                         switch (command.toLowerCase()) {
@@ -436,6 +447,8 @@ function messageChecker(oldMessage, newMessage) {
                             case "philip":
                             case "phil":
                             case "mightyeagle73":
+                            case "mighty_eagle073":
+                            case "eagle":
                             case "aedt":
                                 hours = +11;
                                 break;
@@ -445,6 +458,9 @@ function messageChecker(oldMessage, newMessage) {
                             case "acdt":
                             case "adelaide":
                                 hours = +10.5;
+                                break;
+                            case "alpha":
+                                hours = +2;
                                 break;
                             case "aren":
                             case "amsterdam":
@@ -467,10 +483,14 @@ function messageChecker(oldMessage, newMessage) {
                             case "wowmom98":
                             case "rylan":
                             case "edt":
+                            case "neb":
+                            case "nebble":
                                 hours = -4;
                                 break;
                             case "est":
                             case "cdt":
+                            case "cole":
+                            case "cole kane":
                                 hours = -5;
                                 break;
                             case "cst":
@@ -479,6 +499,9 @@ function messageChecker(oldMessage, newMessage) {
                                 break;
                             case "mst":
                             case "pdt":
+                            case "neppy":
+                            case "neptune":
+                            case "cameron":
                                 hours = -7;
                                 break;
                             case "pst":
@@ -494,14 +517,14 @@ function messageChecker(oldMessage, newMessage) {
                             var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
                             var dateString = date.toString();
                             if (dateString == "Invalid Date") {
-                                message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
+                                message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, my honeyfry. Don't try to confuse me... *or else...*");
                             } else {
                                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                                 message.channel.send(':arrow_forward: The time now at ' + command + ' is ' + dateString);
                             }
                         } else {
-                            message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, dearie. Don't try to confuse me... *or else...*");
+                            message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, my honeyfry. Don't try to confuse me... *or else...*");
                         }
                         message.delete();
                         commandProcessed = true;
@@ -603,7 +626,7 @@ function messageChecker(oldMessage, newMessage) {
                         case "reboot":
                             message.channel.send(":white_check_mark: We'll be back in a bit.").then(function() {
                                 client.destroy();
-                                client.login('MjgyMDQ4NTk5NTc0MDUyODY0.C4g2Pw.yFGdUuMlZITH99tWEic0JxIUGJ4').then(function() {
+                                client.login(api.key).then(function() {
                                     message.channel.send(":white_check_mark: AstralMod is back online!");
                                 }).catch(function() {
                                     console.log("[ERROR] Login failed.");
