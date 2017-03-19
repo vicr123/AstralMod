@@ -147,7 +147,7 @@ function messageChecker(oldMessage, newMessage) {
     }
     
     if (panicMode[message.guild.id]) {
-        if (msg == "mod:panic" && message.member.roles.find("name", "Admin")) {
+        if (msg == "mod:panic" && (message.member.roles.find("name", "Admin")  || message.member.roles.find("name", "Upper Council of Explorers"))) {
             message.channel.send(':rotating_light: Panic mode is now off.');
             panicMode[message.guild.id] = false;
             console.log("Panic is now off.");
@@ -444,12 +444,15 @@ function messageChecker(oldMessage, newMessage) {
                             case "vicr123":
                             case "victor":
                             case "victor tran":
+                            case "vicr":
                             case "philip":
                             case "phil":
                             case "mightyeagle73":
                             case "mighty_eagle073":
+                            case "oscar":
                             case "eagle":
                             case "aedt":
+                            case "onyx":
                                 hours = +11;
                                 break;
                             case "aest:":
@@ -458,6 +461,10 @@ function messageChecker(oldMessage, newMessage) {
                             case "acdt":
                             case "adelaide":
                                 hours = +10.5;
+                                break;
+                            case "sgt":
+                            case "singapore":
+                                hours = +8;
                                 break;
                             case "alpha":
                                 hours = +2;
@@ -472,6 +479,9 @@ function messageChecker(oldMessage, newMessage) {
                             case "london":
                             case "uk":
                             case "jed":
+                            case "lance":
+                            case "lancededcena":
+                            case "stupidgame2":
                                 hours = 0;
                                 break;
                             case "brt":
@@ -485,16 +495,26 @@ function messageChecker(oldMessage, newMessage) {
                             case "edt":
                             case "neb":
                             case "nebble":
+                            case "new york":
                                 hours = -4;
                                 break;
                             case "est":
                             case "cdt":
-                            case "cole":
-                            case "cole kane":
+                            case "wisconsin":
+                            case "texas":
+                            case "dallas":
+                            case "fort worth":
+                            case "austin":
+                            case "houston":
+                            case "memes":
+                            case "trav":
+                            case "travis":
+                            case "travisnc":
                                 hours = -5;
                                 break;
                             case "cst":
                             case "mdt":
+                            case "alkesta":
                                 hours = -6;
                                 break;
                             case "mst":
@@ -502,6 +522,8 @@ function messageChecker(oldMessage, newMessage) {
                             case "neppy":
                             case "neptune":
                             case "cameron":
+                            case "seattle":
+                            case "alk":
                                 hours = -7;
                                 break;
                             case "pst":
@@ -538,7 +560,7 @@ function messageChecker(oldMessage, newMessage) {
                 
                 //Moderator ID: 282068037664768001
                 //Admin ID:     282068065619804160
-                if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator")) { //Thanks Aren! :D
+                if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "Lower Council of Explorers")) { //Thanks Aren! :D
                     var command = msg.substr(4);
                     switch (command) {
                         case "filter":
@@ -612,7 +634,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.delete();
                             break;
                         case "panic":
-                            if (message.member.roles.find("name", "Admin")) {
+                            if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers")) {
                                 message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
                                     panicMode[message.guild.id] = true;
                                 });
@@ -738,9 +760,9 @@ function messageChecker(oldMessage, newMessage) {
                                 } else {
                                     num = num + 1; //Also remove the mod:rm command
                                     message.channel.bulkDelete(command).then(function() {
-                                    message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
+                                        message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
                                     }).catch(function() {
-                                    message.channel.send(":no_entry_sign: ERROR: That didn't work... You might want to try again.");
+                                        message.channel.send(":no_entry_sign: ERROR: That didn't work... You might want to try again.");
                                     });
                                 }
                             }
@@ -948,16 +970,18 @@ client.on('guildMemberRemove', function(user) {
     }
     
     if (user.guild != null) {
-        var channel;
-        if (user.guild.id == 277922530973581312) {
-            channel = client.channels.get("284837615830695936");
-            console.log(user.displayName + " left AstralPhaser Central");
-        } else {
-            channel = client.channels.get("284826899413467136");
-            console.log(user.displayName + " left ShiftOS");
+        if (user.guild.id == 277922530973581312 || user.guild.id == 234414439330349056) {
+            var channel;
+            if (user.guild.id == 277922530973581312) {
+                channel = client.channels.get("284837615830695936");
+                console.log(user.displayName + " left AstralPhaser Central");
+            } else {
+                channel = client.channels.get("284826899413467136");
+                console.log(user.displayName + " left ShiftOS");
+            }
+            
+            channel.sendMessage(":arrow_left: <@" + user.user.id + "> (" + user.displayName + ")");
         }
-        
-        channel.sendMessage(":arrow_left: <@" + user.user.id + "> (" + user.displayName + ")");
     }
 });
 
