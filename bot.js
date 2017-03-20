@@ -40,7 +40,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 12) {
+    switch (Math.floor(Math.random() * 1000) % 16) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -76,6 +76,18 @@ function setGame() {
             break;
         case 11:
             presence.game.name = "checking archives";
+            break;
+        case 12:
+            presence.game.name = "eating honeyfries";
+            break;
+        case 13:
+            presence.game.name = "calling the NSA";
+            break;
+        case 14:
+            presence.game.name = "with node.js"
+            break;
+        case 15:
+            presence.game.name = "thinking of games"
             break;
 
     }
