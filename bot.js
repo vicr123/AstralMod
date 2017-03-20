@@ -515,6 +515,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "cst":
                             case "mdt":
                             case "alkesta":
+                            case "alk":
                                 hours = -6;
                                 break;
                             case "mst":
@@ -523,7 +524,6 @@ function messageChecker(oldMessage, newMessage) {
                             case "neptune":
                             case "cameron":
                             case "seattle":
-                            case "alk":
                                 hours = -7;
                                 break;
                             case "pst":
@@ -759,7 +759,7 @@ function messageChecker(oldMessage, newMessage) {
                                     message.channel.send(":no_entry_sign: ERROR: That's not a number...");
                                 } else {
                                     num = num + 1; //Also remove the mod:rm command
-                                    message.channel.bulkDelete(command).then(function() {
+                                    message.channel.bulkDelete(num).then(function() {
                                         message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
                                     }).catch(function() {
                                         message.channel.send(":no_entry_sign: ERROR: That didn't work... You might want to try again.");
@@ -988,10 +988,11 @@ client.on('guildMemberRemove', function(user) {
 client.on('messageDelete', function(message) {
     if (message.content.startsWith("bot:") || message.content.startsWith("mod:")) return; //Don't want to warn about AstralMod deleted messages
     if (message.author.id == 277949276540239873) return; //Ignore AstralPlayer
-    if (message.guild.id != 140241956843290625) return; //Ignore TGL
     var channel = null;
+    
     if (message.guild != null) {
         if (panicMode[message.guild.id]) return; //Don't want to be doing this in panic mode!
+        if (message.guild.id == 140241956843290625) return; //Ignore TGL
           
         if (message.guild.id == 277922530973581312) { //AstralPhaser Central
             channel = client.channels.get("290439711258968065");
