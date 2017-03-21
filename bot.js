@@ -29,8 +29,10 @@ var panicMode = {};
 var lastMessages = {};
 var sameMessageCount = {};
 var smallMessageCount = {};
+var lastUserInteraction = {};
 var poweroff = false;
 var jailMember = null;
+var interrogMember = null;
 var bulletinTimeout;
 
 function setGame() {
@@ -40,7 +42,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 12) {
+    switch (Math.floor(Math.random() * 1000) % 15) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -76,6 +78,11 @@ function setGame() {
             break;
         case 11:
             presence.game.name = "checking archives";
+            break;
+        case 12:
+        case 13:
+        case 14:
+            presence.game.name = "bot:help for more info";
             break;
 
     }
@@ -139,7 +146,11 @@ function messageChecker(oldMessage, newMessage) {
     if (message.guild == null) return;
     
     if (doModeration[message.guild.id] == null) {
-        doModeration[message.guild.id] = true;
+        if (message.guild.id == 140241956843290625) { //Check if this is TGL
+            doModeration[message.guild.id] = false;
+        } else {
+            doModeration[message.guild.id] = true;
+        }
     }
     
     if (panicMode[message.guild.id] == null) {
@@ -170,7 +181,7 @@ function messageChecker(oldMessage, newMessage) {
         //Michael's Stuff     : 234414439330349056
         //AKidFromTheUK       : 285740807854751754
 
-        if (doModeration[message.guild.id] && message.guild.id != 140241956843290625) { //Check if we should do moderation on this server
+        if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
             if ((expletiveFilter && message.guild.id == 277922530973581312) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
                 //Check for expletives
                 var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
@@ -227,7 +238,7 @@ function messageChecker(oldMessage, newMessage) {
                                     message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
                                     break;
                                 case 5:
-                                    message.reply("We dont want to download your FREE RAM.");
+                                    message.reply("We don't want to download your FREE RAM.");
                                     break;
                             }
                             
@@ -288,7 +299,7 @@ function messageChecker(oldMessage, newMessage) {
                                 message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
                                 break;
                             case 4:
-                                message.reply("DONT SHOUT IN HERE K");
+                                message.reply("DON'T SHOUT IN HERE K");
                                 break;
                         }
                         message.delete();
@@ -318,6 +329,16 @@ function messageChecker(oldMessage, newMessage) {
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
+            }
+        }
+        
+        if (message.mentions != null && message.mentions.users != null) {
+            if (message.mentions.users.has("282048599574052864")) {
+                if (msg.toLowerCase().includes("stop")) {
+                    message.reply(":no_entry_sign: NO: I shall talk as much as I like.");
+                } else if (msg.toLowerCase().includes("hello")) {
+                    message.reply("Is it me you're looking for?");
+                }
             }
         }
         
@@ -554,193 +575,115 @@ function messageChecker(oldMessage, newMessage) {
             }
         } 
         
-        if (message.guild.id != 140241956843290625) { //Check we're not on TGL
-            if (msg.toLowerCase().startsWith("mod:") && !commandProcessed) {
-                //Check for moderator/admin permission
-                
-                //Moderator ID: 282068037664768001
-                //Admin ID:     282068065619804160
-                if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "Lower Council of Explorers")) { //Thanks Aren! :D
-                    var command = msg.substr(4);
-                    switch (command) {
-                        case "filter":
-                            if (message.guild.id != 277922530973581312) {
-                                message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+        if (msg.toLowerCase().startsWith("mod:") && !commandProcessed) {
+            //Check for moderator/admin permission
+            
+            //Moderator ID: 282068037664768001
+            //Admin ID:     282068065619804160
+            if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator") || message.member.roles.find("name", "Mod") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "Lower Council of Explorers")) { //Thanks Aren! :D
+                var command = msg.substr(4);
+                switch (command) {
+                    case "filter":
+                        if (message.guild.id != 277922530973581312) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                        } else {
+                            if (expletiveFilter) {
+                                message.channel.send(':arrow_forward: Expletive Filter: on');
                             } else {
-                                if (expletiveFilter) {
-                                    message.channel.send(':arrow_forward: Expletive Filter: on');
-                                } else {
-                                    message.channel.send(':arrow_forward: Expletive Filter: off');
-                                }
-                                message.delete();
-                            }
-                            break;
-                        case "filter on":
-                            if (message.guild.id != 277922530973581312) {
-                                message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                            } else {
-                                if (expletiveFilter) {
-                                    message.channel.send(':arrow_forward: Expletive Filter is already on.');
-                                } else {
-                                    expletiveFilter = true;
-                                    message.channel.send(':white_check_mark: Expletive Filter is now turned on.');
-                                    console.log("Expletive Filter is now on.");
-                                    bulletinTimeout = client.setInterval(postBulletin, 60000);
-                                }
-                                message.delete();
-                            }
-                            break;
-                        case "filter off":
-                            if (message.guild.id != 277922530973581312) {
-                                message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                            } else {
-                                if (expletiveFilter) {
-                                    expletiveFilter = false;
-                                    message.channel.send(':white_check_mark: Expletive Filter is now turned off.');
-                                    console.log("Expletive Filter is now off.");
-                                    client.clearInterval(bulletinTimeout);
-                                } else {
-                                    message.channel.send(':arrow_forward: Expletive Filter is already off.');
-                                }
-                                message.delete();
-                            }
-                            break;
-                        case "mod":
-                            if (doModeration[message.guild.id]) {
-                                message.channel.send(':arrow_forward: Moderation: on');
-                            } else {
-                                message.channel.send(':arrow_forward: Moderation: off');
+                                message.channel.send(':arrow_forward: Expletive Filter: off');
                             }
                             message.delete();
-                            break;
-                        case "mod on":
-                            if (doModeration[message.guild.id]) {
-                                message.channel.send(':arrow_forward: Moderation is already on.');
+                        }
+                        break;
+                    case "filter on":
+                        if (message.guild.id != 277922530973581312) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                        } else {
+                            if (expletiveFilter) {
+                                message.channel.send(':arrow_forward: Expletive Filter is already on.');
                             } else {
-                                doModeration[message.guild.id] = true;
-                                message.channel.send(':white_check_mark: Moderation is now turned on.');
-                                console.log("Moderation is now on.");
+                                expletiveFilter = true;
+                                message.channel.send(':white_check_mark: Expletive Filter is now turned on.');
+                                console.log("Expletive Filter is now on.");
+                                bulletinTimeout = client.setInterval(postBulletin, 60000);
                             }
                             message.delete();
-                            break;
-                        case "mod off":
-                            if (doModeration[message.guild.id]) {
-                                doModeration[message.guild.id] = false;
-                                message.channel.send(':white_check_mark: Moderation is now turned off. All messages on this server, spam, profane or whatever will be allowed through.');
-                                console.log("Moderation is now off.");
+                        }
+                        break;
+                    case "filter off":
+                        if (message.guild.id != 277922530973581312) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                        } else {
+                            if (expletiveFilter) {
+                                expletiveFilter = false;
+                                message.channel.send(':white_check_mark: Expletive Filter is now turned off.');
+                                console.log("Expletive Filter is now off.");
+                                client.clearInterval(bulletinTimeout);
                             } else {
-                                message.channel.send(':arrow_forward: Moderation is already off.');
+                                message.channel.send(':arrow_forward: Expletive Filter is already off.');
                             }
                             message.delete();
-                            break;
-                        case "panic":
-                            if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers")) {
-                                message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
-                                    panicMode[message.guild.id] = true;
-                                });
-                                console.log("Panic is now on.");
-                                message.delete();
-                            } else {
-                                message.reply(':no_entry_sign: NO: This is an admin only command.');
-                                message.delete();
-                            }
-                            break;
-                        case "reboot":
-                            message.channel.send(":white_check_mark: We'll be back in a bit.").then(function() {
-                                client.destroy();
-                                client.login(api.key).then(function() {
-                                    message.channel.send(":white_check_mark: AstralMod is back online!");
-                                }).catch(function() {
-                                    console.log("[ERROR] Login failed.");
-                                });
+                        }
+                        break;
+                    case "mod":
+                        if (doModeration[message.guild.id]) {
+                            message.channel.send(':arrow_forward: Moderation: on');
+                        } else {
+                            message.channel.send(':arrow_forward: Moderation: off');
+                        }
+                        message.delete();
+                        break;
+                    case "mod on":
+                        if (doModeration[message.guild.id]) {
+                            message.channel.send(':arrow_forward: Moderation is already on.');
+                        } else {
+                            doModeration[message.guild.id] = true;
+                            message.channel.send(':white_check_mark: Moderation is now turned on.');
+                            console.log("Moderation is now on.");
+                        }
+                        message.delete();
+                        break;
+                    case "mod off":
+                        if (doModeration[message.guild.id]) {
+                            doModeration[message.guild.id] = false;
+                            message.channel.send(':white_check_mark: Moderation is now turned off. All messages on this server, spam, profane or whatever will be allowed through.');
+                            console.log("Moderation is now off.");
+                        } else {
+                            message.channel.send(':arrow_forward: Moderation is already off.');
+                        }
+                        message.delete();
+                        break;
+                    case "panic":
+                        if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers")) {
+                            message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
+                                panicMode[message.guild.id] = true;
                             });
-                            break;
-                        case "jail":
-                            if (message.guild.id != 277922530973581312) {
-                                message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                            } else {
-                                if (jailMember == null) {
+                            console.log("Panic is now on.");
+                            message.delete();
+                        } else {
+                            message.reply(':no_entry_sign: NO: This is an admin only command.');
+                            message.delete();
+                        }
+                        break;
+                    case "reboot":
+                        message.channel.send(":white_check_mark: We'll be back in a bit.").then(function() {
+                            client.destroy();
+                            client.login(api.key).then(function() {
+                                message.channel.send(":white_check_mark: AstralMod is back online!");
+                            }).catch(function() {
+                                console.log("[ERROR] Login failed.");
+                            });
+                        });
+                        break;
+                    case "jail":
+                        if (message.guild.id != 277922530973581312) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                        } else {
+                            if (jailMember == null) {
+                                if (lastUserInteraction[message.guild.id] == null) {
                                     message.reply(':no_entry_sign: ERROR: No user to jail. See mod:help for more information.');
                                 } else {
-                                    jailMember.addRole(jailMember.guild.roles.get("277942939915780099"));
-                                    jailMember.setVoiceChannel(jailMember.guild.channels.get(jailMember.guild.afkChannelID));
-                                    message.channel.send(':oncoming_police_car: JAILED!');
-                                    jailMember = null;
-                                }
-                            }
-                            message.delete();
-
-                            break;
-                        case "help":
-                            message.channel.send(
-                                "And here are the mod only commands:\n```\n" +
-                                "mod    [on|off]   Queries moderation status.\n" +
-                                "                  PARAMETER 1 (OPTIONAL)\n" + 
-                                "                  Type on to start moderating the server.\n" +
-                                "                  Type off to stop moderating the server.\n\n" +
-                                "filter [on|off]   Queries the chat filter.\n" +
-                                "                  PARAMETER 1 (OPTIONAL)\n" + 
-                                "                  Type on to set the filter on.\n" +
-                                "                  Type off to set the filter off.\n\n" +
-                                "rm num            Deletes a number of messages.\n" +
-                                "                  PARAMETER 1\n" +
-                                "                  Number of messages to delete.\n\n" +
-                                "uinfo user        Gets information about a user.\n" +
-                                "                  PARAMETER 1\n" +
-                                "                  User ID. This can be obtained by tagging\n" +
-                                "                  the user.\n\n" +
-                                "jail user         Places a user in jail.\n" +
-                                "panic       -     Toggles panic mode.\n" +
-                                "cancel            Cancels a pending operation.\n" +
-                                "help              Prints this help message.\n" +
-                                "reboot            Asks AstralMod to reconnect.\n" +
-                                "poweroff          Asks AstralMod to leave the server.\n" +
-                                "\n" +
-                                "- denotes an admin only command\n" +
-                                "These commands need to be prefixed with mod:\n" +
-                                "```")
-                            break;
-                        case "cancel":
-                            if (poweroff) {
-                                poweroff = false;
-                                message.channel.send(':white_check_mark: OK, I won\'t leave... yet.')
-                            } else if (jailMember != null) {
-                                message.channel.send(':white_check_mark: OK, I won\'t jail ' + jailMember.displayName);
-                                jailMember = null;
-                            } else {
-                                message.reply(':no_entry_sign: ERROR: Nothing to cancel.');
-                            }
-                            message.delete();
-                            return;
-                        default:
-                            if (command.startsWith("uinfo")) {
-                                command = command.substr(6);
-                                command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-                                
-                                message.guild.fetchMember(command).then(function(member) {
-                                    embed = new Discord.RichEmbed();
-                                    embed.setAuthor(member.displayName, member.user.displayAvatarURL);
-                                    embed.setColor("#FF0000");
-                                    var msg = "Discriminator: " + member.user.discriminator + "\n" + 
-                                                "Created at: " + member.user.createdAt.toUTCString() + "\n";
-                                    if (member.joinedAt.getTime() == 0) {
-                                        msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
-                                    } else {
-                                        msg += "Joined at: " + member.joinedAt.toUTCString();
-                                    }
-                                    embed.setDescription(msg);
-                                    message.channel.sendEmbed(embed);
-                                }).catch(function(reason) {
-                                    message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                });
-                            } else if (command.startsWith("jail")) {
-                                if (message.guild.id != 277922530973581312) {
-                                    message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                                } else {
-                                    command = command.substr(6);
-                                    command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-                                    
-                                    message.guild.fetchMember(command).then(function(member) {
+                                    message.guild.fetchMember(lastUserInteraction[message.guild.id]).then(function(member) {
                                         if (member.roles.find("name", "I Broke The Rules!")) {
                                             message.channel.send(':no_entry_sign: ERROR: That user is already in jail.');
                                         } else {
@@ -751,53 +694,203 @@ function messageChecker(oldMessage, newMessage) {
                                         message.channel.send(':no_entry_sign: That didn\'t work. You might want to try again.');
                                     });
                                 }
-                                message.delete();
-                            } else if (command.startsWith("rm")) {
-                                command = command.substr(3);
-                                var num = parseInt(command);
-                                if (num != command) {
-                                    message.channel.send(":no_entry_sign: ERROR: That's not a number...");
-                                } else {
-                                    num = num + 1; //Also remove the mod:rm command
-                                    message.channel.bulkDelete(num).then(function() {
-                                        message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
-                                    }).catch(function() {
-                                        message.channel.send(":no_entry_sign: ERROR: That didn't work... You might want to try again.");
-                                    });
-                                }
-                            }
-                    }
-                    
-                    if (command == "poweroff") {
-                        if (message.author.id == 278805875978928128 || message.author.id == 175760550070845451) {
-                            if (poweroff) {
-                                message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!').then(function() {
-                                    process.exit(0);
-                                }).catch(function() {
-                                    process.exit(0);
-                                });
                             } else {
-                                message.channel.send(':information_source: If you\'re just trying to stop AstralMod from moderating, use `mod:mod off` instead. Otherwise, to power off AstralMod, type in `mod:poweroff` again.');
-                                poweroff = true;
+                                jailMember.addRole(jailMember.guild.roles.get("277942939915780099"));
+                                jailMember.setVoiceChannel(jailMember.guild.channels.get(jailMember.guild.afkChannelID));
+                                message.channel.send(':oncoming_police_car: JAILED!');
+                                jailMember = null;
                             }
+                        }
+                        message.delete();
+                        break;
+                    case "interrogate":
+                        if (message.guild.id != 277922530973581312) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
                         } else {
-                            message.reply(':no_entry_sign: NO: Only 2 special people are allowed to power off the bot. To turn off moderation, use `mod:mod off`.');
+                            if (interrogMember == null) {
+                                message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
+                            } else {
+                                interrogMember.addRole(interrogMember.guild.roles.get("292630494254858241"));
+                                interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
+                                message.channel.send(':white_check_mark: OK: User has been placed in interrogation.');
+                                interrogMember = null;
+                            }
+                        }
+                        message.delete();
+                        break;
+                    case "help":
+                        var helpMessage = "And here are the mod only commands:\n```\n" +
+                            "mod    [on|off]   Queries moderation status.\n" +
+                            "                  PARAMETER 1 (OPTIONAL)\n" + 
+                            "                  Type on to start moderating the server.\n" +
+                            "                  Type off to stop moderating the server.\n\n";
+                            
+                        if (message.guild.id == 277922530973581312) {
+                        helpMessage = helpMessage + 
+                            "filter [on|off]   Queries the chat filter.\n" +
+                            "                  PARAMETER 1 (OPTIONAL)\n" + 
+                            "                  Type on to set the filter on.\n" +
+                            "                  Type off to set the filter off.\n\n";
+                        }
+                            
+                        helpMessage = helpMessage + 
+                            "rm num            Deletes a number of messages.\n" +
+                            "                  PARAMETER 1\n" +
+                            "                  Number of messages to delete.\n\n" +
+                            "uinfo user        Gets information about a user.\n" +
+                            "                  PARAMETER 1\n" +
+                            "                  User ID. This can be obtained by tagging\n" +
+                            "                  the user.\n\n" +
+                            "jail user         Places a user in jail.\n" +
+                            "panic       -     Toggles panic mode.\n" +
+                            "interrogate       Places the newest member of the server into interrogation.\n" +
+                            "cancel            Cancels a pending operation.\n" +
+                            "help              Prints this help message.\n" +
+                            "reboot            Asks AstralMod to reconnect.\n" +
+                            "\n" +
+                            "- denotes an admin only command\n" +
+                            "These commands need to be prefixed with mod:\n" +
+                            "```";
+                            
+                        message.channel.send(helpMessage);
+                        break;
+                    case "cancel":
+                        if (poweroff) {
+                            poweroff = false;
+                            message.channel.send(':white_check_mark: OK, I won\'t leave... yet.')
+                        } else if (jailMember != null) {
+                            message.channel.send(':white_check_mark: OK, I won\'t jail ' + jailMember.displayName);
+                            jailMember = null;
+                        } else {
+                            message.reply(':no_entry_sign: ERROR: Nothing to cancel.');
+                        }
+                        message.delete();
+                        return;
+                    default:
+                        if (command.startsWith("uinfo")) {
+                            command = command.substr(6);
+                            command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
+                            
+                            message.guild.fetchMember(command).then(function(member) {
+                                embed = new Discord.RichEmbed("test");
+                                embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
+                                embed.setColor("#FF0000");
+                                embed.setDescription("User Information");
+                                
+                                {
+                                    var msg = "**Created** " + member.user.createdAt.toUTCString() + "\n";
+                                    if (member.joinedAt.getTime() == 0) {
+                                        msg += "**Joined** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                                    } else {
+                                        msg += "**Joined** " + member.joinedAt.toUTCString();
+                                    }
+                                    
+                                    embed.addField("Timestamps", msg);
+                                }
+                                
+                                {
+                                    var msg = "**Current Display Name** " + member.displayName + "\n";
+                                    msg += "**Username** " + member.user.username + "\n";
+                                    if (member.nickname != null) {
+                                        msg += "**Nickname** " + member.nickname;
+                                    } else {
+                                        msg += "**Nickname** No nickname";
+                                    }
+                                    
+                                    embed.addField("Names", msg);
+                                }
+                                
+                                /*if (member.lastMessageID != null) {
+                                    var lastMessage = null;
+                                    
+                                    message.channel.fetchMessage(member.lastMessage).then(function(retrievedMessage) {
+                                        lastMessage = retrievedMessage;
+                                    }).catch(function () {
+                                        lastMessage = -1;
+                                    });
+                                    
+                                    while (lastMessage == null) {}
+                                    
+                                    if (lastMessage != -1) {
+                                        var msg = "**ID** " + member.lastMessageID + "\n";
+                                        msg += "**Contents** " + lastMessage.content;
+                                        
+                                        embed.addField("Last Message", msg);
+                                    }
+                                }*/
+                                
+                                embed.setFooter("User ID: " + member.user.id);
+                                //embed.setDescription(msg);
+                                message.channel.sendEmbed(embed);
+                                
+                                lastUserInteraction[message.guild.id] = command;
+                            }).catch(function(reason) {
+                                message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                            });
+                        } else if (command.startsWith("jail")) {
+                            if (message.guild.id != 277922530973581312) {
+                                message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                            } else {
+                                command = command.substr(6);
+                                command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
+                                
+                                message.guild.fetchMember(command).then(function(member) {
+                                    if (member.roles.find("name", "I Broke The Rules!")) {
+                                        message.channel.send(':no_entry_sign: ERROR: That user is already in jail.');
+                                    } else {
+                                        jailMember = member;
+                                        message.channel.send(':oncoming_police_car: Placing ' + member.displayName + ' in jail. To confirm, type in mod:jail.');
+                                    }
+                                }).catch(function(reason) {
+                                    message.channel.send(':no_entry_sign: That didn\'t work. You might want to try again.');
+                                });
+                            }
+                            message.delete();
+                        } else if (command.startsWith("rm")) {
+                            command = command.substr(3);
+                            var num = parseInt(command);
+                            if (num != command) {
+                                message.channel.send(":no_entry_sign: ERROR: That's not a number...");
+                            } else {
+                                num = num + 1; //Also remove the mod:rm command
+                                message.channel.bulkDelete(num).then(function() {
+                                    message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
+                                }).catch(function() {
+                                    message.channel.send(":no_entry_sign: ERROR: That didn't work... You might want to try again.");
+                                });
+                            }
+                        }
+                }
+                
+                if (command == "poweroff") {
+                    if (message.author.id == 278805875978928128 || message.author.id == 175760550070845451 || message.author.id == 209829628796338176) {
+                        if (poweroff) {
+                            message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!').then(function() {
+                                process.exit(0);
+                            }).catch(function() {
+                                process.exit(0);
+                            });
+                        } else {
+                            message.channel.send(':information_source: If you\'re just trying to stop AstralMod from moderating, use `mod:mod off` instead. Otherwise, to power off AstralMod, type in `mod:poweroff` again.');
+                            poweroff = true;
                         }
                     } else {
-                        poweroff = false;
-                    }
-                    
-                    if (!command.startsWith("jail")) {
-                        jailMember = null;
+                        message.reply(':no_entry_sign: NO: Only 3 special people are allowed to power off the bot. To turn off moderation, use `mod:mod off`.');
                     }
                 } else {
-                    message.reply(':no_entry_sign: NO: What? You\'re not a member of the staff! Why would you be allowed to type that!?');
-                    message.delete();
+                    poweroff = false;
                 }
+                
+                if (!command.startsWith("jail")) {
+                    jailMember = null;
+                }
+            } else {
+                message.reply(':no_entry_sign: NO: What? You\'re not a member of the staff! Why would you be allowed to type that!?');
+                message.delete();
             }
         }
         
-        if (doModeration[message.guild.id] && message.guild.id != 140241956843290625) { //Check if we should do moderation on this server
+        if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
             //Spam limiting
             if (lastMessages[message.author.id] != msg) {
                 sameMessageCount[message.author.id] = 0;
@@ -902,6 +995,7 @@ client.on('guildMemberAdd', function(guildMember) {
         if (guildMember.guild.id == 277922530973581312) {
             channel = client.channels.get("284837615830695936");
             console.log(guildMember.displayName + " joined AstralPhaser Central");
+            interrogMember = guildMember;
         } else {
             channel = client.channels.get("284826899413467136");
             console.log(guildMember.displayName + " joined ShiftOS");
@@ -939,6 +1033,11 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
             client.channels.get("277943393231831040").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are now in jail. Appeal here to get out of jail. If you do not appeal successfully within 24 hours, an admin will **ban** you from the server.\n\n" + 
             "Additionally, if you leave and rejoin this server in an attempt to break out of jail, you will be **banned.**\n\n" + 
             "Timestamp: " + new Date().toUTCString());
+        }
+        
+        if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Interrogation")) {
+            console.log("Someone is in interrogation!");
+            client.channels.get("292630922040311808").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are in interrogation because due to recent server attacks, we want to make sure you're not someone else that has already been banned. A mod or an admin will come and speak to you shortly. Thanks! :)");
         }
         
         if (newUser.nickname != oldUser.nickname) {
