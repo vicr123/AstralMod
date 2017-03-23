@@ -676,62 +676,8 @@ function messageChecker(oldMessage, newMessage) {
                         } else {
                             message.reply(':no_entry_sign: NO: This is an admin only command.');
                             message.delete();
-                            return;
-                        default:
-                            if (command.startsWith("uinfo")) {
-                                command = command.substr(6);
-                                command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-                                
-                                message.guild.fetchMember(command).then(function(member) {
-                                    embed = new Discord.RichEmbed();
-                                    embed.setAuthor(member.displayName, member.user.displayAvatarURL);
-                                    embed.setColor("#FF0000");
-                                    var msg = "Discriminator: " + member.user.discriminator + "\n" + 
-                                                "Created at: " + member.user.createdAt.toUTCString() + "\n";
-                                    if (member.joinedAt.getTime() == 0) {
-                                        msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
-                                    } else {
-                                        msg += "Joined at: " + member.joinedAt.toUTCString();
-                                    }
-                                    embed.setDescription(msg);
-                                    message.channel.sendEmbed(embed);
-                                }).catch(function(reason) {
-                                    switch (Math.floor(Math.random() * 1000) % 3) {
-                                        case 0:
-                                            message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                            break;
-                                        case 1:
-                                            message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                                            break;
-                                        case 2:
-                                            message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                                            break;
-                                    }
-                                });
-                            } else if (command.startsWith("jail")) {
-                                if (message.guild.id != 277922530973581312) {
-                                    message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                                } else {
-                                    message.guild.fetchMember(lastUserInteraction[message.guild.id]).then(function(member) {
-                                        if (member.roles.find("name", "I Broke The Rules!")) {
-                                            message.channel.send(':no_entry_sign: ERROR: That user is already in jail.');
-                                        } else {
-                                            jailMember = member;
-                                            message.channel.send(':oncoming_police_car: Placing ' + member.displayName + ' in jail. To confirm, type in mod:jail.');
-                                        }
-                                    }).catch(function(reason) {
-                                        message.channel.send(':no_entry_sign: That didn\'t work. You might want to try again.');
-                                    });
-                                }
-                            } else {
-                                jailMember.addRole(jailMember.guild.roles.get("277942939915780099"));
-                                jailMember.setVoiceChannel(jailMember.guild.channels.get(jailMember.guild.afkChannelID));
-                                message.channel.send(':oncoming_police_car: JAILED!');
-                                jailMember = null;
-                            }
+                            break;
                         }
-                        message.delete();
-                        break;
                     case "interrogate":
                         if (message.guild.id != 277922530973581312) {
                             message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
@@ -794,7 +740,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.reply(':no_entry_sign: ERROR: Nothing to cancel.');
                         }
                         message.delete();
-                        return;
+                        break;
                     default:
                         if (command.startsWith("uinfo")) {
                             command = command.substr(6);
@@ -854,7 +800,17 @@ function messageChecker(oldMessage, newMessage) {
                                 
                                 lastUserInteraction[message.guild.id] = command;
                             }).catch(function(reason) {
-                                message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                switch (Math.floor(Math.random() * 1000) % 3) {
+                                    case 0:
+                                        message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                        break;
+                                    case 1:
+                                        message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+                                        break;
+                                    case 2:
+                                        message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+                                        break;
+                                }
                             });
                         } else if (command.startsWith("jail")) {
                             if (message.guild.id != 277922530973581312) {
@@ -871,7 +827,17 @@ function messageChecker(oldMessage, newMessage) {
                                         message.channel.send(':oncoming_police_car: Placing ' + member.displayName + ' in jail. To confirm, type in mod:jail.');
                                     }
                                 }).catch(function(reason) {
-                                    message.channel.send(':no_entry_sign: That didn\'t work. You might want to try again.');
+                                    switch (Math.floor(Math.random() * 1000) % 3) {
+                                        case 0:
+                                            message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                            break;
+                                        case 1:
+                                            message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+                                            break;
+                                        case 2:
+                                            message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+                                            break;
+                                    }
                                 });
                             }
                             message.delete();
@@ -885,7 +851,17 @@ function messageChecker(oldMessage, newMessage) {
                                 message.channel.bulkDelete(num).then(function() {
                                     message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
                                 }).catch(function() {
-                                    message.channel.send(":no_entry_sign: ERROR: That didn't work... You might want to try again.");
+                                    switch (Math.floor(Math.random() * 1000) % 3) {
+                                        case 0:
+                                            message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                            break;
+                                        case 1:
+                                            message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+                                            break;
+                                        case 2:
+                                            message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+                                            break;
+                                    }
                                 });
                             }
                         }
@@ -974,9 +950,8 @@ function messageChecker(oldMessage, newMessage) {
                         message.reply("Pollution is not the solution, my honeyfry.");
                         break;
                 }
-                
+            
                 message.delete();
-                return;
             } else if (smallMessageCount[message.author.id] == 10) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
@@ -1012,9 +987,6 @@ function messageChecker(oldMessage, newMessage) {
                 }
                 
                 message.delete();
-                return;
-            }
-        }
     }
 }
 
