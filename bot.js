@@ -40,7 +40,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 12) {
+    switch (Math.floor(Math.random() * 1000) % 13) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -77,6 +77,9 @@ function setGame() {
         case 11:
             presence.game.name = "checking archives";
             break;
+        case 12:
+            presence.game.name = "being unbreakable";
+            break
 
     }
     client.user.setPresence(presence);
@@ -176,7 +179,7 @@ function messageChecker(oldMessage, newMessage) {
                 var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
                 if (exp != -1) { //Gah! They're not supposed to say that!
                     console.log("Expletive caught at " + parseInt(exp));
-                    switch (Math.floor(Math.random() * 1000) % 6) {
+                    switch (Math.floor(Math.random() * 1000) % 7) {
                         case 0:
                             message.reply("I'm very disappointed in you. This is me <:angryvt:282006699802361856>");
                             break;
@@ -194,6 +197,9 @@ function messageChecker(oldMessage, newMessage) {
                             break;
                         case 5:
                             message.reply("Hey! That was a swear! No!");
+                            break;
+                        case 6:
+                            message.reply("This situation calls for some passive resistance!");
                             break;
                     }
                     
@@ -274,7 +280,7 @@ function messageChecker(oldMessage, newMessage) {
                     //Check for caps
                     if (msg.match(/[A-Z]/gm) != null && msg.match(/[A-Z]/gm).length > (parseFloat(msg.length) * 0.8)) {
                         console.log("Caps filter kicking in!");
-                        switch (Math.floor(Math.random() * 1000) % 5) {
+                        switch (Math.floor(Math.random() * 1000) % 6) {
                             case 0:
                                 message.reply("Shh...");
                                 break;
@@ -289,6 +295,9 @@ function messageChecker(oldMessage, newMessage) {
                                 break;
                             case 4:
                                 message.reply("DONT SHOUT IN HERE K");
+                                break;
+                            case 5:
+                                message.reply("Whoa whoa, slow down, my friend! No need for raised voices!");
                                 break;
                         }
                         message.delete();
@@ -326,7 +335,7 @@ function messageChecker(oldMessage, newMessage) {
             var command = msg.substr(4);
             switch (command) {
                 case "ping":
-                    switch (Math.floor(Math.random() * 1000) % 4) {
+                    switch (Math.floor(Math.random() * 1000) % 5) {
                         case 0:
                             message.channel.send(getBoshyTime(message.guild) + ' PONG! I want to play pong too... :\'(');
                             break;
@@ -337,13 +346,16 @@ function messageChecker(oldMessage, newMessage) {
                             message.channel.send(getBoshyTime(message.guild) + ' PONG! Thanks for playing pong with me!');
                             break;
                         case 3:
+                            message.channel.send(getBoshyTime(message.guild) + ' PONG! Reflect upon this!');
+                            break;
+                        case 4:
                             message.channel.send(getBoshyTime(message.guild) + ' PONG!');
                             break;
                     }
                     commandProcessed = true;
                     break;
                 case "pong":
-                    switch (Math.floor(Math.random() * 1000) % 4) {
+                    switch (Math.floor(Math.random() * 1000) % 5) {
                         case 0:
                             message.channel.send(getBoshyTime(message.guild) + ' PING! Pings are also cool!');
                             break;
@@ -354,6 +366,9 @@ function messageChecker(oldMessage, newMessage) {
                             message.channel.send(getBoshyTime(message.guild) + ' PING! Here\'s the test message you wanted!');
                             break;
                         case 3:
+                            message.channel.send(getBoshyTime(message.guild) + ' PING! Gah! Text form is so last year!');
+                            break;
+                        case 4:
                             message.channel.send(getBoshyTime(message.guild) + ' PING!');
                             break;
                     }
@@ -731,7 +746,17 @@ function messageChecker(oldMessage, newMessage) {
                                     embed.setDescription(msg);
                                     message.channel.sendEmbed(embed);
                                 }).catch(function(reason) {
-                                    message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                    switch (Math.floor(Math.random() * 1000) % 3) {
+                                        case 0:
+                                            message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                            break;
+                                        case 1:
+                                            message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+                                            break;
+                                        case 2:
+                                            message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+                                            break;
+                                    }
                                 });
                             } else if (command.startsWith("jail")) {
                                 if (message.guild.id != 277922530973581312) {
