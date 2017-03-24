@@ -385,7 +385,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.channel.send(getBoshyTime(message.guild) + ' PING! Here\'s the test message you wanted!');
                             break;
                         case 3:
-                            message.channel.send(getBoshyTime(message.guild) + ' PING! Gah! Text form is so last year!');
+                            message.channel.send(getBoshyTime(message.guild) + ' PING! I tried to save this server from pollution before it was cool!');
                             break;
                         case 4:
                             message.channel.send(getBoshyTime(message.guild) + ' PING!');
@@ -870,7 +870,17 @@ function messageChecker(oldMessage, newMessage) {
                 if (command == "poweroff") {
                     if (message.author.id == 278805875978928128 || message.author.id == 175760550070845451 || message.author.id == 209829628796338176) {
                         if (poweroff) {
-                            message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!').then(function() {
+                            switch (Math.floor(Math.random() * 1000) % 3) {
+                                case 0:
+                                    message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!');
+                                    break;
+                                case 1:
+                                    message.channel.send(':white_check_mark: Gah! Byte form is so last week!');
+                                    break;
+                                case 2:
+                                    message.channel.send(':white_check_mark: They saw... right through me...');
+                                    break;
+                            } then(function() {
                                 process.exit(0);
                             }).catch(function() {
                                 process.exit(0);
