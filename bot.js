@@ -872,19 +872,27 @@ function messageChecker(oldMessage, newMessage) {
                         if (poweroff) {
                             switch (Math.floor(Math.random() * 1000) % 3) {
                                 case 0:
-                                    message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!');
+                                    message.channel.send(':white_check_mark: AstralMod is now exiting. Goodbye!').then(function() {
+                                        process.exit(0);
+                                    }).catch(function() {
+                                        process.exit(0);
+                                    });
                                     break;
                                 case 1:
-                                    message.channel.send(':white_check_mark: Gah! Byte form is so last week!');
+                                    message.channel.send(':white_check_mark: Gah! Byte form is so last week!').then(function() {
+                                        process.exit(0);
+                                    }).catch(function() {
+                                        process.exit(0);
+                                    });
                                     break;
                                 case 2:
-                                    message.channel.send(':white_check_mark: They saw... right through me...');
+                                    message.channel.send(':white_check_mark: They saw... right through me...').then(function() {
+                                        process.exit(0);
+                                    }).catch(function() {
+                                        process.exit(0);
+                                    });
                                     break;
-                            } then(function() {
-                                process.exit(0);
-                            }).catch(function() {
-                                process.exit(0);
-                            });
+                            }
                         } else {
                             message.channel.send(':information_source: If you\'re just trying to stop AstralMod from moderating, use `mod:mod off` instead. Otherwise, to power off AstralMod, type in `mod:poweroff` again.');
                             poweroff = true;
