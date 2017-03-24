@@ -500,6 +500,9 @@ function messageChecker(oldMessage, newMessage) {
                             case "singapore":
                                 hours = +8;
                                 break;
+                            case "sotiris":
+                                hours = +3;
+                                break;
                             case "alpha":
                                 hours = +2;
                                 break;
@@ -544,6 +547,9 @@ function messageChecker(oldMessage, newMessage) {
                             case "trav":
                             case "travis":
                             case "travisnc":
+                            case "trm":
+                            case "melon":
+                            case "therandommelon":
                                 hours = -5;
                                 break;
                             case "cst":
