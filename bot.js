@@ -987,6 +987,8 @@ function messageChecker(oldMessage, newMessage) {
                 }
                 
                 message.delete();
+            }
+        }
     }
 }
 
