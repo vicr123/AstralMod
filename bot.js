@@ -685,19 +685,58 @@ function messageChecker(oldMessage, newMessage) {
                             break;
                         }
                     case "interrogate":
-                        if (message.guild.id != 277922530973581312) {
+                        if (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056) {
                             message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
                         } else {
                             if (interrogMember == null) {
                                 message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
                             } else {
-                                interrogMember.addRole(interrogMember.guild.roles.get("292630494254858241"));
-                                interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
+                                if (message.guild.id == 277922530973581312) {
+                                    if (interrogMember.guild.id == 277922530973581312) {
+                                        interrogMember.addRole(interrogMember.guild.roles.get("292630494254858241"));
+                                        interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
+                                    } else {
+                                        message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
+                                    }
+                                } else {
+                                    if (interrogMember.guild.id == 234414439330349056) {
+                                        interrogMember.addRole(interrogMember.guild.roles.get("295336966285950977"));
+                                        interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
+                                    } else {
+                                        message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
+                                    }
+                                }
                                 message.channel.send(':white_check_mark: OK: User has been placed in interrogation.');
                                 interrogMember = null;
                             }
                         }
                         message.delete();
+                        break;
+                    case "reboot":
+                        message.channel.send(":white_check_mark: We'll be back in a bit.").then(function() {
+                            client.destroy();
+                            client.login('MjgyMDQ4NTk5NTc0MDUyODY0.C4g2Pw.yFGdUuMlZITH99tWEic0JxIUGJ4').then(function() {
+                                message.channel.send(":white_check_mark: AstralMod is back online!");
+                            }).catch(function() {
+                                console.log("[ERROR] Login failed.");
+                            });
+                        });
+                        break;
+                    case "jail":
+                        if (message.guild.id != 277922530973581312) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                        } else {
+                            if (jailMember == null) {
+                                message.reply(':no_entry_sign: ERROR: No user to jail. See mod:help for more information.');
+                            } else {
+                                jailMember.addRole(jailMember.guild.roles.get("277942939915780099"));
+                                jailMember.setVoiceChannel(jailMember.guild.channels.get(jailMember.guild.afkChannelID));
+                                message.channel.send(':oncoming_police_car: JAILED!');
+                                jailMember = null;
+                            }
+                        }
+                        message.delete();
+
                         break;
                     case "help":
                         var helpMessage = "And here are the mod only commands:\n```\n" +
@@ -1077,6 +1116,11 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
             } else {
                 channel.send(oldUser.user.username + " has changed his nickname to " + newUser.nickname);
             }
+        }
+    } else if (newUser.guild.id == 234414439330349056) {
+        if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Interrogation")) {
+            console.log("Someone is in interrogation!");
+            client.channels.get("295337094128205826").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are in interrogation because due to recent server attacks, we want to make sure you're not someone else that has already been banned. A mod or an admin will come and speak to you shortly. Thanks! :)");
         }
     }
 });
