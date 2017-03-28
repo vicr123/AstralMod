@@ -321,7 +321,7 @@ function messageChecker(oldMessage, newMessage) {
             //ShiftOS             : 282513112257658880
             //theShell            : 283184634400079872
             //AKidFromTheUK       : 285740807854751754
-            if (message.author.id != 282048599574052864 && msg.search(/\bkys\b/i) != -1) {
+            if (message.author.id != 282048599574052864 && msg.search(/\b(kys|kill yourself)\b/i) != -1) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
                     client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
@@ -341,10 +341,29 @@ function messageChecker(oldMessage, newMessage) {
         
         if (message.mentions != null && message.mentions.users != null) {
             if (message.mentions.users.has("282048599574052864")) {
-                if (msg.toLowerCase().includes("stop")) {
-                    message.reply(":no_entry_sign: NO: I shall talk as much as I like.");
-                } else if (msg.toLowerCase().includes("hello")) {
+                if (msg.toLowerCase().includes("stop") || msg.toLowerCase().includes("shut up")) {
+                    
+                    switch (Math.floor(Math.random() * 1000) % 3) {
+                        case 0:
+                            message.reply(":no_entry_sign: NO: I shall talk as much as I like.");
+                            break;
+                        case 1:
+                            message.reply(":no_entry_sign: NO: You shu... I'd better not say that actually");
+                            break;
+                        case 2:
+                            message.reply(":no_entry_sign: NO: Just no.");
+                            break;
+                    }
+                } else if (msg.toLowerCase().includes("fuck you") | msg.toLowerCase().includes("fuck off")) {
+                    message.reply("Want a :hammer:?");
+                } else if (msg.toLowerCase().includes("hello") || msg.toLowerCase().includes("hi")) {
                     message.reply("Is it me you're looking for?");
+                } else if (msg.toLowerCase().includes("how") && msg.toLowerCase().includes("you")) {
+                    message.reply("I'm doing OK I suppose.");
+                } else if (msg.toLowerCase().includes("yes") || msg.toLowerCase().includes("yep")) {
+                    message.reply("Well, I suppose so.");
+                } else if (msg.toLowerCase().includes("no") || msg.toLowerCase().includes("nope")) {
+                    message.reply("I guess not.");
                 }
             }
         }
@@ -394,7 +413,9 @@ function messageChecker(oldMessage, newMessage) {
                     commandProcessed = true;
                     break;
                 case "time":
-                    message.channel.send(':arrow_forward: The time now is ' + new Date().toUTCString());
+                    var localtime = new Date();
+                    localtime.setTime(localtime.getTime() + (60*60*1000)); 
+                    message.channel.send(':arrow_forward: The time now is ' + localtime.toUTCString());
                     message.delete();
                     commandProcessed = true;
                     break;
@@ -459,6 +480,11 @@ function messageChecker(oldMessage, newMessage) {
                     message.delete();
                     commandProcessed = true;
                     break;
+                case "egg":
+                    message.reply(":egg:");
+                    message.delete();
+                    commandProcessed = true;
+                    break;
                 default:
                      if (command.startsWith("time")) {
                         command = command.substr(5);
@@ -504,27 +530,35 @@ function messageChecker(oldMessage, newMessage) {
                                 hours = +3;
                                 break;
                             case "alpha":
-                                hours = +2;
-                                break;
                             case "aren":
+                            case "jelle":
                             case "amsterdam":
                             case "berlin":
-                                hours = +1;
+                                hours = +2;
                                 break;
-                            case "gmt":
-                            case "utc":
                             case "london":
                             case "uk":
                             case "jed":
                             case "lance":
                             case "lancededcena":
                             case "stupidgame2":
+                            case "gmt":
+                                hours = +1;
+                                break;
+                            case "utc":
                                 hours = 0;
+                                break;
+                            case "ndt":
+                            case "craftxbox":
+                                hours = -2.5
                                 break;
                             case "brt":
                             case "vrabble":
                             case "vrabbers":
                                 hours = -3;
+                                break;
+                            case "nst":
+                                hours = -3.5;
                                 break;
                             case "michael":
                             case "wowmom98":
@@ -535,7 +569,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "new york":
                                 hours = -4;
                                 break;
-                            case "est":
+                            case "est":It
                             case "cdt":
                             case "wisconsin":
                             case "texas":
@@ -560,6 +594,7 @@ function messageChecker(oldMessage, newMessage) {
                                 break;
                             case "mst":
                             case "pdt":
+                            case "arizona":
                             case "neppy":
                             case "neptune":
                             case "cameron":
@@ -682,8 +717,8 @@ function messageChecker(oldMessage, newMessage) {
                         } else {
                             message.reply(':no_entry_sign: NO: This is an admin only command.');
                             message.delete();
-                            break;
                         }
+                        break;
                     case "interrogate":
                         if (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056) {
                             message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
@@ -695,6 +730,8 @@ function messageChecker(oldMessage, newMessage) {
                                     if (interrogMember.guild.id == 277922530973581312) {
                                         interrogMember.addRole(interrogMember.guild.roles.get("292630494254858241"));
                                         interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
+                                        message.channel.send(':white_check_mark: OK: User has been placed in interrogation.');
+                                        interrogMember = null;
                                     } else {
                                         message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
                                     }
@@ -702,12 +739,12 @@ function messageChecker(oldMessage, newMessage) {
                                     if (interrogMember.guild.id == 234414439330349056) {
                                         interrogMember.addRole(interrogMember.guild.roles.get("295336966285950977"));
                                         interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
+                                        message.channel.send(':white_check_mark: OK: User has been placed in interrogation.');
+                                        interrogMember = null;
                                     } else {
                                         message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
                                     }
                                 }
-                                message.channel.send(':white_check_mark: OK: User has been placed in interrogation.');
-                                interrogMember = null;
                             }
                         }
                         message.delete();
@@ -1068,6 +1105,7 @@ client.on('guildMemberAdd', function(guildMember) {
         } else {
             channel = client.channels.get("284826899413467136");
             console.log(guildMember.displayName + " joined ShiftOS");
+            interrogMember = guildMember;
         }
         
         channel.sendMessage(":arrow_right: <@" + guildMember.user.id + ">");
@@ -1173,6 +1211,8 @@ client.on('messageDelete', function(message) {
             channel = client.channels.get("290442327158292480");
         } else if (message.guild.id == 278824407743463424) { //theShell
             channel = client.channels.get("290444399731671040");
+        } else if (message.guild.id == 287937616685301762) { //WoW
+            channel = client.channels.get("295498899370803200");
         }
     }
     
@@ -1195,6 +1235,8 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
             channel = client.channels.get("290442327158292480");
         } else if (oldMessage.guild.id == 278824407743463424) { //theShell
             channel = client.channels.get("290444399731671040");
+        } else if (oldMessage.guild.id == 287937616685301762) { //WoW
+            channel = client.channels.get("295498899370803200");
         }
     }
     
