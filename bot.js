@@ -176,7 +176,7 @@ function messageChecker(oldMessage, newMessage) {
         });
     }*/
     
-    if (message.author.id != 280495817901473793 && message.author.id != 282048599574052864) {
+    if (message.author.id != 280495817901473793 && !message.author.bot) {
         //Server Detection:
         //AstralPhaser Central: 277922530973581312
         //Michael's Stuff     : 234414439330349056
@@ -221,7 +221,7 @@ function messageChecker(oldMessage, newMessage) {
                 if (message.guild.id == 277922530973581312) {
                     //Check for links
                     
-                    if (message.member != null && !(message.member.roles.find("name", "Patron Tier 1ne") || message.member.roles.find("name", "Patron Tier 2wo") || message.member.roles.find("name", "Patron Tier 3hree") ||message.member.roles.find("name", "Patron Tier 4our"))) {
+                    if (message.member != null && !(message.member.roles.find("name", "Patron Tier 5ive") || message.member.roles.find("name", "Patron Tier 2wo") || message.member.roles.find("name", "Patron Tier 3hree") ||message.member.roles.find("name", "Patron Tier 4our"))) {
                         exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
                         if (exp != -1) { //This is a link.
                             console.log("Link caught at " + parseInt(exp));
@@ -485,6 +485,10 @@ function messageChecker(oldMessage, newMessage) {
                     message.delete();
                     commandProcessed = true;
                     break;
+                case "braces":
+                    message.reply("On the same line my dear honeyfry. ```cpp\nvoid abc() {\n}```");
+                    commandProcessed = true;
+                    break;
                 default:
                      if (command.startsWith("time")) {
                         command = command.substr(5);
@@ -499,6 +503,9 @@ function messageChecker(oldMessage, newMessage) {
                             case "nz":
                                 hours = +13;
                                 break;
+                            case "aedt":
+                                hours = +11;
+                                break;
                             case "sydney":
                             case "canberra":
                             case "vicr123":
@@ -511,16 +518,18 @@ function messageChecker(oldMessage, newMessage) {
                             case "mighty_eagle073":
                             case "oscar":
                             case "eagle":
-                            case "aedt":
                             case "onyx":
-                                hours = +11;
+                                hours = +10;
                                 break;
                             case "aest:":
                                 hours = +10;
                                 break;
                             case "acdt":
-                            case "adelaide":
                                 hours = +10.5;
+                                break;
+                            case "adelaide":
+                            case "aedt":
+                                hours = +9.5;
                                 break;
                             case "sgt":
                             case "singapore":
@@ -567,9 +576,10 @@ function messageChecker(oldMessage, newMessage) {
                             case "neb":
                             case "nebble":
                             case "new york":
-                                hours = -4;
+                            case "miles":
+                                hours = -5;
                                 break;
-                            case "est":It
+                            case "est":
                             case "cdt":
                             case "wisconsin":
                             case "texas":
@@ -584,25 +594,25 @@ function messageChecker(oldMessage, newMessage) {
                             case "trm":
                             case "melon":
                             case "therandommelon":
-                                hours = -5;
+                                hours = -6;
                                 break;
                             case "cst":
                             case "mdt":
                             case "alkesta":
                             case "alk":
-                                hours = -6;
+                                hours = -7;
                                 break;
                             case "mst":
                             case "pdt":
                             case "arizona":
+                            case "seattle":
                             case "neppy":
                             case "neptune":
                             case "cameron":
-                            case "seattle":
-                                hours = -7;
+                                hours = -8;
                                 break;
                             case "pst":
-                                hours = -8;
+                                hours = -9;
                                 break;
                             default:
                                 hours = parseFloat(command);
@@ -820,6 +830,25 @@ function messageChecker(oldMessage, newMessage) {
                             jailMember = null;
                         } else {
                             message.reply(':no_entry_sign: ERROR: Nothing to cancel.');
+                        }
+                        message.delete();
+                        break;
+                    case "brandon":
+                        if (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                        } else {
+                            if (interrogMember == null) {
+                                message.reply(':no_entry_sign: ERROR: No user to brandongate. See mod:help for more information.');
+                            } else {
+                                if (interrogMember.guild.id == 277922530973581312) {
+                                    interrogMember.sendMessage("If you're Brandon, then begone. If you're not, then to appeal, get in touch with vicr123#5096. Sorry about the kick. We've had to do this because of a special someone trying to break the rules.");
+                                    interrogMember.ban();
+                                    message.channel.send(':white_check_mark: OK: User has been brandongated!');
+                                    interrogMember = null;
+                                } else {
+                                    message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
+                                }
+                            }
                         }
                         message.delete();
                         break;
@@ -1123,6 +1152,12 @@ client.on('guildMemberAdd', function(guildMember) {
         embed.setDescription(msg);
         channel.sendEmbed(embed);
         
+        var now = new Date();
+        var joinDate = guildMember.user.createdAt;
+        if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
+            channel.sendMessage("<@&278303148765085697> This member was created today.");
+        }
+        
         /*if (guildMember.user.createdAt.getTime() < 1487962800000) {
             channel.sendMessage("This user was created **before** the suspected raid and a ban is probably not necessary.");
         } else {
@@ -1222,6 +1257,33 @@ client.on('messageDelete', function(message) {
             message.cleanContent + "\n" +
             "```"
         );
+    }
+});
+
+client.on('messageDeleteBulk', function(messages) {
+    var channel = null;
+    
+    if (messages.first().guild != null) {
+        if (panicMode[messages.first().guild.id]) return; //Don't want to be doing this in panic mode!
+        if (messages.first().guild.id == 140241956843290625) return; //Ignore TGL
+          
+        if (messages.first().guild.id == 277922530973581312) { //AstralPhaser Central
+            channel = client.channels.get("290439711258968065");
+        } else if (messages.first().guild.id == 234414439330349056) { //ShiftOS
+            channel = client.channels.get("290442327158292480");
+        } else if (messages.first().guild.id == 278824407743463424) { //theShell
+            channel = client.channels.get("290444399731671040");
+        } else if (messages.first().guild.id == 287937616685301762) { //WoW
+            channel = client.channels.get("295498899370803200");
+        }
+    }
+    
+    if (channel != null) {
+        var message = ":wastebasket: " + parseInt(messages.length) + " messages in <#" + messages.first().channel.id + "> were deleted.\n"
+        for (let [key, msg] of messages) {
+            message += "```" + msg.cleanContent + "```";
+        }
+        channel.sendMessage(message);
     }
 });
 
