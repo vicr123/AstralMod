@@ -341,29 +341,35 @@ function messageChecker(oldMessage, newMessage) {
         
         if (message.mentions != null && message.mentions.users != null) {
             if (message.mentions.users.has("282048599574052864")) {
-                if (msg.toLowerCase().includes("stop") || msg.toLowerCase().includes("shut up")) {
-                    
-                    switch (Math.floor(Math.random() * 1000) % 3) {
-                        case 0:
-                            message.reply(":no_entry_sign: NO: I shall talk as much as I like.");
-                            break;
-                        case 1:
-                            message.reply(":no_entry_sign: NO: You shu... I'd better not say that actually");
-                            break;
-                        case 2:
-                            message.reply(":no_entry_sign: NO: Just no.");
-                            break;
+                if (message.author.id == 159310300275802112) {
+                    message.reply("BEGONE. You called my creator mean. :sob:");
+                } else {
+                    if (msg.toLowerCase().includes("stop") || (msg.toLowerCase().includes("shut") && msg.toLowerCase().includes("up"))) {
+                        
+                        switch (Math.floor(Math.random() * 1000) % 3) {
+                            case 0:
+                                message.reply(":no_entry_sign: NO: I shall talk as much as I like.");
+                                break;
+                            case 1:
+                                message.reply(":no_entry_sign: NO: You shu... I'd better not say that actually");
+                                break;
+                            case 2:
+                                message.reply(":no_entry_sign: NO: Just no.");
+                                break;
+                        }
+                    } else if (msg.toLowerCase().includes("fuck you") || msg.toLowerCase().includes("fuck off") || msg.toLowerCase().includes("shit")) {
+                        message.reply("Want a :hammer:?");
+                    } else if (msg.toLowerCase().includes("how") && msg.toLowerCase().includes("you")) {
+                        message.reply("I'm doing OK I suppose.");
+                    } else if (msg.toLowerCase().includes("yes") || msg.toLowerCase().includes("yep") || msg.toLowerCase().includes("right?") || msg.toLowerCase().includes("isn't it?")) {
+                        message.reply("Well, I suppose so.");
+                    } else if (msg.toLowerCase().includes("no") || msg.toLowerCase().includes("nope")) {
+                        message.reply("I guess not.");
+                    } else if (msg.toLowerCase().includes("?")) {
+                        message.reply("Erm... Maybe? I dunno.");
+                    } else if (msg.toLowerCase().includes("hello") || msg.toLowerCase().includes("hi")) {
+                        message.reply("Is it me you're looking for?");
                     }
-                } else if (msg.toLowerCase().includes("fuck you") | msg.toLowerCase().includes("fuck off")) {
-                    message.reply("Want a :hammer:?");
-                } else if (msg.toLowerCase().includes("hello") || msg.toLowerCase().includes("hi")) {
-                    message.reply("Is it me you're looking for?");
-                } else if (msg.toLowerCase().includes("how") && msg.toLowerCase().includes("you")) {
-                    message.reply("I'm doing OK I suppose.");
-                } else if (msg.toLowerCase().includes("yes") || msg.toLowerCase().includes("yep")) {
-                    message.reply("Well, I suppose so.");
-                } else if (msg.toLowerCase().includes("no") || msg.toLowerCase().includes("nope")) {
-                    message.reply("I guess not.");
                 }
             }
         }
@@ -577,7 +583,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "nebble":
                             case "new york":
                             case "miles":
-                                hours = -5;
+                                hours = -4;
                                 break;
                             case "est":
                             case "cdt":
@@ -594,13 +600,14 @@ function messageChecker(oldMessage, newMessage) {
                             case "trm":
                             case "melon":
                             case "therandommelon":
-                                hours = -6;
+                            case "united":
+                                hours = -5;
                                 break;
                             case "cst":
                             case "mdt":
                             case "alkesta":
                             case "alk":
-                                hours = -7;
+                                hours = -6;
                                 break;
                             case "mst":
                             case "pdt":
@@ -609,10 +616,10 @@ function messageChecker(oldMessage, newMessage) {
                             case "neppy":
                             case "neptune":
                             case "cameron":
-                                hours = -8;
+                                hours = -7;
                                 break;
                             case "pst":
-                                hours = -9;
+                                hours = -8;
                                 break;
                             default:
                                 hours = parseFloat(command);
@@ -644,7 +651,7 @@ function messageChecker(oldMessage, newMessage) {
             
             //Moderator ID: 282068037664768001
             //Admin ID:     282068065619804160
-            if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator") || message.member.roles.find("name", "Mod") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "Lower Council of Explorers")) { //Thanks Aren! :D
+            if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator") || message.member.roles.find("name", "moderators") || message.member.roles.find("name", "Mod") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "Lower Council of Explorers")) { //Thanks Aren! :D
                 var command = msg.substr(4);
                 switch (command) {
                     case "filter":
