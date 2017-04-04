@@ -507,7 +507,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "christchurch":
                             case "new zealand":
                             case "nz":
-                                hours = +13;
+                                hours = +12;
                                 break;
                             case "aedt":
                                 hours = +11;
