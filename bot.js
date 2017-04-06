@@ -42,7 +42,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 14) {
+    switch (Math.floor(Math.random() * 1000) % 22) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -68,7 +68,7 @@ function setGame() {
             presence.game.name = "being a stepswitcher";
             break;
         case 8:
-            presence.game.name = "activating supa weapon";
+            presence.game.name = "with supa weapon";
             break;
         case 9:
             presence.game.name = "solving puzzles";
@@ -83,9 +83,32 @@ function setGame() {
             presence.game.name = "being unbreakable";
             break;
         case 13:
+            presence.game.name = "sandwiches";
+            break;
+        case 14:
+            presence.game.name = "drawing pokemon";
+            break;
+        case 15:
+            presence.game.name = "obsessing";
+            break;
+        case 16:
+            presence.game.name = "the waiting game";
+            break;
+        case 17:
+            presence.game.name = "bending space";
+            break;
+        case 18:
+            presence.game.name = "with hexagons";
+            break;
+        case 19:
+            presence.game.name = "with music";
+            break;
+        case 20:
+            presence.game.name = "being a ninja";
+            break;
+        case 21:
             presence.game.name = "bot:help for more info";
             break;
-
     }
     client.user.setPresence(presence);
 }
