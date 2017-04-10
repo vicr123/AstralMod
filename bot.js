@@ -547,6 +547,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "mighty_eagle073":
                             case "oscar":
                             case "eagle":
+                            case "projsh":
                             case "onyx":
                                 hours = +10;
                                 break;
@@ -863,17 +864,17 @@ function messageChecker(oldMessage, newMessage) {
                         }
                         message.delete();
                         break;
-                    case "brandon":
+                    case "banterrogate":
                         if (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056) {
                             message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
                         } else {
                             if (interrogMember == null) {
-                                message.reply(':no_entry_sign: ERROR: No user to brandongate. See mod:help for more information.');
+                                message.reply(':no_entry_sign: ERROR: No user to banterrogate. See mod:help for more information.');
                             } else {
                                 if (interrogMember.guild.id == 277922530973581312) {
-                                    interrogMember.sendMessage("If you're Brandon, then begone. If you're not, then to appeal, get in touch with vicr123#5096. Sorry about the kick. We've had to do this because of a special someone trying to break the rules.");
+                                    interrogMember.sendMessage("You seem to be someone that has been making alts. If you're not, then to appeal, get in touch with vicr123#5096. Sorry about the kick. We've had to do this because of a special someone trying to break the rules.");
                                     interrogMember.ban();
-                                    message.channel.send(':white_check_mark: OK: User has been brandongated!');
+                                    message.channel.send(':white_check_mark: OK: User has been banterrogated!');
                                     interrogMember = null;
                                 } else {
                                     message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
@@ -1278,6 +1279,8 @@ client.on('messageDelete', function(message) {
             channel = client.channels.get("290444399731671040");
         } else if (message.guild.id == 287937616685301762) { //WoW
             channel = client.channels.get("295498899370803200");
+        } else if (message.guild.id == 297057036292849680) { //ALA
+            channel = client.channels.get("297762292823490570");
         }
     }
     
@@ -1305,6 +1308,8 @@ client.on('messageDeleteBulk', function(messages) {
             channel = client.channels.get("290444399731671040");
         } else if (messages.first().guild.id == 287937616685301762) { //WoW
             channel = client.channels.get("295498899370803200");
+        } else if (messages.first().guild.id == 297057036292849680) { //ALA
+            channel = client.channels.get("297762292823490570");
         }
     }
     
@@ -1329,6 +1334,8 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
             channel = client.channels.get("290444399731671040");
         } else if (oldMessage.guild.id == 287937616685301762) { //WoW
             channel = client.channels.get("295498899370803200");
+        } else if (oldMessage.guild.id == 297057036292849680) { //ALA
+            channel = client.channels.get("297762292823490570");
         }
     }
     
