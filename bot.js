@@ -357,7 +357,7 @@ function messageChecker(oldMessage, newMessage) {
                 } else if (message.guild.id == 281066689892974592) { //LE
                     client.channels.get("288272065109295104").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 } else if (message.guild.id == 297057036292849680) { //ALA
-					client.channels.get("297762292823490570").sendmessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("297762292823490570").sendmessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
