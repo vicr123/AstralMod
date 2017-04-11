@@ -572,6 +572,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "aren":
                             case "jelle":
                             case "amsterdam":
+                            case "jason":
                             case "berlin":
                                 hours = +2;
                                 break;
