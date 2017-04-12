@@ -120,13 +120,9 @@ client.on('ready', () => {
 });
 
 function getBoshyTime(guild) {
-    if (guild.id == 277922530973581312) { //AstralPhaser
-        return "<:vtBoshyTime:280178631886635008>";
-    } else if (guild.id == 234414439330349056) {
-        return "<:vtBoshyTime:280542032261545984>";
-    } else if (guild.id == 278824407743463424) {
-        return "<:vtBoshyTime:283186465020706818>";
-    } else {
+    if (guild.emojis.exists('name', 'vtBoshyTime')) {
+        return "<:vtBoshyTime:" + guilds.emojis.find('name', 'vtBoshyTime').id + ">";
+    } else { 
         return ":warning:";
     }
 }
