@@ -840,8 +840,11 @@ function messageChecker(oldMessage, newMessage) {
                             "                  Number of messages to delete.\n\n" +
                             "uinfo user        Gets information about a user.\n" +
                             "                  PARAMETER 1\n" +
-                            "                  User ID. This can be obtained by tagging\n" +
-                            "                  the user.\n\n" +
+                            "                  User ID. This can be obtained with the\n" +
+                            "                  rtid command.\n\n" +
+                            "rtid user         Gets a user's user ID.\n" +
+                            "                  PARAMETER 1\n" +
+                            "                  Username of the user to find.\n\n" +
                             "jail user         Places a user in jail.\n" +
                             "panic       -     Toggles panic mode.\n" +
                             "interrogate       Places the newest member of the server into interrogation.\n" +
@@ -957,6 +960,28 @@ function messageChecker(oldMessage, newMessage) {
                                         break;
                                 }
                             });
+                        } else if (command.startsWith("rtid")) {
+                            command = command.substr(5);
+                            //Find a user's ID based on given name
+                            
+                            var foundUsers = client.users.findAll("username", command);
+                            if (foundUsers.length == 0) {
+                                message.channel.send(':no_entry_sign: ERROR: Couldn\'t find anyone with that username. You might want to try again.');
+                            } else {
+                                var reply = ":white_check_mark: OK: We found " + parseInt(foundUsers.length) + " users with that username.\n```\n";
+                                for (let user of foundUsers) {
+                                    reply += user.username + "#" + user.discriminator + ": " + user.id + "\n";
+                                    
+                                    message.guild.fetchMember(user).then(function(member) {
+                                        message.channel.send(":white_check_mark: " + user.username + "#" + user.discriminator + " exists on this server.");
+                                    }).catch(function() {
+                                        message.channel.send(":no_entry_sign: " + user.username + "#" + user.discriminator + " does not exist on this server.");
+                                    });
+                                }
+                                reply += "```";
+                                message.channel.send(reply);
+                            }
+                            message.delete();
                         } else if (command.startsWith("jail")) {
                             if (message.guild.id != 277922530973581312) {
                                 message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
