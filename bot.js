@@ -120,7 +120,7 @@ client.on('ready', () => {
 });
 
 function getBoshyTime(guild) {
-    if (guild.emojis.exists('name', 'vtBoshyTime') {
+    if (guild.emojis.exists('name', 'vtBoshyTime')) {
         return "<:vtBoshyTime:" + guilds.emojis.find('name', 'vtBoshyTime').id + ">";
     } else { 
         return ":warning:";
