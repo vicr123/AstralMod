@@ -994,6 +994,10 @@ function messageChecker(oldMessage, newMessage) {
                                 
                                 if (ms <= 0) {
                                     message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
+                                } else if (ms > 86400000) {
+                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
                                 } else {
                                     var timeout = setTimeout(function() {
                                         var msg = "<@" + message.author.id + "> :alarm_clock: Time's up! No description was provided.";
@@ -1017,9 +1021,13 @@ function messageChecker(oldMessage, newMessage) {
                                 minutes = parseFloat(command.substring(0, indexOfSpace));
                                 var reminder = command.substring(indexOfSpace + 1);
                                 var ms = minutes * 60000;
-                                
+
                                 if (ms <= 0) {
                                     message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
+                                } else if (ms > 86400000) {
+                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
                                 } else {
                                     var timeout = setTimeout(function() {
                                         var msg = "<@" + message.author.id + "> :alarm_clock: Time's up: `" + reminder + "`";
