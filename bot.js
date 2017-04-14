@@ -121,7 +121,7 @@ client.on('ready', () => {
 
 function getBoshyTime(guild) {
     if (guild.emojis.exists('name', 'vtBoshyTime')) {
-        return "<:vtBoshyTime:" + guilds.emojis.find('name', 'vtBoshyTime').id + ">";
+        return "<:vtBoshyTime:" + guild.emojis.find('name', 'vtBoshyTime').id + ">";
     } else { 
         return ":warning:";
     }
@@ -204,7 +204,7 @@ function messageChecker(oldMessage, newMessage) {
         if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
             if ((expletiveFilter && message.guild.id == 277922530973581312) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
                 //Check for expletives
-                var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
+                var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
                 if (exp != -1) { //Gah! They're not supposed to say that!
                     console.log("Expletive caught at " + parseInt(exp));
                     switch (Math.floor(Math.random() * 1000) % 7) {
@@ -841,6 +841,11 @@ function messageChecker(oldMessage, newMessage) {
                             "rtid user         Gets a user's user ID.\n" +
                             "                  PARAMETER 1\n" +
                             "                  Username of the user to find.\n\n" +
+                            "clock min [rem]   Sets a timer. This cannot be cancelled.\n" +
+                            "                  PARAMETER 1\n" +
+                            "                  Number of minutes to set the timer for.\n" +
+                            "                  PARAMETER 2 (OPTIONAL)\n" +
+                            "                  Reminder to be sent with the message.\n\n" +
                             "jail user         Places a user in jail.\n" +
                             "panic       -     Toggles panic mode.\n" +
                             "interrogate       Places the newest member of the server into interrogation.\n" +
@@ -978,6 +983,74 @@ function messageChecker(oldMessage, newMessage) {
                                 message.channel.send(reply);
                             }
                             message.delete();
+                        } else if (command.startsWith("clock")) {
+                            command = command.substr(6);
+                            
+                            var indexOfSpace = command.indexOf(" ");
+                            var minutes;
+                            if (indexOfSpace == -1) {
+                                minutes = parseFloat(command);
+                                var ms = minutes * 60000;
+                                
+                                if (ms <= 0) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+                                } else {
+                                    var timeout = setTimeout(function() {
+                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up! No description was provided.";
+                                        
+                                        var mentions = "\nThese people were also mentioned: ";
+                                        var count = 0;
+                                        for (let [id, user] of message.mentions.users) {
+                                            count++;
+                                            mentions += "<@" + id + "> ";
+                                        }
+                                        
+                                        if (count > 0) {
+                                            msg += mentions;
+                                        }
+                                        
+                                        message.channel.send(msg);
+                                    }, ms);
+                                    message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
+                                }
+                            } else {
+                                minutes = parseFloat(command.substring(0, indexOfSpace));
+                                var reminder = command.substring(indexOfSpace + 1);
+                                var ms = minutes * 60000;
+                                
+                                if (ms <= 0) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+                                } else {
+                                    var timeout = setTimeout(function() {
+                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up: `" + reminder + "`";
+                                        
+                                        var mentions = "\nThese people were also mentioned: ";
+                                        var count = 0;
+                                        for (let [id, user] of message.mentions.users) {
+                                            count++;
+                                            mentions += "<@" + id + "> ";
+                                        }
+                                        
+                                        if (count > 0) {
+                                            msg += mentions;
+                                        }
+                                        
+                                        message.channel.send(msg);
+                                    }, ms);
+                                    message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
+                                }
+                            }
+                        } else if (command.startsWith("cancel")) {
+                            command = command.substr(7);
+                            
+                            if (command.startsWith("clock")) {
+                                command = command.substr(6);
+                                
+                                clearTimeout(parseInt(command));
+                                message.channel.send(":white_check_mark: OK: If a timer with the ID `" + command + "` exists, it has been cancelled.");
+                            } else {
+                                message.channel.send(":no_entry_sign: ERROR: Not sure what to cancel.");
+                            }
                         } else if (command.startsWith("jail")) {
                             if (message.guild.id != 277922530973581312) {
                                 message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
@@ -1309,7 +1382,7 @@ client.on('messageDelete', function(message) {
     }
     
     if (channel != null) {
-        channel.sendMessage(":wastebasket: Message by <@" + message.author.id + "> in <#" + message.channel.id + "> at " + message.createdAt.toUTCString() + " was deleted.\n" +
+        channel.sendMessage(":wastebasket: Message by " + message.author.username + "#" + message.author.discriminator + " in <#" + message.channel.id + "> at " + message.createdAt.toUTCString() + " was deleted.\n" +
             "```\n" +
             message.cleanContent + "\n" +
             "```"
@@ -1364,7 +1437,7 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
     }
     
     if (channel != null) {
-        channel.sendMessage(":pencil2: Message by <@" + oldMessage.author.id + "> in <#" + oldMessage.channel.id + "> at " + oldMessage.createdAt.toUTCString() + " was edited.\n" +
+        channel.sendMessage(":pencil2: Message by " + oldMessage.author.username + "#" + oldMessage.author.discriminator + " in <#" + oldMessage.channel.id + "> at " + oldMessage.createdAt.toUTCString() + " was edited.\n" +
             "```\n" +
             oldMessage.cleanContent + "\n" +
             "```" +
