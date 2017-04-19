@@ -665,6 +665,10 @@ function messageChecker(oldMessage, newMessage) {
                         }
                         message.delete();
                         commandProcessed = true;
+                    } else if (command.startsWith("attack")) {
+                        command = command.substr(7);
+                        message.channel.send("<@" + message.author.id + "> :right_facing_fist: " + command);
+                        commandProcessed = true;
                     }
             }
         } 
