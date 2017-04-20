@@ -667,7 +667,11 @@ function messageChecker(oldMessage, newMessage) {
                         commandProcessed = true;
                     } else if (command.startsWith("attack")) {
                         command = command.substr(7);
-                        message.channel.send("<@" + message.author.id + "> :right_facing_fist: " + command);
+                        if (command.indexOf("@everyone") == -1) {
+                            message.channel.send("<@" + message.author.id + "> :right_facing_fist: " + command);
+                        } else {
+                            message.reply("Nice try, but I ain't going to interrupt everyone. Kinda nice to not be bothered.");
+                        }
                         commandProcessed = true;
                     }
             }
