@@ -127,6 +127,14 @@ function getBoshyTime(guild) {
     }
 }
 
+function isMod(member) {
+    if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers")) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 //var prank = true;
 
 function postBulletin() {
@@ -671,13 +679,97 @@ function messageChecker(oldMessage, newMessage) {
                             if (command.indexOf("@here") == -1) {
                                 message.channel.send("<@" + message.author.id + "> :right_facing_fist: " + command);
                             } else {
-                            message.reply("Nice try, but I ain't going to interrupt everyone who is online at this time. Kinda nice to not be bothered.");
+                                message.reply("Nice try, but I ain't going to interrupt everyone who is online at this time. Kinda nice to not be bothered.");
                             }
                         } else {
                             message.reply("Nice try, but I ain't going to interrupt everyone. Kinda nice to not be bothered.");
                         }
                         commandProcessed = true;
-                    }
+                    } else if (command.startsWith("clock")) {
+                            command = command.substr(6);
+                            
+                            var indexOfSpace = command.indexOf(" ");
+                            var minutes;
+                            if (indexOfSpace == -1) {
+                                minutes = parseFloat(command);
+                                var ms = minutes * 60000;
+                                
+                                if (ms <= 0) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
+                                } else if (ms > 86400000) {
+                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
+                                } else {
+                                    var timeout = setTimeout(function() {
+                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up! No description was provided.";
+                                        
+                                        var mentions = "\nThese people were also mentioned: ";
+                                        var count = 0;
+                                        for (let [id, user] of message.mentions.users) {
+                                            count++;
+                                            mentions += "<@" + id + "> ";
+                                        }
+                                        
+                                        if (count > 0) {
+                                            msg += mentions;
+                                        }
+                                        
+                                        if (isMod(message.member)) {
+                                            message.channel.send(msg);
+                                        } else {
+                                            message.author.sendMessage(msg);
+                                        }
+                                    }, ms);
+                                    
+                                    if (isMod(message.member)) {
+                                        message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
+                                    } else {
+                                        message.channel.send(":white_check_mark: OK: I will DM <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
+                                    }
+                                }
+                            } else {
+                                minutes = parseFloat(command.substring(0, indexOfSpace));
+                                var reminder = command.substring(indexOfSpace + 1);
+                                var ms = minutes * 60000;
+
+                                if (ms <= 0) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
+                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
+                                } else if (ms > 86400000) {
+                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
+                                } else {
+                                    var timeout = setTimeout(function() {
+                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up: `" + reminder + "`";
+                                        
+                                        var mentions = "\nThese people were also mentioned: ";
+                                        var count = 0;
+                                        for (let [id, user] of message.mentions.users) {
+                                            count++;
+                                            mentions += "<@" + id + "> ";
+                                        }
+                                        
+                                        if (count > 0) {
+                                            msg += mentions;
+                                        }
+                                        
+                                        if (isMod(message.member)) {
+                                            message.channel.send(msg);
+                                        } else {
+                                            message.author.sendMessage(msg);
+                                        }
+                                    }, ms);
+                                    
+                                    if (isMod(message.member)) {
+                                        message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
+                                    } else {
+                                        message.channel.send(":white_check_mark: OK: I will DM <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
+                                    }
+                                }
+                                commandProcessed = true;
+                            }
+                        }
             }
         } 
         
@@ -686,7 +778,7 @@ function messageChecker(oldMessage, newMessage) {
             
             //Moderator ID: 282068037664768001
             //Admin ID:     282068065619804160
-            if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Moderator") || message.member.roles.find("name", "moderators") || message.member.roles.find("name", "Mod") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "Lower Council of Explorers")) { //Thanks Aren! :D
+            if (isMod(message.member)) { //Thanks Aren! :D
                 var command = msg.substr(4);
                 switch (command) {
                     case "filter":
@@ -995,71 +1087,6 @@ function messageChecker(oldMessage, newMessage) {
                                 message.channel.send(reply);
                             }
                             message.delete();
-                        } else if (command.startsWith("clock")) {
-                            command = command.substr(6);
-                            
-                            var indexOfSpace = command.indexOf(" ");
-                            var minutes;
-                            if (indexOfSpace == -1) {
-                                minutes = parseFloat(command);
-                                var ms = minutes * 60000;
-                                
-                                if (ms <= 0) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
-                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
-                                } else if (ms > 86400000) {
-                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
-                                } else {
-                                    var timeout = setTimeout(function() {
-                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up! No description was provided.";
-                                        
-                                        var mentions = "\nThese people were also mentioned: ";
-                                        var count = 0;
-                                        for (let [id, user] of message.mentions.users) {
-                                            count++;
-                                            mentions += "<@" + id + "> ";
-                                        }
-                                        
-                                        if (count > 0) {
-                                            msg += mentions;
-                                        }
-                                        
-                                        message.channel.send(msg);
-                                    }, ms);
-                                    message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
-                                }
-                            } else {
-                                minutes = parseFloat(command.substring(0, indexOfSpace));
-                                var reminder = command.substring(indexOfSpace + 1);
-                                var ms = minutes * 60000;
-
-                                if (ms <= 0) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
-                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
-                                } else if (ms > 86400000) {
-                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
-                                } else {
-                                    var timeout = setTimeout(function() {
-                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up: `" + reminder + "`";
-                                        
-                                        var mentions = "\nThese people were also mentioned: ";
-                                        var count = 0;
-                                        for (let [id, user] of message.mentions.users) {
-                                            count++;
-                                            mentions += "<@" + id + "> ";
-                                        }
-                                        
-                                        if (count > 0) {
-                                            msg += mentions;
-                                        }
-                                        
-                                        message.channel.send(msg);
-                                    }, ms);
-                                    message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
-                                }
-                            }
                         } else if (command.startsWith("cancel")) {
                             command = command.substr(7);
                             
@@ -1403,7 +1430,7 @@ client.on('messageDelete', function(message) {
         }
     }
     
-    if (channel != null) {
+    if (channel != null && message.channel != channel) {
         channel.sendMessage(":wastebasket: Message by " + message.author.username + "#" + message.author.discriminator + " in <#" + message.channel.id + "> at " + message.createdAt.toUTCString() + " was deleted.\n" +
             "```\n" +
             message.cleanContent + "\n" +
@@ -1434,7 +1461,7 @@ client.on('messageDeleteBulk', function(messages) {
         }
     }
     
-    if (channel != null) {
+    if (channel != null && message.channel != channel) {
         var message = ":wastebasket: " + parseInt(messages.length) + " messages in <#" + messages.first().channel.id + "> were deleted.\n"
         for (let [key, msg] of messages) {
             message += "```" + msg.cleanContent + "```";
@@ -1462,7 +1489,7 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
         }
     }
     
-    if (channel != null) {
+    if (channel != null && oldMessage.channel != channel) {
         channel.sendMessage(":pencil2: Message by " + oldMessage.author.username + "#" + oldMessage.author.discriminator + " in <#" + oldMessage.channel.id + "> at " + oldMessage.createdAt.toUTCString() + " was edited.\n" +
             "```\n" +
             oldMessage.cleanContent + "\n" +
