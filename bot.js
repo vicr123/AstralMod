@@ -112,6 +112,15 @@ function setGame() {
         case 22:
             presence.game.name = "bot:help for more info";
             break;
+            case 23:
+            presence.game.name = "TimeHACK";
+            break;
+            case 24:
+            presence.game.name = "TiemHARK";
+            break;
+            case 25:
+            presence.game.name = "harking tiem";
+            break;
     }
     client.user.setPresence(presence);
 }
