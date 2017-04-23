@@ -42,7 +42,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 22) {
+    switch (Math.floor(Math.random() * 1000) % 23) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -107,6 +107,9 @@ function setGame() {
             presence.game.name = "being a ninja";
             break;
         case 21:
+            presence.game.name = "if money cant buy happiness then why is it so fabulous";
+            break;
+        case 22:
             presence.game.name = "bot:help for more info";
             break;
     }
