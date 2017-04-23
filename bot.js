@@ -174,7 +174,7 @@ function messageChecker(oldMessage, newMessage) {
     if (message.guild == null) return;
     
     if (doModeration[message.guild.id] == null) {
-        if (message.guild.id == 140241956843290625) { //Check if this is TGL
+        if (message.guild.id == 140241956843290625 || message.guild.id == 287937616685301762) { //Check if this is TGL
             doModeration[message.guild.id] = false;
         } else {
             doModeration[message.guild.id] = true;
