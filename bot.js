@@ -676,7 +676,7 @@ function messageChecker(oldMessage, newMessage) {
                         }
                         message.delete();
                         commandProcessed = true;
-                    } else if (command.startsWith("attack")) {
+                    } else if (command.startsWith("attack") && (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056)) {
                         command = command.substr(7);
                         if (command.indexOf("@everyone") == -1) {
                             if (command.indexOf("@here") == -1) {
