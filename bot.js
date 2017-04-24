@@ -1430,6 +1430,8 @@ client.on('messageDelete', function(message) {
             channel = client.channels.get("297762292823490570");
         } else if (message.guild.id == 281066689892974592) { //LE
             channel = client.channels.get("302821411821453312");
+        } else if (message.guild.id == 266018132827570176) { //TH
+            channel = client.channels.get("306041264933961728");
         }
     }
     
@@ -1461,6 +1463,8 @@ client.on('messageDeleteBulk', function(messages) {
             channel = client.channels.get("297762292823490570");
         } else if (messages.first().guild.id == 281066689892974592) { //LE
             channel = client.channels.get("302821411821453312");
+        } else if (messages.first().guild.id == 266018132827570176) { //TH
+            channel = client.channels.get("306041264933961728");
         }
     }
     
@@ -1489,6 +1493,8 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
             channel = client.channels.get("297762292823490570");
         } else if (oldMessage.guild.id == 281066689892974592) { //LE
             channel = client.channels.get("302821411821453312");
+        } else if (oldMessage.guild.id == 266018132827570176) { //TH
+            channel = client.channels.get("306041264933961728");
         }
     }
     
