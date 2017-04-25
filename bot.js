@@ -42,7 +42,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 23) {
+    switch (Math.floor(Math.random() * 1000) % 25) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -112,13 +112,13 @@ function setGame() {
         case 22:
             presence.game.name = "bot:help for more info";
             break;
-            case 23:
+        case 23:
             presence.game.name = "TimeHACK";
             break;
-            case 24:
+        case 24:
             presence.game.name = "TiemHARK";
             break;
-            case 25:
+        case 25:
             presence.game.name = "harking tiem";
             break;
     }
