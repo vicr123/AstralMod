@@ -234,7 +234,7 @@ function handleSuggest(message) {
                                         ":arrow_right: **Is this ok?**\n[y] Continue\n[anything else] Abort\n\n" +
                                         ":information_source: At any time, simply type `q` to cancel the suggestion.");
                 } else {
-                    message.author.send(":right_arrow: Ready to submit this suggestion?\n[y] Submit\n[r] Start over");
+                    message.author.send(":arrow_right: Ready to submit this suggestion?\n[y] Submit\n[r] Start over");
                 }
                 break;
                 
