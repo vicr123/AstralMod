@@ -831,7 +831,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.reply("Nice try, but I ain't going to interrupt everyone. Kinda nice to not be bothered.");
                         }
                         commandProcessed = true;
-                    } else if (command.startsWith("suggest") {
+                    } else if (command.startsWith("suggest")) {
                         command = command.substr(8);
                         if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056) {
                             suggestStates[message.author.id] = {};
