@@ -246,7 +246,7 @@ client.on('ready', () => {
 });
 
 function containsExpletive(phrase) {
-    var exp = phrase.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
+    var exp = phrase.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)+(\b|\s|$|\.|\,)/i);
     
     if (exp == -1) {
         return false;
