@@ -36,6 +36,10 @@ var jailMember = null;
 var interrogMember = null;
 var bulletinTimeout;
 
+process.on('unhandledRejection', function(err, p) {
+    console.log("An unhandled promise rejection has occurred.");
+});
+
 function setGame() {
     var presence = {};
     presence.game = {};
