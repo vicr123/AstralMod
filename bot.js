@@ -192,9 +192,9 @@ function handleSuggest(message) {
                     
                     var channel;
                     if (state.guild == 277922530973581312) { //APHC
-                        client.channels.get("308499752993947649")
+                        channel = client.channels.get("308499752993947649");
                     } else if (state.guild == 234414439330349056) { //ShiftOS
-                        client.channels.get("308518752557727746")
+                        channel = client.channels.get("308518752557727746");
                     }
                     
                     channel.sendEmbed(embed);
