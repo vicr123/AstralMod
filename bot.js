@@ -148,6 +148,8 @@ function handleSuggest(message) {
             case 2: //Title
                 if (message.content.length > 30) {
                     message.author.send(":no_entry_sign: Your response needs to be 30 characters or less.");
+                } else if (containsExpletive(message.content)) {
+                    message.author.send(":no_entry_sign: This looks like spam. And we don't like spam. Unless it's in a can. Try again, and be a bit nicer please.");
                 } else {
                     state.title = message.content;
                     
@@ -178,6 +180,8 @@ function handleSuggest(message) {
             case 3: //Suggestion
                 if (message.content.length > 1000) {
                     message.author.send(":no_entry_sign: Your response needs to be 1000 characters or less.");
+                } else if (containsExpletive(message.content)) {
+                    message.author.send(":no_entry_sign: This looks like spam. And we don't like spam. Unless it's in a can. Try again, and be a bit nicer please.");
                 } else {
                     state.suggestion = message.content;
                     state.state = 4;
@@ -240,6 +244,16 @@ client.on('ready', () => {
     client.setInterval(setGame, 300000);
     setGame();
 });
+
+function containsExpletive(phrase) {
+    var exp = phrase.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
+    
+    if (exp == -1) {
+        return false;
+    } else {
+        return true;
+    }
+}
 
 function getBoshyTime(guild) {
     if (guild.emojis.exists('name', 'vtBoshyTime')) {
@@ -340,8 +354,7 @@ function messageChecker(oldMessage, newMessage) {
         if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
             if ((expletiveFilter && message.guild.id == 277922530973581312) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
                 //Check for expletives
-                var exp = msg.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)(\b|\s|$|\.|\,)/i);
-                if (exp != -1) { //Gah! They're not supposed to say that!
+                if (containsExpletive(msg)) { //Gah! They're not supposed to say that!
                     console.log("Expletive caught at " + parseInt(exp));
                     switch (Math.floor(Math.random() * 1000) % 7) {
                         case 0:
