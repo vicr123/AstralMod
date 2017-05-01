@@ -221,6 +221,8 @@ function handleSuggest(message) {
                         channel = client.channels.get("308499752993947649");
                     } else if (state.guild == 234414439330349056) { //ShiftOS
                         channel = client.channels.get("308518752557727746");
+                    } else if (state.guild == 297057036292849680) { //ALA
+                        channel = client.channels.get("308547573382250497");
                     }
                     
                     channel.sendEmbed(embed);
@@ -671,7 +673,7 @@ function messageChecker(oldMessage, newMessage) {
                     commandProcessed = true;
                     break;
                 case "suggest":
-                    if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056) {
+                    if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056 || message.guild.id == 297057036292849680) {
                         suggestStates[message.author.id] = {};
                         suggestStates[message.author.id].state = 1;
                         suggestStates[message.author.id].guild = message.guild.id;
