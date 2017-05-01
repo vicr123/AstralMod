@@ -30,6 +30,7 @@ var lastMessages = {};
 var sameMessageCount = {};
 var smallMessageCount = {};
 var lastUserInteraction = {};
+var suggestStates = {};
 var poweroff = false;
 var jailMember = null;
 var interrogMember = null;
@@ -116,6 +117,89 @@ function setGame() {
     client.user.setPresence(presence);
 }
 
+function handleSuggest(message) {
+    var state = suggestStates[message.author.id];
+    if (message.content.toLowerCase() == "q") {
+        //Abort
+        message.author.send(":octagonal_sign: Suggestion process cancelled.");
+        state = null;
+    } else {
+        switch (state.state) {
+            case 1: //Welcome to the suggestion tool
+                if (message.content.toLowerCase() == "y") {
+                    //Continue
+                    state.state = 2;
+                    message.author.send("**Title**\nCreate a title for this suggestion.\n\n:arrow_right: Enter the title of your suggestion now. (30 characters or less)");
+                } else {
+                    //Abort
+                    message.author.send(":octagonal_sign: Suggestion process cancelled.");
+                    state = null;
+                }
+                break;
+            case 2: //Title
+                if (message.content.length > 30) {
+                    message.author.send(":no_entry_sign: Your response needs to be 30 characters or less.");
+                } else {
+                    state.title = message.content;
+                    state.state = 3;
+                    message.author.send("**Suggestion**\nWrite details about what we need to improve.\n" +
+                                        "Good example: `We need to have a #theshell channel for all talk about theShell.`\n" +
+                                        "Bad example: `#theshell` **or** `Get us a theShell channel or else.`\n\n" +
+                                        ":arrow_right: Detail your suggestion now. (1000 characters or less)");
+                }
+                break;
+            case 3: //Suggestion
+                if (message.content.length > 1000) {
+                    message.author.send(":no_entry_sign: Your response needs to be 1000 characters or less.");
+                } else {
+                    state.suggestion = message.content;
+                    state.state = 4;
+                    message.author.send("**Confirmation**\nThis is what the staff will see:");
+
+                    var embed = new Discord.RichEmbed("test");
+                    embed.setAuthor(message.author.username + "#" + message.author.discriminator, message.author.displayAvatarURL);
+                    embed.setColor("#00CA00");
+                    embed.setDescription("Suggestion from <@" + message.author.id + ">");
+                    
+                    embed.addField(state.title, state.suggestion);
+                    embed.setFooter("User ID: " + message.author.id);
+                                
+                    message.author.sendEmbed(embed);
+
+                    message.author.send(":arrow_right: Ready to submit this suggestion?\n[y] Submit\n[r] Start over");
+                }
+                break;
+            case 4: //Confirm
+                if (message.content.toLowerCase() == "y") {
+                    //Submit
+                    var embed = new Discord.RichEmbed("test");
+                    embed.setAuthor(message.author.username + "#" + message.author.discriminator, message.author.displayAvatarURL);
+                    embed.setColor("#00CA00");
+                    embed.setDescription("Suggestion from <@" + message.author.id + ">");
+                    
+                    embed.addField(state.title, state.suggestion);
+                    
+                    embed.setFooter("User ID: " + message.author.id);
+                                
+                    client.channels.get("308499752993947649").sendEmbed(embed);
+                    state = null;
+                    message.author.send("**Suggestion Submitted.**\n:white_check_mark: OK: Your suggestion has been submitted to our staff. Thanks! :D");
+                } else if (message.content.toLowerCase() == "r") {
+                    state.state = 1;
+                    message.author.send("**Make a suggestion**\n" +
+                                        "By making a suggestion, your Discord tag will be recorded, along with your suggestion. Any spam suggestions will lead to appropriate action by members of staff.\n\n" +
+                                        ":arrow_right: **Is this ok?**\n[y] Continue\n[anything else] Abort\n\n" +
+                                        ":information_source: At any time, simply type `q` to cancel the suggestion.");
+                } else {
+                    message.author.send(":right_arrow: Ready to submit this suggestion?\n[y] Submit\n[r] Start over");
+                }
+                break;
+                
+        }
+    }
+    suggestStates[message.author.id] = state;
+}
+
 client.on('ready', () => {
     console.log("AstralMod is now ready!");
     client.setInterval(setGame, 300000);
@@ -174,7 +258,13 @@ function messageChecker(oldMessage, newMessage) {
     }
     var msg = message.content;
     
-    if (message.guild == null) return;
+    if (message.guild == null) {
+        if (suggestStates[message.author.id] != null) {
+            handleSuggest(message);
+        }
+        return;
+    }
+        
     
     if (doModeration[message.guild.id] == null) {
         if (message.guild.id == 140241956843290625 || message.guild.id == 287937616685301762) { //Check if this is TGL
@@ -464,6 +554,7 @@ function messageChecker(oldMessage, newMessage) {
                         "                  Useful for checking jail time.\n" +
                         "                  PARAMETER 1 (OPTIONAL)\n" + 
                         "                  A timezone to query, for example, +10 or -5.\n\n" +
+                        "suggest           Starts the suggestion process.\n" +
                         "about             Tells you about AstralMod\n" + 
                         "copyright         Tells you about AstralMod\n" + 
                         "license           Tells you about AstralMod\n" + 
@@ -526,6 +617,21 @@ function messageChecker(oldMessage, newMessage) {
                 case "braces":
                     message.reply("On the same line my dear honeyfry. ```cpp\nvoid abc() {\n}```");
                     commandProcessed = true;
+                    break;
+                case "suggest":
+                    if (message.guild.id == 277922530973581312) {
+                        suggestStates[message.author.id] = {};
+                        suggestStates[message.author.id].state = 1;
+                        
+                        message.reply(":arrow_left: Continue in DMs.");
+                        message.author.send("**Make a suggestion**\n" +
+                                            "By making a suggestion, your Discord tag will be recorded, along with your suggestion. Any spam suggestions will lead to appropriate action by members of staff.\n\n" +
+                                            ":arrow_right: **Is this ok?**\n[y] Continue\n[anything else] Abort\n\n" +
+                                            ":information_source: At any time, simply type `q` to cancel the suggestion.");
+                    } else {
+                        message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
+                    }
+                    message.delete();
                     break;
                 default:
                      if (command.startsWith("time")) {
