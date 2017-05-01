@@ -217,6 +217,8 @@ function handleSuggest(message) {
                         channel = client.channels.get("308499752993947649");
                     } else if (state.guild == 234414439330349056) { //ShiftOS
                         channel = client.channels.get("308518752557727746");
+                    } else if (state.guild == 297057036292849680) { //ALA
+                        channel = client.channels.get("308547573382250497");
                     }
                     
                     channel.sendEmbed(embed);
