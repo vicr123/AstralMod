@@ -189,8 +189,15 @@ function handleSuggest(message) {
                     embed.addField(state.title, state.suggestion);
                     
                     embed.setFooter("User ID: " + message.author.id);
-                                
-                    client.channels.get("308499752993947649").sendEmbed(embed);
+                    
+                    var channel;
+                    if (state.guild == 277922530973581312) { //APHC
+                        client.channels.get("308499752993947649")
+                    } else if (state.guild == 234414439330349056) { //ShiftOS
+                        client.channels.get("308518752557727746")
+                    }
+                    
+                    channel.sendEmbed(embed);
                     state = null;
                     message.author.send("**Suggestion Submitted.**\n:white_check_mark: OK: Your suggestion has been submitted to our staff. Thanks! :D");
                 } else if (message.content.toLowerCase() == "r") {
@@ -628,9 +635,10 @@ function messageChecker(oldMessage, newMessage) {
                     commandProcessed = true;
                     break;
                 case "suggest":
-                    if (message.guild.id == 277922530973581312) {
+                    if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056) {
                         suggestStates[message.author.id] = {};
                         suggestStates[message.author.id].state = 1;
+                        suggestStates[message.author.id].guild = message.guild.id;
                         
                         message.reply(":arrow_left: Continue in DMs.");
                         message.author.send("**Make a suggestion**\n" +
