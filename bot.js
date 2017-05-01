@@ -199,7 +199,7 @@ function handleSuggest(message) {
                     
                     channel.sendEmbed(embed);
                     state = null;
-                    message.author.send("**Suggestion Submitted.**\n:white_check_mark: OK: Your suggestion has been submitted to our staff. Thanks! :D");
+                    message.author.send(":white_check_mark: OK: Your suggestion has been submitted to our staff. Thanks! :D");
                 } else if (message.content.toLowerCase() == "r") {
                     state.state = 1;
                     message.author.send("**Make a suggestion**\n" +
