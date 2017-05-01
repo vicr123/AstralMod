@@ -150,11 +150,29 @@ function handleSuggest(message) {
                     message.author.send(":no_entry_sign: Your response needs to be 30 characters or less.");
                 } else {
                     state.title = message.content;
-                    state.state = 3;
-                    message.author.send("**Suggestion**\nWrite details about what we need to improve.\n" +
-                                        "Good example: `We need to have a #theshell channel for all talk about theShell.`\n" +
-                                        "Bad example: `#theshell` **or** `Get us a theShell channel or else.`\n\n" +
-                                        ":arrow_right: Detail your suggestion now. (1000 characters or less)");
+                    
+                    if (state.suggestion == null) {
+                        state.state = 3;
+                        message.author.send("**Suggestion**\nWrite details about what we need to improve.\n" +
+                                            "Good example: `We need to have a #theshell channel for all talk about theShell.`\n" +
+                                            "Bad example: `#theshell` **or** `Get us a theShell channel or else.`\n\n" +
+                                            ":arrow_right: Detail your suggestion now. (1000 characters or less)");
+                    } else {
+                        state.state = 4;
+                        message.author.send("**Confirmation**\nThis is what the staff will see:");
+
+                        var embed = new Discord.RichEmbed("test");
+                        embed.setAuthor(message.author.username + "#" + message.author.discriminator, message.author.displayAvatarURL);
+                        embed.setColor("#00CA00");
+                        embed.setDescription("Suggestion from <@" + message.author.id + ">");
+                        
+                        embed.addField(state.title, state.suggestion);
+                        embed.setFooter("User ID: " + message.author.id);
+                                    
+                        message.author.sendEmbed(embed);
+
+                        message.author.send(":arrow_right: Ready to submit this suggestion?\n[y] Submit\n[r] Start over");
+                    }
                 }
                 break;
             case 3: //Suggestion
@@ -202,6 +220,7 @@ function handleSuggest(message) {
                     message.author.send(":white_check_mark: OK: Your suggestion has been submitted to our staff. Thanks! :D");
                 } else if (message.content.toLowerCase() == "r") {
                     state.state = 1;
+                    state.suggestion = null;
                     message.author.send("**Make a suggestion**\n" +
                                         "By making a suggestion, your Discord tag will be recorded, along with your suggestion. Any spam suggestions will lead to appropriate action by members of staff.\n\n" +
                                         ":arrow_right: **Is this ok?**\n[y] Continue\n[anything else] Abort\n\n" +
@@ -811,6 +830,24 @@ function messageChecker(oldMessage, newMessage) {
                         } else {
                             message.reply("Nice try, but I ain't going to interrupt everyone. Kinda nice to not be bothered.");
                         }
+                        commandProcessed = true;
+                    } else if (command.startsWith("suggestion") {
+                        command = command.substr(11);
+                        if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056) {
+                            suggestStates[message.author.id] = {};
+                            suggestStates[message.author.id].state = 1;
+                            suggestStates[message.author.id].guild = message.guild.id;
+                            suggestStates[message.author.id].suggestion = command;
+                            
+                            message.reply(":arrow_left: Continue in DMs.");
+                            message.author.send("**Make a suggestion**\n" +
+                                                "By making a suggestion, your Discord tag will be recorded, along with your suggestion. Any spam suggestions will lead to appropriate action by members of staff.\n\n" +
+                                                ":arrow_right: **Is this ok?**\n[y] Continue\n[anything else] Abort\n\n" +
+                                                ":information_source: At any time, simply type `q` to cancel the suggestion.");
+                        } else {
+                            message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
+                        }
+                        message.delete();
                         commandProcessed = true;
                     } else if (command.startsWith("clock")) {
                             command = command.substr(6);
