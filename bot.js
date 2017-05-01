@@ -280,7 +280,7 @@ function isMod(member) {
 //var prank = true;
 
 function postBulletin() {
-    var channel = client.channels.get("277922530973581312");
+    var channel = client.channels.get("308576038324142081");
     
     switch (Math.floor(Math.random() * 1000) % 6) {
         case 0:
@@ -358,7 +358,7 @@ function messageChecker(oldMessage, newMessage) {
         //AKidFromTheUK       : 285740807854751754
 
         if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
-            if ((expletiveFilter && message.guild.id == 277922530973581312) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
+            if ((expletiveFilter && message.guild.id == 277922530973581312 && message.channel.id == 308576038324142081) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
                 //Check for expletives
                 if (containsExpletive(msg)) { //Gah! They're not supposed to say that!
                     console.log("Expletive caught at " + parseInt(exp));
@@ -392,7 +392,7 @@ function messageChecker(oldMessage, newMessage) {
                 
                 
                 //Continue only if on AstralPhaser
-                if (message.guild.id == 277922530973581312) {
+                if (message.guild.id == 277922530973581312 && message.channel.id == 308576038324142081) {
                     //Check for links
                     
                     if (message.member != null && !(message.member.roles.find("name", "Patron Tier 5ive") || message.member.roles.find("name", "Patron Tier 2wo") || message.member.roles.find("name", "Patron Tier 3hree") ||message.member.roles.find("name", "Patron Tier 4our"))) {
