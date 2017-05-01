@@ -641,6 +641,7 @@ function messageChecker(oldMessage, newMessage) {
                         message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
                     }
                     message.delete();
+                    commandProcessed = true;
                     break;
                 default:
                      if (command.startsWith("time")) {
