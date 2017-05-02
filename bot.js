@@ -149,9 +149,9 @@ function handleSuggest(message) {
                     embed.setDescription("Suggestion from <@" + message.author.id + ">");
                     
                     if (state.suggestion == null) {
-                        embed.addField("...", "___");
+                        embed.addField("[...]", "...");
                     } else {
-                        embed.addField("...", state.suggestion);
+                        embed.addField("[...]", state.suggestion);
                     }
                     
                     embed.setFooter("User ID: " + message.author.id);
@@ -180,7 +180,7 @@ function handleSuggest(message) {
                         embed.setColor("#00CA00");
                         embed.setDescription("Suggestion from <@" + message.author.id + ">");
                         
-                        embed.addField(state.title, "...");
+                        embed.addField(state.title, "[...]");
                         
                         embed.setFooter("User ID: " + message.author.id);
                         message.author.sendEmbed(embed);
