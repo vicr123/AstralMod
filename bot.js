@@ -142,7 +142,22 @@ function handleSuggest(message) {
                 if (message.content.toLowerCase() == "y") {
                     //Continue
                     state.state = 2;
-                    message.author.send("**Title**\nCreate a title for this suggestion.\n\n:arrow_right: Enter the title of your suggestion now. (30 characters or less)");
+                    
+                    var embed = new Discord.RichEmbed("test");
+                    embed.setAuthor(message.author.username + "#" + message.author.discriminator, message.author.displayAvatarURL);
+                    embed.setColor("#00CA00");
+                    embed.setDescription("Suggestion from <@" + message.author.id + ">");
+                    
+                    if (state.suggestion == null) {
+                        embed.addField("...", "");
+                    } else {
+                        embed.addField("...", state.suggestion);
+                    }
+                    
+                    embed.setFooter("User ID: " + message.author.id);
+                    message.author.sendEmbed(embed);
+                    
+                    message.author.send(":arrow_right: What's the title for this suggestion? It'll need to be 30 characters or less.");
                 } else {
                     //Abort
                     message.author.send(":octagonal_sign: Suggestion process cancelled.");
@@ -159,13 +174,23 @@ function handleSuggest(message) {
                     
                     if (state.suggestion == null) {
                         state.state = 3;
+                        
+                        var embed = new Discord.RichEmbed("test");
+                        embed.setAuthor(message.author.username + "#" + message.author.discriminator, message.author.displayAvatarURL);
+                        embed.setColor("#00CA00");
+                        embed.setDescription("Suggestion from <@" + message.author.id + ">");
+                        
+                        embed.addField(state.title, "...");
+                        
+                        embed.setFooter("User ID: " + message.author.id);
+                        message.author.sendEmbed(embed);
+                    
                         message.author.send("**Suggestion**\nWrite details about what we need to improve.\n" +
                                             "Good example: `We need to have a #theshell channel for all talk about theShell.`\n" +
                                             "Bad example: `#theshell` **or** `Get us a theShell channel or else.`\n\n" +
                                             ":arrow_right: Detail your suggestion now. (1000 characters or less)");
                     } else {
                         state.state = 4;
-                        message.author.send("**Confirmation**\nThis is what the staff will see:");
 
                         var embed = new Discord.RichEmbed("test");
                         embed.setAuthor(message.author.username + "#" + message.author.discriminator, message.author.displayAvatarURL);
