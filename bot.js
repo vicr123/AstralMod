@@ -934,9 +934,15 @@ function messageChecker(oldMessage, newMessage) {
                             
                             message.reply(":arrow_left: Continue in DMs.");
                             message.author.send("**Make a suggestion**\n" +
-                                                "By making a suggestion, your Discord tag will be recorded, along with your suggestion. Any spam suggestions will lead to appropriate action by members of staff.\n\n" +
-                                                ":arrow_right: **Is this ok?**\n[y] Continue\n[anything else] Abort\n\n" +
-                                                ":information_source: At any time, simply type `q` to cancel the suggestion.");
+                                            "Here's how this will work.\n\n" +
+                                            "- I'll walk you through the process of creating a suggestion on the suggestions channel.\n" +
+                                            "- Just respond to my prompts by typing a message in this DM and sending it.\n" +
+                                            "- At any time, simply respond with `q` to cancel the suggestion.\n\n" +
+                                            "However, please be aware of the following:\n" +
+                                            "- Your Discord Username will be recorded and sent along with the suggestion.\n" +
+                                            "- Your suggestion will be publicly visible.\n" +
+                                            "- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
+                                            "Respond with `y` if you understood the above.");
                         } else {
                             message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
                         }
