@@ -149,9 +149,9 @@ function handleSuggest(message) {
                     embed.setDescription("Suggestion from <@" + message.author.id + ">");
                     
                     if (state.suggestion == null) {
-                        embed.addField("[...]", "...");
+                        embed.addField(":large_blue_circle: ...", ":white_circle:");
                     } else {
-                        embed.addField("[...]", state.suggestion);
+                        embed.addField(":large_blue_circle: ...", ":white_circle: " + state.suggestion);
                     }
                     
                     embed.setFooter("User ID: " + message.author.id);
@@ -180,7 +180,7 @@ function handleSuggest(message) {
                         embed.setColor("#00CA00");
                         embed.setDescription("Suggestion from <@" + message.author.id + ">");
                         
-                        embed.addField(state.title, "[...]");
+                        embed.addField(":white_circle: " + state.title, ":large_blue_circle: ...");
                         
                         embed.setFooter("User ID: " + message.author.id);
                         message.author.sendEmbed(embed);
@@ -214,7 +214,6 @@ function handleSuggest(message) {
                 } else {
                     state.suggestion = message.content;
                     state.state = 4;
-                    message.author.send("**Confirmation**\nThis is what the staff will see:");
 
                     var embed = new Discord.RichEmbed("test");
                     embed.setAuthor(message.author.username + "#" + message.author.discriminator, message.author.displayAvatarURL);
