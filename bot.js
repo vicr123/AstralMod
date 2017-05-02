@@ -35,6 +35,7 @@ var poweroff = false;
 var jailMember = null;
 var interrogMember = null;
 var bulletinTimeout;
+var runningCommands = true;
 
 process.on('unhandledRejection', function(err, p) {
     console.log("An unhandled promise rejection has occurred.");
@@ -343,7 +344,14 @@ function messageChecker(oldMessage, newMessage) {
         }
         return;
     }
-        
+    
+    if (!runningCommands) {
+        if ((message.author.id == 278805875978928128 || message.author.id == 175760550070845451 || message.author.id == 209829628796338176) && msg == "mod:cmd") {
+            runningCommands = true;
+            message.reply(':white_check_mark: OK: AstralMod commands have been enabled.');
+        }
+        return;
+    }
     
     if (doModeration[message.guild.id] == null) {
         if (message.guild.id == 140241956843290625 || message.guild.id == 287937616685301762) { //Check if this is TGL
@@ -1170,6 +1178,13 @@ function messageChecker(oldMessage, newMessage) {
                             
                         message.channel.send(helpMessage);
                         break;
+                    case "cmd":
+                        if (message.author.id == 278805875978928128 || message.author.id == 175760550070845451 || message.author.id == 209829628796338176) {
+                            runningCommands = false;
+                            message.reply(':white_check_mark: OK: AstralMod commands have been stopped in all servers, and moderation has been turned off in all servers.');
+                        } else {
+                            message.reply(':no_entry_sign: NO: Only 3 special people are allowed to use this command. To turn off moderation, use `mod:mod off`.');
+                        }
                     case "cancel":
                         if (poweroff) {
                             poweroff = false;
