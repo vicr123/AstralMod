@@ -610,12 +610,18 @@ function messageChecker(oldMessage, newMessage) {
                     } else if (msg.toLowerCase().includes("no") || msg.toLowerCase().includes("nope")) {
                         message.reply("I guess not.");
                     } else if (msg.toLowerCase().includes("?")) {
-                        switch (Math.floor(Math.random() * 1000) % 2) {
+                        switch (Math.floor(Math.random() * 1000) % 4) {
                             case 0:
                                 message.reply("Erm... Maybe? I dunno.");
                                 break;
                             case 1:
                                 message.reply("Consider this a polite dodge of the question.");
+                                break;
+                            case 2:
+                                message.reply("I see someone is interested in seeing how I respond to a question.");
+                                break;
+                            case 3:
+                                message.reply("Sausages.");
                                 break;
                         }
                     } else if (msg.toLowerCase().includes("hello") || msg.toLowerCase().includes("hi")) {
