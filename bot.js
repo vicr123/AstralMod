@@ -837,6 +837,7 @@ function messageChecker(oldMessage, newMessage) {
                             case "london":
                             case "uk":
                             case "jed":
+                            case "mrjed385":
                             case "lance":
                             case "lancededcena":
                             case "stupidgame2":
