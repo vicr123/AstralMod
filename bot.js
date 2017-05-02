@@ -610,7 +610,14 @@ function messageChecker(oldMessage, newMessage) {
                     } else if (msg.toLowerCase().includes("no") || msg.toLowerCase().includes("nope")) {
                         message.reply("I guess not.");
                     } else if (msg.toLowerCase().includes("?")) {
-                        message.reply("Erm... Maybe? I dunno.");
+                        switch (Math.floor(Math.random() * 1000) % 2) {
+                            case 0:
+                                message.reply("Erm... Maybe? I dunno.");
+                                break;
+                            case 1:
+                                message.reply("Consider this a polite dodge of the question.");
+                                break;
+                        }
                     } else if (msg.toLowerCase().includes("hello") || msg.toLowerCase().includes("hi")) {
                         message.reply("Is it me you're looking for?");
                     }
