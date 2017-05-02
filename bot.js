@@ -149,7 +149,7 @@ function handleSuggest(message) {
                     embed.setDescription("Suggestion from <@" + message.author.id + ">");
                     
                     if (state.suggestion == null) {
-                        embed.addField("...", "");
+                        embed.addField("...", "___");
                     } else {
                         embed.addField("...", state.suggestion);
                     }
