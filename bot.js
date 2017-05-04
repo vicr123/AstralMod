@@ -316,7 +316,7 @@ client.on('ready', () => {
 });
 
 function nickExpletiveCheck(phrase) {
-	if (containsExpletive(phrase)) return false;
+	if (containsExpletive(phrase)) return true;
 	
 	var exp = phrase.search(/(hentai)+/i);
 
