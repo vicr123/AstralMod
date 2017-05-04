@@ -30,6 +30,8 @@ var lastMessages = {};
 var sameMessageCount = {};
 var smallMessageCount = {};
 var lastUserInteraction = {};
+var pendingNicks = {};
+var pendingNickTimeout = {};
 var suggestStates = {};
 var poweroff = false;
 var jailMember = null;
@@ -313,8 +315,20 @@ client.on('ready', () => {
     setGame();
 });
 
+function nickExpletiveCheck(phrase) {
+	if (containsExpletive(phrase)) return false;
+	
+	var exp = phrase.search(/(hentai)+/i);
+
+	if (exp == -1) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 function containsExpletive(phrase) {
-    var exp = phrase.search(/(\b|\s|^|\.|\,)(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)+(\b|\s|$|\.|\,)/i);
+    var exp = phrase.search(/(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)+/i);
     
     if (exp == -1) {
         return false;
@@ -808,276 +822,306 @@ function messageChecker(oldMessage, newMessage) {
                     message.delete();
                     commandProcessed = true;
                     break;
-                default:
-                     if (command.startsWith("time")) {
-                        command = command.substr(5);
-                        
-                        var hours;
-                        
-                        switch (command.toLowerCase()) {
-                            case "nzdt":
-                            case "auckland":
-                            case "christchurch":
-                            case "new zealand":
-                            case "nz":
-                                hours = +12;
-                                break;
-                            case "aedt":
-                                hours = +11;
-                                break;
-                            case "sydney":
-                            case "canberra":
-                            case "vicr123":
-                            case "victor":
-                            case "victor tran":
-                            case "vicr":
-                            case "philip":
-                            case "phil":
-                            case "mightyeagle73":
-                            case "mighty_eagle073":
-                            case "oscar":
-                            case "eagle":
-                            case "projsh":
-                            case "onyx":
-                                hours = +10;
-                                break;
-                            case "aest:":
-                                hours = +10;
-                                break;
-                            case "acdt":
-                                hours = +10.5;
-                                break;
-                            case "adelaide":
-                            case "aedt":
-                                hours = +9.5;
-                                break;
-                            case "sgt":
-                            case "singapore":
-                                hours = +8;
-                                break;
-                            case "sotiris":
-                                hours = +3;
-                                break;
-                            case "alpha":
-                            case "aren":
-                            case "jelle":
-                            case "amsterdam":
-                            case "jason":
-                            case "berlin":
-                                hours = +2;
-                                break;
-                            case "london":
-                            case "uk":
-                            case "jed":
-                            case "lance":
-                            case "lancededcena":
-                            case "stupidgame2":
-                            case "gmt":
-                                hours = +1;
-                                break;
-                            case "utc":
-                                hours = 0;
-                                break;
-                            case "ndt":
-                            case "craftxbox":
-                                hours = -2.5
-                                break;
-                            case "brt":
-                            case "vrabble":
-                            case "vrabbers":
-                                hours = -3;
-                                break;
-                            case "nst":
-                                hours = -3.5;
-                                break;
-                            case "michael":
-                            case "wowmom98":
-                            case "rylan":
-                            case "edt":
-                            case "neb":
-                            case "nebble":
-                            case "new york":
-                            case "miles":
-                                hours = -4;
-                                break;
-                            case "est":
-                            case "cdt":
-                            case "wisconsin":
-                            case "texas":
-                            case "dallas":
-                            case "fort worth":
-                            case "austin":
-                            case "houston":
-                            case "memes":
-                            case "trav":
-                            case "travis":
-                            case "travisnc":
-                            case "trm":
-                            case "melon":
-                            case "therandommelon":
-                            case "united":
-                                hours = -5;
-                                break;
-                            case "cst":
-                            case "mdt":
-                            case "alkesta":
-                            case "alk":
-                                hours = -6;
-                                break;
-                            case "mst":
-                            case "pdt":
-                            case "arizona":
-                            case "seattle":
-                            case "neppy":
-                            case "neptune":
-                            case "cameron":
-                                hours = -7;
-                                break;
-                            case "pst":
-                                hours = -8;
-                                break;
-                            default:
-                                hours = parseFloat(command);
-                                command = "UTC " + command + ":00";
-                        }
-                        
-                        if (hours > -14 && hours < 14) {
-                            var localtime = new Date();
-                            var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
-                            var dateString = date.toString();
-                            if (dateString == "Invalid Date") {
-                                message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, my honeyfry. Don't try to confuse me... *or else...*");
-                            } else {
-                                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                                message.channel.send(':arrow_forward: The time now at ' + command + ' is ' + dateString);
-                            }
-                        } else {
-                            message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, my honeyfry. Don't try to confuse me... *or else...*");
-                        }
-                        message.delete();
-                        commandProcessed = true;
-                    } else if (command.startsWith("attack") && (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056)) {
-                        command = command.substr(7);
-                        if (command.indexOf("@everyone") == -1) {
-                            if (command.indexOf("@here") == -1) {
-                                message.channel.send("<@" + message.author.id + "> :right_facing_fist: " + command);
-                            } else {
-                                message.reply("Nice try, but I ain't going to interrupt everyone who is online at this time. Kinda nice to not be bothered.");
-                            }
-                        } else {
-                            message.reply("Nice try, but I ain't going to interrupt everyone. Kinda nice to not be bothered.");
-                        }
-                        commandProcessed = true;
-                    } else if (command.startsWith("suggest")) {
-                        command = command.substr(8);
-                        if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056) {
-                            suggestStates[message.author.id] = {};
-                            suggestStates[message.author.id].state = 1;
-                            suggestStates[message.author.id].guild = message.guild.id;
-                            suggestStates[message.author.id].suggestion = command;
-                            
-                            message.reply(":arrow_left: Continue in DMs.");
-                            message.author.send("**Make a suggestion**\n" +
-                                            "Here's how this will work.\n\n" +
-                                            "- I'll walk you through the process of creating a suggestion on the suggestions channel.\n" +
-                                            "- Just respond to my prompts by typing a message in this DM and sending it.\n" +
-                                            "- At any time, simply respond with `q` to cancel the suggestion.\n\n" +
-                                            "However, please be aware of the following:\n" +
-                                            "- Your Discord Username will be recorded and sent along with the suggestion.\n" +
-                                            "- Your suggestion will be publicly visible.\n" +
-                                            "- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
-                                            "Respond with `y` if you understood the above.");
-                        } else {
-                            message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
-                        }
-                        message.delete();
-                        commandProcessed = true;
-                    } else if (command.startsWith("clock")) {
-                            command = command.substr(6);
-                            
-                            var indexOfSpace = command.indexOf(" ");
-                            var minutes;
-                            if (indexOfSpace == -1) {
-                                minutes = parseFloat(command);
-                                var ms = minutes * 60000;
-                                
-                                if (ms <= 0) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
-                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
-                                } else if (ms > 86400000) {
-                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
-                                } else {
-                                    var timeout = setTimeout(function() {
-                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up! No description was provided.";
-                                        
-                                        var mentions = "\nThese people were also mentioned: ";
-                                        var count = 0;
-                                        for (let [id, user] of message.mentions.users) {
-                                            count++;
-                                            mentions += "<@" + id + "> ";
-                                        }
-                                        
-                                        if (count > 0) {
-                                            msg += mentions;
-                                        }
-                                        
-                                        if (isMod(message.member)) {
-                                            message.channel.send(msg);
-                                        } else {
-                                            message.author.sendMessage(msg);
-                                        }
-                                    }, ms);
-                                    
-                                    if (isMod(message.member)) {
-                                        message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
-                                    } else {
-                                        message.channel.send(":white_check_mark: OK: I will DM <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
-                                    }
-                                }
-                            } else {
-                                minutes = parseFloat(command.substring(0, indexOfSpace));
-                                var reminder = command.substring(indexOfSpace + 1);
-                                var ms = minutes * 60000;
+				default:
+					if (command.startsWith("time")) {
+						command = command.substr(5);
 
-                                if (ms <= 0) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
-                                } else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
-                                    message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
-                                } else if (ms > 86400000) {
-                                    message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
-                                } else {
-                                    var timeout = setTimeout(function() {
-                                        var msg = "<@" + message.author.id + "> :alarm_clock: Time's up: `" + reminder + "`";
-                                        
-                                        var mentions = "\nThese people were also mentioned: ";
-                                        var count = 0;
-                                        for (let [id, user] of message.mentions.users) {
-                                            count++;
-                                            mentions += "<@" + id + "> ";
-                                        }
-                                        
-                                        if (count > 0) {
-                                            msg += mentions;
-                                        }
-                                        
-                                        if (isMod(message.member)) {
-                                            message.channel.send(msg);
-                                        } else {
-                                            message.author.sendMessage(msg);
-                                        }
-                                    }, ms);
-                                    
-                                    if (isMod(message.member)) {
-                                        message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
-                                    } else {
-                                        message.channel.send(":white_check_mark: OK: I will DM <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
-                                    }
-                                }
-                                commandProcessed = true;
-                            }
-                        }
+						var hours;
+
+						switch (command.toLowerCase()) {
+							case "nzdt":
+							case "auckland":
+							case "christchurch":
+							case "new zealand":
+							case "nz":
+								hours = +12;
+								break;
+							case "aedt":
+								hours = +11;
+								break;
+							case "sydney":
+							case "canberra":
+							case "vicr123":
+							case "victor":
+							case "victor tran":
+							case "vicr":
+							case "philip":
+							case "phil":
+							case "mightyeagle73":
+							case "mighty_eagle073":
+							case "oscar":
+							case "eagle":
+							case "projsh":
+							case "onyx":
+								hours = +10;
+								break;
+							case "aest:":
+								hours = +10;
+								break;
+							case "acdt":
+								hours = +10.5;
+								break;
+							case "adelaide":
+							case "aedt":
+								hours = +9.5;
+								break;
+							case "sgt":
+							case "singapore":
+								hours = +8;
+								break;
+							case "sotiris":
+								hours = +3;
+								break;
+							case "alpha":
+							case "aren":
+							case "jelle":
+							case "amsterdam":
+							case "jason":
+							case "berlin":
+								hours = +2;
+								break;
+							case "london":
+							case "uk":
+							case "jed":
+							case "lance":
+							case "lancededcena":
+							case "stupidgame2":
+							case "gmt":
+								hours = +1;
+								break;
+							case "utc":
+								hours = 0;
+								break;
+							case "ndt":
+							case "craftxbox":
+								hours = -2.5
+								break;
+							case "brt":
+							case "vrabble":
+							case "vrabbers":
+								hours = -3;
+								break;
+							case "nst":
+								hours = -3.5;
+								break;
+							case "michael":
+							case "wowmom98":
+							case "rylan":
+							case "edt":
+							case "neb":
+							case "nebble":
+							case "new york":
+							case "miles":
+								hours = -4;
+								break;
+							case "est":
+							case "cdt":
+							case "wisconsin":
+							case "texas":
+							case "dallas":
+							case "fort worth":
+							case "austin":
+							case "houston":
+							case "memes":
+							case "trav":
+							case "travis":
+							case "travisnc":
+							case "trm":
+							case "melon":
+							case "therandommelon":
+							case "united":
+								hours = -5;
+								break;
+							case "cst":
+							case "mdt":
+							case "alkesta":
+							case "alk":
+								hours = -6;
+								break;
+							case "mst":
+							case "pdt":
+							case "arizona":
+							case "seattle":
+							case "neppy":
+							case "neptune":
+							case "cameron":
+								hours = -7;
+								break;
+							case "pst":
+								hours = -8;
+								break;
+							default:
+								hours = parseFloat(command);
+								command = "UTC " + command + ":00";
+						}
+
+						if (hours > -14 && hours < 14) {
+							var localtime = new Date();
+							var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + hours * 60) * 60000);
+							var dateString = date.toString();
+							if (dateString == "Invalid Date") {
+								message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, my honeyfry. Don't try to confuse me... *or else...*");
+							} else {
+								dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+								dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+								message.channel.send(':arrow_forward: The time now at ' + command + ' is ' + dateString);
+							}
+						} else {
+							message.channel.send(":no_entry_sign: ERROR: That ain't a valid timezone, my honeyfry. Don't try to confuse me... *or else...*");
+						}
+						message.delete();
+						commandProcessed = true;
+					} else if (command.startsWith("attack") && (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056)) {
+						command = command.substr(7);
+						if (command.indexOf("@everyone") == -1) {
+							if (command.indexOf("@here") == -1) {
+								message.channel.send("<@" + message.author.id + "> :right_facing_fist: " + command);
+							} else {
+								message.reply("Nice try, but I ain't going to interrupt everyone who is online at this time. Kinda nice to not be bothered.");
+							}
+						} else {
+							message.reply("Nice try, but I ain't going to interrupt everyone. Kinda nice to not be bothered.");
+						}
+						commandProcessed = true;
+					} else if (command.startsWith("suggest")) {
+						command = command.substr(8);
+						if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056) {
+							suggestStates[message.author.id] = {};
+							suggestStates[message.author.id].state = 1;
+							suggestStates[message.author.id].guild = message.guild.id;
+							suggestStates[message.author.id].suggestion = command;
+
+							message.reply(":arrow_left: Continue in DMs.");
+							message.author.send("**Make a suggestion**\n" +
+								"Here's how this will work.\n\n" +
+								"- I'll walk you through the process of creating a suggestion on the suggestions channel.\n" +
+								"- Just respond to my prompts by typing a message in this DM and sending it.\n" +
+								"- At any time, simply respond with `q` to cancel the suggestion.\n\n" +
+								"However, please be aware of the following:\n" +
+								"- Your Discord Username will be recorded and sent along with the suggestion.\n" +
+								"- Your suggestion will be publicly visible.\n" +
+								"- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
+								"Respond with `y` if you understood the above.");
+						} else {
+							message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
+						}
+						message.delete();
+						commandProcessed = true;
+					} else if (command.startsWith("clock")) {
+						command = command.substr(6);
+
+						var indexOfSpace = command.indexOf(" ");
+						var minutes;
+						if (indexOfSpace == -1) {
+							minutes = parseFloat(command);
+							var ms = minutes * 60000;
+
+							if (ms <= 0) {
+								message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+							} else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
+								message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
+							} else if (ms > 86400000) {
+								message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
+							} else {
+								var timeout = setTimeout(function () {
+									var msg = "<@" + message.author.id + "> :alarm_clock: Time's up! No description was provided.";
+
+									var mentions = "\nThese people were also mentioned: ";
+									var count = 0;
+									for (let [id, user] of message.mentions.users) {
+										count++;
+										mentions += "<@" + id + "> ";
+									}
+
+									if (count > 0) {
+										msg += mentions;
+									}
+
+									if (isMod(message.member)) {
+										message.channel.send(msg);
+									} else {
+										message.author.sendMessage(msg);
+									}
+								}, ms);
+
+								if (isMod(message.member)) {
+									message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
+								} else {
+									message.channel.send(":white_check_mark: OK: I will DM <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds).");
+								}
+							}
+						} else {
+							minutes = parseFloat(command.substring(0, indexOfSpace));
+							var reminder = command.substring(indexOfSpace + 1);
+							var ms = minutes * 60000;
+
+							if (ms <= 0) {
+								message.channel.send(":no_entry_sign: ERROR: Yeah... timers don't go for 0 seconds or less.");
+							} else if (isNaN(ms) || ms == Infinity || ms == -Infinity) {
+								message.channel.send(":no_entry_sign: ERROR: Yeah nice try, but I don't break that easily.");
+							} else if (ms > 86400000) {
+								message.channel.send(":no_entry_sign: ERROR: Ain't one day enough for ya? I'm not a timekeeper ok? One day is already pushing it...");
+							} else {
+								var timeout = setTimeout(function () {
+									var msg = "<@" + message.author.id + "> :alarm_clock: Time's up: `" + reminder + "`";
+
+									var mentions = "\nThese people were also mentioned: ";
+									var count = 0;
+									for (let [id, user] of message.mentions.users) {
+										count++;
+										mentions += "<@" + id + "> ";
+									}
+
+									if (count > 0) {
+										msg += mentions;
+									}
+
+									if (isMod(message.member)) {
+										message.channel.send(msg);
+									} else {
+										message.author.sendMessage(msg);
+									}
+								}, ms);
+
+								if (isMod(message.member)) {
+									message.channel.send(":white_check_mark: OK: I will ping <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
+								} else {
+									message.channel.send(":white_check_mark: OK: I will DM <@" + message.author.id + "> in " + minutes + " minutes (" + ms / 1000 + " seconds) to `" + reminder + "`.");
+								}
+							}
+							commandProcessed = true;
+						}
+					} else if (command.startsWith("nick")) {
+						command = command.substr(5);
+						if (message.guild.id == 277922530973581312) {
+
+							if (pendingNickTimeout[message.author.id] == null) {
+								pendingNickTimeout[message.author.id] = new Date().getTime() - 3600000;
+							}
+
+							if (new Date().getTime() > pendingNickTimeout[message.author.id]) {
+								pendingNickTimeout[message.author.id] = new Date().getTime() + 3600000;
+
+								if (nickExpletiveCheck(command)) {
+									message.channel.send(":no_entry_sign: NO: Preliminary nickname checks failed. Choose a more... erm... *sensible* nickname please.");
+								} else {
+									var nick = command;
+									message.channel.send(":white_check_mark: OK: Preliminary nickname checks passed. Your nickname will be changed in 5 minutes if the mods agree with it.");
+
+									pendingNicks[message.author.id] = setTimeout(function () {
+										message.member.setNickname(nick);
+										pendingNicks[message.author.id] = null;
+									}, 300000, null);
+									client.channels.get("277923386959855626").sendMessage("<@" + message.author.id + "> is changing his nickname to `" + nick + "`. Type `mod:declnick " + message.author.id + "` to cancel this.");
+								}
+							} else {
+								message.channel.send(":no_entry_sign: NO: Cool down. You'll need to wait an hour between each change. Ask a mod if you absolutely must have your nickname change *now.*");
+							}
+						} else {
+							message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+						}
+						commandProcessed = true;
+					}
             }
         } 
         
@@ -1310,40 +1354,40 @@ function messageChecker(oldMessage, newMessage) {
                         }
                         message.delete();
                         break;
-                    default:
-                        if (command.startsWith("uinfo")) {
-                            command = command.substr(6);
-                            command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-                            
-                            message.guild.fetchMember(command).then(function(member) {
-                                embed = new Discord.RichEmbed("test");
-                                embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
-                                embed.setColor("#FF0000");
-                                embed.setDescription("User Information");
-                                
-                                {
-                                    var msg = "**Created** " + member.user.createdAt.toUTCString() + "\n";
-                                    if (member.joinedAt.getTime() == 0) {
-                                        msg += "**Joined** -∞... and beyond! Discord seems to be giving incorrect info... :(";
-                                    } else {
-                                        msg += "**Joined** " + member.joinedAt.toUTCString();
-                                    }
-                                    
-                                    embed.addField("Timestamps", msg);
-                                }
-                                
-                                {
-                                    var msg = "**Current Display Name** " + member.displayName + "\n";
-                                    msg += "**Username** " + member.user.username + "\n";
-                                    if (member.nickname != null) {
-                                        msg += "**Nickname** " + member.nickname;
-                                    } else {
-                                        msg += "**Nickname** No nickname";
-                                    }
-                                    
-                                    embed.addField("Names", msg);
-                                }
-                                
+					default:
+						if (command.startsWith("uinfo")) {
+							command = command.substr(6);
+							command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
+
+							message.guild.fetchMember(command).then(function (member) {
+								embed = new Discord.RichEmbed("test");
+								embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
+								embed.setColor("#FF0000");
+								embed.setDescription("User Information");
+
+								{
+									var msg = "**Created** " + member.user.createdAt.toUTCString() + "\n";
+									if (member.joinedAt.getTime() == 0) {
+										msg += "**Joined** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+									} else {
+										msg += "**Joined** " + member.joinedAt.toUTCString();
+									}
+
+									embed.addField("Timestamps", msg);
+								}
+
+								{
+									var msg = "**Current Display Name** " + member.displayName + "\n";
+									msg += "**Username** " + member.user.username + "\n";
+									if (member.nickname != null) {
+										msg += "**Nickname** " + member.nickname;
+									} else {
+										msg += "**Nickname** No nickname";
+									}
+
+									embed.addField("Names", msg);
+								}
+
                                 /*if (member.lastMessageID != null) {
                                     var lastMessage = null;
                                     
@@ -1362,111 +1406,120 @@ function messageChecker(oldMessage, newMessage) {
                                         embed.addField("Last Message", msg);
                                     }
                                 }*/
-                                
-                                embed.setFooter("User ID: " + member.user.id);
-                                //embed.setDescription(msg);
-                                message.channel.sendEmbed(embed);
-                                
-                                lastUserInteraction[message.guild.id] = command;
-                            }).catch(function(reason) {
-                                switch (Math.floor(Math.random() * 1000) % 3) {
-                                    case 0:
-                                        message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                        break;
-                                    case 1:
-                                        message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                                        break;
-                                    case 2:
-                                        message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                                        break;
-                                }
-                            });
-                        } else if (command.startsWith("rtid")) {
-                            command = command.substr(5);
-                            //Find a user's ID based on given name
-                            
-                            var foundUsers = client.users.findAll("username", command);
-                            if (foundUsers.length == 0) {
-                                message.channel.send(':no_entry_sign: ERROR: Couldn\'t find anyone with that username. You might want to try again.');
-                            } else {
-                                var reply = ":white_check_mark: OK: We found " + parseInt(foundUsers.length) + " users with that username.\n```\n";
-                                for (let user of foundUsers) {
-                                    reply += user.username + "#" + user.discriminator + ": " + user.id + "\n";
-                                    
-                                    message.guild.fetchMember(user).then(function(member) {
-                                        message.channel.send(":white_check_mark: " + user.username + "#" + user.discriminator + " exists on this server.");
-                                    }).catch(function() {
-                                        message.channel.send(":no_entry_sign: " + user.username + "#" + user.discriminator + " does not exist on this server.");
-                                    });
-                                }
-                                reply += "```";
-                                message.channel.send(reply);
-                            }
-                            message.delete();
-                        } else if (command.startsWith("cancel")) {
-                            command = command.substr(7);
-                            
-                            if (command.startsWith("clock")) {
-                                command = command.substr(6);
-                                
-                                clearTimeout(parseInt(command));
-                                message.channel.send(":white_check_mark: OK: If a timer with the ID `" + command + "` exists, it has been cancelled.");
-                            } else {
-                                message.channel.send(":no_entry_sign: ERROR: Not sure what to cancel.");
-                            }
-                        } else if (command.startsWith("jail")) {
-                            if (message.guild.id != 277922530973581312) {
-                                message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                            } else {
-                                command = command.substr(6);
-                                command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-                                
-                                message.guild.fetchMember(command).then(function(member) {
-                                    if (member.roles.find("name", "I Broke The Rules!")) {
-                                        message.channel.send(':no_entry_sign: ERROR: That user is already in jail.');
-                                    } else {
-                                        jailMember = member;
-                                        message.channel.send(':oncoming_police_car: Placing ' + member.displayName + ' in jail. To confirm, type in mod:jail.');
-                                    }
-                                }).catch(function(reason) {
-                                    switch (Math.floor(Math.random() * 1000) % 3) {
-                                        case 0:
-                                            message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                            break;
-                                        case 1:
-                                            message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                                            break;
-                                        case 2:
-                                            message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                                            break;
-                                    }
-                                });
-                            }
-                            message.delete();
-                        } else if (command.startsWith("rm")) {
-                            command = command.substr(3);
-                            var num = parseInt(command);
-                            if (num != command) {
-                                message.channel.send(":no_entry_sign: ERROR: That's not a number...");
-                            } else {
-                                num = num + 1; //Also remove the mod:rm command
-                                message.channel.bulkDelete(num).then(function() {
-                                    message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
-                                }).catch(function() {
-                                    switch (Math.floor(Math.random() * 1000) % 3) {
-                                        case 0:
-                                            message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                            break;
-                                        case 1:
-                                            message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                                            break;
-                                        case 2:
-                                            message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                                            break;
-                                    }
-                                });
-                            }
-                        }
+
+								embed.setFooter("User ID: " + member.user.id);
+								//embed.setDescription(msg);
+								message.channel.sendEmbed(embed);
+
+								lastUserInteraction[message.guild.id] = command;
+							}).catch(function (reason) {
+								switch (Math.floor(Math.random() * 1000) % 3) {
+									case 0:
+										message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+										break;
+									case 1:
+										message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+										break;
+									case 2:
+										message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+										break;
+								}
+							});
+						} else if (command.startsWith("rtid")) {
+							command = command.substr(5);
+							//Find a user's ID based on given name
+
+							var foundUsers = client.users.findAll("username", command);
+							if (foundUsers.length == 0) {
+								message.channel.send(':no_entry_sign: ERROR: Couldn\'t find anyone with that username. You might want to try again.');
+							} else {
+								var reply = ":white_check_mark: OK: We found " + parseInt(foundUsers.length) + " users with that username.\n```\n";
+								for (let user of foundUsers) {
+									reply += user.username + "#" + user.discriminator + ": " + user.id + "\n";
+
+									message.guild.fetchMember(user).then(function (member) {
+										message.channel.send(":white_check_mark: " + user.username + "#" + user.discriminator + " exists on this server.");
+									}).catch(function () {
+										message.channel.send(":no_entry_sign: " + user.username + "#" + user.discriminator + " does not exist on this server.");
+									});
+								}
+								reply += "```";
+								message.channel.send(reply);
+							}
+							message.delete();
+						} else if (command.startsWith("cancel")) {
+							command = command.substr(7);
+
+							if (command.startsWith("clock")) {
+								command = command.substr(6);
+
+								clearTimeout(parseInt(command));
+								message.channel.send(":white_check_mark: OK: If a timer with the ID `" + command + "` exists, it has been cancelled.");
+							} else {
+								message.channel.send(":no_entry_sign: ERROR: Not sure what to cancel.");
+							}
+						} else if (command.startsWith("jail")) {
+							if (message.guild.id != 277922530973581312) {
+								message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+							} else {
+								command = command.substr(6);
+								command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
+
+								message.guild.fetchMember(command).then(function (member) {
+									if (member.roles.find("name", "I Broke The Rules!")) {
+										message.channel.send(':no_entry_sign: ERROR: That user is already in jail.');
+									} else {
+										jailMember = member;
+										message.channel.send(':oncoming_police_car: Placing ' + member.displayName + ' in jail. To confirm, type in mod:jail.');
+									}
+								}).catch(function (reason) {
+									switch (Math.floor(Math.random() * 1000) % 3) {
+										case 0:
+											message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+											break;
+										case 1:
+											message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+											break;
+										case 2:
+											message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+											break;
+									}
+								});
+							}
+							message.delete();
+						} else if (command.startsWith("rm")) {
+							command = command.substr(3);
+							var num = parseInt(command);
+							if (num != command) {
+								message.channel.send(":no_entry_sign: ERROR: That's not a number...");
+							} else {
+								num = num + 1; //Also remove the mod:rm command
+								message.channel.bulkDelete(num).then(function () {
+									message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
+								}).catch(function () {
+									switch (Math.floor(Math.random() * 1000) % 3) {
+										case 0:
+											message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+											break;
+										case 1:
+											message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+											break;
+										case 2:
+											message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+											break;
+									}
+								});
+							}
+						} else if (command.startsWith("declnick")) {
+							command = command.substr(9);
+							if (pendingNicks[command] != null) {
+								clearTimeout(pendingNicks[command]);
+								pendingNicks[command] = null;
+								message.channel.send(':white_check_mark: OK: User nickname change has been cancelled.');
+							} else {
+								message.channel.send(':no_entry_sign: ERROR: That didn\'t work. Has 5 minutes passed?');
+							}
+						}
                 }
                 
                 if (command == "poweroff") {
