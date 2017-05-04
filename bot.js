@@ -318,7 +318,7 @@ client.on('ready', () => {
 function nickExpletiveCheck(phrase) {
 	if (containsExpletive(phrase)) return true;
 	
-	var exp = phrase.search(/(hentai)+/i);
+	var exp = phrase.search(/(hentai|asl|a55|ass|anal|ballsack|bong|cocaine|cum|dick|dp|pedo|pube|rape|scat|semen|testes|tits|anus|arse|bitch|b1tch|b17ch|boob|cock|foreskin|hardon|jerk)+/i);
 
 	if (exp == -1) {
 		return false;
@@ -328,7 +328,7 @@ function nickExpletiveCheck(phrase) {
 }
 
 function containsExpletive(phrase) {
-    var exp = phrase.search(/(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|thisisnotarealwordbutatestword)+/i);
+    var exp = phrase.search(/(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|vagina|thisisnotarealwordbutatestword)+/i);
     
     if (exp == -1) {
         return false;
@@ -1103,7 +1103,7 @@ function messageChecker(oldMessage, newMessage) {
 								pendingNickTimeout[message.author.id] = new Date().getTime() + 3600000;
 
 								if (nickExpletiveCheck(command)) {
-									message.channel.send(":no_entry_sign: NO: Preliminary nickname checks failed. Choose a more... erm... *sensible* nickname please.");
+									message.channel.send(":no_entry_sign: NO: Preliminary nickname checks failed. Wait an hour and then choose a more... erm... *sensible* nickname please.");
 								} else {
 									var nick = command;
 									message.channel.send(":white_check_mark: OK: Preliminary nickname checks passed. Your nickname will be changed in 5 minutes if the mods agree with it.");
