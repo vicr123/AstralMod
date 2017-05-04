@@ -36,6 +36,7 @@ var jailMember = null;
 var interrogMember = null;
 var bulletinTimeout;
 var runningCommands = true;
+var jelleCaps = true;
 
 process.on('unhandledRejection', function(err, p) {
     console.log("An unhandled promise rejection has occurred.");
@@ -365,6 +366,19 @@ function postBulletin() {
     }
 }
 
+function handleDM(message) {
+    if (suggestStates[message.author.id] != null) {
+        handleSuggest(message);
+        return;
+    } else {
+        var msg = message.content;
+        var command = msg;
+        if (msg.toLowerCase().startsWith("mod:") || msg.toLowerCase().startsWith("bot:")) {
+            command = msg.substr(4);
+        }
+    }
+}
+
 function messageChecker(oldMessage, newMessage) {
     var message;
     if (newMessage == null) {
@@ -375,9 +389,7 @@ function messageChecker(oldMessage, newMessage) {
     var msg = message.content;
     
     if (message.guild == null) {
-        if (suggestStates[message.author.id] != null) {
-            handleSuggest(message);
-        }
+        handleDM(message);
         return;
     }
     
@@ -418,6 +430,26 @@ function messageChecker(oldMessage, newMessage) {
             
         });
     }*/
+
+
+	if (message.author.id == 199958849094942721 && jelleCaps) { //Jelle
+		if (msg.toLowerCase() != msg) {
+			message.reply("GASP! YOU USED A CAPITAL!").then(function(newMessage) {
+				setTimeout(function () {
+					newMessage.delete();
+				}, 3000, null);
+			});
+		}
+	}
+
+	if (message == "jl:jelle" && (message.author.id == 199958849094942721 || message.author.id == 278805875978928128)) {
+		if (jelleCaps) {
+			message.channel.send(":white_check_mark: OK: Jelle Caps warning has been turned off until next restart");
+		} else {
+			message.channel.send(":white_check_mark: OK: Jelle Caps warning has been turned on");
+		}
+		jelleCaps = !jelleCaps;
+	}
     
     if (message.author.id != 280495817901473793 && !message.author.bot) {
         //Server Detection:
