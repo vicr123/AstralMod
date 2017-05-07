@@ -40,6 +40,9 @@ var bulletinTimeout;
 var runningCommands = true;
 var jelleCaps = true;
 
+var dispatcher;
+var connection;
+
 process.on('unhandledRejection', function(err, p) {
     console.log("An unhandled promise rejection has occurred.");
 });
@@ -309,10 +312,22 @@ function handleSuggest(message) {
     suggestStates[message.author.id] = state;
 }
 
+function playAudio() {
+    dispatcher = connection.playFile("forecastvoice.mp3");
+    dispatcher.on('end', playAudio);
+}
+
 client.on('ready', () => {
     console.log("AstralMod is now ready!");
     client.setInterval(setGame, 300000);
     setGame();
+    
+    //Jump into waiting room
+    client.channels.get("277924441584041985").join().then(function(conn) {
+    console.log("Now connected to waiting room!");
+        connection = conn;
+        playAudio();
+    });
 });
 
 function nickExpletiveCheck(phrase) {
@@ -647,7 +662,7 @@ function messageChecker(oldMessage, newMessage) {
                                 message.reply(":no_entry_sign: NO: Just no.");
                                 break;
                         }
-                    } else if (msg.toLowerCase().includes("fuck you") || msg.toLowerCase().includes("fuck off") || msg.toLowerCase().includes("shit")) {
+                    } else if (msg.toLowerCase().includes("fuck you") || msg.toLowerCase().includes("fuck off") || msg.toLowerCase().includes("shit") || msg.toLowerCase().includes("stfu") ) {
                         message.reply("Want a :hammer:?");
                     } else if (msg.toLowerCase().includes("how") && msg.toLowerCase().includes("you")) {
                         message.reply("I'm doing OK I suppose.");
