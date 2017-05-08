@@ -38,7 +38,6 @@ var jailMember = null;
 var interrogMember = null;
 var bulletinTimeout;
 var runningCommands = true;
-var jelleCaps = true;
 
 var dispatcher;
 var connection;
@@ -459,26 +458,6 @@ function messageChecker(oldMessage, newMessage) {
             
         });
     }*/
-
-
-	if (message.author.id == 199958849094942721 && jelleCaps) { //Jelle
-		if (msg.toLowerCase() != msg) {
-			message.reply("GASP! YOU USED A CAPITAL!").then(function(newMessage) {
-				setTimeout(function () {
-					newMessage.delete();
-				}, 3000, null);
-			});
-		}
-	}
-
-	if (message == "jl:jelle" && (message.author.id == 199958849094942721 || message.author.id == 278805875978928128)) {
-		if (jelleCaps) {
-			message.channel.send(":white_check_mark: OK: Jelle Caps warning has been turned off until next restart");
-		} else {
-			message.channel.send(":white_check_mark: OK: Jelle Caps warning has been turned on");
-		}
-		jelleCaps = !jelleCaps;
-	}
     
     if (message.author.id != 280495817901473793 && !message.author.bot) {
         //Server Detection:
@@ -489,8 +468,9 @@ function messageChecker(oldMessage, newMessage) {
         if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
             if ((expletiveFilter && message.guild.id == 277922530973581312 && message.channel.id == 308576038324142081) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
                 //Check for expletives
+                var exp;
                 if (containsExpletive(msg)) { //Gah! They're not supposed to say that!
-                    console.log("Expletive caught at " + parseInt(exp));
+                    //console.log("Expletive caught at " + parseInt(exp));
                     switch (Math.floor(Math.random() * 1000) % 7) {
                         case 0:
                             message.reply("I'm very disappointed in you. This is me <:angryvt:282006699802361856>");
