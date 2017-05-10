@@ -1831,7 +1831,7 @@ client.on('messageDeleteBulk', function(messages) {
         }
     }
     
-    if (channel != null && message.channel != channel) {
+    if (channel != null) {
         var message = ":wastebasket: " + parseInt(messages.length) + " messages in <#" + messages.first().channel.id + "> were deleted.\n"
         for (let [key, msg] of messages) {
             message += "```" + msg.cleanContent + "```";
