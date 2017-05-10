@@ -1492,7 +1492,11 @@ function messageChecker(oldMessage, newMessage) {
 							} else {
 								num = num + 1; //Also remove the mod:rm command
 								message.channel.bulkDelete(num).then(function () {
-									message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
+                                    if (num == 2) {
+                                        message.channel.send(":white_check_mark: OK: I successfully deleted 1 message.");
+                                    } else {
+                                        message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
+                                    }
 								}).catch(function () {
 									switch (Math.floor(Math.random() * 1000) % 3) {
 										case 0:
