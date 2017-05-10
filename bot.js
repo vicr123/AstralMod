@@ -238,7 +238,7 @@ function handleSuggest(message) {
                             state.lastEmbed = message;
                         });
 
-                        message.author.send("Ready to submit this suggestion?\n[y] Submit\n[r] Start over");
+                        message.author.send("Ready to submit this suggestion?");
                     }
                 }
                 break;
