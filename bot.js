@@ -53,7 +53,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 26) {
+    switch (Math.floor(Math.random() * 1000) % 27) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -124,14 +124,17 @@ function setGame() {
             presence.game.name = "bot:help for more info";
             break;
         case 23:
-             presence.game.name = "TimeHACK";
-             break;
+            presence.game.name = "TimeHACK";
+            break;
         case 24:
-             presence.game.name = "TiemHARK";
-             break;
+            presence.game.name = "TiemHARK";
+            break;
         case 25:
             presence.game.name = "harking tiem";
             break;
+		case 26:
+			presence.game.name = "trying to DJ";
+			break;
     }
     client.user.setPresence(presence);
 }
@@ -206,6 +209,8 @@ function handleSuggest(message) {
                     message.author.send(":no_entry_sign: Your response needs to be 30 characters or less.");
                 } else if (containsExpletive(message.content)) {
                     message.author.send(":no_entry_sign: This looks like spam. And we don't like spam. Unless it's in a can. Try again, and be a bit nicer please.");
+                } else if (message.content.length < 3) {
+                    message.author.send(":no_entry_sign: That title seems WAY too short. Make it a bit longer, please?");
                 } else {
                     state.title = message.content;
                     
@@ -667,6 +672,8 @@ function messageChecker(oldMessage, newMessage) {
                         }
                     } else if (msg.toLowerCase().includes("hello") || msg.toLowerCase().includes("hi")) {
                         message.reply("Is it me you're looking for?");
+                    } else if (msg.toLowerCase().includes("i") && (msg.toLowerCase().includes("love") || msg.toLowerCase().includes(":heart:") || msg.toLowerCase().includes("<3"))) {
+                        message.reply("Aww! Thanks! :heart:");
                     }
                 }
             }
@@ -824,130 +831,131 @@ function messageChecker(oldMessage, newMessage) {
                             var hours;
 
                             switch (command.toLowerCase()) {
-                                    case "nzdt":
-                                    case "auckland":
-                                    case "christchurch":
-                                    case "new zealand":
-                                    case "nz":
-                                            hours = +12;
-                                            break;
-                                    case "aedt":
-                                            hours = +11;
-                                            break;
-                                    case "sydney":
-                                    case "canberra":
-                                    case "vicr123":
-                                    case "victor":
-                                    case "victor tran":
-                                    case "vicr":
-                                    case "philip":
-                                    case "phil":
-                                    case "mightyeagle73":
-                                    case "mighty_eagle073":
-                                    case "oscar":
-                                    case "eagle":
-                                    case "projsh":
-                                    case "onyx":
-                                            hours = +10;
-                                            break;
-                                    case "aest:":
-                                            hours = +10;
-                                            break;
-                                    case "acdt":
-                                            hours = +10.5;
-                                            break;
-                                    case "adelaide":
-                                    case "aedt":
-                                            hours = +9.5;
-                                            break;
-                                    case "sgt":
-                                    case "singapore":
-                                            hours = +8;
-                                            break;
-                                    case "sotiris":
-                                            hours = +3;
-                                            break;
-                                    case "alpha":
-                                    case "aren":
-                                    case "jelle":
-                                    case "amsterdam":
-                                    case "jason":
-                                    case "berlin":
-                                            hours = +2;
-                                            break;
-                                    case "london":
-                                    case "uk":
-                                    case "jed":
-                                    case "lance":
-                                    case "lancededcena":
-                                    case "stupidgame2":
-                                    case "gmt":
-                                            hours = +1;
-                                            break;
-                                    case "utc":
-                                            hours = 0;
-                                            break;
-                                    case "ndt":
-                                    case "craftxbox":
-                                            hours = -2.5
-                                            break;
-                                    case "brt":
-                                    case "vrabble":
-                                    case "vrabbers":
-                                            hours = -3;
-                                            break;
-                                    case "nst":
-                                            hours = -3.5;
-                                            break;
-                                    case "michael":
-                                    case "wowmom98":
-                                    case "rylan":
-                                    case "edt":
-                                    case "neb":
-                                    case "nebble":
-                                    case "new york":
-                                    case "miles":
-                                            hours = -4;
-                                            break;
-                                    case "est":
-                                    case "cdt":
-                                    case "wisconsin":
-                                    case "texas":
-                                    case "dallas":
-                                    case "fort worth":
-                                    case "austin":
-                                    case "houston":
-                                    case "memes":
-                                    case "trav":
-                                    case "travis":
-                                    case "travisnc":
-                                    case "trm":
-                                    case "melon":
-                                    case "therandommelon":
-                                    case "united":
-                                            hours = -5;
-                                            break;
-                                    case "cst":
-                                    case "mdt":
-                                    case "alkesta":
-                                    case "alk":
-                                            hours = -6;
-                                            break;
-                                    case "mst":
-                                    case "pdt":
-                                    case "arizona":
-                                    case "seattle":
-                                    case "neppy":
-                                    case "neptune":
-                                    case "cameron":
-                                            hours = -7;
-                                            break;
-                                    case "pst":
-                                            hours = -8;
-                                            break;
-                                    default:
-                                            hours = parseFloat(command);
-                                            command = "UTC " + command + ":00";
+                                case "nzdt":
+                                case "auckland":
+                                case "christchurch":
+                                case "new zealand":
+                                case "nz":
+                                    hours = +12;
+                                    break;
+                                case "aedt":
+                                    hours = +11;
+                                    break;
+                                case "sydney":
+                                case "canberra":
+                                case "vicr123":
+                                case "victor":
+                                case "victor tran":
+                                case "vicr":
+                                case "philip":
+                                case "phil":
+                                case "mightyeagle73":
+                                case "mighty_eagle073":
+                                case "oscar":
+                                case "eagle":
+                                case "projsh":
+                                case "onyx":
+                                    hours = +10;
+                                    break;
+                                case "aest:":
+                                    hours = +10;
+                                    break;
+                                case "acdt":
+                                    hours = +10.5;
+                                    break;
+                                case "adelaide":
+                                case "aedt":
+                                    hours = +9.5;
+                                    break;
+                                case "sgt":
+                                case "singapore":
+                                    hours = +8;
+                                    break;
+                                case "sotiris":
+                                    hours = +3;
+                                    break;
+                                case "alpha":
+                                case "aren":
+                                case "jelle":
+                                case "amsterdam":
+                                case "jason":
+                                case "berlin":
+                                    hours = +2;
+                                    break;
+                                case "london":
+                                case "uk":
+                                case "jed":
+                                case "lance":
+                                case "lancededcena":
+                                case "stupidgame2":
+                                case "gmt":
+                                    hours = +1;
+                                    break;
+                                case "utc":
+                                    hours = 0;
+                                    break;
+                                case "ndt":
+                                case "craftxbox":
+                                    hours = -2.5
+                                    break;
+                                case "brt":
+                                case "vrabble":
+                                case "vrabbers":
+                                    hours = -3;
+                                    break;
+                                case "nst":
+                                    hours = -3.5;
+                                    break;
+                                case "michael":
+                                case "wowmom98":
+                                case "rylan":
+                                case "edt":
+                                case "neb":
+                                case "nebble":
+                                case "new york":
+                                case "miles":
+                                case "lemp":
+                                    hours = -4;
+                                    break;
+                                case "est":
+                                case "cdt":
+                                case "wisconsin":
+                                case "texas":
+                                case "dallas":
+                                case "fort worth":
+                                case "austin":
+                                case "houston":
+                                case "memes":
+                                case "trav":
+                                case "travis":
+                                case "travisnc":
+                                case "trm":
+                                case "melon":
+                                case "therandommelon":
+                                case "united":
+                                        hours = -5;
+                                        break;
+                                case "cst":
+                                case "mdt":
+                                case "alkesta":
+                                case "alk":
+                                        hours = -6;
+                                        break;
+                                case "mst":
+                                case "pdt":
+                                case "arizona":
+                                case "seattle":
+                                case "neppy":
+                                case "neptune":
+                                case "cameron":
+                                        hours = -7;
+                                        break;
+                                case "pst":
+                                        hours = -8;
+                                        break;
+                                default:
+                                        hours = parseFloat(command);
+                                        command = "UTC " + command + ":00";
                             }
 
                             if (hours > -14 && hours < 14) {
