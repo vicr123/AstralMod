@@ -365,7 +365,7 @@ function getBoshyTime(guild) {
 }
 
 function isMod(member) {
-    if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers")) {
+    if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers") || member.roles.find("name", "Pseudo-moderator")) {
         return true;
     } else {
         return false;
@@ -634,7 +634,9 @@ function messageChecker(oldMessage, newMessage) {
                 if (message.author.id == 159310300275802112) {
                     message.reply("BEGONE. You called my creator mean. :sob:");
                 } else {
-                    if (msg.toLowerCase().includes("stop") || (msg.toLowerCase().includes("shut") && msg.toLowerCase().includes("up"))) {
+                    if (msg.toLowerCase().includes("jxbot")) {
+                        message.reply(":no_entry_sign: YA MENTIONED THE INFERIOR BOT. [punches hand and shakes head slowly]");
+                    } else if (msg.toLowerCase().includes("stop") || (msg.toLowerCase().includes("shut") && msg.toLowerCase().includes("up"))) {
                         
                         switch (Math.floor(Math.random() * 1000) % 3) {
                             case 0:
@@ -865,6 +867,7 @@ function messageChecker(oldMessage, newMessage) {
                                     break;
                                 case "adelaide":
                                 case "aedt":
+                                case "v-":
                                     hours = +9.5;
                                     break;
                                 case "sgt":
@@ -933,6 +936,7 @@ function messageChecker(oldMessage, newMessage) {
                                 case "melon":
                                 case "therandommelon":
                                 case "united":
+                                case "lolrepeatlol":
                                         hours = -5;
                                         break;
                                 case "cst":
@@ -1732,7 +1736,7 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
         
         if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Interrogation")) {
             console.log("Someone is in interrogation!");
-            client.channels.get("292630922040311808").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are in interrogation because due to recent server attacks, we want to make sure you're not someone else that has already been banned. A mod or an admin will come and speak to you shortly. Thanks! :)");
+            client.channels.get("292630922040311808").sendMessage("<@" + newUser.id + "> :oncoming_police_car: A member of staff just wishes to make sure you're not someone we've banned before. If you have any social media accounts, just tell us so we can see that you're not someone that we've banned :)");
         }
         
         if (newUser.nickname != oldUser.nickname) {
@@ -1746,7 +1750,7 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
     } else if (newUser.guild.id == 234414439330349056) {
         if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Interrogation")) {
             console.log("Someone is in interrogation!");
-            client.channels.get("295337094128205826").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are in interrogation because due to recent server attacks, we want to make sure you're not someone else that has already been banned. A mod or an admin will come and speak to you shortly. Thanks! :)");
+            client.channels.get("295337094128205826").sendMessage("<@" + newUser.id + "> :oncoming_police_car: A member of staff just wishes to make sure you're not someone we've banned before. If you have any social media accounts, just tell us so we can see that you're not someone that we've banned :)");
         }
     }
 });
