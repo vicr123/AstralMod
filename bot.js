@@ -38,6 +38,7 @@ var jailMember = null;
 var interrogMember = null;
 var bulletinTimeout;
 var runningCommands = true;
+var bananaFilter = true;
 
 var dispatcher;
 var connection;
@@ -457,12 +458,34 @@ function messageChecker(oldMessage, newMessage) {
         message.delete();
     }
     
-    /*if (message.channel.id == 277943393231831040) {
-        var line = "[" + message.createdAt.toUTCString() + " - " + message.member.displayName + "] " + msg + "\n";
-        fs.appendFile("brokerules.txt", line, function(err) {
-            
-        });
-    }*/
+    if (msg == "mod:banana" && message.author.id == 135169858689171456 || message.author.id == 278805875978928128) {
+        bananaFilter = !bananaFilter;
+        if (bananaFilter) {
+            message.reply(":white_check_mark: Banana filter is now on.");
+            message.delete();
+        } else {
+            message.reply(":white_check_mark: Banana filter is now off.");
+            message.delete();
+        }
+    } else {
+        if (message.author.id == 135169858689171456 && bananaFilter) {
+            if (message.attachments != null) {
+                var block = false;
+                for (let [key, attachment] of message.attachments) {
+                    if (attachment.height != null) {
+                        block = true;
+                        break;
+                    }
+                }
+                
+                if (block) {
+                    message.reply("Nope.");
+                    message.delete();
+                    return;
+                }
+            }
+        }
+    }
     
     if (message.author.id != 280495817901473793 && !message.author.bot) {
         //Server Detection:
