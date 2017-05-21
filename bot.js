@@ -1304,6 +1304,18 @@ function messageChecker(oldMessage, newMessage) {
                         message.delete();
 
                         break;
+                    case "fetch":
+                        message.reply("Give me a minute...").then(function(newMessage, messageArray) {
+                            message.guild.fetchMembers().then(function() {
+                                message.reply(":white_check_mark: All members for this guild fetched.");
+                                newMessage.delete();
+                            }).catch(function() {
+                                message.reply(":no_entry_sign: Something didn't work.");
+                                newMessage.delete();
+                            });
+                        });
+                        message.delete();
+                        break;
                     case "help":
                         var helpMessage = "And here are the mod only commands:\n```\n" +
                             "mod    [on|off]   Queries moderation status.\n" +
