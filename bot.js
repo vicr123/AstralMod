@@ -458,7 +458,7 @@ function messageChecker(oldMessage, newMessage) {
         message.delete();
     }
     
-    if (msg == "mod:banana" && message.author.id == 135169858689171456 || message.author.id == 278805875978928128) {
+    if (msg == "mod:banana" && (message.author.id == 135169858689171456 || message.author.id == 278805875978928128)) {
         bananaFilter = !bananaFilter;
         if (bananaFilter) {
             message.reply(":white_check_mark: Banana filter is now on.");
