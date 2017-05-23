@@ -1851,7 +1851,7 @@ client.on('messageDelete', function(message) {
     }
     
     if (channel != null && message.channel != channel) {
-        var msg = ":wastebasket: **" + message.author.username + "#" + message.author.discriminator + "** <#" + message.channel.id + "> @ `" +        message.createdAt.toUTCString() + "`.";
+        var msg = ":wastebasket: **" + message.author.username + "#" + message.author.discriminator + "** <#" + message.channel.id + "> `" +        message.createdAt.toUTCString() + "`.";
         
         if (message.cleanContent.length) {
             msg += "\n```\n" +
@@ -1930,7 +1930,7 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
     }
     
     if (channel != null && oldMessage.channel != channel) {
-        var msg = ":pencil2: **" + oldMessage.author.username + "#" + oldMessage.author.discriminator + "** <#" + oldMessage.channel.id + "> @ `" + oldMessage.createdAt.toUTCString() + "`.\n";
+        var msg = ":pencil2: **" + oldMessage.author.username + "#" + oldMessage.author.discriminator + "** <#" + oldMessage.channel.id + "> `" + oldMessage.createdAt.toUTCString() + "`.\n";
         
         
         if (oldMessage.cleanContent.length) {
