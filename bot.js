@@ -44,7 +44,7 @@ var dispatcher;
 var connection;
 
 process.on('unhandledRejection', function(err, p) {
-    console.log("An unhandled promise rejection has occurred.");
+    console.log("[ERROR] Unhandled Promise Rejection.");
 });
 
 function setGame() {
@@ -138,6 +138,14 @@ function setGame() {
 			break;
     }
     client.user.setPresence(presence);
+}
+
+function getUserString(user) {
+    var u = user;
+    if (user.user != null) {
+        u = user.user;
+    }
+    return u.username + "#" + u.discriminator;
 }
 
 function handleSuggest(message) {
@@ -323,13 +331,13 @@ function playAudio() {
 }
 
 client.on('ready', () => {
-    console.log("AstralMod is now ready!");
+    console.log("[STATUS] AstralMod is now ready!");
     client.setInterval(setGame, 300000);
     setGame();
     
     //Jump into waiting room
     client.channels.get("277924441584041985").join().then(function(conn) {
-    console.log("Now connected to waiting room!");
+    console.log("[STATUS] AstralMod is connected to the waiting room");
         connection = conn;
         playAudio();
     });
@@ -451,7 +459,7 @@ function messageChecker(oldMessage, newMessage) {
         if (msg == "mod:panic" && (message.member.roles.find("name", "Admin")  || message.member.roles.find("name", "Upper Council of Explorers"))) {
             message.channel.send(':rotating_light: Panic mode is now off.');
             panicMode[message.guild.id] = false;
-            console.log("Panic is now off.");
+            console.log("[STATUS] Panic off.");
             message.delete();
             return;
         }
@@ -498,7 +506,7 @@ function messageChecker(oldMessage, newMessage) {
                 //Check for expletives
                 var exp;
                 if (containsExpletive(msg)) { //Gah! They're not supposed to say that!
-                    //console.log("Expletive caught at " + parseInt(exp));
+                    console.log("[FILTER] Expletive caught from " + getUserString(message.author));
                     switch (Math.floor(Math.random() * 1000) % 7) {
                         case 0:
                             message.reply("I'm very disappointed in you. This is me <:angryvt:282006699802361856>");
@@ -535,7 +543,7 @@ function messageChecker(oldMessage, newMessage) {
                     if (message.member != null && !(message.member.roles.find("name", "Patron Tier 5ive") || message.member.roles.find("name", "Patron Tier 2wo") || message.member.roles.find("name", "Patron Tier 3hree") ||message.member.roles.find("name", "Patron Tier 4our"))) {
                         exp = msg.search(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i);
                         if (exp != -1) { //This is a link.
-                            console.log("Link caught at " + parseInt(exp));
+                        console.log("[FILTER] Link caught from " + getUserString(message.author));
                             switch (Math.floor(Math.random() * 1000) % 6) {
                                 case 0:
                                     message.reply("I've replaced your link with a not-so-link-like link: click here");
@@ -574,7 +582,7 @@ function messageChecker(oldMessage, newMessage) {
                         }
                         
                         if (block) {
-                            console.log("Image caught");
+                            console.log("[FILTER] Image caught from " + getUserString(message.author));
                             switch (Math.floor(Math.random() * 1000) % 5) {
                                 case 0:
                                     message.reply("A picture says a thousand words. That picture said about fifteen words. These exact words.");
@@ -599,7 +607,7 @@ function messageChecker(oldMessage, newMessage) {
                     
                     //Check for caps
                     if (msg.match(/[A-Z]/gm) != null && msg.match(/[A-Z]/gm).length > (parseFloat(msg.length) * 0.8)) {
-                        console.log("Caps filter kicking in!");
+                        console.log("[FILTER] Caps caught from " + getUserString(message.author));
                         switch (Math.floor(Math.random() * 1000) % 6) {
                             case 0:
                                 message.reply("Shh...");
@@ -631,21 +639,18 @@ function messageChecker(oldMessage, newMessage) {
             //AstralPhaser Central: 282513354118004747
             //ShiftOS             : 282513112257658880
             //theShell            : 283184634400079872
-            //AKidFromTheUK       : 285740807854751754
             if (message.author.id != 282048599574052864 && msg.search(/\b(kys|kill yourself)\b/i) != -1) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
-                    client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("282513354118004747").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
-                    client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("282513112257658880").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 } else if (message.guild.id == 278824407743463424) { //theShell {
-                    client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
-                } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
-                    client.channels.get("285740807854751754").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("283184634400079872").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
-                    client.channels.get("288272065109295104").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("288272065109295104").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 } else if (message.guild.id == 297057036292849680) { //ALA
-                    client.channels.get("297762292823490570").sendmessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("297762292823490570").sendmessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
@@ -1187,7 +1192,7 @@ function messageChecker(oldMessage, newMessage) {
                             } else {
                                 expletiveFilter = true;
                                 message.channel.send(':white_check_mark: Expletive Filter is now turned on.');
-                                console.log("Expletive Filter is now on.");
+                                console.log("[Status] Expletive filter on");
                                 bulletinTimeout = client.setInterval(postBulletin, 60000);
                             }
                             message.delete();
@@ -1200,7 +1205,7 @@ function messageChecker(oldMessage, newMessage) {
                             if (expletiveFilter) {
                                 expletiveFilter = false;
                                 message.channel.send(':white_check_mark: Expletive Filter is now turned off.');
-                                console.log("Expletive Filter is now off.");
+                                console.log("[Status] Expletive filter off");
                                 client.clearInterval(bulletinTimeout);
                             } else {
                                 message.channel.send(':arrow_forward: Expletive Filter is already off.');
@@ -1222,7 +1227,7 @@ function messageChecker(oldMessage, newMessage) {
                         } else {
                             doModeration[message.guild.id] = true;
                             message.channel.send(':white_check_mark: Moderation is now turned on.');
-                            console.log("Moderation is now on.");
+                                console.log("[STATUS] Moderation on");
                         }
                         message.delete();
                         break;
@@ -1230,7 +1235,7 @@ function messageChecker(oldMessage, newMessage) {
                         if (doModeration[message.guild.id]) {
                             doModeration[message.guild.id] = false;
                             message.channel.send(':white_check_mark: Moderation is now turned off. All messages on this server, spam, profane or whatever will be allowed through.');
-                            console.log("Moderation is now off.");
+                            console.log("[STATUS] Moderation off");
                         } else {
                             message.channel.send(':arrow_forward: Moderation is already off.');
                         }
@@ -1241,7 +1246,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
                                 panicMode[message.guild.id] = true;
                             });
-                            console.log("Panic is now on.");
+                            console.log("[STATUS] Panic on");
                             message.delete();
                         } else {
                             message.reply(':no_entry_sign: NO: This is an admin only command.');
@@ -1277,16 +1282,6 @@ function messageChecker(oldMessage, newMessage) {
                             }
                         }
                         message.delete();
-                        break;
-                    case "reboot":
-                        message.channel.send(":white_check_mark: We'll be back in a bit.").then(function() {
-                            client.destroy();
-                            client.login('MjgyMDQ4NTk5NTc0MDUyODY0.C4g2Pw.yFGdUuMlZITH99tWEic0JxIUGJ4').then(function() {
-                                message.channel.send(":white_check_mark: AstralMod is back online!");
-                            }).catch(function() {
-                                console.log("[ERROR] Login failed.");
-                            });
-                        });
                         break;
                     case "jail":
                         if (message.guild.id != 277922530973581312) {
@@ -1352,7 +1347,6 @@ function messageChecker(oldMessage, newMessage) {
                             "interrogate       Places the newest member of the server into interrogation.\n" +
                             "cancel            Cancels a pending operation.\n" +
                             "help              Prints this help message.\n" +
-                            "reboot            Asks AstralMod to reconnect.\n" +
                             "\n" +
                             "- denotes an admin only command\n" +
                             "These commands need to be prefixed with mod:\n" +
@@ -1406,7 +1400,7 @@ function messageChecker(oldMessage, newMessage) {
 
 							message.guild.fetchMember(command).then(function (member) {
 								embed = new Discord.RichEmbed("test");
-								embed.setAuthor(member.displayName + "#" + member.user.discriminator, member.user.displayAvatarURL);
+								embed.setAuthor(getUserString(member), member.user.displayAvatarURL);
 								embed.setColor("#FF0000");
 								embed.setDescription("User Information");
 
@@ -1480,12 +1474,12 @@ function messageChecker(oldMessage, newMessage) {
 							} else {
 								var reply = ":white_check_mark: OK: We found " + parseInt(foundUsers.length) + " users with that username.\n```\n";
 								for (let user of foundUsers) {
-									reply += user.username + "#" + user.discriminator + ": " + user.id + "\n";
+									reply += getUserString(user) + ": " + user.id + "\n";
 
 									message.guild.fetchMember(user).then(function (member) {
-										message.channel.send(":white_check_mark: " + user.username + "#" + user.discriminator + " exists on this server.");
+										message.channel.send(":white_check_mark: " + getUserString(user) + " exists on this server.");
 									}).catch(function () {
-										message.channel.send(":no_entry_sign: " + user.username + "#" + user.discriminator + " does not exist on this server.");
+										message.channel.send(":no_entry_sign: " + getUserString(user) + " does not exist on this server.");
 									});
 								}
 								reply += "```";
@@ -1638,15 +1632,13 @@ function messageChecker(oldMessage, newMessage) {
             if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] == 10) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
-                    client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513354118004747").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
-                    client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513112257658880").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 278824407743463424) { //theShell
-                    client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
-                } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
-                    client.channels.get("285722047060115456").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("283184634400079872").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
-                    client.channels.get("288272065109295104").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("288272065109295104").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 }
                 
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
@@ -1654,7 +1646,7 @@ function messageChecker(oldMessage, newMessage) {
             } else if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] > 10) {
                 message.delete();
             } else if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] > 3) {
-                console.log("Spam limits kicking in!");
+                console.log("[FILTER] Spam detected by " + getUserString(message.author));
                 switch (Math.floor(Math.random() * 1000) % 5) {
                     case 0:
                         message.reply("Well... We all heard you.");
@@ -1677,22 +1669,21 @@ function messageChecker(oldMessage, newMessage) {
             } else if (smallMessageCount[message.author.id] == 10) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
-                    client.channels.get("282513354118004747").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513354118004747").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
-                    client.channels.get("282513112257658880").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513112257658880").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 278824407743463424) { //theShell
-                    client.channels.get("283184634400079872").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
-                } else if (message.guild.id == 285722047060115456) { //AKidFromTheUK
-                    client.channels.get("285722047060115456").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("283184634400079872").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
-                    client.channels.get("288272065109295104").sendMessage(getBoshyTime(message.guild) + " PING! <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("288272065109295104").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
                 }
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
                 message.delete();
+                console.log("[FILTER] Spam notification sent by " + getUserString(message.author));
             } else if (smallMessageCount[message.author.id] > 10) {
                 message.delete();
             } else if (smallMessageCount[message.author.id] > 5) {
-                console.log("Spam limits kicking in!");
+                console.log("[FILTER] Spam detected by " + getUserString(message.author));
                 switch (Math.floor(Math.random() * 1000) % 4) {
                     case 0:
                         message.reply("This looks like spam. And we don't like spam.");
@@ -1722,11 +1713,11 @@ client.on('guildMemberAdd', function(guildMember) {
         var channel;
         if (guildMember.guild.id == 277922530973581312) {
             channel = client.channels.get("284837615830695936");
-            console.log(guildMember.displayName + " joined AstralPhaser Central");
+            console.log("[STATUS] " + getUserString(user) + " --> APHC");
             interrogMember = guildMember;
         } else {
             channel = client.channels.get("284826899413467136");
-            console.log(guildMember.displayName + " joined ShiftOS");
+            console.log("[STATUS] " + getUserString(user) + " --> SOS");
             interrogMember = guildMember;
         }
         
@@ -1763,24 +1754,25 @@ client.on('guildMemberAdd', function(guildMember) {
 
 client.on('guildMemberUpdate', function(oldUser, newUser) {
     if (newUser.guild.id == 277922530973581312) {
-        if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "I Broke The Rules!")) {
-            console.log("Someone broke the rules!");
+        if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Jailed")) {
+            console.log("[STATUS] " + getUserString(newUser) + " --> JAIL");
             client.channels.get("277943393231831040").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are now in jail. Appeal here to get out of jail. If you do not appeal successfully within 24 hours, an admin will **ban** you from the server.\n\n" + 
             "Additionally, if you leave and rejoin this server in an attempt to break out of jail, you will be **banned.**\n\n" + 
             "Timestamp: " + new Date().toUTCString());
         }
         
         if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Interrogation")) {
-            console.log("Someone is in interrogation!");
+            console.log("[STATUS] " + getUserString(newUser) + " --> INTERROGATION");
             client.channels.get("292630922040311808").sendMessage("<@" + newUser.id + "> :oncoming_police_car: A member of staff just wishes to make sure you're not someone we've banned before. If you have any social media accounts, just tell us so we can see that you're not someone that we've banned :)");
         }
         
         if (newUser.nickname != oldUser.nickname) {
+            console.log("[STATUS] " + getUserString(newUser) + " --> N(" + newUser.nickname + ")");
             var channel = client.channels.get("282513354118004747"); //Bot Warnings
             if (newUser.nickname == null) {
-                channel.send(oldUser.user.username + " has cleared his nickname");
+                channel.send(":abcd: " + getUserString(oldUser) + " has cleared his nickname");
             } else {
-                channel.send(oldUser.user.username + " has changed his nickname to " + newUser.nickname);
+                channel.send(":abcd: " + getUserString(oldUser) + " has changed his nickname to " + newUser.nickname);
             }
         }
     } else if (newUser.guild.id == 234414439330349056) {
@@ -1795,8 +1787,9 @@ client.on('userUpdate', function(oldUser, newUser) {
     if (newUser.username != oldUser.username) {
         var aphcGuild = client.channels.get("282513354118004747").guild;
         aphcGuild.fetchMember(newUser).then(function(member) {
+            console.log("[STATUS] " + getUserString(oldUser) + " --> U(" + newUser.username + ")");
             var channel = client.channels.get("282513354118004747"); //Admin Bot warnings
-            channel.send(oldUser.username + " has changed his username in all servers to " + newUser.username);
+            channel.send(":ab: " + getUserString(oldUser) + " has changed his username in all servers to " + newUser.username + ". Please check the spreadsheet for this person and update the username accordingly.");
         }).catch(function() {
             
         });
@@ -1805,7 +1798,7 @@ client.on('userUpdate', function(oldUser, newUser) {
 
 client.on('guildMemberRemove', function(user) {
     if (user.roles.find("name", "I Broke The Rules!")) {
-        console.log("Someone left jail!");
+            console.log("[STATUS] !!! <-- " + getUserString(user));
         client.channels.get("277943393231831040").sendMessage(":arrow_left: <@" + user.id + "> has left the server in jail.");
     }
     
@@ -1814,10 +1807,10 @@ client.on('guildMemberRemove', function(user) {
             var channel;
             if (user.guild.id == 277922530973581312) {
                 channel = client.channels.get("284837615830695936");
-                console.log(user.displayName + " left AstralPhaser Central");
+                console.log("[STATUS] APHC <-- " + getUserString(user));
             } else {
                 channel = client.channels.get("284826899413467136");
-                console.log(user.displayName + " left ShiftOS");
+                console.log("[STATUS]  SOS <-- " + getUserString(user));
             }
             
             channel.sendMessage(":arrow_left: <@" + user.user.id + "> (" + user.displayName + ")");
@@ -1852,7 +1845,7 @@ client.on('messageDelete', function(message) {
     }
     
     if (channel != null && message.channel != channel) {
-        var msg = ":wastebasket: **" + message.author.username + "#" + message.author.discriminator + "** <#" + message.channel.id + "> `" +        message.createdAt.toUTCString() + "`.";
+        var msg = ":wastebasket: **" + getUserString(message.author) + "** <#" + message.channel.id + "> `" +        message.createdAt.toUTCString() + "`.";
         
         if (message.cleanContent.length) {
             msg += "\n```\n" +
@@ -1931,7 +1924,7 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
     }
     
     if (channel != null && oldMessage.channel != channel) {
-        var msg = ":pencil2: **" + oldMessage.author.username + "#" + oldMessage.author.discriminator + "** <#" + oldMessage.channel.id + "> `" + oldMessage.createdAt.toUTCString() + "`.\n";
+        var msg = ":pencil2: **" + getUserString(oldMessage.author) + "** <#" + oldMessage.channel.id + "> `" + oldMessage.createdAt.toUTCString() + "`.\n";
         
         
         if (oldMessage.cleanContent.length) {
