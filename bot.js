@@ -1566,7 +1566,7 @@ function messageChecker(oldMessage, newMessage) {
                 }
                 
                 if (command == "poweroff") {
-                    if (message.author.id == 278805875978928128 || message.author.id == 175760550070845451 || message.author.id == 209829628796338176) {
+                    if (message.author.id == 278805875978928128 || message.author.id == 241299743869894667 || message.author.id == 209829628796338176) {
                         if (poweroff) {
                             switch (Math.floor(Math.random() * 1000) % 3) {
                                 case 0:
@@ -1739,7 +1739,7 @@ client.on('guildMemberAdd', function(guildMember) {
         var now = new Date();
         var joinDate = guildMember.user.createdAt;
         if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
-            channel.sendMessage("<@&278303148765085697> This member was created today.");
+            channel.sendMessage("<@&313996053881815040> This member was created today.");
         }
         
         /*if (guildMember.user.createdAt.getTime() < 1487962800000) {
@@ -1772,12 +1772,12 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
             if (newUser.nickname == null) {
                 channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: [cleared]");
             } else {
-                channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right:  " + newUser.nickname);
+                channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: " + newUser.nickname);
             }
         }
     } else if (newUser.guild.id == 234414439330349056) {
         if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Interrogation")) {
-            console.log("Someone is in interrogation!");
+            console.log("[STATUS] " + getUserString(newUser) + " --> INTERROGATION");
             client.channels.get("295337094128205826").sendMessage("<@" + newUser.id + "> :oncoming_police_car: A member of staff just wishes to make sure you're not someone we've banned before. If you have any social media accounts, just tell us so we can see that you're not someone that we've banned :)");
         }
     }
@@ -1845,7 +1845,7 @@ client.on('messageDelete', function(message) {
     }
     
     if (channel != null && message.channel != channel) {
-        var msg = ":wastebasket: **" + getUserString(message.author) + "** <#" + message.channel.id + "> `" +        message.createdAt.toUTCString() + "`.";
+        var msg = ":wastebasket: **" + getUserString(message.author) + "** <#" + message.channel.id + "> `" + message.createdAt.toUTCString() + "`.";
         
         if (message.cleanContent.length) {
             msg += "\n```\n" +
