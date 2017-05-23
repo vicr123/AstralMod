@@ -1851,11 +1851,27 @@ client.on('messageDelete', function(message) {
     }
     
     if (channel != null && message.channel != channel) {
-        channel.sendMessage(":wastebasket: Message by " + message.author.username + "#" + message.author.discriminator + " in <#" + message.channel.id + "> at " + message.createdAt.toUTCString() + " was deleted.\n" +
-            "```\n" +
-            message.cleanContent + "\n" +
-            "```"
-        );
+        var msg = ":wastebasket: Message by " + message.author.username + "#" + message.author.discriminator + " in <#" + message.channel.id + "> at " +        message.createdAt.toUTCString() + " was deleted.";
+        
+        if (message.cleanContent.length) {
+            msg += "\n```\n" +
+                message.cleanContent + "\n" +
+                "```";
+        }
+        
+        if (message.attachments.size > 0) {
+            msg += "\nThe following files were attached to this message:";
+            
+            for (let [key, attachment] of message.attachments) {
+                if (attachment.height == null) {
+                    msg += "\n```" + attachment.filename + " @ " + parseInt(attachment.filesize) + " bytes long```";
+                } else {
+                    msg += "\n" + attachment.proxyURL;
+                }
+            }
+        }
+            
+        channel.send(msg);
     }
 });
 
@@ -1914,14 +1930,34 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
     }
     
     if (channel != null && oldMessage.channel != channel) {
-        channel.sendMessage(":pencil2: Message by " + oldMessage.author.username + "#" + oldMessage.author.discriminator + " in <#" + oldMessage.channel.id + "> at " + oldMessage.createdAt.toUTCString() + " was edited.\n" +
-            "```\n" +
-            oldMessage.cleanContent + "\n" +
-            "```" +
-            "```\n" +
+        var msg = ":pencil2: Message by " + oldMessage.author.username + "#" + oldMessage.author.discriminator + " in <#" + oldMessage.channel.id + "> at " + oldMessage.createdAt.toUTCString() + " was edited.\n";
+        
+        
+        if (oldMessage.cleanContent.length) {
+            msg += "```\n" +
+                oldMessage.cleanContent + "\n" +
+                "```";
+        } else {
+            msg += "```\n[no content]\n```";
+        }
+        
+        msg += "```\n" +
             newMessage.cleanContent + "\n" +
-            "```\n"
-        );
+            "```";
+            
+        if (oldMessage.attachments.size > 0) {
+            msg += "\nThe following files were attached to this message:";
+            
+            for (let [key, attachment] of oldMessage.attachments) {
+                if (attachment.height == null) {
+                    msg += "\n```" + attachment.filename + " @ " + parseInt(attachment.filesize) + " bytes long```";
+                } else {
+                    msg += "\n" + attachment.proxyURL;
+                }
+            }
+        }
+            
+        channel.send(msg);
     }
 });
 
