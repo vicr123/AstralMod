@@ -642,15 +642,15 @@ function messageChecker(oldMessage, newMessage) {
             if (message.author.id != 282048599574052864 && msg.search(/\b(kys|kill yourself)\b/i) != -1) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
-                    client.channels.get("282513354118004747").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
+                    client.channels.get("282513354118004747").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
-                    client.channels.get("282513112257658880").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
+                    client.channels.get("282513112257658880").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 } else if (message.guild.id == 278824407743463424) { //theShell {
-                    client.channels.get("283184634400079872").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
+                    client.channels.get("283184634400079872").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 } else if (message.guild.id == 281066689892974592) { //LE
-                    client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
+                    client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 } else if (message.guild.id == 297057036292849680) { //ALA
-                    client.channels.get("297762292823490570").sendmessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
+                    client.channels.get("297762292823490570").sendmessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
