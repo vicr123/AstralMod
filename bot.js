@@ -1349,7 +1349,7 @@ function messageChecker(oldMessage, newMessage) {
                             "                  Type on to set the filter on.\n" +
                             "                  Type off to set the filter off.\n\n" +
                             "deal user         Walks through the process of dealing\n" +
-                            "                  with an unruly member\n" +;
+                            "                  with an unruly member\n";
                         }
                             
                         helpMessage = helpMessage + 
