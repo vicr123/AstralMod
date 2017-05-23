@@ -34,7 +34,10 @@ var pendingNicks = {};
 var pendingNickTimeout = {};
 var suggestStates = {};
 var poweroff = false;
-var jailMember = null;
+var actionMember = null;
+var actioningMember = null;
+var actionStage = -1;
+var actionToPerform = null;
 var interrogMember = null;
 var bulletinTimeout;
 var runningCommands = true;
@@ -325,6 +328,69 @@ function handleSuggest(message) {
     suggestStates[message.author.id] = state;
 }
 
+function handleAction(message) {
+    var msg = message.content;
+    if (actionStage == 0) { //Select Action
+        if (msg.toLowerCase() == "interrogate") {
+            if (message.guild.id == 277922530973581312) {
+                actionMember.addRole(actionMember.guild.roles.get("292630494254858241"));
+            } else {
+                actionMember.addRole(actionMember.guild.roles.get("295336966285950977"));
+            }
+            actionMember.setVoiceChannel(actionMember.guild.channels.get(actionMember.guild.afkChannelID));
+            message.channel.send(':gear: ' + getUserString(actionMember) + " has been placed in interrogation.");
+            actionMember = null;
+            actioningMember = null;
+        } else if (msg.toLowerCase() == "jail") {
+            actionMember.addRole(actionMember.guild.roles.get("277942939915780099"));
+            actionMember.setVoiceChannel(actionMember.guild.channels.get(actionMember.guild.afkChannelID));
+            message.channel.send(':gear: ' + getUserString(actionMember) + " has been placed in jail.");
+            actionMember = null;
+            actioningMember = null;
+        } else if (msg.toLowerCase() == "kick") {
+            actionStage = 1;
+            message.channel.send(":gear: Enter reason for kicking " + getUserString(actionMember) + " or `cancel`.");
+            actionToPerform = "kick";
+        } else if (msg.toLowerCase() == "ban") {
+            actionStage = 1;
+            message.channel.send(":gear: Enter reason for banning " + getUserString(actionMember) + " or `cancel`.");
+            actionToPerform = "ban";
+        } else {
+            message.channel.send(':gear: Unknown command. Exiting action menu.');
+            actionMember = null;
+            actioningMember = null;
+        }
+            message.delete();
+    } else if (actionStage == 1) {
+        if (msg == "cancel") {
+            message.channel.send(':gear: Cancelled. Exiting action menu.');
+            actionMember = null;
+            actioningMember = null;
+        } else if (actionToPerform == "kick") {
+            actionMember.kick(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(actionMember) + " has been kicked from the server.");
+                actionMember = null;
+                actioningMember = null;
+            }).catch(function() {
+                message.channel.send(':gear: ' + getUserString(actionMember) + " couldn't kicked from the server. Exiting action menu");
+                actionMember = null;
+                actioningMember = null;
+            });
+        } else if (actionToPerform == "ban") {
+            actionMember.ban(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(actionMember) + " has been banned from the server.");
+                actionMember = null;
+                actioningMember = null;
+            }).catch(function() {
+                message.channel.send(':gear: ' + getUserString(actionMember) + " couldn't banned from the server. Exiting action menu");
+                actionMember = null;
+                actioningMember = null;
+            });
+        }
+        message.delete();
+    }
+}
+
 function playAudio() {
     dispatcher = connection.playFile("forecastvoice.mp3");
     dispatcher.on('end', playAudio);
@@ -337,7 +403,7 @@ client.on('ready', () => {
     
     //Jump into waiting room
     client.channels.get("277924441584041985").join().then(function(conn) {
-    console.log("[STATUS] AstralMod is connected to the waiting room");
+        console.log("[STATUS] AstralMod is connected to the waiting room");
         connection = conn;
         playAudio();
     });
@@ -441,6 +507,10 @@ function messageChecker(oldMessage, newMessage) {
             message.reply(':white_check_mark: OK: AstralMod commands have been enabled.');
         }
         return;
+    }
+    
+    if (actioningMember == message.author) {
+        handleAction(message);
     }
     
     if (doModeration[message.guild.id] == null) {
@@ -1253,52 +1323,6 @@ function messageChecker(oldMessage, newMessage) {
                             message.delete();
                         }
                         break;
-                    case "interrogate":
-                        if (message.guild.id != 277922530973581312 && message.guild.id != 234414439330349056) {
-                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                        } else {
-                            if (interrogMember == null) {
-                                message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
-                            } else {
-                                if (message.guild.id == 277922530973581312) {
-                                    if (interrogMember.guild.id == 277922530973581312) {
-                                        interrogMember.addRole(interrogMember.guild.roles.get("292630494254858241"));
-                                        interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
-                                        message.channel.send(':white_check_mark: OK: User has been placed in interrogation.');
-                                        interrogMember = null;
-                                    } else {
-                                        message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
-                                    }
-                                } else {
-                                    if (interrogMember.guild.id == 234414439330349056) {
-                                        interrogMember.addRole(interrogMember.guild.roles.get("295336966285950977"));
-                                        interrogMember.setVoiceChannel(interrogMember.guild.channels.get(interrogMember.guild.afkChannelID));
-                                        message.channel.send(':white_check_mark: OK: User has been placed in interrogation.');
-                                        interrogMember = null;
-                                    } else {
-                                        message.reply(':no_entry_sign: ERROR: No user to interrogate. See mod:help for more information.');
-                                    }
-                                }
-                            }
-                        }
-                        message.delete();
-                        break;
-                    case "jail":
-                        if (message.guild.id != 277922530973581312) {
-                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                        } else {
-                            if (jailMember == null) {
-                                message.reply(':no_entry_sign: ERROR: No user to jail. See mod:help for more information.');
-                            } else {
-                                jailMember.addRole(jailMember.guild.roles.get("277942939915780099"));
-                                jailMember.setVoiceChannel(jailMember.guild.channels.get(jailMember.guild.afkChannelID));
-                                message.channel.send(':oncoming_police_car: JAILED!');
-                                jailMember = null;
-                            }
-                        }
-                        message.delete();
-
-                        break;
                     case "fetch":
                         message.reply("Give me a minute...").then(function(newMessage, messageArray) {
                             message.guild.fetchMembers().then(function() {
@@ -1366,9 +1390,10 @@ function messageChecker(oldMessage, newMessage) {
                         if (poweroff) {
                             poweroff = false;
                             message.channel.send(':white_check_mark: OK, I won\'t leave... yet.')
-                        } else if (jailMember != null) {
-                            message.channel.send(':white_check_mark: OK, I won\'t jail ' + jailMember.displayName);
-                            jailMember = null;
+                        } else if (actionMember != null) {
+                            message.channel.send(':white_check_mark: OK, I won\'t perform any actions on ' + actionMember.displayName);
+                            actionMember = null;
+                            actioningMember = null;
                         } else {
                             message.reply(':no_entry_sign: ERROR: Nothing to cancel.');
                         }
@@ -1497,20 +1522,20 @@ function messageChecker(oldMessage, newMessage) {
 							} else {
 								message.channel.send(":no_entry_sign: ERROR: Not sure what to cancel.");
 							}
-						} else if (command.startsWith("jail")) {
+						} else if (command.startsWith("deal")) {
 							if (message.guild.id != 277922530973581312) {
 								message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                            } else if (actioningMember != null) {
+                                message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember) + " is already performing actions on another user.");
 							} else {
 								command = command.substr(6);
 								command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
 
 								message.guild.fetchMember(command).then(function (member) {
-									if (member.roles.find("name", "I Broke The Rules!")) {
-										message.channel.send(':no_entry_sign: ERROR: That user is already in jail.');
-									} else {
-										jailMember = member;
-										message.channel.send(':oncoming_police_car: Placing ' + member.displayName + ' in jail. To confirm, type in mod:jail.');
-									}
+                                    actionMember = member;
+                                    actioningMember = message.author;
+                                    actionStage = 0;
+                                    message.channel.send(':gear: Select an action to perform on ' + getUserString(member) + '. `interrogate` `jail` `kick` `ban`');
 								}).catch(function (reason) {
 									switch (Math.floor(Math.random() * 1000) % 3) {
 										case 0:
@@ -1600,10 +1625,6 @@ function messageChecker(oldMessage, newMessage) {
                     }
                 } else {
                     poweroff = false;
-                }
-                
-                if (!command.startsWith("jail")) {
-                    jailMember = null;
                 }
             } else {
                 message.reply(':no_entry_sign: NO: What? You\'re not a member of the staff! Why would you be allowed to type that!?');
@@ -1713,11 +1734,11 @@ client.on('guildMemberAdd', function(guildMember) {
         var channel;
         if (guildMember.guild.id == 277922530973581312) {
             channel = client.channels.get("284837615830695936");
-            console.log("[STATUS] " + getUserString(user) + " --> APHC");
+            console.log("[STATUS] " + getUserString(guildMember) + " --> APHC");
             interrogMember = guildMember;
         } else {
             channel = client.channels.get("284826899413467136");
-            console.log("[STATUS] " + getUserString(user) + " --> SOS");
+            console.log("[STATUS] " + getUserString(guildMember) + " --> SOS");
             interrogMember = guildMember;
         }
         
