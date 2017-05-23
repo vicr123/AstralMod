@@ -642,15 +642,15 @@ function messageChecker(oldMessage, newMessage) {
             if (message.author.id != 282048599574052864 && msg.search(/\b(kys|kill yourself)\b/i) != -1) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
-                    client.channels.get("282513354118004747").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("282513354118004747").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
-                    client.channels.get("282513112257658880").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("282513112257658880").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
                 } else if (message.guild.id == 278824407743463424) { //theShell {
-                    client.channels.get("283184634400079872").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("283184634400079872").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
-                    client.channels.get("288272065109295104").sendMessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
                 } else if (message.guild.id == 297057036292849680) { //ALA
-                    client.channels.get("297762292823490570").sendmessage(":red_circle: <@" + auth.id + "> wrote \"kys\" on " + message.channel.name + ".");
+                    client.channels.get("297762292823490570").sendmessage(":red_circle: " + getUserString(auth) + " \"kys\" " + message.channel.name + ".");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
@@ -1632,13 +1632,13 @@ function messageChecker(oldMessage, newMessage) {
             if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] == 10) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
-                    client.channels.get("282513354118004747").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513354118004747").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
-                    client.channels.get("282513112257658880").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513112257658880").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 278824407743463424) { //theShell
-                    client.channels.get("283184634400079872").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("283184634400079872").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
-                    client.channels.get("288272065109295104").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 }
                 
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
@@ -1669,13 +1669,13 @@ function messageChecker(oldMessage, newMessage) {
             } else if (smallMessageCount[message.author.id] == 10) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
-                    client.channels.get("282513354118004747").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513354118004747").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 234414439330349056) { //ShiftOS
-                    client.channels.get("282513112257658880").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("282513112257658880").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 278824407743463424) { //theShell
-                    client.channels.get("283184634400079872").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("283184634400079872").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
-                    client.channels.get("288272065109295104").sendMessage(":red_circle: <@" + auth.id + "> was spamming on " + message.channel.name + ".");
+                    client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 }
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
                 message.delete();
@@ -1770,9 +1770,9 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
             console.log("[STATUS] " + getUserString(newUser) + " --> N(" + newUser.nickname + ")");
             var channel = client.channels.get("282513354118004747"); //Bot Warnings
             if (newUser.nickname == null) {
-                channel.send(":abcd: " + getUserString(oldUser) + " has cleared his nickname");
+                channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: [cleared]");
             } else {
-                channel.send(":abcd: " + getUserString(oldUser) + " has changed his nickname to " + newUser.nickname);
+                channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right:  " + newUser.nickname);
             }
         }
     } else if (newUser.guild.id == 234414439330349056) {
@@ -1789,7 +1789,7 @@ client.on('userUpdate', function(oldUser, newUser) {
         aphcGuild.fetchMember(newUser).then(function(member) {
             console.log("[STATUS] " + getUserString(oldUser) + " --> U(" + newUser.username + ")");
             var channel = client.channels.get("282513354118004747"); //Admin Bot warnings
-            channel.send(":ab: " + getUserString(oldUser) + " has changed his username in all servers to " + newUser.username + ". Please check the spreadsheet for this person and update the username accordingly.");
+            channel.send(":ab: " + getUserString(oldUser) + " :arrow_right: " + newUser.username + ". Check spreadsheet!");
         }).catch(function() {
             
         });
