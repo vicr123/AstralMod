@@ -1776,7 +1776,7 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
         }
         
         if (newUser.nickname != oldUser.nickname) {
-            var channel = client.channels.get("285668975390621697"); //Admin Bot warnings
+            var channel = client.channels.get("282513354118004747"); //Bot Warnings
             if (newUser.nickname == null) {
                 channel.send(oldUser.user.username + " has cleared his nickname");
             } else {
@@ -1792,13 +1792,14 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
 });
 
 client.on('userUpdate', function(oldUser, newUser) {
-    if (newUser.guild != null) {
-        if (newUser.guild.id == 277922530973581312) {
-            if (newUser.username != oldUser.username) {
-                var channel = client.channels.get("285668975390621697"); //Admin Bot warnings
-                channel.send(oldUser.user.username + " has changed his username in all servers to " + newUser.username);
-            }
-        }
+    if (newUser.username != oldUser.username) {
+        var aphcGuild = client.channels.get("282513354118004747").guild;
+        aphcGuild.fetchMember(newUser).then(function(member) {
+            var channel = client.channels.get("282513354118004747"); //Admin Bot warnings
+            channel.send(oldUser.user.username + " has changed his username in all servers to " + newUser.username);
+        }).catch(function() {
+            
+        });
     }
 });
 
