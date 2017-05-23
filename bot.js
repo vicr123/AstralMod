@@ -401,7 +401,6 @@ function handleAction(message) {
                 actioningMember = null;
             });
         }
-        }
         message.delete();
     }
 }
