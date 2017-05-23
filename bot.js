@@ -1796,7 +1796,7 @@ client.on('userUpdate', function(oldUser, newUser) {
         var aphcGuild = client.channels.get("282513354118004747").guild;
         aphcGuild.fetchMember(newUser).then(function(member) {
             var channel = client.channels.get("282513354118004747"); //Admin Bot warnings
-            channel.send(oldUser.user.username + " has changed his username in all servers to " + newUser.username);
+            channel.send(oldUser.username + " has changed his username in all servers to " + newUser.username);
         }).catch(function() {
             
         });
