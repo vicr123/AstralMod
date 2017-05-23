@@ -355,6 +355,10 @@ function handleAction(message) {
             actionStage = 1;
             message.channel.send(":gear: Enter reason for banning " + getUserString(actionMember) + " or `cancel`.");
             actionToPerform = "ban";
+        } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname") {
+            actionStage = 1;
+            message.channel.send(":gear: Enter new nickname for " + getUserString(actionMember) + " or `cancel`.");
+            actionToPerform = "nick";
         } else {
             message.channel.send(':gear: Unknown command. Exiting action menu.');
             actionMember = null;
@@ -386,6 +390,17 @@ function handleAction(message) {
                 actionMember = null;
                 actioningMember = null;
             });
+        } else if (actionToPerform == "nick") {
+            actionMember.setNickname(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(actionMember) + " has changed his nickname.");
+                actionMember = null;
+                actioningMember = null;
+            }).catch(function() {
+                message.channel.send(':gear: ' + getUserString(actionMember) + " couldn't have his nickname changed. Exiting action menu");
+                actionMember = null;
+                actioningMember = null;
+            });
+        }
         }
         message.delete();
     }
@@ -1536,7 +1551,7 @@ function messageChecker(oldMessage, newMessage) {
                                     actionMember = member;
                                     actioningMember = message.author;
                                     actionStage = 0;
-                                    message.channel.send(':gear: Select an action to perform on ' + getUserString(member) + '. `interrogate` `jail` `kick` `ban`');
+                                    message.channel.send(':gear: Select an action to perform on ' + getUserString(member) + '. `interrogate` `jail` `kick` `ban` `nick`');
 								}).catch(function (reason) {
 									switch (Math.floor(Math.random() * 1000) % 3) {
 										case 0:
