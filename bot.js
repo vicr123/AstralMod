@@ -931,6 +931,10 @@ function messageChecker(oldMessage, newMessage) {
                     message.reply("On the same line my dear honeyfry. ```cpp\nvoid abc() {\n}```");
                     commandProcessed = true;
                     break;
+                case "uptime":
+                    message.reply(":clock1: AstralMod has been up for " + parseInt(client.uptime) + " seconds.");
+                    commandProcessed = true;
+                    break;
                 case "suggest":
                     if (message.guild.id == 277922530973581312 || message.guild.id == 234414439330349056 || message.guild.id == 297057036292849680) {
                         suggestStates[message.author.id] = {};
@@ -2009,6 +2013,21 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
         }
             
         channel.send(msg);
+    }
+});
+
+client.on("guildBanAdd", function(guild, user) {
+    if (guild.id == 234414439330349056 || guild.id == 277922530973581312) {
+        var channel;
+        console.log("[STATUS] " + getUserString(user) + " --> BAN");
+        
+        if (guild.id == 277922530973581312) {
+            channel = client.channels.get("284837615830695936");
+        } else {
+            channel = client.channels.get("284826899413467136");
+        }
+        
+        channel.sendMessage(":red_circle: " + user.username + " :hammer: ¯\_(ツ)_/¯ :hammer:");
     }
 });
 
