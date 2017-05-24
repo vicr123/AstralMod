@@ -1549,11 +1549,15 @@ function messageChecker(oldMessage, newMessage) {
 							} else {
 								message.channel.send(":no_entry_sign: ERROR: Not sure what to cancel.");
 							}
-						} else if (command.startsWith("deal")) {
+						} else if (command.startsWith("deal") || command.startsWith("manage")) {
 							if (actioningMember[message.guild.id] != null) {
-                                message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember[message.guild.id]) + " is already performing actions on another user.");
+                                message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember[message.guild.id]) + " is already managing another user.");
 							} else {
-								command = command.substr(6);
+                                if (command.startsWith("deal")) {
+                                    command = command.substr(5);
+                                } else if (command.startsWith("manage")) {
+                                    command = command.substr(7);
+                                }
 								command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
 
 								message.guild.fetchMember(command).then(function (member) {
@@ -1561,7 +1565,7 @@ function messageChecker(oldMessage, newMessage) {
                                         message.channel.send(":gear: Cannot perform any actions on " + getUserString(member) + ".");
                                     } else {
                                         var canDoActions = false;
-                                        var msg = ':gear: ' + getUserString(member) + ": ";
+                                        var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
                                         if (member.kickable) {
                                             msg += '`kick` ';
                                             canDoActions = true;
