@@ -34,14 +34,15 @@ var pendingNicks = {};
 var pendingNickTimeout = {};
 var suggestStates = {};
 var poweroff = false;
-var actionMember = null;
-var actioningMember = null;
-var actionStage = -1;
-var actionToPerform = null;
 var interrogMember = null;
 var bulletinTimeout;
 var runningCommands = true;
 var bananaFilter = true;
+
+var actionMember = {};
+var actioningMember = {};
+var actionStage = {};
+var actionToPerform = {};
 
 var dispatcher;
 var connection;
@@ -330,84 +331,90 @@ function handleSuggest(message) {
 
 function handleAction(message) {
     var msg = message.content;
-    if (actionStage == 0) { //Select Action
-        if (msg.toLowerCase() == "interrogate") {
-            if (message.guild.id == 277922530973581312) {
-                actionMember.addRole(actionMember.guild.roles.get("292630494254858241"));
-            } else {
-                actionMember.addRole(actionMember.guild.roles.get("295336966285950977"));
-            }
-            actionMember.setVoiceChannel(actionMember.guild.channels.get(actionMember.guild.afkChannelID));
-            message.channel.send(':gear: ' + getUserString(actionMember) + " has been placed in interrogation.");
-            actionMember = null;
-            actioningMember = null;
-        } else if (msg.toLowerCase() == "jail") {
-            actionMember.addRole(actionMember.guild.roles.get("277942939915780099"));
-            actionMember.setVoiceChannel(actionMember.guild.channels.get(actionMember.guild.afkChannelID));
-            message.channel.send(':gear: ' + getUserString(actionMember) + " has been placed in jail.");
-            actionMember = null;
-            actioningMember = null;
-        } else if (msg.toLowerCase() == "mute") {
-            actionMember.addRole(actionMember.guild.roles.get("294782894625390593"));
-            message.channel.send(':gear: ' + getUserString(actionMember) + " has been placed on time out.");
-            actionMember = null;
-            actioningMember = null;
-        } else if (msg.toLowerCase() == "kick") {
-            actionStage = 1;
-            message.channel.send(":gear: Enter reason for kicking " + getUserString(actionMember) + " or `cancel`.");
-            actionToPerform = "kick";
-        } else if (msg.toLowerCase() == "ban") {
-            actionStage = 1;
-            message.channel.send(":gear: Enter reason for banning " + getUserString(actionMember) + " or `cancel`.");
-            actionToPerform = "ban";
-        } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname") {
-            actionStage = 1;
-            message.channel.send(":gear: Enter new nickname for " + getUserString(actionMember) + " or `cancel`.");
-            actionToPerform = "nick";
-        } else {
-            message.channel.send(':gear: Unknown command. Exiting action menu.');
-            actionMember = null;
-            actioningMember = null;
-        }
-            message.delete();
-    } else if (actionStage == 1) {
+    var member = actionMember[message.guild.id];
+    if (actionStage[message.guild.id] == 0) { //Select Action
         if (msg == "cancel") {
             message.channel.send(':gear: Cancelled. Exiting action menu.');
-            actionMember = null;
-            actioningMember = null;
-        } else if (actionToPerform == "kick") {
-            actionMember.kick(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(actionMember) + " has been kicked from the server.");
-                actionMember = null;
-                actioningMember = null;
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if (msg.toLowerCase() == "interrogate" && message.guild.id == 277922530973581312) {
+            if (message.guild.id == 277922530973581312) {
+                member.addRole(member.guild.roles.get("292630494254858241"));
+            } else {
+                member.addRole(member.guild.roles.get("295336966285950977"));
+            }
+            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
+            message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if (msg.toLowerCase() == "jail" && message.guild.id == 277922530973581312) {
+            member.addRole(member.guild.roles.get("277942939915780099"));
+            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
+            message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if (msg.toLowerCase() == "mute" && message.guild.id == 277922530973581312) {
+            member.addRole(member.guild.roles.get("294782894625390593"));
+            message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if (msg.toLowerCase() == "kick") {
+            actionStage[message.guild.id] = 1;
+            message.channel.send(":gear: Enter reason for kicking " + getUserString(member) + " or `cancel`.");
+            actionToPerform[message.guild.id] = "kick";
+        } else if (msg.toLowerCase() == "ban") {
+            actionStage[message.guild.id] = 1;
+            message.channel.send(":gear: Enter reason for banning " + getUserString(member) + " or `cancel`.");
+            actionToPerform[message.guild.id] = "ban";
+        } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname") {
+            actionStage[message.guild.id] = 1;
+            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + " or `cancel`.");
+            actionToPerform[message.guild.id] = "nick";
+        } else {
+            message.channel.send(':gear: Unknown command. Exiting action menu.');
+            member = null;
+            actioningMember[message.guild.id] = null;
+        }
+            message.delete();
+    } else if (actionStage[message.guild.id] == 1) {
+        if (msg == "cancel") {
+            message.channel.send(':gear: Cancelled. Exiting action menu.');
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if (actionToPerform[message.guild.id] == "kick") {
+            member.kick(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(member) + " has been kicked from the server.");
+                member = null;
+                actioningMember[message.guild.id] = null;
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(actionMember) + " couldn't kicked from the server. Exiting action menu");
-                actionMember = null;
-                actioningMember = null;
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't kicked from the server. Exiting action menu");
+                member = null;
+                actioningMember[message.guild.id] = null;
             });
-        } else if (actionToPerform == "ban") {
-            actionMember.ban(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(actionMember) + " has been banned from the server.");
-                actionMember = null;
-                actioningMember = null;
+        } else if (actionToPerform[message.guild.id] == "ban") {
+            member.ban(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
+                member = null;
+                actioningMember[message.guild.id] = null;
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(actionMember) + " couldn't banned from the server. Exiting action menu");
-                actionMember = null;
-                actioningMember = null;
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't banned from the server. Exiting action menu");
+                member = null;
+                actioningMember[message.guild.id] = null;
             });
-        } else if (actionToPerform == "nick") {
-            actionMember.setNickname(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(actionMember) + " has changed his nickname.");
-                actionMember = null;
-                actioningMember = null;
+        } else if (actionToPerform[message.guild.id] == "nick") {
+            member.setNickname(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
+                member = null;
+                actioningMember[message.guild.id] = null;
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(actionMember) + " couldn't have his nickname changed. Exiting action menu");
-                actionMember = null;
-                actioningMember = null;
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't have his nickname changed. Exiting action menu");
+                member = null;
+                actioningMember[message.guild.id] = null;
             });
         }
         message.delete();
     }
+    actionMember[message.guild.id] = member;
 }
 
 function playAudio() {
@@ -528,7 +535,7 @@ function messageChecker(oldMessage, newMessage) {
         return;
     }
     
-    if (actioningMember == message.author) {
+    if (actioningMember[message.guild.id] == message.author) {
         handleAction(message);
     }
     
@@ -1410,10 +1417,6 @@ function messageChecker(oldMessage, newMessage) {
                         if (poweroff) {
                             poweroff = false;
                             message.channel.send(':white_check_mark: OK, I won\'t leave... yet.')
-                        } else if (actionMember != null) {
-                            message.channel.send(':white_check_mark: OK, I won\'t perform any actions on ' + actionMember.displayName);
-                            actionMember = null;
-                            actioningMember = null;
                         } else {
                             message.reply(':no_entry_sign: ERROR: Nothing to cancel.');
                         }
@@ -1543,19 +1546,22 @@ function messageChecker(oldMessage, newMessage) {
 								message.channel.send(":no_entry_sign: ERROR: Not sure what to cancel.");
 							}
 						} else if (command.startsWith("deal")) {
-							if (message.guild.id != 277922530973581312) {
-								message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
-                            } else if (actioningMember != null) {
-                                message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember) + " is already performing actions on another user.");
+							if (actioningMember[message.guild.id] != null) {
+                                message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember[message.guild.id]) + " is already performing actions on another user.");
 							} else {
 								command = command.substr(6);
 								command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
 
 								message.guild.fetchMember(command).then(function (member) {
-                                    actionMember = member;
-                                    actioningMember = message.author;
-                                    actionStage = 0;
-                                    message.channel.send(':gear: Select an action to perform on ' + getUserString(member) + '. `interrogate` `jail` `kick` `ban` `nick` `mute`');
+                                    actionMember[message.guild.id] = member;
+                                    actioningMember[message.guild.id] = message.author;
+                                    actionStage[message.guild.id] = 0;
+                                    
+                                    var msg = ':gear: Select an action to perform on ' + getUserString(member) + '. `kick` `ban` `nick` ';
+                                    if (message.guild.id == 277922530973581312) {
+                                        msg += "`interrogate` `jail` `mute`";
+                                    }
+                                    message.channel.send(msg);
 								}).catch(function (reason) {
 									switch (Math.floor(Math.random() * 1000) % 3) {
 										case 0:
