@@ -368,7 +368,7 @@ function handleAction(message) {
             actionToPerform[message.guild.id] = "ban";
         } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname") {
             actionStage[message.guild.id] = 1;
-            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + " or `cancel`.");
+            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
             actionToPerform[message.guild.id] = "nick";
         } else {
             message.channel.send(':gear: Unknown command. Exiting action menu.');
@@ -402,6 +402,10 @@ function handleAction(message) {
                 actioningMember[message.guild.id] = null;
             });
         } else if (actionToPerform[message.guild.id] == "nick") {
+            if (msg == "clear") {
+                msg = "";
+            }
+            
             member.setNickname(msg).then(function(member) {
                 message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
                 member = null;
@@ -1553,15 +1557,30 @@ function messageChecker(oldMessage, newMessage) {
 								command = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
 
 								message.guild.fetchMember(command).then(function (member) {
-                                    actionMember[message.guild.id] = member;
-                                    actioningMember[message.guild.id] = message.author;
-                                    actionStage[message.guild.id] = 0;
-                                    
-                                    var msg = ':gear: Select an action to perform on ' + getUserString(member) + '. `kick` `ban` `nick` ';
-                                    if (message.guild.id == 277922530973581312) {
-                                        msg += "`interrogate` `jail` `mute`";
+                                    if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
+                                        message.channel.send(":gear: Cannot perform any actions on this user.");
+                                    } else {
+                                        var canDoActions = false;
+                                        var msg = ':gear: Select an action to perform on ' + getUserString(member) + ". ";
+                                        if (member.kickable) {
+                                            msg += '`kick` `ban` `nick` ';
+                                            canDoActions = true;
+                                        }
+                                        
+                                        if (message.guild.id == 277922530973581312) {
+                                            msg += "`interrogate` `jail` `mute` ";
+                                            canDoActions = true;
+                                        }
+                                        
+                                        if (canDoActions) {
+                                            actionMember[message.guild.id] = member;
+                                            actioningMember[message.guild.id] = message.author;
+                                            actionStage[message.guild.id] = 0;
+                                            message.channel.send(msg);
+                                        } else {
+                                            message.channel.send(":gear: Cannot perform any actions on this user.");
+                                        }
                                     }
-                                    message.channel.send(msg);
 								}).catch(function (reason) {
 									switch (Math.floor(Math.random() * 1000) % 3) {
 										case 0:
@@ -1665,16 +1684,6 @@ function messageChecker(oldMessage, newMessage) {
             }
             lastMessages[message.author.id] = msg
             sameMessageCount[message.author.id] += 1;
-            
-            /*if (smallMessageCount[message.author.id] == null) {
-                smallMessageCount[message.author.id] = 0;
-            }
-            
-            if (msg.length < 5 || msg.indexOf(" ") == -1) {
-                smallMessageCount[message.author.id] += 1;
-            } else {
-                smallMessageCount[message.author.id] = 0;
-            }*/
             
             if (lastMessages[message.author.id] == msg && sameMessageCount[message.author.id] == 10) {
                 var auth = message.author;
@@ -1788,14 +1797,6 @@ client.on('guildMemberAdd', function(guildMember) {
         if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
             channel.sendMessage("<@&313996053881815040> This member was created today.");
         }
-        
-        /*if (guildMember.user.createdAt.getTime() < 1487962800000) {
-            channel.sendMessage("This user was created **before** the suspected raid and a ban is probably not necessary.");
-        } else {
-            channel.sendMessage("This user was created **after** the suspected raid.");
-        }*/
-        
-        //if (guildMember.joinedAt - guildMember.createdAt
     }
 });
 
