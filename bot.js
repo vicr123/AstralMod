@@ -347,6 +347,11 @@ function handleAction(message) {
             message.channel.send(':gear: ' + getUserString(actionMember) + " has been placed in jail.");
             actionMember = null;
             actioningMember = null;
+        } else if (msg.toLowerCase() == "mute") {
+            actionMember.addRole(actionMember.guild.roles.get("294782894625390593"));
+            message.channel.send(':gear: ' + getUserString(actionMember) + " has been placed on time out.");
+            actionMember = null;
+            actioningMember = null;
         } else if (msg.toLowerCase() == "kick") {
             actionStage = 1;
             message.channel.send(":gear: Enter reason for kicking " + getUserString(actionMember) + " or `cancel`.");
@@ -1550,7 +1555,7 @@ function messageChecker(oldMessage, newMessage) {
                                     actionMember = member;
                                     actioningMember = message.author;
                                     actionStage = 0;
-                                    message.channel.send(':gear: Select an action to perform on ' + getUserString(member) + '. `interrogate` `jail` `kick` `ban` `nick`');
+                                    message.channel.send(':gear: Select an action to perform on ' + getUserString(member) + '. `interrogate` `jail` `kick` `ban` `nick` `mute`');
 								}).catch(function (reason) {
 									switch (Math.floor(Math.random() * 1000) % 3) {
 										case 0:
