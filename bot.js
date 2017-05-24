@@ -1558,12 +1558,17 @@ function messageChecker(oldMessage, newMessage) {
 
 								message.guild.fetchMember(command).then(function (member) {
                                     if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                                        message.channel.send(":gear: Cannot perform any actions on this user.");
+                                        message.channel.send(":gear: Cannot perform any actions on " + getUserString(member) + ".");
                                     } else {
                                         var canDoActions = false;
-                                        var msg = ':gear: Select an action to perform on ' + getUserString(member) + ". ";
+                                        var msg = ':gear: ' + getUserString(member) + ": ";
                                         if (member.kickable) {
-                                            msg += '`kick` `ban` `nick` ';
+                                            msg += '`kick` ';
+                                            canDoActions = true;
+                                        }
+                                        
+                                        if (member.bannable) {
+                                            msg += '`ban` `nick` ';
                                             canDoActions = true;
                                         }
                                         
@@ -1578,7 +1583,7 @@ function messageChecker(oldMessage, newMessage) {
                                             actionStage[message.guild.id] = 0;
                                             message.channel.send(msg);
                                         } else {
-                                            message.channel.send(":gear: Cannot perform any actions on this user.");
+                                            message.channel.send(":gear: Cannot perform any actions on " + getUserString(member) + ".");
                                         }
                                     }
 								}).catch(function (reason) {
