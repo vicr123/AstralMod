@@ -2027,7 +2027,7 @@ client.on("guildBanAdd", function(guild, user) {
             channel = client.channels.get("284826899413467136");
         }
         
-        channel.sendMessage(":red_circle: " + user.username + " :hammer: ¯\_(ツ)_/¯ :hammer:");
+        channel.sendMessage(":red_circle: " + user.username + " :hammer: ¯\\_(ツ)_/¯ :hammer:");
     }
 });
 
