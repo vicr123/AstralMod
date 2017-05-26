@@ -1690,7 +1690,7 @@ function messageChecker(oldMessage, newMessage) {
             }
         }
         
-        if (doModeration[message.guild.id] && message.attachments == null) { //Check if we should do moderation on this server. If message contains an attachment, ignore it.
+        if (doModeration[message.guild.id] && message.attachments != null) { //Check if we should do moderation on this server. If message contains an attachment, ignore it.
             //Spam limiting
             if (lastMessages[message.author.id] != msg) {
                 sameMessageCount[message.author.id] = 0;
