@@ -544,7 +544,7 @@ function messageChecker(oldMessage, newMessage) {
     }
     
     if (doModeration[message.guild.id] == null) {
-        if (message.guild.id == 140241956843290625 || message.guild.id == 287937616685301762) { //Check if this is TGL
+        if (message.guild.id == 140241956843290625) { //Check if this is TGL
             doModeration[message.guild.id] = false;
         } else {
             doModeration[message.guild.id] = true;
@@ -1690,7 +1690,7 @@ function messageChecker(oldMessage, newMessage) {
             }
         }
         
-        if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
+        if (doModeration[message.guild.id] && message.attachments == null) { //Check if we should do moderation on this server. If message contains an attachment, ignore it.
             //Spam limiting
             if (lastMessages[message.author.id] != msg) {
                 sameMessageCount[message.author.id] = 0;
