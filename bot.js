@@ -1690,7 +1690,19 @@ function messageChecker(oldMessage, newMessage) {
             }
         }
         
-        if (doModeration[message.guild.id] && message.attachments != null) { //Check if we should do moderation on this server. If message contains an attachment, ignore it.
+        var performModerationOnMessage = true;
+        //Check for images.
+        //Other attachments are ok.
+        if (message.attachments != null) {
+            for (let [key, attachment] of message.attachments) {
+                if (attachment.height != null) {
+                    performModerationOnMessage = false;
+                    break;
+                }
+            }
+        }
+        
+        if (doModeration[message.guild.id] && performModerationOnMessage) { //Check if we should do moderation on this server. If message contains an attachment, ignore it.
             //Spam limiting
             if (lastMessages[message.author.id] != msg) {
                 sameMessageCount[message.author.id] = 0;
