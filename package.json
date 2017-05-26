@@ -1,0 +1,22 @@
+{
+  "name": "astralmod",
+  "version": "1.0.0",
+  "description": "Discord Moderation Bot for AstralPhaser Central, ShiftOS, theShell and other servers",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vicr123/AstralMod.git"
+  },
+  "author": "vicr123",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/vicr123/AstralMod/issues"
+  },
+  "dependencies": {
+    "discord.js": "^11.1.0",
+    "opusscript": "0.0.3"
+  }
+}
