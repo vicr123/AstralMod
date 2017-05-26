@@ -1803,12 +1803,17 @@ client.on('guildMemberAdd', function(guildMember) {
             msg += "Joined at: " + guildMember.joinedAt.toUTCString();
         }
         embed.setDescription(msg);
+        embed.setFooter("User ID for moderation actions: " + guildMember.user.id);
         channel.sendEmbed(embed);
         
         var now = new Date();
         var joinDate = guildMember.user.createdAt;
         if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
-            channel.sendMessage("<@&313996053881815040> This member was created today.");
+            if (guildMember.guild.id == 277922530973581312) {
+                channel.sendMessage(":calendar: <@&313996053881815040> This member was created today.");
+            } else {
+                channel.sendMessage(":calendar: <@&317657591927013378> This member was created today.");
+            }
         }
     }
 });
