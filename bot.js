@@ -932,7 +932,7 @@ function messageChecker(oldMessage, newMessage) {
                     commandProcessed = true;
                     break;
                 case "uptime":
-                    message.reply(":clock1: AstralMod has been up for " + parseInt(client.uptime) + " seconds.");
+                    message.reply(":clock1: AstralMod has been up for " + parseInt(client.uptime) + " milliseconds.");
                     commandProcessed = true;
                     break;
                 case "suggest":
@@ -1566,7 +1566,7 @@ function messageChecker(oldMessage, newMessage) {
 
 								message.guild.fetchMember(command).then(function (member) {
                                     if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                                        message.channel.send(":gear: Cannot perform any actions on " + getUserString(member) + ".");
+                                        message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
                                     } else {
                                         var canDoActions = false;
                                         var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
@@ -1591,7 +1591,7 @@ function messageChecker(oldMessage, newMessage) {
                                             actionStage[message.guild.id] = 0;
                                             message.channel.send(msg);
                                         } else {
-                                            message.channel.send(":gear: Cannot perform any actions on " + getUserString(member) + ".");
+                                            message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
                                         }
                                     }
 								}).catch(function (reason) {
