@@ -595,6 +595,10 @@ function messageChecker(oldMessage, newMessage) {
         }
     }
     
+    if (!isMod(message.member) && msg.indexOf("@everyone") != -1 && message.guild.id == 277922530973581312) {
+        message.reply("Nice try... but we disabled that.");
+    }
+    
     if (message.author.id != 280495817901473793 && !message.author.bot) {
         //Server Detection:
         //AstralPhaser Central: 277922530973581312
