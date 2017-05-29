@@ -940,12 +940,16 @@ function messageChecker(oldMessage, newMessage) {
 		    var uptime = parseInt(client.uptime); // Get uptime in ms
 		    uptime = uptime / 1000; // Convert from ms to s
 		    var uptimeMinutes = Math.round(uptime / 60); // Get the uptime in minutes
-		    var uptimeHours = Math.round(uptimeMinutes / 60); // Get the uptime in hours
-		    uptimeMinutes = uptimeMinutes - (uptimeHours * 60) // Remove the hours from the minutes
-	            if (uptimeMinutes < 10) {
-			    timeString = uptimeHours + ":0" + uptimeMinutes // We need to add an additional 0 to the minutes
+		    var minutes = Math.round(uptime % 60);
+		    var hours = 0;
+		    while (uptimeMinutes <= 60) {
+	            hours++;
+		    uptimeMinutes = uptimeMinutes - 60;
+		    }
+	            if (minutes < 10) {
+			    timeString = hours + ":0" + minutes // We need to add an additional 0 to the minutes
 		    } else {
-			    timeString = uptimeHours + ":" + uptimeMinutes // We don't need to add an extra 0.
+			    timeString = hours + ":" + minutes // We don't need to add an extra 0.
 		    }
                     message.reply(":clock1: AstralMod has been up for " + timeString + " hours.");
                     commandProcessed = true;
