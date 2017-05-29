@@ -1653,7 +1653,7 @@ function messageChecker(oldMessage, newMessage) {
                 }
                 
                 if (command == "poweroff") {
-                    if (message.author.id == 278805875978928128 || message.author.id == 241299743869894667 || message.author.id == 209829628796338176) {
+                    if (message.author.id == 278805875978928128 || message.author.id == 241299743869894667 || message.author.id == 113060599566508032) {
                         if (poweroff) {
                             switch (Math.floor(Math.random() * 1000) % 3) {
                                 case 0:
