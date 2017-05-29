@@ -1395,6 +1395,45 @@ function messageChecker(oldMessage, newMessage) {
                         });
                         message.delete();
                         break;
+                    case "prepchat":
+                        if (message.guild.id != 277922530973581312) {
+                            message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+                        } else {
+                            var waitingRoom = client.channels.get("277924441584041985");
+
+                            membersInWaitingRoom = Array.from(waitingRoom.members.values());
+
+                            for (var i = 0; i < membersInWaitingRoom.length; i++) {
+                                var member = membersInWaitingRoom[i];
+                                if (member.selfMute || member.id == 282048599574052864) {
+                                    membersInWaitingRoom.splice(i, 1);
+                                    i--;
+                                }
+                            }
+
+                            var placeMemberFunction = function() {
+                                if (membersInWaitingRoom.length != 0) {
+                                    //Choose a random member
+                                    var chosenMember = membersInWaitingRoom.splice(Math.floor(Math.random() * 1000) % membersInWaitingRoom.length, 1)[0];
+                                    chosenMember.setVoiceChannel("277922530973581313").then(function() {
+                                        console.log("Member placed in weekly chat");
+                                    }).catch(function() {
+                                        console.log("Member couldn't be placed in weekly chat");
+                                    });
+                                } else {
+                                    console.log("No more members to place in weekly chat");
+                                }
+                            }
+
+                            for (var i = 0; i < 10; i++) {
+                                //setTimeout(placeMemberFunction, (i + 1) * 1000);
+                                placeMemberFunction();
+                            }
+
+                            message.delete();
+                            message.reply("Placing people into chat.");
+                        }
+                        break;
                     case "help":
                         var helpMessage = "And here are the mod only commands:\n```\n" +
                             "mod    [on|off]   Queries moderation status.\n" +
