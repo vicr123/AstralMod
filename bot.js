@@ -1411,12 +1411,15 @@ function messageChecker(oldMessage, newMessage) {
                                 }
                             }
 
+                            var numberOfMembersPlaced = 0;
+
                             var placeMemberFunction = function() {
                                 if (membersInWaitingRoom.length != 0) {
                                     //Choose a random member
                                     var chosenMember = membersInWaitingRoom.splice(Math.floor(Math.random() * 1000) % membersInWaitingRoom.length, 1)[0];
                                     chosenMember.setVoiceChannel("277922530973581313").then(function() {
                                         console.log("Member placed in weekly chat");
+                                        numberOfMembersPlaced++;
                                     }).catch(function() {
                                         console.log("Member couldn't be placed in weekly chat");
                                     });
@@ -1431,7 +1434,7 @@ function messageChecker(oldMessage, newMessage) {
                             }
 
                             message.delete();
-                            message.reply("Placing people into chat.");
+                            message.reply(":speech_balloon: Placing people into chat now. Please wait.");
                         }
                         break;
                     case "help":
