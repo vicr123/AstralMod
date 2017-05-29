@@ -470,8 +470,12 @@ function getBoshyTime(guild) {
 }
 
 function isMod(member) {
-    if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers") || member.roles.find("name", "Pseudo-Moderator")) {
-        return true;
+    if (member != null) {
+        if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers") || member.roles.find("name", "Pseudo-Moderator")) {
+            return true;
+        } else {
+            return false;
+        }
     } else {
         return false;
     }
