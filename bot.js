@@ -38,7 +38,10 @@ var interrogMember = null;
 var bulletinTimeout;
 var runningCommands = true;
 var bananaFilter = true;
+
 var allowPrepChat = true;
+var membersPlaced = [];
+var numberOfMembersTried = 0;
 
 var actionMember = {};
 var actioningMember = {};
@@ -1405,41 +1408,77 @@ function messageChecker(oldMessage, newMessage) {
 
                             for (var i = 0; i < membersInWaitingRoom.length; i++) {
                                 var member = membersInWaitingRoom[i];
-                                if (member.selfMute || member.id == 282048599574052864) {
+                                if (member.selfMute || member.id == 282048599574052864 || isMod(member) || 
+                                member.roles.find("name", "T2: OSFirstTimer Fans") || member.roles.find("name", "T3: Super Supporters") || member.roles.find("name", "T4: Ultimate AstralMates") || member.roles.find("name", "T5: Gods of Phasers")) {
                                     membersInWaitingRoom.splice(i, 1);
                                     i--;
                                 }
                             }
 
-                            var numberOfMembersPlaced = 0;
+                            /*var postFeedbackFunction = function() {
+                                if (numberOfMembersTried == 10) {
+                                    var msg = ":speech_balloon: " + parseInt(membersPlaced.length) + " members were placed into the chat.```";
+                                    for (let member of membersPlaced) {
+                                        reply += getUserString(member) + "\n";
+                                    }
+                                    msg += "```";
+                                    message.reply(msg);
+
+                                    numberOfMembersTried = 0;
+                                    membersPlaced = [];
+                                }
+                            };*/
+                            
 
                             var placeMemberFunction = function() {
+                                numberOfMembersTried++;
                                 if (membersInWaitingRoom.length != 0) {
                                     //Choose a random member
                                     var chosenMember = membersInWaitingRoom.splice(Math.floor(Math.random() * 1000) % membersInWaitingRoom.length, 1)[0];
                                     chosenMember.setVoiceChannel("277922530973581313").then(function() {
                                         console.log("Member placed in weekly chat");
-                                        numberOfMembersPlaced++;
+                                        membersPlaced.push(chosenMember);
+                                        message.channel.send(":speech_balloon: `" + getUserString(chosenMember) + "` was placed into the Weekly Chat")
+                                        //postFeedbackFunction();
                                     }).catch(function() {
                                         console.log("Member couldn't be placed in weekly chat");
+                                        message.channel.send(":speech_balloon: `" + getUserString(chosenMember) + "` was unable to be placed into the Weekly Chat")
+                                        //postFeedbackFunction();
                                     });
+                                    return true;
                                 } else {
                                     console.log("No more members to place in weekly chat");
+                                    return false;
+                                    //postFeedbackFunction();
                                 }
                             }
 
+                            var changeAllowPrepChat = true;
+
                             for (var i = 0; i < 10; i++) {
-                                //setTimeout(placeMemberFunction, (i + 1) * 1000);
-                                placeMemberFunction();
+                                if (placeMemberFunction()) {
+                                    if (i == 9) {
+                                        message.channel.send(":speech_balloon: 10 people have been queued to be moved to the weekly chat.")
+                                    }
+                                } else {
+                                    if (i == 0) {
+                                        message.channel.send(":speech_balloon: No eligible members were found in the waiting room.")
+                                        changeAllowPrepChat = false;
+                                    } else {
+                                        message.channel.send(":speech_balloon: There are only " + parseInt(i) + " eligible members in the weekly chat and all of them have been queued to be moved in.")
+                                    }
+                                    i = 10;
+                                }
                             }
 
                             message.delete();
-                            message.reply(":speech_balloon: Placing people into chat now. Please wait.");
-
-                            allowPrepChat = false;
-                            setTimeout(function() {
-                                allowPrepChat = true;
-                            }, 60000);
+                            
+                            if (changeAllowPrepChat) {
+                                allowPrepChat = false;
+                                setTimeout(function() {
+                                    allowPrepChat = true;
+                                }, 60000);
+                            }
                         }
                         break;
                     case "help":
