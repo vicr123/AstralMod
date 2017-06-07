@@ -141,9 +141,9 @@ function setGame() {
         case 25:
             presence.game.name = "harking tiem";
             break;
-		case 26:
-			presence.game.name = "trying to DJ";
-			break;
+        case 26:
+            presence.game.name = "trying to DJ";
+            break;
     }
     client.user.setPresence(presence);
 }
@@ -339,11 +339,11 @@ function handleAction(message) {
             message.channel.send(':gear: Cancelled. Exiting action menu.');
             member = null;
             actioningMember[message.guild.id] = null;
-        } else if (msg.toLowerCase() == "interrogate" && message.guild.id == 277922530973581312) {
+        } else if (msg.toLowerCase() == "interrogate" && (message.guild.id == 277922530973581312 || message.guild.id == 287937616685301762)) {
             if (message.guild.id == 277922530973581312) {
                 member.addRole(member.guild.roles.get("292630494254858241"));
-            } else {
-                member.addRole(member.guild.roles.get("295336966285950977"));
+            } else if (message.guild.id == 287937616685301762) {
+                member.addRole(member.guild.roles.get("319847521440497666"));
             }
             member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
@@ -1515,7 +1515,6 @@ function messageChecker(oldMessage, newMessage) {
                             "                  PARAMETER 2 (OPTIONAL)\n" +
                             "                  Reminder to be sent with the message.\n\n" +
                             "panic       -     Toggles panic mode.\n" +
-                            "interrogate       Places the newest member of the server into interrogation.\n" +
                             "cancel            Cancels a pending operation.\n" +
                             "help              Prints this help message.\n" +
                             "\n" +
@@ -1692,8 +1691,13 @@ function messageChecker(oldMessage, newMessage) {
                                             canDoActions = true;
                                         }
                                         
+                                        if (message.guild.id == 287937616685301762 || message.guild.id == 277922530973581312) {
+                                            msg += "`interrogate` ";
+                                            canDoActions = true;
+                                        }
+                                        
                                         if (message.guild.id == 277922530973581312) {
-                                            msg += "`interrogate` `jail` `mute` ";
+                                            msg += "`jail` `mute` ";
                                             canDoActions = true;
                                         }
                                         
@@ -1898,10 +1902,15 @@ client.on('message', messageChecker);
 client.on('messageUpdate', messageChecker);
 
 client.on('guildMemberAdd', function(guildMember) {
-    if (guildMember.guild.id == 277922530973581312) {
+    if (guildMember.guild.id == 277922530973581312 || guildMember.guild.id == 278824407743463424) {
         var channel;
-        channel = client.channels.get("284837615830695936");
-        console.log("[STATUS] " + getUserString(guildMember) + " --> APHC");
+        if (guildMember.guild.id == 277922530973581312) {
+            channel = client.channels.get("284837615830695936");
+            console.log("[STATUS] " + getUserString(guildMember) + " --> APHC");
+        } else {
+            channel = client.channels.get("320422079130238980");
+            console.log("[STATUS] " + getUserString(guildMember) + " --> ts");
+        }
         interrogMember = guildMember;
         
         channel.sendMessage(":arrow_right: <@" + guildMember.user.id + ">");
@@ -1925,8 +1934,6 @@ client.on('guildMemberAdd', function(guildMember) {
         if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
             if (guildMember.guild.id == 277922530973581312) {
                 channel.sendMessage(":calendar: <@&313996053881815040> This member was created today.");
-            } else {
-                channel.sendMessage(":calendar: <@&317657591927013378> This member was created today.");
             }
         }
     }
@@ -1934,15 +1941,15 @@ client.on('guildMemberAdd', function(guildMember) {
 
 client.on('guildMemberUpdate', function(oldUser, newUser) {
     if (newUser.guild.id == 277922530973581312) {
-        if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Jailed")) {
+        if (newUser.roles.find("name", "Jailed")) {
             console.log("[STATUS] " + getUserString(newUser) + " --> JAIL");
             client.channels.get("277943393231831040").sendMessage("<@" + newUser.id + "> :oncoming_police_car: You are now in jail. Appeal here to get out of jail. If you do not appeal successfully within 24 hours, an admin will **ban** you from the server.\n\n" + 
             "Additionally, if you leave and rejoin this server in an attempt to break out of jail, you will be **banned.**\n\n" + 
             "Timestamp: " + new Date().toUTCString());
         }
         
-        if (/*!oldUser.roles.find("name", "I Broke The Rules!") &&*/ newUser.roles.find("name", "Interrogation")) {
-            console.log("[STATUS] " + getUserString(newUser) + " --> INTERROGATION");
+        if (newUser.roles.find("name", "Interrogation")) {
+            console.log("[STATUS] " + getUserString(newUser) + " --> INTERROGATION APHC");
             client.channels.get("292630922040311808").sendMessage("<@" + newUser.id + "> :oncoming_police_car: A member of staff just wishes to make sure you're not someone we've banned before. If you have any social media accounts, just tell us so we can see that you're not someone that we've banned :)");
         }
         
@@ -1954,6 +1961,11 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
             } else {
                 channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: " + newUser.nickname);
             }
+        }
+    } else if (newUser.guild.id == 287937616685301762) {
+        if (newUser.roles.find("name", "interrogation")) {
+            console.log("[STATUS] " + getUserString(newUser) + " --> INTERROGATION WOW");
+            client.channels.get("319848725566586890").sendMessage("<@" + newUser.id + "> :oncoming_police_car: A member of staff just wishes to make sure you're not someone we've banned before. :)");
         }
     }
 });
@@ -1978,10 +1990,15 @@ client.on('guildMemberRemove', function(user) {
     }
     
     if (user.guild != null) {
-        if (user.guild.id == 277922530973581312) {
+        if (user.guild.id == 277922530973581312 || user.guild.id == 278824407743463424) {
             var channel;
-            channel = client.channels.get("284837615830695936");
-            console.log("[STATUS] APHC <-- " + getUserString(user));
+            if (user.guild.id == 277922530973581312) {
+                channel = client.channels.get("284837615830695936");
+                console.log("[STATUS] APHC <-- " + getUserString(user));
+            } else {
+                channel = client.channels.get("320422079130238980");
+                console.log("[STATUS] ts <-- " + getUserString(user));
+            }
             
             channel.sendMessage(":arrow_left: <@" + user.user.id + "> (" + user.displayName + ")");
         }
