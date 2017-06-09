@@ -1047,6 +1047,7 @@ function messageChecker(oldMessage, newMessage) {
                                 case "lance":
                                 case "lancededcena":
                                 case "stupidgame2":
+                                case "mattie"
                                 case "gmt":
                                     hours = +1;
                                     break;
@@ -1108,6 +1109,8 @@ function messageChecker(oldMessage, newMessage) {
                                 case "neppy":
                                 case "neptune":
                                 case "cameron":
+                                case "max"
+                                case "banana"
                                 case "komputerkid":
                                         hours = -7;
                                         break;
