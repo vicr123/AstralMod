@@ -1109,7 +1109,7 @@ function messageChecker(oldMessage, newMessage) {
                                 case "neppy":
                                 case "neptune":
                                 case "cameron":
-                                case "max"
+                                case "max":
                                 case "komputerkid":
                                 case "banana":
                                         hours = -7;
