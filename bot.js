@@ -1763,7 +1763,7 @@ function messageChecker(oldMessage, newMessage) {
                                     if (num == 2) {
                                         message.channel.send(":white_check_mark: OK: I successfully deleted 1 message.");
                                     } else if (num > 99) {
-					message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.")    
+					message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");    
 				    } else {
                                         message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
                                     }
