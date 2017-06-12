@@ -393,7 +393,7 @@ function handleAction(message) {
                 member = null;
                 actioningMember[message.guild.id] = null;
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't kicked from the server. Exiting action menu");
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't be kicked from the server. Exiting action menu");
                 member = null;
                 actioningMember[message.guild.id] = null;
             });
@@ -403,7 +403,7 @@ function handleAction(message) {
                 member = null;
                 actioningMember[message.guild.id] = null;
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't banned from the server. Exiting action menu");
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
                 member = null;
                 actioningMember[message.guild.id] = null;
             });
@@ -877,7 +877,7 @@ function messageChecker(oldMessage, newMessage) {
                     commandProcessed = true;
                     break;
                 case "help":
-                    var msg = "Here are some things you can try:\n```\n" +
+                    var helpMessage = "Here are some things you can try:\n```\n" +
                         "time   [tz]       Gets the time at UTC +00:00.\n" + 
                         "                  Useful for checking jail time.\n" +
                         "                  PARAMETER 1 (OPTIONAL)\n" + 
@@ -890,12 +890,12 @@ function messageChecker(oldMessage, newMessage) {
                     
                     
                     if (message.guild.id == 277922530973581312) { //APHC specific stuff
-                        msg = msg + "nick [name]        Change your nickname on this server..\n" +
+                        helpMessage = helpMessage + "nick name         Change your nickname on this server.\n" +
                         "                  PARAMETER 1\n" +
-                        "                  New nickname.\n";
+                        "                  New nickname.\n\n";
                     }
                     
-                    msg = msg + "suggest           Starts the suggestion process.\n" +
+                    helpMessage = helpMessage + "suggest           Starts the suggestion process.\n" +
                         "about             Tells you about AstralMod\n" + 
                         "copyright         Tells you about AstralMod\n" + 
                         "license           Tells you about AstralMod\n" + 
@@ -903,7 +903,7 @@ function messageChecker(oldMessage, newMessage) {
                         "ping|pong         Asks AstralMod to reply with a message\n\n" +
                         "These commands need to be prefixed with bot:\n" +
                         "```";
-                    message.channel.send(msg);
+                    message.channel.send(helpMessage);
                     break;
                 case "about":
                 case "license":
@@ -1524,7 +1524,7 @@ function messageChecker(oldMessage, newMessage) {
                             
                         helpMessage = helpMessage + 
                             "deal user         Walks through the process of dealing\n" +
-                            "                  with an unruly member\n";
+                            "                  with an unruly member\n\n" +
                             "rm num            Deletes a number of messages.\n" +
                             "                  PARAMETER 1\n" +
                             "                  Number of messages to delete.\n\n" +
