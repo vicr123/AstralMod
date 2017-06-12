@@ -153,7 +153,7 @@ function getUserString(user) {
     if (user.user != null) {
         u = user.user;
     }
-    return u.username + "#" + u.discriminator;
+    return u.tag;
 }
 
 function handleSuggest(message) {
