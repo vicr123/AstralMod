@@ -51,10 +51,6 @@ var actionToPerform = {};
 var dispatcher;
 var connection;
 
-process.on('unhandledRejection', function(err, p) {
-    console.log("[ERROR] Unhandled Promise Rejection.");
-});
-
 function setGame() {
     var presence = {};
     presence.game = {};
@@ -153,7 +149,7 @@ function getUserString(user) {
     if (user.user != null) {
         u = user.user;
     }
-    return u.username + "#" + u.discriminator;
+    return u.tag;
 }
 
 function handleSuggest(message) {
@@ -1766,7 +1762,9 @@ function messageChecker(oldMessage, newMessage) {
 								message.channel.bulkDelete(num).then(function () {
                                     if (num == 2) {
                                         message.channel.send(":white_check_mark: OK: I successfully deleted 1 message.");
-                                    } else {
+                                    } else if (num > 99) {
+					message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");    
+				    } else {
                                         message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
                                     }
 								}).catch(function () {
@@ -2192,6 +2190,10 @@ client.on("guildBanAdd", function(guild, user) {
         channel = client.channels.get("284837615830695936");
         channel.sendMessage(":red_circle: " + user.username + " :hammer: ¯\\_(ツ)_/¯ :hammer:");
     }
+});
+
+process.on('unhandledRejection', function(err, p) {
+    console.log("[ERROR | UNCAUGHT PROMISE] " + err.stack);
 });
 
 client.login(api.key).catch(function() {
