@@ -877,20 +877,33 @@ function messageChecker(oldMessage, newMessage) {
                     commandProcessed = true;
                     break;
                 case "help":
-                    message.channel.send(
-                        "Here are some things you can try:\n```\n" +
+                    var msg = "Here are some things you can try:\n```\n" +
                         "time   [tz]       Gets the time at UTC +00:00.\n" + 
                         "                  Useful for checking jail time.\n" +
                         "                  PARAMETER 1 (OPTIONAL)\n" + 
                         "                  A timezone to query, for example, +10 or -5.\n\n" +
-                        "suggest           Starts the suggestion process.\n" +
+                        "clock min [rem]   Sets a timer. This cannot be cancelled. You will receive a DM.\n" +
+                        "                  PARAMETER 1\n" +
+                        "                  Number of minutes to set the timer for.\n" +
+                        "                  PARAMETER 2 (OPTIONAL)\n" +
+                        "                  Reminder to be sent with the message.\n\n";
+                    
+                    
+                    if (message.guild.id == 277922530973581312) { //APHC specific stuff
+                        msg = msg + "nick [name]        Change your nickname on this server..\n" +
+                        "                  PARAMETER 1\n" +
+                        "                  New nickname.\n";
+                    }
+                    
+                    msg = msg + "suggest           Starts the suggestion process.\n" +
                         "about             Tells you about AstralMod\n" + 
                         "copyright         Tells you about AstralMod\n" + 
                         "license           Tells you about AstralMod\n" + 
                         "warranty          Tells you about AstralMod\n\n" + 
                         "ping|pong         Asks AstralMod to reply with a message\n\n" +
                         "These commands need to be prefixed with bot:\n" +
-                        "```")
+                        "```";
+                    message.channel.send(msg);
                     break;
                 case "about":
                 case "license":
@@ -1501,24 +1514,24 @@ function messageChecker(oldMessage, newMessage) {
                             "                  Type on to start moderating the server.\n" +
                             "                  Type off to stop moderating the server.\n\n";
                             
-                        if (message.guild.id == 277922530973581312) {
+                        if (message.guild.id == 277922530973581312) { //APHC specific stuff
                         helpMessage = helpMessage + 
                             "filter [on|off]   Queries the chat filter.\n" +
                             "                  PARAMETER 1 (OPTIONAL)\n" + 
                             "                  Type on to set the filter on.\n" +
                             "                  Type off to set the filter off.\n\n" +
-                            "deal user         Walks through the process of dealing\n" +
-                            "                  with an unruly member\n";
                         }
                             
                         helpMessage = helpMessage + 
+                            "deal user         Walks through the process of dealing\n" +
+                            "                  with an unruly member\n";
                             "rm num            Deletes a number of messages.\n" +
                             "                  PARAMETER 1\n" +
                             "                  Number of messages to delete.\n\n" +
                             "uinfo user        Gets information about a user.\n" +
                             "                  PARAMETER 1\n" +
                             "                  User ID. This can be obtained with the\n" +
-                            "                  rtid command.\n\n" +
+                            "                  rtid command. Alternatively use a @mention.\n\n" +
                             "rtid user         Gets a user's user ID.\n" +
                             "                  PARAMETER 1\n" +
                             "                  Username of the user to find.\n\n" +
