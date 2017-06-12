@@ -473,7 +473,7 @@ function getBoshyTime(guild) {
 
 function isMod(member) {
     if (member != null) {
-        if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers") || member.roles.find("name", "Pseudo-Moderator")) {
+        if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers") || member.roles.find("name", "Pseudo-Moderator") || member.roles.find("name", "Staff") || member.roles.find("name", "The Crew")) {
             return true;
         } else {
             return false;
@@ -562,7 +562,8 @@ function messageChecker(oldMessage, newMessage) {
     }
     
     if (panicMode[message.guild.id]) {
-        if (msg == "mod:panic" && (message.member.roles.find("name", "Admin")  || message.member.roles.find("name", "Upper Council of Explorers"))) {
+        if (msg == "mod:panic" && (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers")
+            || message.member.roles.find("name", "The Crew"))) {
             message.channel.send(':rotating_light: Panic mode is now off.');
             panicMode[message.guild.id] = false;
             console.log("[STATUS] Panic off.");
@@ -1376,7 +1377,7 @@ function messageChecker(oldMessage, newMessage) {
                         message.delete();
                         break;
                     case "panic":
-                        if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers")) {
+                        if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "The Crew")) {
                             message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
                                 panicMode[message.guild.id] = true;
                             });
