@@ -51,10 +51,6 @@ var actionToPerform = {};
 var dispatcher;
 var connection;
 
-process.on('unhandledRejection', function(err, p) {
-    console.log("[ERROR] Unhandled Promise Rejection.");
-});
-
 function setGame() {
     var presence = {};
     presence.game = {};
@@ -2192,6 +2188,10 @@ client.on("guildBanAdd", function(guild, user) {
         channel = client.channels.get("284837615830695936");
         channel.sendMessage(":red_circle: " + user.username + " :hammer: ¯\\_(ツ)_/¯ :hammer:");
     }
+});
+
+process.on('unhandledRejection', function(err, p) {
+    console.log("[ERROR | UNCAUGHT PROMISE] " + err.stack);
 });
 
 client.login(api.key).catch(function() {
