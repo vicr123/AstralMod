@@ -765,6 +765,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 } else if (message.guild.id == 297057036292849680) { //ALA
                     client.channels.get("297762292823490570").sendmessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
+                } else if (message.guild.id == 263368501928919040) { //TWOW
+                    client.channels.get("314589053959929866").sendMessage(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
@@ -1850,6 +1852,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("283184634400079872").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
                     client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 263368501928919040) { //TWOW
+                    client.channels.get("314589053959929866").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 }
                 
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
@@ -1885,6 +1889,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("283184634400079872").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 281066689892974592) { //LE
                     client.channels.get("288272065109295104").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 263368501928919040) { //TWOW
+                    client.channels.get("314589053959929866").sendMessage(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 }
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
                 message.delete();
