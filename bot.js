@@ -1400,6 +1400,7 @@ function messageChecker(oldMessage, newMessage) {
                         allowPrepChat = true;
                         //fall through
                     case "prepchat":
+                        var numberOfMembers = 15;
                         if (message.guild.id != 277922530973581312) {
                             message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
                         } else if (!allowPrepChat) {
@@ -1411,8 +1412,7 @@ function messageChecker(oldMessage, newMessage) {
 
                             for (var i = 0; i < membersInWaitingRoom.length; i++) {
                                 var member = membersInWaitingRoom[i];
-                                if (member.selfMute || member.id == 282048599574052864 || isMod(member) || 
-                                member.roles.find("name", "T2: OSFirstTimer Fans") || member.roles.find("name", "T3: Super Supporters") || member.roles.find("name", "T4: Ultimate AstralMates") || member.roles.find("name", "T5: Gods of Phasers")) {
+                                if (member.selfMute || member.id == 282048599574052864 || isMod(member)) {
                                     membersInWaitingRoom.splice(i, 1);
                                     i--;
                                 }
@@ -1458,10 +1458,10 @@ function messageChecker(oldMessage, newMessage) {
 
                             var changeAllowPrepChat = true;
 
-                            for (var i = 0; i < 10; i++) {
+                            for (var i = 0; i < numberOfMembers; i++) {
                                 if (placeMemberFunction()) {
-                                    if (i == 9) {
-                                        message.channel.send(":speech_balloon: 10 people have been queued to be moved to the weekly chat.")
+                                    if (i == numberOfMembers - 1) {
+                                        message.channel.send(":speech_balloon: " + parseInt(numberOfMembers) + " people have been queued to be moved to the weekly chat.")
                                     }
                                 } else {
                                     if (i == 0) {
@@ -1932,13 +1932,14 @@ client.on('guildMemberAdd', function(guildMember) {
         embed.setFooter("User ID for moderation actions: " + guildMember.user.id);
         channel.sendEmbed(embed);
         
+        /*
         var now = new Date();
         var joinDate = guildMember.user.createdAt;
         if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
             if (guildMember.guild.id == 277922530973581312) {
                 channel.sendMessage(":calendar: <@&313996053881815040> This member was created today.");
             }
-        }
+        }*/
     }
 });
 
