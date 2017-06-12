@@ -349,8 +349,12 @@ function handleAction(message) {
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
             member = null;
             actioningMember[message.guild.id] = null;
-        } else if (msg.toLowerCase() == "jail" && message.guild.id == 277922530973581312) {
-            member.addRole(member.guild.roles.get("277942939915780099"));
+        } else if (msg.toLowerCase() == "jail" && (message.guild.id == 277922530973581312 || message.guild.id == 263368501928919040)) {
+            if (message.guild.id == 277922530973581312) {
+                member.addRole(member.guild.roles.get("277942939915780099"));
+            } else {
+                member.addRole(member.guild.roles.get("267731524734943233"));
+            }
             member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
             member = null;
@@ -1703,8 +1707,13 @@ function messageChecker(oldMessage, newMessage) {
                                             canDoActions = true;
                                         }
                                         
+                                        if (message.guild.id == 277922530973581312 || message.guild.id == 263368501928919040) {
+                                            msg += "`jail` ";
+                                            canDoActions = true;
+                                        }
+                                        
                                         if (message.guild.id == 277922530973581312) {
-                                            msg += "`jail` `mute` ";
+                                            msg += "`mute` ";
                                             canDoActions = true;
                                         }
                                         
