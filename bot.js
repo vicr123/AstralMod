@@ -1908,11 +1908,14 @@ client.on('message', messageChecker);
 client.on('messageUpdate', messageChecker);
 
 client.on('guildMemberAdd', function(guildMember) {
-    if (guildMember.guild.id == 277922530973581312 || guildMember.guild.id == 278824407743463424) {
+    if (guildMember.guild.id == 277922530973581312 || guildMember.guild.id == 278824407743463424 || guildMember.guild.id == 263368501928919040) {
         var channel;
         if (guildMember.guild.id == 277922530973581312) {
             channel = client.channels.get("284837615830695936");
             console.log("[STATUS] " + getUserString(guildMember) + " --> APHC");
+        } else if (guildMember.guild.id == 263368501928919040) {
+            channel = client.channels.get("314589053959929866");
+            console.log("[STATUS] " + getUserString(user) + " --> TWOW");
         } else {
             channel = client.channels.get("320422079130238980");
             console.log("[STATUS] " + getUserString(guildMember) + " --> ts");
@@ -1979,6 +1982,7 @@ client.on('guildMemberUpdate', function(oldUser, newUser) {
 
 client.on('userUpdate', function(oldUser, newUser) {
     if (newUser.username != oldUser.username) {
+        
         var aphcGuild = client.channels.get("282513354118004747").guild;
         aphcGuild.fetchMember(newUser).then(function(member) {
             console.log("[STATUS] " + getUserString(oldUser) + " --> U(" + newUser.username + ")");
@@ -1997,11 +2001,14 @@ client.on('guildMemberRemove', function(user) {
     }
     
     if (user.guild != null) {
-        if (user.guild.id == 277922530973581312 || user.guild.id == 278824407743463424) {
+        if (user.guild.id == 277922530973581312 || user.guild.id == 278824407743463424 || user.guild.id == 263368501928919040) {
             var channel;
             if (user.guild.id == 277922530973581312) {
                 channel = client.channels.get("284837615830695936");
                 console.log("[STATUS] APHC <-- " + getUserString(user));
+            } else if (user.guild.id == 263368501928919040) {
+                channel = client.channels.get("314589053959929866");
+                console.log("[STATUS] TWOW <-- " + getUserString(user));
             } else {
                 channel = client.channels.get("320422079130238980");
                 console.log("[STATUS] ts <-- " + getUserString(user));
@@ -2033,6 +2040,8 @@ client.on('messageDelete', function(message) {
             channel = client.channels.get("302821411821453312");
         } else if (message.guild.id == 266018132827570176) { //TH
             channel = client.channels.get("306041264933961728");
+        } else if (message.guild.id == 263368501928919040) { //TWOW
+            channel = client.channels.get("314589053959929866");
         }
     }
     
@@ -2080,6 +2089,8 @@ client.on('messageDeleteBulk', function(messages) {
             channel = client.channels.get("302821411821453312");
         } else if (messages.first().guild.id == 266018132827570176) { //TH
             channel = client.channels.get("306041264933961728");
+        } else if (messages.first().guild.id == 263368501928919040) { //TWOW
+            channel = client.channels.get("314589053959929866");
         }
     }
     
@@ -2108,6 +2119,8 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
             channel = client.channels.get("302821411821453312");
         } else if (oldMessage.guild.id == 266018132827570176) { //TH
             channel = client.channels.get("306041264933961728");
+        } else if (oldMessage.guild.id == 263368501928919040) { //TWOW
+            channel = client.channels.get("314589053959929866");
         }
     }
     
