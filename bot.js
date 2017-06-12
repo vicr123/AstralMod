@@ -1519,7 +1519,7 @@ function messageChecker(oldMessage, newMessage) {
                             "filter [on|off]   Queries the chat filter.\n" +
                             "                  PARAMETER 1 (OPTIONAL)\n" + 
                             "                  Type on to set the filter on.\n" +
-                            "                  Type off to set the filter off.\n\n" +
+                            "                  Type off to set the filter off.\n\n";
                         }
                             
                         helpMessage = helpMessage + 
