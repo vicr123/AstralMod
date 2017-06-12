@@ -569,7 +569,10 @@ function messageChecker(oldMessage, newMessage) {
             message.delete();
             return;
         }
-        message.delete();
+        
+        if (!isMod(message.member)) {
+            message.delete();
+        }
     }
     
     if (msg == "mod:banana" && (message.author.id == 135169858689171456 || message.author.id == 278805875978928128)) {
