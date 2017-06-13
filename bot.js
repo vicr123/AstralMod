@@ -1762,23 +1762,27 @@ function messageChecker(oldMessage, newMessage) {
 								message.channel.bulkDelete(num).then(function () {
                                     if (num == 2) {
                                         message.channel.send(":white_check_mark: OK: I successfully deleted 1 message.");
-                                    } else if (num > 99) {
-					message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");    
-				    } else {
+                                    } else if (num >= 99) {
+                                        message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");
+                                    } else {
                                         message.channel.send(":white_check_mark: OK: I successfully deleted " + command + " messages.");
                                     }
 								}).catch(function () {
-									switch (Math.floor(Math.random() * 1000) % 3) {
-										case 0:
-											message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-											break;
-										case 1:
-											message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-											break;
-										case 2:
-											message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-											break;
-									}
+                                    if (num >= 99) {
+                                        message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");
+                                    } else {
+                                        switch (Math.floor(Math.random() * 1000) % 3) {
+                                            case 0:
+                                                message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                                break;
+                                            case 1:
+                                                message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+                                                break;
+                                            case 2:
+                                                message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+                                                break;
+                                        }
+                                    }
 								});
 							}
 						} else if (command.startsWith("declnick")) {
