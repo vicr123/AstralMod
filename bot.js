@@ -1437,21 +1437,6 @@ function messageChecker(oldMessage, newMessage) {
                                 }
                             }
 
-                            /*var postFeedbackFunction = function() {
-                                if (numberOfMembersTried == 10) {
-                                    var msg = ":speech_balloon: " + parseInt(membersPlaced.length) + " members were placed into the chat.```";
-                                    for (let member of membersPlaced) {
-                                        reply += getUserString(member) + "\n";
-                                    }
-                                    msg += "```";
-                                    message.reply(msg);
-
-                                    numberOfMembersTried = 0;
-                                    membersPlaced = [];
-                                }
-                            };*/
-                            
-
                             var placeMemberFunction = function() {
                                 numberOfMembersTried++;
                                 if (membersInWaitingRoom.length != 0) {
@@ -1489,7 +1474,7 @@ function messageChecker(oldMessage, newMessage) {
                                     } else {
                                         message.channel.send(":speech_balloon: There are only " + parseInt(i) + " eligible members in the weekly chat and all of them have been queued to be moved in.")
                                     }
-                                    i = 10;
+                                    i = numberOfMembers;
                                 }
                             }
 
