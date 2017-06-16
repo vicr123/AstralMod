@@ -605,7 +605,7 @@ function messageChecker(oldMessage, newMessage) {
         }
     }
     
-    if (!isMod(message.member) && msg.indexOf("@everyone") != -1 && message.guild.id == 277922530973581312) {
+    if (!isMod(message.member) && msg.indexOf("@everyone") != -1 || msg.indexOf("@here") != -1 && message.guild.id == 277922530973581312) {
         message.reply("Nice try... but we disabled that.");
     }
     
