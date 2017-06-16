@@ -444,7 +444,7 @@ client.on('ready', () => {
 function nickExpletiveCheck(phrase) {
 	if (containsExpletive(phrase)) return true;
 	
-	var exp = phrase.search(/(hentai|asl|a55|ass|anal|ballsack|bong|cocaine|cum|dick|dp|pedo|pube|rape|scat|semen|testes|tits|anus|arse|bitch|b1tch|b17ch|boob|cock|foreskin|hardon|jerk)+/i);
+	var exp = phrase.search(/(hentai|asl|a55|ass|anal|ballsack|bong|cocaine|cum|dick|dp|pedo|pube|rape|scat|semen|testes|tits|anus|arse|bitch|b1tch|b17ch|boob|cock|foreskin|hardon|jerk|✓ᵛᵉʳᶦᶠᶦᵉᵈ)+/i);
 
 	if (exp == -1) {
 		return false;
