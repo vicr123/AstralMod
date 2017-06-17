@@ -444,7 +444,7 @@ client.on('ready', () => {
 function nickExpletiveCheck(phrase) {
 	if (containsExpletive(phrase)) return true;
 	
-	var exp = phrase.search(/(hentai|asl|a55|ass|anal|ballsack|bong|cocaine|cum|dick|dp|pedo|pube|rape|scat|semen|testes|tits|anus|arse|bitch|b1tch|b17ch|boob|cock|foreskin|hardon|jerk)+/i);
+	var exp = phrase.search(/(hentai|asl|a55|ass|anal|ballsack|bong|cocaine|cum|dick|dp|pedo|pube|rape|scat|semen|testes|tits|anus|arse|bitch|b1tch|b17ch|boob|cock|foreskin|hardon|jerk|✓ᵛᵉʳᶦᶠᶦᵉᵈ)+/i);
 
 	if (exp == -1) {
 		return false;
@@ -605,7 +605,7 @@ function messageChecker(oldMessage, newMessage) {
         }
     }
     
-    if (!isMod(message.member) && msg.indexOf("@everyone") != -1 && message.guild.id == 277922530973581312) {
+    if (!isMod(message.member) && msg.indexOf("@everyone") != -1 || msg.indexOf("@here") != -1 && message.guild.id == 277922530973581312) {
         message.reply("Nice try... but we disabled that.");
     }
     
