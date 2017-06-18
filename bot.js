@@ -1935,7 +1935,7 @@ client.on('guildMemberAdd', function(guildMember) {
             console.log("[STATUS] " + getUserString(guildMember) + " --> APHC");
         } else if (guildMember.guild.id == 263368501928919040) {
             channel = client.channels.get("314589053959929866");
-            console.log("[STATUS] " + getUserString(user) + " --> TWOW");
+            console.log("[STATUS] " + getUserString(guildMember) + " --> TWOW");
         } else {
             channel = client.channels.get("320422079130238980");
             console.log("[STATUS] " + getUserString(guildMember) + " --> ts");
