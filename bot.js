@@ -1282,16 +1282,16 @@ function messageChecker(oldMessage, newMessage) {
                             if (message.guild.id == 277922530973581312) {
 
                                     if (pendingNickTimeout[message.author.id] == null) {
-                                            pendingNickTimeout[message.author.id] = new Date().getTime() - 3600000;
+                                            pendingNickTimeout[message.author.id] = new Date().getTime() - 86400000;
                                     }
 
                                     if (new Date().getTime() > pendingNickTimeout[message.author.id]) {
-                                            pendingNickTimeout[message.author.id] = new Date().getTime() + 3600000;
+                                            pendingNickTimeout[message.author.id] = new Date().getTime() + 86400000;
 
                                             if (nickExpletiveCheck(command)) {
-                                                    message.channel.send(":no_entry_sign: NO: Preliminary nickname checks failed. Wait an hour and then choose a more... erm... *sensible* nickname please.");
+                                                    message.channel.send(":no_entry_sign: NO: Preliminary nickname checks failed. Wait until tomorrow and then choose a more... erm... *sensible* nickname please.");
                                             } else if (command.length >= 32) {
-                                                    message.channel.send(":no_entry_sign: NO: Nicknames need to be less than 32 characters. Wait an hour and then try again.");
+                                                    message.channel.send(":no_entry_sign: NO: Nicknames need to be less than 32 characters. Wait until tomorrow and then try again.");
                                             } else {
                                                     var nick = command;
                                                     message.channel.send(":white_check_mark: OK: Preliminary nickname checks passed. Your nickname will be changed in 5 minutes if the mods agree with it.");
@@ -1300,10 +1300,14 @@ function messageChecker(oldMessage, newMessage) {
                                                             message.member.setNickname(nick);
                                                             pendingNicks[message.author.id] = null;
                                                     }, 300000, null);
-                                                    client.channels.get("277923386959855626").sendMessage("<@" + message.author.id + "> is changing his nickname to `" + nick + "`. Type `mod:declnick " + message.author.id + "` to cancel this.");
+                                                    if (nick == "") {
+                                                        client.channels.get("277923386959855626").sendMessage("<@" + message.author.id + "> :arrow_right: `[clear]`. `mod:declnick " + message.author.id + "`");
+                                                    } else {
+                                                        client.channels.get("277923386959855626").sendMessage("<@" + message.author.id + "> :arrow_right: `" + nick + "`. `mod:declnick " + message.author.id + "`");
+                                                    }
                                             }
                                     } else {
-                                            message.channel.send(":no_entry_sign: NO: Cool down. You'll need to wait an hour between each change. Ask a mod if you absolutely must have your nickname change *now.*");
+                                            message.channel.send(":no_entry_sign: NO: Cool down. You'll need to wait a day between each change. Ask a mod if you absolutely must have your nickname change *now.*");
                                     }
                             } else {
                                     message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
