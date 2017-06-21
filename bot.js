@@ -473,7 +473,7 @@ function getBoshyTime(guild) {
 
 function isMod(member) {
     if (member != null) {
-        if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers") || member.roles.find("name", "Pseudo-Moderator") || member.roles.find("name", "Staff") || member.roles.find("name", "The Crew")) {
+        if (member.roles.find("name", "Admin") || member.roles.find("name", "Moderator") || member.roles.find("name", "moderators") || member.roles.find("name", "Mod") || member.roles.find("name", "Upper Council of Explorers") || member.roles.find("name", "Lower Council of Explorers") || member.roles.find("name", "Pseudo-Moderator") || member.roles.find("name", "Staff") || member.roles.find("name", "The Crew") || member.roles.find("name", "Mini-Mods")) {
             return true;
         } else {
             return false;
@@ -2033,9 +2033,9 @@ client.on('guildMemberRemove', function(user) {
             } else if (user.guild.id == 263368501928919040) {
                 channel = client.channels.get("314589053959929866");
                 console.log("[STATUS] TWOW <-- " + getUserString(user));
-            } else if (guildMember.guild.id == 287937616685301762) {
+            } else if (user.guild.id == 287937616685301762) {
                 channel = client.channels.get("326970091683971072");
-                console.log("[STATUS] TWOW <-- " + getUserString(user));
+                console.log("[STATUS] WoW <-- " + getUserString(user));
             } else {
                 channel = client.channels.get("320422079130238980");
                 console.log("[STATUS] ts <-- " + getUserString(user));
