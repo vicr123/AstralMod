@@ -1928,7 +1928,7 @@ client.on('message', messageChecker);
 client.on('messageUpdate', messageChecker);
 
 client.on('guildMemberAdd', function(guildMember) {
-    if (guildMember.guild.id == 277922530973581312 || guildMember.guild.id == 278824407743463424 || guildMember.guild.id == 263368501928919040) {
+    if (guildMember.guild.id == 277922530973581312 || guildMember.guild.id == 278824407743463424 || guildMember.guild.id == 263368501928919040 || guildMember.guild.id == 287937616685301762) {
         var channel;
         if (guildMember.guild.id == 277922530973581312) {
             channel = client.channels.get("284837615830695936");
@@ -1936,6 +1936,9 @@ client.on('guildMemberAdd', function(guildMember) {
         } else if (guildMember.guild.id == 263368501928919040) {
             channel = client.channels.get("314589053959929866");
             console.log("[STATUS] " + getUserString(guildMember) + " --> TWOW");
+        } else if (guildMember.guild.id == 287937616685301762) {
+            channel = client.channels.get("326970091683971072");
+            console.log("[STATUS] " + getUserString(guildMember) + " --> WoW");
         } else {
             channel = client.channels.get("320422079130238980");
             console.log("[STATUS] " + getUserString(guildMember) + " --> ts");
@@ -1958,14 +1961,15 @@ client.on('guildMemberAdd', function(guildMember) {
         embed.setFooter("User ID for moderation actions: " + guildMember.user.id);
         channel.sendEmbed(embed);
         
-        /*
-        var now = new Date();
-        var joinDate = guildMember.user.createdAt;
-        if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
-            if (guildMember.guild.id == 277922530973581312) {
-                channel.sendMessage(":calendar: <@&313996053881815040> This member was created today.");
+        if (guildMember.guild.id == 287937616685301762) {
+            var now = new Date();
+            var joinDate = guildMember.user.createdAt;
+            if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
+                if (guildMember.guild.id == 287937616685301762) {
+                    channel.sendMessage(":calendar: <@&326915978392764426> This member was created today.");
+                }
             }
-        }*/
+        }
     }
 });
 
@@ -2028,6 +2032,9 @@ client.on('guildMemberRemove', function(user) {
                 console.log("[STATUS] APHC <-- " + getUserString(user));
             } else if (user.guild.id == 263368501928919040) {
                 channel = client.channels.get("314589053959929866");
+                console.log("[STATUS] TWOW <-- " + getUserString(user));
+            } else if (guildMember.guild.id == 287937616685301762) {
+                channel = client.channels.get("326970091683971072");
                 console.log("[STATUS] TWOW <-- " + getUserString(user));
             } else {
                 channel = client.channels.get("320422079130238980");

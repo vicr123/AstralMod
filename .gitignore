@@ -1,4 +1,6 @@
 
 keys.js
 
-node_modules/ws/lib/Validation.fallback.js
+node_modules/
+
+.vs/
