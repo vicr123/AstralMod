@@ -771,7 +771,7 @@ function messageChecker(oldMessage, newMessage) {
             //BotWarnings:
             //AstralPhaser Central: 282513354118004747
             //theShell            : 283184634400079872
-            if (message.author.id != 282048599574052864 && msg.search(/\b(kys|kill yourself)\b/i) != -1) {
+            if (message.author.id != 282048599574052864 && msg.search(/\b(kys|kill yourself|k-y-s|k y s|k ys|k ys|k i l l yourself|k i l l y o u r s e l f|k-ys|ky-s|kill y o u r s e l f|kill ys|k yourself|killyourself|k y o u r s e l f)\b/i) != -1) {
                 var auth = message.author;
                 if (message.guild.id == 277922530973581312) { //AstralPhaser
                     client.channels.get("282513354118004747").send(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
