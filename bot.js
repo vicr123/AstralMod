@@ -356,10 +356,17 @@ function handleAction(message) {
             member = null;
             actioningMember[message.guild.id] = null;
         } else if (msg.toLowerCase() == "mute" && message.guild.id == 277922530973581312) {
-            member.addRole(member.guild.roles.get("294782894625390593"));
-            message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
-            member = null;
-            actioningMember[message.guild.id] = null;
+	    if (member.roles.get("294782894625390593")) {
+                member.removeRole(member.roles.get("294782894625390593"));
+		message.channel.send(':gear: ' + getUserString(member) + " has been removed from time out.");
+		member = null;
+		actioningMember[message.guild.id] = null;
+	    } else {
+                member.addRole(member.guild.roles.get("294782894625390593"));
+                message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
+                member = null;
+                actioningMember[message.guild.id] = null;
+	    }
         } else if (msg.toLowerCase() == "kick") {
             actionStage[message.guild.id] = 1;
             message.channel.send(":gear: Enter reason for kicking " + getUserString(member) + " or `cancel`.");
