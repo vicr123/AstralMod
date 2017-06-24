@@ -1573,9 +1573,8 @@ function messageChecker(oldMessage, newMessage) {
                         if (message.guild.id != 277922530973581312) {
                             message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
                         } else {
-                            var roleid = 328075669080768514
-                            message.guild.roles.get(roleid).members.forEach(function(cmember) {
-                                cmember.removeRole(message.guild.roles.get(roleid));
+                            message.guild.roles.get("328075669080768514").members.forEach(function(cmember) {
+                                cmember.removeRole(message.guild.roles.get("328075669080768514"));
                             });
                         }
                         break;
