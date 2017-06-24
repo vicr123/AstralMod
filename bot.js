@@ -2103,7 +2103,7 @@ client.on('guildMemberRemove', function(user) {
     }
     
     if (user.guild != null) {
-        if (user.guild.id == 277922530973581312 || user.guild.id == 278824407743463424 || user.guild.id == 263368501928919040) {
+        if (user.guild.id == 277922530973581312 || user.guild.id == 278824407743463424 || user.guild.id == 263368501928919040 || user.guild.id == 287937616685301762) {
             var channel;
             if (user.guild.id == 277922530973581312) {
                 channel = client.channels.get("284837615830695936");
