@@ -948,6 +948,61 @@ function messageChecker(oldMessage, newMessage) {
                     );
                     commandProcessed = true;
                     break;
+                case "uinfo":
+                    if (!isMod(message.member)) {
+                        var member = message.member;
+                        embed = new Discord.RichEmbed("test");
+                        embed.setAuthor(getUserString(member), member.user.displayAvatarURL);
+                        embed.setColor("#FF0000");
+                        embed.setDescription("User Information");
+
+                        {
+                            var msg = "**Created** " + member.user.createdAt.toUTCString() + "\n";
+                            if (member.joinedAt.getTime() == 0) {
+                                msg += "**Joined** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                            } else {
+                                msg += "**Joined** " + member.joinedAt.toUTCString();
+                            }
+
+                            embed.addField("Timestamps", msg);
+                        }
+
+                        {
+                            var msg = "**Current Display Name** " + member.displayName + "\n";
+                            msg += "**Username** " + member.user.username + "\n";
+                            if (member.nickname != null) {
+                                msg += "**Nickname** " + member.nickname;
+                            } else {
+                                msg += "**Nickname** No nickname";
+                            }
+
+                            embed.addField("Names", msg);
+                        }
+
+                        /*if (member.lastMessageID != null) {
+                            var lastMessage = null;
+                            
+                            message.channel.fetchMessage(member.lastMessage).then(function(retrievedMessage) {
+                                lastMessage = retrievedMessage;
+                            }).catch(function () {
+                                lastMessage = -1;
+                            });
+                            
+                            while (lastMessage == null) {}
+                            
+                            if (lastMessage != -1) {
+                                var msg = "**ID** " + member.lastMessageID + "\n";
+                                msg += "**Contents** " + lastMessage.content;
+                                
+                                embed.addField("Last Message", msg);
+                            }
+                        }*/
+
+                        embed.setFooter("User ID: " + member.user.id);
+                        //embed.setDescription(msg);
+                        message.channel.sendEmbed(embed);
+                        commandProcessed = true;
+                    }
                 case "warranty":
                     message.author.send(
                         "This program is distributed in the hope that it will be useful,\n" +
