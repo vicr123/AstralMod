@@ -1523,7 +1523,7 @@ function messageChecker(oldMessage, newMessage) {
                                     //Choose a random member
                                     var chosenMember = membersInWaitingRoom.splice(Math.floor(Math.random() * 1000) % membersInWaitingRoom.length, 1)[0];
                                     chosenMember.setVoiceChannel("277922530973581313").then(function() {
-					chosenMember.addRole(message.guild.roles.find('name', 'Weekly Chat').id);
+					chosenMember.addRole(328075669080768514);
                                         console.log("Member placed in weekly chat");
                                         membersPlaced.push(chosenMember);
                                         message.channel.send(":speech_balloon: `" + getUserString(chosenMember) + "` was placed into the Weekly Chat")
@@ -1545,7 +1545,7 @@ function messageChecker(oldMessage, newMessage) {
 
                             for (var i = 0; i < numberOfMembers; i++) {
                                 if (placeMemberFunction()) {
-                                    if (i == numberOfMembers - 1) {
+                                   if (i == numberOfMembers - 1) {
                                         message.channel.send(":speech_balloon: " + parseInt(numberOfMembers) + " people have been queued to be moved to the weekly chat.")
                                     }
                                 } else {
@@ -1573,7 +1573,7 @@ function messageChecker(oldMessage, newMessage) {
 			if (message.guild.id != 277922530973581312) {
 			    message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
 			} else {
-			    var roleid = message.guild.roles.find('name', 'Weekly Chat').id
+			    var roleid = 328075669080768514
 			    message.guild.roles.get(roleid).members.forEach(function(cmember) {
 			    	cmember.removeRole(roleid);
 			    });
