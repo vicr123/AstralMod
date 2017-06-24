@@ -60,7 +60,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 30) {
+    switch (Math.floor(Math.random() * 1000) % 31) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -146,6 +146,9 @@ function setGame() {
         case 28:
         case 29:
             presence.game.name = "v." + amVersion;
+            break;
+        case 30:
+            presence.game.name = "Locked and loaded!";
             break;
     }
     client.user.setPresence(presence);
