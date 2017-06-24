@@ -1576,7 +1576,9 @@ function messageChecker(oldMessage, newMessage) {
                             message.guild.roles.get("328075669080768514").members.forEach(function(cmember) {
                                 cmember.removeRole(message.guild.roles.get("328075669080768514"));
                             });
+                            message.send(":speech_balloon: All weekly chat-ees have the Chatroom Phil permissions revoked.");
                         }
+                        message.delete();
                         break;
                     case "help":
                         var helpMessage = "And here are the mod only commands:\n```\n" +
