@@ -1003,6 +1003,7 @@ function messageChecker(oldMessage, newMessage) {
                         message.channel.sendEmbed(embed);
                         commandProcessed = true;
                     }
+                    break;
                 case "warranty":
                     message.author.send(
                         "This program is distributed in the hope that it will be useful,\n" +
