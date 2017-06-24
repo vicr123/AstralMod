@@ -1523,6 +1523,7 @@ function messageChecker(oldMessage, newMessage) {
                                     //Choose a random member
                                     var chosenMember = membersInWaitingRoom.splice(Math.floor(Math.random() * 1000) % membersInWaitingRoom.length, 1)[0];
                                     chosenMember.setVoiceChannel("277922530973581313").then(function() {
+					chosenMember.addRole(message.guild.roles.find('name', 'Weekly Chat').id);
                                         console.log("Member placed in weekly chat");
                                         membersPlaced.push(chosenMember);
                                         message.channel.send(":speech_balloon: `" + getUserString(chosenMember) + "` was placed into the Weekly Chat")
@@ -1568,6 +1569,16 @@ function messageChecker(oldMessage, newMessage) {
                             }
                         }
                         break;
+		    case "stopchat":
+			if (message.guild.id != 277922530973581312) {
+			    message.reply(':no_entry_sign: ERROR: Unable to use that command in this server.');
+			} else {
+			    var roleid = message.guild.roles.find('name', 'Weekly Chat').id
+			    message.guild.roles.get(roleid).members.forEach(function(cmember) {
+			    	cmember.removeRole(roleid);
+			    });
+			}
+			break;
                     case "help":
                         var helpMessage = "And here are the mod only commands:\n```\n" +
                             "mod    [on|off]   Queries moderation status.\n" +
