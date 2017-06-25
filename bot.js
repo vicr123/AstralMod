@@ -365,12 +365,6 @@ function handleAction(message) {
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
             member = null;
             actioningMember[message.guild.id] = null;
-        } else if ((msg.toLowerCase() == "pjail" || msg.toLowerCase() == "pj") && message.guild.id == 277922530973581312) {
-            member.addRole(member.guild.roles.get("326782768573054977"));
-            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
-            message.channel.send(':gear: ' + getUserString(member) + " has been placed in pseudo-jail.");
-            member = null;
-            actioningMember[message.guild.id] = null;
         } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && message.guild.id == 277922530973581312) {
             if (member.roles.get("294782894625390593")) {
                 member.removeRole(member.roles.get("294782894625390593"));
@@ -1379,6 +1373,7 @@ function messageChecker(oldMessage, newMessage) {
                                                             message.member.setNickname(nick);
                                                             pendingNicks[message.author.id] = null;
                                                     }, 300000, null);
+
                                                     if (nick == "") {
                                                         client.channels.get("277923386959855626").send("<@" + message.author.id + "> :arrow_right: `[clear]`. `mod:declnick " + message.author.id + "`");
                                                     } else {
@@ -1806,7 +1801,7 @@ function messageChecker(oldMessage, newMessage) {
                                         }
                                         
                                         if (message.guild.id == 277922530973581312) {
-                                            msg += "`(m)ute` `(pj)ail` ";
+                                            msg += "`(m)ute` ";
                                             canDoActions = true;
                                         }
                                         
