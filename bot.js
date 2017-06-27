@@ -471,7 +471,7 @@ function nickExpletiveCheck(phrase) {
 }
 
 function containsExpletive(phrase) {
-    var exp = phrase.search(/(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|vagina|thisisnotarealwordbutatestword)+/i);
+    var exp = phrase.search(/\b(shit|shite|shitty|bullshit|fuck|fucking|ass|penis|cunt|faggot|damn|wank|wanker|nigger|bastard|shut up|piss|vagina|thisisnotarealwordbutatestword)+\b/i);
     
     if (exp == -1) {
         return false;
