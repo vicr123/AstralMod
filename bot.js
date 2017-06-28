@@ -18,7 +18,7 @@
  * 
  * *************************************/
 
-const amVersion = "1.0.1";
+const amVersion = "1.1.0";
 
 const Discord = require('discord.js');
 const api = require('./keys.js');
@@ -456,6 +456,9 @@ client.on('ready', () => {
         connection = conn;
         playAudio();
     });
+    
+    //Get all messages in #suggestions
+    client.channels.get("308499752993947649").fetchMessages();
 });
 
 function nickExpletiveCheck(phrase) {
@@ -2015,6 +2018,10 @@ function messageChecker(oldMessage, newMessage) {
 client.on('message', messageChecker);
 client.on('messageUpdate', messageChecker);
 
+client.on('messageUpdate', function(old, newMessage) {
+    console.log("Message Update");
+});
+
 client.on('guildMemberAdd', function(guildMember) {
     if (guildMember.guild.id == 277922530973581312 || guildMember.guild.id == 278824407743463424 || guildMember.guild.id == 263368501928919040 || guildMember.guild.id == 287937616685301762) {
         var channel;
@@ -2277,6 +2284,18 @@ client.on("guildBanAdd", function(guild, user) {
         console.log("[STATUS] " + getUserString(user) + " --> BAN");
         channel = client.channels.get("284837615830695936");
         channel.send(":red_circle: " + user.username + " :hammer: ¯\\_(ツ)_/¯ :hammer:");
+    }
+});
+
+client.on("messageReactionAdd", function(reaction, user) {
+    if (reaction.message.channel.id == 308499752993947649) {
+        if (!isMod(reaction.message.guild.member(user))) {
+            if (reaction.emoji.identifier != "plus1:280230222614233088" && reaction.emoji.identifier != "minus1:280230258358222850") {
+                //Remove reaction
+                reaction.remove(user);
+            }
+        }
+        //console.log("Reaction added: " + reaction.emoji.identifier);
     }
 });
 
