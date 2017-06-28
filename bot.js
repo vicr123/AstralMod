@@ -18,7 +18,7 @@
  * 
  * *************************************/
 
-const amVersion = "1.1.0";
+const amVersion = "1.1.1";
 
 const Discord = require('discord.js');
 const api = require('./keys.js');
@@ -52,6 +52,18 @@ var actionToPerform = {};
 
 var dispatcher;
 var connection;
+
+const suggestionStartMessage =  "**Make a suggestion**\n" +
+                                "Welcome to the suggestion process! Please read this before you continue.\n" +
+                                "Here's how this will work.\n\n" +
+                                "- I'll walk you through the process of creating a suggestion on the suggestions channel.\n" +
+                                "- Just respond to my prompts by typing a message in this DM and sending it.\n" +
+                                "- At any time, simply respond with `q` to cancel the suggestion.\n\n" +
+                                "However, please be aware of the following:\n" +
+                                "- Your Discord Username will be recorded and sent along with the suggestion.\n" +
+                                "- Your suggestion will be publicly visible.\n" +
+                                "- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
+                                "Wait 30 seconds, and then respond with `y` if you understood the above."
 
 function setGame() {
     var presence = {};
@@ -193,7 +205,7 @@ function handleSuggest(message) {
 
         embed.addField(title, suggestion);
         
-        message.author.sendEmbed(embed);
+        message.author.send("", {embed: embed});
         
         message.author.send(":octagonal_sign: Suggestion process cancelled.");
         state = null;
@@ -201,26 +213,30 @@ function handleSuggest(message) {
         switch (state.state) {
             case 1: //Welcome to the suggestion tool
                 if (message.content.toLowerCase() == "y") {
-                    //Continue
-                    state.state = 2;
-                    
-                    var embed = new Discord.RichEmbed("test");
-                    embed.setAuthor("Suggestion");
-                    embed.setColor("#00CA00");
-                    embed.setDescription("\u200B");
-                    
-                    if (state.suggestion == null) {
-                        embed.addField("__Title__\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_", "Suggestion");
+                    if (state.startTime.getTime() + 30000 > (new Date()).getTime()) {
+                        message.author.send(":arrow_up: Before you can make a suggestion, you'll need to read the above carefully. Please take time to read it again, and then you can continue with your suggestion.");
                     } else {
-                        embed.addField("__Title__\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_", state.suggestion);
+                        //Continue
+                        state.state = 2;
+                        
+                        var embed = new Discord.RichEmbed("test");
+                        embed.setAuthor("Suggestion");
+                        embed.setColor("#00CA00");
+                        embed.setDescription("\u200B");
+                        
+                        if (state.suggestion == null) {
+                            embed.addField("__Title__\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_", "Suggestion");
+                        } else {
+                            embed.addField("__Title__\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_", state.suggestion);
+                        }
+                        
+                        embed.setFooter("User ID: " + message.author.id);
+                        message.author.send("", {embed: embed}).then(function(message) {
+                            state.lastEmbed = message;
+                        });
+                        
+                        message.author.send("What's the title for this suggestion? It'll need to be 30 characters or less.");
                     }
-                    
-                    embed.setFooter("User ID: " + message.author.id);
-                    message.author.sendEmbed(embed).then(function(message) {
-                        state.lastEmbed = message;
-                    });
-                    
-                    message.author.send("What's the title for this suggestion? It'll need to be 30 characters or less.");
                 } else {
                     //Abort
                     message.author.send(":octagonal_sign: Suggestion process cancelled.");
@@ -247,7 +263,7 @@ function handleSuggest(message) {
                         
                         embed.addField(state.title, "__Suggestion__\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_");
                         
-                        message.author.sendEmbed(embed).then(function(message) {
+                        message.author.send("", {embed: embed}).then(function(message) {
                             state.lastEmbed = message;
                         });
                     
@@ -262,7 +278,7 @@ function handleSuggest(message) {
                         
                         embed.addField(state.title, state.suggestion);
                         
-                        message.author.sendEmbed(embed).then(function(message) {
+                        message.author.send("", {embed: embed}).then(function(message) {
                             state.lastEmbed = message;
                         });
 
@@ -286,7 +302,7 @@ function handleSuggest(message) {
                     
                     embed.addField(state.title, state.suggestion);
                     
-                    message.author.sendEmbed(embed).then(function(message) {
+                    message.author.send("", {embed: embed}).then(function(message) {
                         state.lastEmbed = message;
                     });
 
@@ -311,23 +327,40 @@ function handleSuggest(message) {
                         channel = client.channels.get("308547573382250497");
                     }
                     
-                    channel.sendEmbed(embed);
+                    channel.send("", {embed: embed});
                     state = null;
                     message.author.send(":white_check_mark: OK: Your suggestion has been submitted to our staff. Thanks! :D");
-                } else if (message.content.toLowerCase() == "r" || message.content.toLowerCase() == "start over" || message.content.toLowerCase() == "retry" || message.content.toLowerCase() == "start over" ||
+                } else if (message.content.toLowerCase() == "r" || message.content.toLowerCase() == "start over" || message.content.toLowerCase() == "retry" || message.content.toLowerCase() == "no" ||
                             message.content.toLowerCase() == "restart") {
-                    state.state = 1;
+                    state.state = 2;
                     state.suggestion = null;
-                    message.author.send("**Make a suggestion**\n" +
-                                        "Here's how this will work.\n\n" +
-                                        "- I'll walk you through the process of creating a suggestion on the suggestions channel.\n" +
-                                        "- Just respond to my prompts by typing a message in this DM and sending it.\n" +
-                                        "- At any time, simply respond with `q` to cancel the suggestion.\n\n" +
-                                        "However, please be aware of the following:\n" +
-                                        "- Your Discord Username will be recorded and sent along with the suggestion.\n" +
-                                        "- Your suggestion will be publicly visible.\n" +
-                                        "- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
-                                        "Respond with `y` if you understood the above.");
+                    state.startTime = new Date();
+                    message.author.send(suggestionStartMessage);
+                } else if (message.content.toLowerCase == "cancel") {//Abort
+                    var embed = new Discord.RichEmbed("test");
+                    embed.setAuthor("[CANCELLED]");
+                    embed.setColor("#FF0000");
+                    embed.setDescription("\u200B");
+                    
+                    var title;
+                    if (state.title == null) {
+                        title = "~~Title~~";
+                    } else {
+                        title = "~~" + state.title + "~~";
+                    }
+
+                    var suggestion;
+                    if (state.suggestion == null) {
+                        suggestion = "~~Suggestion~~";
+                    } else {
+                        suggestion = "~~" + state.suggestion + "~~";
+                    }
+
+                    embed.addField(title, suggestion);
+                    
+                    message.author.send("", {embed: embed});
+                    
+                    message.author.send(":octagonal_sign: Suggestion process cancelled.");
                 } else {
                     message.author.send("Sorry, I didn't quite get that. Respond with `yes` or `retry`.");
                 }
@@ -458,7 +491,9 @@ client.on('ready', () => {
     });
     
     //Get all messages in #suggestions
-    client.channels.get("308499752993947649").fetchMessages();
+    client.channels.get("308499752993947649").fetchMessages({
+        limit: 100
+    });
 });
 
 function nickExpletiveCheck(phrase) {
@@ -1000,7 +1035,7 @@ function messageChecker(oldMessage, newMessage) {
 
                         embed.setFooter("User ID: " + member.user.id);
                         //embed.setDescription(msg);
-                        message.channel.sendEmbed(embed);
+                        message.channel.send("", {embed: embed});
                         commandProcessed = true;
                     }
                     break;
@@ -1059,18 +1094,10 @@ function messageChecker(oldMessage, newMessage) {
                         suggestStates[message.author.id] = {};
                         suggestStates[message.author.id].state = 1;
                         suggestStates[message.author.id].guild = message.guild.id;
+                        suggestStates[message.author.id].startTime = new Date();
                         
                         message.reply(":arrow_left: Continue in DMs.");
-                        message.author.send("**Make a suggestion**\n" +
-                                            "Here's how this will work.\n\n" +
-                                            "- I'll walk you through the process of creating a suggestion on the suggestions channel.\n" +
-                                            "- Just respond to my prompts by typing a message in this DM and sending it.\n" +
-                                            "- At any time, simply respond with `q` to cancel the suggestion.\n\n" +
-                                            "However, please be aware of the following:\n" +
-                                            "- Your Discord Username will be recorded and sent along with the suggestion.\n" +
-                                            "- Your suggestion will be publicly visible.\n" +
-                                            "- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
-                                            "Respond with `y` if you understood the above.");
+                        message.author.send(suggestionStartMessage);
                     } else {
                         message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
                     }
@@ -1252,18 +1279,10 @@ function messageChecker(oldMessage, newMessage) {
                                     suggestStates[message.author.id].state = 1;
                                     suggestStates[message.author.id].guild = message.guild.id;
                                     suggestStates[message.author.id].suggestion = command;
+                                    suggestStates[message.author.id].startTime = new Date();
 
                                     message.reply(":arrow_left: Continue in DMs.");
-                                    message.author.send("**Make a suggestion**\n" +
-                                            "Here's how this will work.\n\n" +
-                                            "- I'll walk you through the process of creating a suggestion on the suggestions channel.\n" +
-                                            "- Just respond to my prompts by typing a message in this DM and sending it.\n" +
-                                            "- At any time, simply respond with `q` to cancel the suggestion.\n\n" +
-                                            "However, please be aware of the following:\n" +
-                                            "- Your Discord Username will be recorded and sent along with the suggestion.\n" +
-                                            "- Your suggestion will be publicly visible.\n" +
-                                            "- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
-                                            "Respond with `y` if you understood the above.");
+                                    message.author.send(suggestionStartMessage);
                             } else {
                                     message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
                             }
@@ -1717,7 +1736,7 @@ function messageChecker(oldMessage, newMessage) {
 
 								embed.setFooter("User ID: " + member.user.id);
 								//embed.setDescription(msg);
-								message.channel.sendEmbed(embed);
+								message.channel.send("", {embed: embed});
 
 								lastUserInteraction[message.guild.id] = command;
 							}).catch(function (reason) {
@@ -2018,10 +2037,6 @@ function messageChecker(oldMessage, newMessage) {
 client.on('message', messageChecker);
 client.on('messageUpdate', messageChecker);
 
-client.on('messageUpdate', function(old, newMessage) {
-    console.log("Message Update");
-});
-
 client.on('guildMemberAdd', function(guildMember) {
     if (guildMember.guild.id == 277922530973581312 || guildMember.guild.id == 278824407743463424 || guildMember.guild.id == 263368501928919040 || guildMember.guild.id == 287937616685301762) {
         var channel;
@@ -2054,7 +2069,7 @@ client.on('guildMemberAdd', function(guildMember) {
         }
         embed.setDescription(msg);
         embed.setFooter("User ID for moderation actions: " + guildMember.user.id);
-        channel.sendEmbed(embed);
+        channel.send("", {embed: embed});
         
         if (guildMember.guild.id == 287937616685301762) {
             var now = new Date();
