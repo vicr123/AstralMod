@@ -72,7 +72,7 @@ function setGame() {
     presence.afk = false;
     
     
-    switch (Math.floor(Math.random() * 1000) % 31) {
+    switch (Math.floor(Math.random() * 1000) % 35) {
         case 0:
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
@@ -95,7 +95,7 @@ function setGame() {
             presence.game.name = "with ones and zeroes";
             break;
         case 7:
-            presence.game.name = "being a stepswitcher";
+            presence.game.name = "thyShell";
             break;
         case 8:
             presence.game.name = "with supa weapon";
@@ -155,13 +155,29 @@ function setGame() {
             presence.game.name = "trying to DJ";
             break;
         case 27:
+	    presence.game.name = "Sausages";
+	    break;
         case 28:
+	    presence.game.name = "59 6f 75 20 64 65 63 6f 64 65 64 20 74 68 69 73 20 6d 65 73 73 61 67 65 21";
+	    break;
         case 29:
             presence.game.name = "v." + amVersion;
             break;
         case 30:
             presence.game.name = "Locked and loaded!";
             break;
+	 case 31:
+	    presence.game.name = "Android Pay";
+	    break;
+	 case 32:
+	    presence.game.name = "translating English into Dutch";
+	    break;
+	 case 33:
+	    presence.game.name = "translating Dutch into English";
+	    break;
+	 case 34:
+	    presence.game.name = "Hallo hoe gaat het vandaag?";
+	    break;
     }
     client.user.setPresence(presence);
 }
