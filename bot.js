@@ -633,8 +633,7 @@ function messageChecker(oldMessage, newMessage) {
     }
     
     if (panicMode[message.guild.id]) {
-        if (msg == "mod:panic" && (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers")
-            || message.member.roles.find("name", "The Crew"))) {
+        if (msg == "mod:panic" && isMod(message.member)) {
             message.channel.send(':rotating_light: Panic mode is now off.');
             panicMode[message.guild.id] = false;
             console.log("[STATUS] Panic off.");
@@ -1508,16 +1507,11 @@ function messageChecker(oldMessage, newMessage) {
                         message.delete();
                         break;
                     case "panic":
-                        if (message.member.roles.find("name", "Admin") || message.member.roles.find("name", "Upper Council of Explorers") || message.member.roles.find("name", "The Crew")) {
-                            message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
-                                panicMode[message.guild.id] = true;
-                            });
-                            console.log("[STATUS] Panic on");
-                            message.delete();
-                        } else {
-                            message.reply(':no_entry_sign: NO: This is an admin only command.');
-                            message.delete();
-                        }
+                        message.channel.send(':rotating_light: Panic mode is now on. All message sending for this server has been turned off.').then(function() {
+                            panicMode[message.guild.id] = true;
+                        });
+                        console.log("[STATUS] Panic on");
+                        message.delete();
                         break;
                     case "fetch":
                         message.reply("Give me a minute...").then(function(newMessage, messageArray) {
@@ -2167,7 +2161,7 @@ client.on('guildMemberRemove', function(user) {
                 console.log("[STATUS] ts <-- " + getUserString(user));
             }
             
-            channel.send(":arrow_left: <@" + user.user.id + "> (" + user.displayName + ")");
+            channel.send(":arrow_left: <@" + user.user.id + "> (" + user.displayName + "#" + user.discriminator ")");
         }
     }
 });
@@ -2321,7 +2315,7 @@ client.on("guildBanAdd", function(guild, user) {
 client.on("messageReactionAdd", function(reaction, user) {
     if (reaction.message.channel.id == 308499752993947649) {
         if (!isMod(reaction.message.guild.member(user))) {
-            if (reaction.emoji.identifier != "plus1:280230222614233088" && reaction.emoji.identifier != "minus1:280230258358222850") {
+            if (reaction.emoji.identifier != "plus1:280230222614233088" && reaction.emoji.identifier != "minus1:280230258358222850" && reaction.emoji.identifier != ":still:307857698462892032") {
                 //Remove reaction
                 reaction.remove(user);
             }
