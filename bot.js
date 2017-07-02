@@ -77,7 +77,7 @@ function setGame() {
             presence.game.name = "with ban buttons";
             break; //SCRUATCHO
         case 1:
-            presence.game.name = "ShiftOS";
+            presence.game.name = "Fighting JXBot";
             break;
         case 2:
             presence.game.name = "Annoy Victor";
@@ -137,19 +137,10 @@ function setGame() {
             presence.game.name = "being a ninja";
             break;
         case 21:
-            presence.game.name = "if money cant buy happiness then why is it so fabulous";
+            presence.game.name = "with Unicode characters";
             break;
         case 22:
             presence.game.name = "bot:help for more info";
-            break;
-        case 23:
-            presence.game.name = "TimeHACK";
-            break;
-        case 24:
-            presence.game.name = "TiemHARK";
-            break;
-        case 25:
-            presence.game.name = "harking tiem";
             break;
         case 26:
             presence.game.name = "trying to DJ";
@@ -161,22 +152,25 @@ function setGame() {
 	    presence.game.name = "59 6f 75 20 64 65 63 6f 64 65 64 20 74 68 69 73 20 6d 65 73 73 61 67 65 21";
 	    break;
         case 29:
+        case 23:
+        case 24:
+        case 25:
             presence.game.name = "v." + amVersion;
             break;
         case 30:
             presence.game.name = "Locked and loaded!";
             break;
-	 case 31:
-	    presence.game.name = "Android Pay";
-	    break;
-	 case 32:
-	    presence.game.name = "translating English into Dutch";
-	    break;
-	 case 33:
-	    presence.game.name = "translating Dutch into English";
-	    break;
-	 case 34:
-	    presence.game.name = "Hallo hoe gaat het vandaag?";
+        case 31:
+            presence.game.name = "Android Pay";
+            break;
+        case 32:
+            presence.game.name = "translating English into Dutch";
+            break;
+        case 33:
+            presence.game.name = "translating Dutch into English";
+            break;
+        case 34:
+            presence.game.name = "Hallo hoe gaat het vandaag?";
 	    break;
     }
     client.user.setPresence(presence);
