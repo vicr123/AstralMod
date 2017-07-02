@@ -2161,7 +2161,7 @@ client.on('guildMemberRemove', function(user) {
                 console.log("[STATUS] ts <-- " + getUserString(user));
             }
             
-            channel.send(":arrow_left: <@" + user.user.id + "> (" + user.displayName + "#" + user.discriminator ")");
+            channel.send(":arrow_left: <@" + user.user.id + "> (" + user.displayName + "#" + user.discriminator + ")");
         }
     }
 });
