@@ -63,6 +63,10 @@ const suggestionStartMessage =  "**Make a suggestion**\n" +
                                 "- Your Discord Username will be recorded and sent along with the suggestion.\n" +
                                 "- Your suggestion will be publicly visible.\n" +
                                 "- Any misuse of this command, including (but not limited to) spam will lead to appropriate discipline from staff.\n\n" +
+                                "**Here are some things not to suggest because they will be immediately declined.** This counts as misuse of the suggest command, so hit `q` now if you were going to suggest one of these.\n" +
+                                "- New text/voice channels.\n" +
+                                "- Anything to do with AstralMod. For that, head to https://github.com/vicr123/AstralMod and file a bug report.\n" +
+                                "- New bots.\n\n" +
                                 "Wait 30 seconds, and then respond with `y` if you understood the above."
 
 function setGame() {
@@ -2155,7 +2159,7 @@ client.on('guildMemberRemove', function(user) {
                 console.log("[STATUS] ts <-- " + getUserString(user));
             }
             
-            channel.send(":arrow_left: <@" + user.user.id + "> (" + user.displayName + "#" + user.discriminator + ")");
+            channel.send(":arrow_left: <@" + user.user.id + "> (" + user.displayName + "#" + user.user.discriminator + ")");
         }
     }
 });
