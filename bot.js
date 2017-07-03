@@ -1273,7 +1273,7 @@ function messageChecker(oldMessage, newMessage) {
                             }
                             message.delete();
                             commandProcessed = true;
-                    } else if (command.startsWith("attack") && (message.guild.id != 277922530973581312)) {
+                    } else if (command.startsWith("attack")) {
                             command = command.substr(7);
                             if (command.indexOf("@everyone") == -1) {
                                     if (command.indexOf("@here") == -1) {
