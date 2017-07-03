@@ -2313,7 +2313,7 @@ client.on("guildBanAdd", function(guild, user) {
 client.on("messageReactionAdd", function(reaction, user) {
     if (reaction.message.channel.id == 308499752993947649) {
         if (!isMod(reaction.message.guild.member(user))) {
-            if (reaction.emoji.identifier != "plus1:280230222614233088" && reaction.emoji.identifier != "minus1:280230258358222850" && reaction.emoji.identifier != ":still:307857698462892032") {
+            if (reaction.emoji.identifier != "plus1:280230222614233088" && reaction.emoji.identifier != "minus1:280230258358222850" && reaction.emoji.identifier != "still:307857698462892032") {
                 //Remove reaction
                 reaction.remove(user);
             }
