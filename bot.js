@@ -1104,6 +1104,13 @@ function messageChecker(oldMessage, newMessage) {
                     break;
                 case "suggest":
                     if (message.guild.id == 277922530973581312 || message.guild.id == 297057036292849680) {
+                        if (message.guild.id == 277922530973581312) {
+                            if (!message.member.roles.has("278338447335489546") && !isMod(message.member)) {
+                                message.reply(":no_entry_sign: ERROR: Suggestions have been restricted to regulars on this server. Become a regular or speak directly to an admin to suggest something.");
+                                break;
+                            }
+                        }
+                        
                         suggestStates[message.author.id] = {};
                         suggestStates[message.author.id].state = 1;
                         suggestStates[message.author.id].guild = message.guild.id;
@@ -1288,6 +1295,9 @@ function messageChecker(oldMessage, newMessage) {
                     } else if (command.startsWith("suggest")) {
                             command = command.substr(8);
                             if (message.guild.id == 277922530973581312) {
+                                if (!message.member.roles.has("278338447335489546") && !isMod(message.member)) {
+                                    message.reply(":no_entry_sign: ERROR: Suggestions have been restricted to regulars on this server. Become a regular or speak directly to an admin to suggest something.");
+                                } else {
                                     suggestStates[message.author.id] = {};
                                     suggestStates[message.author.id].state = 1;
                                     suggestStates[message.author.id].guild = message.guild.id;
@@ -1296,8 +1306,9 @@ function messageChecker(oldMessage, newMessage) {
 
                                     message.reply(":arrow_left: Continue in DMs.");
                                     message.author.send(suggestionStartMessage);
+                                }
                             } else {
-                                    message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
+                                message.reply(":no_entry_sign: ERROR: Suggestions are not accepted on this server via AstralMod. Speak directly to an admin to suggest something.");
                             }
                             message.delete();
                             commandProcessed = true;
