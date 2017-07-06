@@ -677,6 +677,10 @@ function messageChecker(oldMessage, newMessage) {
         message.reply("Nice try... but we disabled that.");
     }
     
+    if (msg == "kden") {
+        message.channel.send("live");
+    }
+    
     if (message.author.id != 280495817901473793 && !message.author.bot) {
         //Server Detection:
         //AstralPhaser Central: 277922530973581312
@@ -1155,9 +1159,7 @@ function messageChecker(oldMessage, newMessage) {
                                 case "eagle":
                                 case "projsh":
                                 case "onyx":
-                                    hours = +10;
-                                    break;
-                                case "aest:":
+                                case "aest":
                                     hours = +10;
                                     break;
                                 case "acdt":
