@@ -39,7 +39,7 @@ var poweroff = false;
 var interrogMember = null;
 var bulletinTimeout;
 var runningCommands = true;
-var bananaFilter = true;
+var bananaFilter = false;
 
 var allowPrepChat = true;
 var membersPlaced = [];
@@ -392,19 +392,23 @@ function handleAction(message) {
             message.channel.send(':gear: Cancelled. Exiting action menu.');
             member = null;
             actioningMember[message.guild.id] = null;
-        } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == 277922530973581312 || message.guild.id == 287937616685301762)) {
+        } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == 277922530973581312 || message.guild.id == 287937616685301762 || message.guild.id == 305039436490735627)) {
             if (message.guild.id == 277922530973581312) {
                 member.addRole(member.guild.roles.get("292630494254858241"));
             } else if (message.guild.id == 287937616685301762) {
                 member.addRole(member.guild.roles.get("319847521440497666"));
+            } else if (message.guild.id == 305039436490735627) {
+                member.addRole(member.guild.roles.get("326250571692769281"));
             }
             member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
             member = null;
             actioningMember[message.guild.id] = null;
-        } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == 277922530973581312 || message.guild.id == 263368501928919040)) {
+        } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == 277922530973581312 || message.guild.id == 263368501928919040 || message.guild.id == 305039436490735627)) {
             if (message.guild.id == 277922530973581312) {
                 member.addRole(member.guild.roles.get("277942939915780099"));
+            } else if (message.guild.id == 305039436490735627) {
+                member.addRole(member.guild.roles.get("310196007919157250"));
             } else {
                 member.addRole(member.guild.roles.get("267731524734943233"));
             }
@@ -412,14 +416,21 @@ function handleAction(message) {
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
             member = null;
             actioningMember[message.guild.id] = null;
-        } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && message.guild.id == 277922530973581312) {
-            if (member.roles.get("294782894625390593")) {
-                member.removeRole(member.roles.get("294782894625390593"));
+        } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && (message.guild.id == 277922530973581312 || message.guild.id == 305039436490735627)) {
+            var roleId;
+            if (message.guild.id == 277922530973581312) {
+                roleId = "294782894625390593";
+            } else if (message.guild.id == 305039436490735627) {
+                roleId = "309883481024888842";
+            }
+            
+            if (member.roles.get(roleId)) {
+                member.removeRole(member.roles.get(roleId));
                 message.channel.send(':gear: ' + getUserString(member) + " has been removed from time out.");
                 member = null;
                 actioningMember[message.guild.id] = null;
             } else {
-                member.addRole(member.guild.roles.get("294782894625390593"));
+                member.addRole(member.guild.roles.get(roleId));
                 message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
                 member = null;
                 actioningMember[message.guild.id] = null;
@@ -835,6 +846,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("297762292823490570").send(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 } else if (message.guild.id == 263368501928919040) { //TWOW
                     client.channels.get("314589053959929866").send(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
+                } else if (message.guild.id == 305039436490735627) { //STTA
+                    client.channels.get("310017630964809738").send(":red_circle: " + getUserString(auth) + " \"kys\" <#" + message.channel.id + ">.");
                 }
                 message.reply("Right. We don't appreciate that here. (A notification has been sent to the mods.)");
                 message.delete();
@@ -1989,6 +2002,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("288272065109295104").send(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 263368501928919040) { //TWOW
                     client.channels.get("314589053959929866").send(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 305039436490735627) { //STTA
+                    client.channels.get("310017630964809738").send(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 }
                 
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
@@ -2026,6 +2041,8 @@ function messageChecker(oldMessage, newMessage) {
                     client.channels.get("288272065109295104").send(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 } else if (message.guild.id == 263368501928919040) { //TWOW
                     client.channels.get("314589053959929866").send(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
+                } else if (message.guild.id == 305039436490735627) { //STTA
+                    client.channels.get("310017630964809738").send(":red_circle: " + getUserString(auth) + " was spamming on " + message.channel.name + ".");
                 }
                 message.reply("Quite enough of this. I'm not warning you any more. (A notification has been sent to the mods.)");
                 message.delete();
@@ -2200,6 +2217,8 @@ client.on('messageDelete', function(message) {
             channel = client.channels.get("306041264933961728");
         } else if (message.guild.id == 263368501928919040) { //TWOW
             channel = client.channels.get("323825759393153025");
+        } else if (message.guild.id == 305039436490735627) { //STTA
+            channel = client.channels.get("332735413645082626");
         }
     }
     
@@ -2249,6 +2268,8 @@ client.on('messageDeleteBulk', function(messages) {
             channel = client.channels.get("306041264933961728");
         } else if (messages.first().guild.id == 263368501928919040) { //TWOW
             channel = client.channels.get("323825759393153025");
+        } else if (messages.first().guild.id == 305039436490735627) { //STTA
+            channel = client.channels.get("332735413645082626");
         }
     }
     
@@ -2279,6 +2300,8 @@ client.on('messageUpdate', function(oldMessage, newMessage) {
             channel = client.channels.get("306041264933961728");
         } else if (oldMessage.guild.id == 263368501928919040) { //TWOW
             channel = client.channels.get("323825759393153025");
+        } else if (oldMessage.guild.id == 305039436490735627) { //STTA
+            channel = client.channels.get("332735413645082626");
         }
     }
     
