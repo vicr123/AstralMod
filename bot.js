@@ -698,7 +698,7 @@ function messageChecker(oldMessage, newMessage) {
         //AKidFromTheUK       : 285740807854751754
 
         if (doModeration[message.guild.id]) { //Check if we should do moderation on this server
-            if ((expletiveFilter && message.guild.id == 277922530973581312 && message.channel.id == 308576038324142081) || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
+            if (expletiveFilter || message.guild.id == 278824407743463424) { //Check for expletives only if on AstralPhaser Central or theShell
                 //Check for expletives
                 var exp;
                 if (containsExpletive(msg)) { //Gah! They're not supposed to say that!
@@ -1565,7 +1565,7 @@ function messageChecker(oldMessage, newMessage) {
 
                             for (var i = 0; i < membersInWaitingRoom.length; i++) {
                                 var member = membersInWaitingRoom[i];
-                                if (member.selfMute || member.id == 282048599574052864 || isMod(member)) {
+                                if (member.selfMute || member.serverMute || member.id == 282048599574052864 || isMod(member)) {
                                     membersInWaitingRoom.splice(i, 1);
                                     i--;
                                 }
@@ -1600,14 +1600,20 @@ function messageChecker(oldMessage, newMessage) {
                             for (var i = 0; i < numberOfMembers; i++) {
                                 if (placeMemberFunction()) {
                                    if (i == numberOfMembers - 1) {
-                                        message.channel.send(":speech_balloon: " + parseInt(numberOfMembers) + " people have been queued to be moved to the weekly chat.")
+                                        //Turn on filter
+                                        expletiveFilter = true;
+                                
+                                        message.channel.send(":speech_balloon: " + parseInt(numberOfMembers) + " people have been queued to be moved to the weekly chat. The filter has been switched on.")
                                     }
                                 } else {
                                     if (i == 0) {
                                         message.channel.send(":speech_balloon: No eligible members were found in the waiting room.")
                                         changeAllowPrepChat = false;
                                     } else {
-                                        message.channel.send(":speech_balloon: There are only " + parseInt(i) + " eligible members in the weekly chat and all of them have been queued to be moved in.")
+                                        message.channel.send(":speech_balloon: There are only " + parseInt(i) + " eligible members in the weekly chat and all of them have been queued to be moved in. The filter has been switched on.")
+                                        
+                                        //Turn on filter
+                                        expletiveFilter = true;
                                     }
                                     i = numberOfMembers;
                                 }
@@ -2087,6 +2093,9 @@ client.on('guildMemberAdd', function(guildMember) {
         } else if (guildMember.guild.id == 287937616685301762) {
             channel = client.channels.get("326970091683971072");
             console.log("[STATUS] " + getUserString(guildMember) + " --> WoW");
+        } else if (guildMember.guild.id == 305039436490735627) {
+            channel = client.channels.get("332750228975517699");
+            console.log("[STATUS] " + getUserString(guildMember) + " --> STTA");
         } else {
             channel = client.channels.get("320422079130238980");
             console.log("[STATUS] " + getUserString(guildMember) + " --> ts");
@@ -2173,7 +2182,7 @@ client.on('guildMemberRemove', function(user) {
     }
     
     if (user.guild != null) {
-        if (user.guild.id == 277922530973581312 || user.guild.id == 278824407743463424 || user.guild.id == 263368501928919040 || user.guild.id == 287937616685301762) {
+        if (user.guild.id == 277922530973581312 || user.guild.id == 278824407743463424 || user.guild.id == 263368501928919040 || user.guild.id == 287937616685301762 || user.guild.id == 305039436490735627) {
             var channel;
             if (user.guild.id == 277922530973581312) {
                 channel = client.channels.get("284837615830695936");
@@ -2184,6 +2193,9 @@ client.on('guildMemberRemove', function(user) {
             } else if (user.guild.id == 287937616685301762) {
                 channel = client.channels.get("326970091683971072");
                 console.log("[STATUS] WoW <-- " + getUserString(user));
+            } else if (user.guild.id == 305039436490735627) {
+                channel = client.channels.get("332750228975517699");
+                console.log("[STATUS] STTA <-- " + getUserString(user));
             } else {
                 channel = client.channels.get("320422079130238980");
                 console.log("[STATUS] ts <-- " + getUserString(user));
