@@ -882,6 +882,28 @@ function messageChecker(oldMessage, newMessage) {
                         message.reply("Well, I suppose so.");
                     } else if (msg.toLowerCase().includes("no") || msg.toLowerCase().includes("nope")) {
                         message.reply("I guess not.");
+					} else if (msg.toLowerCase().includes("skynet")) {
+						message.reply("It depends on how you perceive me...");
+					} else if (msg.toLowerCase().includes("ok") || msg.toLowerCase.includes("okay")) && (msg.toLower.includes("google")) {
+						message.reply("I may be a bot, but I'm not your phone.");
+					} else if (msg.toLowercase().includes("what") && (msg.toLowerCase.includes("life") || msg.toLowerCase.includes("universe") || msg.toLowerCase.includes("everything"))) {
+						switch (Math.floor(Math.random() * 1000) % 2) {
+							case 0:
+								message.reply("Please wait approx. 7.5 million years...");
+								break;
+							case 1:
+								message.reply("42.");
+								break;
+						}
+					} else if (msg.toLowerCase().includes("what") || msg.toLowerCase().includes("who") msg.toLowerCase().includes("where") || msg.toLowerCase().includes("when") || msg.toLowerCase().includes("why") || msg.toLowerCase.includes("how") {
+						switch (Math.floor(Math.random() * 1000) % 2){
+							case 0:
+								message.reply("Please, ask a yes or no question");
+								break;
+							case 1:
+								message.reply("Are you just trying to find easter eggs?");
+								break;
+						}
                     } else if (msg.toLowerCase().includes("?")) {
                         switch (Math.floor(Math.random() * 1000) % 4) {
                             case 0:
