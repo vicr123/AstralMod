@@ -886,7 +886,7 @@ function messageChecker(oldMessage, newMessage) {
 						message.reply("It depends on how you perceive me...");
 					} else if ((msg.toLowerCase().includes("ok") || msg.toLowerCase().includes("okay")) && (msg.toLowerCase().includes("google"))) {
 						message.reply("I may be a bot, but I'm not your phone.");
-					} else if (msg.toLowercase().includes("what") && (msg.toLowerCase().includes("life") || msg.toLowerCase().includes("universe") || msg.toLowerCase().includes("everything"))) {
+					} else if (msg.toLowerCase().includes("what") && (msg.toLowerCase().includes("life") || msg.toLowerCase().includes("universe") || msg.toLowerCase().includes("everything"))) {
 						switch (Math.floor(Math.random() * 1000) % 2) {
 							case 0:
 								message.reply("Please wait approx. 7.5 million years...");
