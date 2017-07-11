@@ -729,7 +729,7 @@ function messageChecker(oldMessage, newMessage) {
                             message.reply("And was that necessary?");
                             break;
 			case 8:
-			    message.reply("Whoa, whoa. Now, let's not.")
+			    message.reply("Whoa, whoa. Now, let's not do that again.");
 			    break;
                     }
                     
