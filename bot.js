@@ -725,6 +725,12 @@ function messageChecker(oldMessage, newMessage) {
                         case 6:
                             message.reply("This situation calls for some passive resistance!");
                             break;
+			case 7:
+                            message.reply("And was that necessary?");
+                            break;
+			case 8:
+			    message.reply("Whoa, whoa. Now, let's not.")
+			    break;
                     }
                     
                     message.delete();
@@ -795,6 +801,9 @@ function messageChecker(oldMessage, newMessage) {
                                 case 4:
                                     message.reply("If I'm not going to delete it, a mod will. Let's save them some work.");
                                     break;
+				case 5:
+                                    message.reply("Whatever that was.. *wasn't very necessary..*");
+                                    break;
                             }
                             message.delete();
                             return;
@@ -822,6 +831,9 @@ function messageChecker(oldMessage, newMessage) {
                                 break;
                             case 5:
                                 message.reply("Whoa whoa, slow down, my friend! No need for raised voices!");
+                                break;
+			    case 6:
+                                message.reply("There's no reason for the excessive caps.");
                                 break;
                         }
                         message.delete();
@@ -1289,6 +1301,7 @@ function messageChecker(oldMessage, newMessage) {
                                 case "neptune":
                                 case "cameron":
                                 case "max":
+				case "rain":
                                 case "komputerkid":
                                 case "banana":
                                         hours = -7;
@@ -1447,7 +1460,7 @@ function messageChecker(oldMessage, newMessage) {
                                             if (nickExpletiveCheck(command)) {
                                                     message.channel.send(":no_entry_sign: NO: Preliminary nickname checks failed. Wait until tomorrow and then choose a more... erm... *sensible* nickname please.");
                                             } else if (command.length >= 32) {
-                                                    message.channel.send(":no_entry_sign: NO: Nicknames need to be less than 32 characters. Wait until tomorrow and then try again.");
+                                                    message.channel.send(":no_entry_sign: NO: Sorry, but nicknames need to be less than 32 characters. Wait until tomorrow and then try again.");
                                             } else {
                                                     var nick = command;
                                                     message.channel.send(":white_check_mark: OK: Preliminary nickname checks passed. Your nickname will be changed in 5 minutes if the mods agree with it.");
@@ -2092,6 +2105,9 @@ function messageChecker(oldMessage, newMessage) {
                     case 3:
                         message.reply("If you're going to type that, why not get out a pen and paper and do it yourself?");
                         break;
+		    case 4:
+			message.reply("Oh, come on! Out of all the other places to do that, right here?");
+			break;
                 }
                 
                 message.delete();
