@@ -25,9 +25,16 @@ var allowPrepChat = true;
 var membersPlaced = [];
 var numberOfMembersTried = 0;
 
+var dispatcher;
+var connection;
+
 function playAudio() {
-    dispatcher = connection.playFile("forecastvoice.mp3");
-    dispatcher.on('end', playAudio);
+    try {
+        dispatcher = connection.playFile("forecastvoice.mp3");
+        dispatcher.on('end', playAudio);
+    } catch (err) {
+        log("Disconnected from the waiting room.", logType.critical);
+    }
 }
 
 function startup() {
@@ -36,7 +43,7 @@ function startup() {
         log("Now connecting to the waiting room.");
         //Jump into waiting room
         client.channels.get(consts.aphc.waitingRoomChannel).join().then(function(conn) {
-            log("AstralMod is connected to the waiting room", logType.good);
+            log("Now playing audio in the AstralPhaser Central Waiting Room.", logType.good);
             connection = conn;
             playAudio();
         });
@@ -93,20 +100,16 @@ function processCommand(message, isMod, command) {
                 for (var i = 0; i < numberOfMembers; i++) {
                     if (placeMemberFunction()) {
                         if (i == numberOfMembers - 1) {
-                            //Turn on filter
-                            expletiveFilter = true;
-                    
-                            message.channel.send(":speech_balloon: " + parseInt(numberOfMembers) + " people have been queued to be moved to the weekly chat. The filter has been switched on.")
+                            //TODO: Turn on expletive filter
+                            message.channel.send(":speech_balloon: " + parseInt(numberOfMembers) + " people have been queued to be moved to the weekly chat.")
                         }
                     } else {
                         if (i == 0) {
                             message.channel.send(":speech_balloon: No eligible members were found in the waiting room.")
                             changeAllowPrepChat = false;
                         } else {
-                            message.channel.send(":speech_balloon: There are only " + parseInt(i) + " eligible members in the weekly chat and all of them have been queued to be moved in. The filter has been switched on.")
-                            
-                            //Turn on filter
-                            expletiveFilter = true;
+                            message.channel.send(":speech_balloon: There are only " + parseInt(i) + " eligible members in the weekly chat and all of them have been queued to be moved in.")
+                            //TODO: Turn on expletive filter
                         }
                         i = numberOfMembers;
                     }

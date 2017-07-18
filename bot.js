@@ -32,14 +32,12 @@ const commandEmitter = new events.EventEmitter();
 var plugins = {};
 
 /** @type{Object} */
-var settings = null;
+global.settings = null;
 var listening = true;
-
-var dispatcher;
-var connection;
 
 var nickTimeouts = {};
 
+//Variables for the deal command
 var actionMember = {};
 var actioningMember = {};
 var actionStage = {};
@@ -54,6 +52,7 @@ global.logType = {
 }
 
 global.log = function(logMessage, type = logType.debug) {
+    //Log a message to the console
     if (type == logType.debug) {
         if (process.argv.indexOf("--debug") == -1) {
             return;
@@ -378,7 +377,9 @@ function processModCommand(message) {
             }
         } else {
             //Configuration menu
-            if (message.author.id == consts.users.vicr123 || message.author.id == message.guild.owner.user.id) {
+
+            //Make sure person has neccessary permissions
+            if (message.author.id == consts.users.vicr123 || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
                 settings[message.guild.id].configuringUser = message.author.id;
                 settings[message.guild.id].configuringStage = 0;
                 message.author.send(getSingleConfigureWelcomeText(message.guild));
@@ -434,39 +435,6 @@ function processModCommand(message) {
                 message.channel.send(':white_check_mark: OK: User nickname change has been cancelled.');
             } else {
                 message.channel.send(':no_entry_sign: ERROR: That didn\'t work. Has 5 minutes passed?');
-            }
-        } else if (command.startsWith("rm ")) {
-            var number = command.substr(3);
-            var num = parseInt(number);
-            if (num != number) {
-                message.channel.send(":no_entry_sign: ERROR: That's not a number...");
-            } else {
-                num = num + 1; //Also remove the mod:rm command
-                message.channel.bulkDelete(num).then(function () {
-                    if (num == 2) {
-                        message.channel.send(":white_check_mark: OK: I successfully deleted 1 message.");
-                    } else if (num >= 99) {
-                        message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");
-                    } else {
-                        message.channel.send(":white_check_mark: OK: I successfully deleted " + number + " messages.");
-                    }
-                }).catch(function () {
-                    if (num >= 99) {
-                        message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");
-                    } else {
-                        switch (Math.floor(Math.random() * 1000) % 3) {
-                            case 0:
-                                message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                break;
-                            case 1:
-                                message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                                break;
-                            case 2:
-                                message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                                break;
-                        }
-                    }
-                });
             }
         } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
             if (actioningMember[message.guild.id] != null) {
@@ -621,7 +589,7 @@ function processAmCommand(message) {
             embed.setAuthor("AstralMod Help Contents");
             embed.setDescription("Here are some things you can try. For more information, just `am:help [command]`");
 
-            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**rm**\n**deal**\nping\nuinfo\nnick", true);
+            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\nping\nuinfo\nnick\nhelp", true);
 
             for (key in plugins) {
                 var plugin = plugins[key];
@@ -685,12 +653,6 @@ function processAmCommand(message) {
                     help.title = "mod:declnick";
                     help.helpText = "Declines a nickname";
                     break;
-                case "rm":
-                    help.title = "mod:rm";
-                    help.usageText = "mod:rm number";
-                    help.helpText = "Removes a number of messages";
-                    help.param1 = "The number of messages to remove";
-                    break;
                 case "deal":
                     help.title = "mod:deal";
                     help.usageText = "mod:deal user";
@@ -719,6 +681,14 @@ function processAmCommand(message) {
                     help.usageText = "am:nick nickname";
                     help.helpText = "Sets your nickname after staff have a chance to review it";
                     help.param1 = "The nickname you wish to be known as";
+                    break;
+                case "help":
+                    help.title = "am:help";
+                    help.usageText = "am:help [command]";
+                    help.helpText = "Acquire information about how to use AstralMod and any available commands";
+                    help.param1 = "*Optional Parameter*\n" +
+                                  "The command to acquire information about.\n" +
+                                  "If this parameter is not present, we'll list the available commands.";
                     break;
                 default:
                     //Look thorough modules for help
@@ -841,10 +811,6 @@ function setNicknameTentative(member, nickname, guild) {
         settings[guild.id].pendingNicks = pendingNicks;
         return "cooldown";
     }
-}
-
-function processSpam(message) {
-    return false;
 }
 
 function processConfigure(message, guild) {
@@ -1062,52 +1028,43 @@ function getSingleConfigureWelcomeText(guild) {
     var guildSetting = settings[guild.id];
     var string = "What would you like to configure? Type the number next to the option you want to set:```";
 
-    string += "1. Staff Roles        " + guildSetting.modRoles.length + " roles\n";
+    string += "1 Staff Roles        " + guildSetting.modRoles.length + " roles\n";
 
     if (guildSetting.memberAlerts == null) {
-        string += "2. Member Alerts      Disabled\n";
+        string += "2 Member Alerts      Disabled\n";
     } else {
-        string += "2. Member Alerts      #" + guild.channels.get(guildSetting.memberAlerts).name + "\n";
+        string += "2 Member Alerts      #" + guild.channels.get(guildSetting.memberAlerts).name + "\n";
     }
 
     if (guildSetting.chatLogs == null) {
-        string += "3. Chat Logs          Disabled\n";
+        string += "3 Chat Logs          Disabled\n";
     } else {
-        string += "3. Chat Logs          #" + guild.channels.get(guildSetting.chatLogs).name + "\n";
+        string += "3 Chat Logs          #" + guild.channels.get(guildSetting.chatLogs).name + "\n";
     }
 
     if (guildSetting.botWarnings == null) {
-        string += "4. Bot Warnings       Disabled\n";
+        string += "4 Bot Warnings       Disabled\n";
     } else {
-        string += "4. Bot Warnings       #" + guild.channels.get(guildSetting.botWarnings).name + "\n";
+        string += "4 Bot Warnings       #" + guild.channels.get(guildSetting.botWarnings).name + "\n";
     }
 
-    if (guildSetting.memberAlerts == null) {
-        string += "5. Suggestions        Disabled\n";
+    if (guildSetting.suggestions == null) {
+        string += "5 Suggestions        Disabled\n";
     } else {
-        string += "5. Suggestions        #" + guild.channels.get(guildSetting.memberAlerts).name + "\n";
+        string += "5 Suggestions        #" + guild.channels.get(guildSetting.suggestions).name + "\n";
     }
 
     if (guildSetting.nickModeration == null || guildSetting.nickModeration == false) {
-        string += "a. Nick Moderation    Disabled\n";
+        string += "a Nick Moderation    Disabled\n";
     } else {
-        string += "a. Nick Moderation    Enabled\n";
+        string += "a Nick Moderation    Enabled\n";
     }
 
     string += "\n";
-    string += "0. Exit Configuration Menu```";
+    string += "0 Exit Configuration Menu\n";
+    string += "< Reset AstralMod```"
 
     return string;
-
-    /*
-    return "What would you like to configure? Type the number next to the option you want to set:" + 
-                "```1. Staff Roles\n" +
-                "2. Member Alerts Channel\n" + 
-                "3. Chat Logs Channel\n" +
-                "4. Bot warnings channel\n" +
-                "5. Suggestions Channel\n" + 
-                "\n" +
-                "0. Exit Configuration Menu```";*/
 }
 
 function processSingleConfigure(message, guild) {
@@ -1115,6 +1072,21 @@ function processSingleConfigure(message, guild) {
     var guildSetting = settings[guild.id];
 
     switch (guildSetting.configuringStage) {
+        case -10: { //Reset AstralMod
+            if (message.content == "Reset AstralMod") { //Purge all configuration for this server
+                log("Purging all configuration for " + guild.id);
+                guildSetting = {
+                    requiresConfig: true
+                };
+                log("Configuration for " + guild.id + " purged.", logType.good);
+                message.author.send("AstralMod configuration for this server has been reset. To set up AstralMod, just `mod:config` in the server.");
+            } else { //Cancel
+                message.author.send("Returning to Main Menu.");
+                message.author.send(getSingleConfigureWelcomeText(guild));
+                guildSetting.configuringStage = 0;
+            }
+            break;
+        }
         case 0: { //Main Menu
             switch (text) {
                 case "1": //Staff Roles
@@ -1160,6 +1132,12 @@ function processSingleConfigure(message, guild) {
 
                     message.author.send("Ok, I've changed that.");
                     message.author.send(getSingleConfigureWelcomeText(guild));
+                    break;
+                case "<": //Reset AstralMod
+                    message.author.send("**Reset AstralMod**\n" +
+                                        "Resetting AstralMod for this server. This will clear all settings for this server and you'll need to set up AstralMod again to use it.\n" +
+                                        "To reset AstralMod, respond with `Reset AstralMod`.");
+                    guildSetting.configuringStage = -10;
                     break;
                 default:
                     message.author.send("That's not an option.");
@@ -1382,6 +1360,121 @@ function processSingleConfigure(message, guild) {
     settings[guild.id] = guildSetting;
 }
 
+function processDeal(message) {
+    //Handle the deal command
+    var msg = message.content;
+    var member = actionMember[message.guild.id];
+    if (actionStage[message.guild.id] == 0) { //Select Action
+        if (msg == "cancel") { //Cancel Action
+            message.channel.send(':gear: Cancelled. Exiting action menu.');
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == consts.aphc.id || message.guild.id == 287937616685301762 || message.guild.id == 305039436490735627)) {
+            if (message.guild.id == consts.aphc.id) {
+                member.addRole(member.guild.roles.get(consts.aphc.interrogationRole));
+            } else if (message.guild.id == 287937616685301762) {
+                member.addRole(member.guild.roles.get("319847521440497666"));
+            } else if (message.guild.id == 305039436490735627) {
+                member.addRole(member.guild.roles.get("326250571692769281"));
+            }
+            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
+            message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040 || message.guild.id == 305039436490735627)) {
+            if (message.guild.id == consts.aphc.id) {
+                member.addRole(member.guild.roles.get(consts.aphc.jailRole));
+            } else if (message.guild.id == 305039436490735627) {
+                member.addRole(member.guild.roles.get("310196007919157250"));
+            } else {
+                member.addRole(member.guild.roles.get("267731524734943233"));
+            }
+            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
+            message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && (message.guild.id == consts.aphc.id || message.guild.id == 305039436490735627)) {
+            var roleId;
+            if (message.guild.id == consts.aphc.id) {
+                roleId = consts.aphc.jailRole;
+            } else if (message.guild.id == 305039436490735627) {
+                roleId = "309883481024888842";
+            }
+            
+            if (member.roles.get(roleId)) {
+                member.removeRole(member.roles.get(roleId));
+                message.channel.send(':gear: ' + getUserString(member) + " has been removed from time out.");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            } else {
+                member.addRole(member.guild.roles.get(roleId));
+                message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            }
+        } else if (msg.toLowerCase() == "kick" || msg.toLowerCase() == "k") {
+            actionStage[message.guild.id] = 1;
+            message.channel.send(":gear: Enter reason for kicking " + getUserString(member) + " or `cancel`.");
+            actionToPerform[message.guild.id] = "kick";
+        } else if (msg.toLowerCase() == "ban" || msg.toLowerCase() == "b") {
+            actionStage[message.guild.id] = 1;
+            message.channel.send(":gear: Enter reason for banning " + getUserString(member) + " or `cancel`.");
+            actionToPerform[message.guild.id] = "ban";
+        } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname" || msg.toLowerCase() == "n") {
+            actionStage[message.guild.id] = 1;
+            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
+            actionToPerform[message.guild.id] = "nick";
+        } else {
+            message.channel.send(':gear: Unknown command. Exiting action menu.');
+            member = null;
+            actioningMember[message.guild.id] = null;
+        }
+        message.delete();
+    } else if (actionStage[message.guild.id] == 1) {
+        if (msg == "cancel") {
+            message.channel.send(':gear: Cancelled. Exiting action menu.');
+            member = null;
+            actioningMember[message.guild.id] = null;
+        } else if (actionToPerform[message.guild.id] == "kick") {
+            member.kick(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(member) + " has been kicked from the server.");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            }).catch(function() {
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't be kicked from the server. Exiting action menu");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            });
+        } else if (actionToPerform[message.guild.id] == "ban") {
+            member.ban(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            }).catch(function() {
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            });
+        } else if (actionToPerform[message.guild.id] == "nick") {
+            if (msg == "clear") {
+                msg = "";
+            }
+            
+            member.setNickname(msg).then(function(member) {
+                message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            }).catch(function() {
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't have his nickname changed. Exiting action menu");
+                member = null;
+                actioningMember[message.guild.id] = null;
+            });
+        }
+        message.delete();
+    }
+    actionMember[message.guild.id] = member;
+}
+
 function processMessage(message) {
     //Ignore self
     if (message.author.id == client.user.id) return;
@@ -1390,32 +1483,39 @@ function processMessage(message) {
 
     //Determine if this is in a guild
     if (message.guild != null) {
+        //Determine if we are in a workflow
+        if (actioningMember[message.guild.id] == message.author) {
+            //We are currently in the deal workflow
+            processDeal(message);
+            return;
+        }
+
         //Determine if this is a command
         if (text.startsWith("mod:")) { //This is a mod command
             if (!processModCommand(message)) {
                 if (!processAmCommand(message)) {
-                    //Pass command onto modules
+                    //Pass command onto plugins
                     commandEmitter.emit('processCommand', message, true, text.substr(4).toLowerCase());
                 }
             }
         } else if (text.startsWith("am:")) {
                 if (!processAmCommand(message)) {
-                    //Pass command onto modules
+                    //Pass command onto plugins
                     commandEmitter.emit('processCommand', message, false, text.substr(3).toLowerCase());
                 }
         } else {
-            //Spam protection
-            if (!processSpam(message)) {
-                //Pass command onto modules
-                commandEmitter.emit('newMessage', message);
-            }
+            //Neither workflow or command
+            //Pass onto plugins
+            commandEmitter.emit('newMessage', message);
         }
     } else {
         //Determine if this is within a workflow or if this is unsolicited
         for (key in settings) {
             var guildSetting = settings[key];
             if (guildSetting != null) {
+                //First check if user is currently configuring
                 if (guildSetting.configuringUser == message.author.id) {
+                    //Check if this is during first time setup
                     if (guildSetting.requiresConfig) {
                         processConfigure(message, client.guilds.get(key));
                     } else {
@@ -1634,13 +1734,13 @@ client.once('ready', function() {
 
     if (!fs.existsSync("settings.json")) {
         log("AstralMod configuration file does not exist. Creating now.", logType.warning);
-        settings = {};
+        global.settings = {};
         
         //Load in all guilds
         client.guilds.forEach(newGuild);
     } else {
         log("Loading AstralMod configuration file...");
-        settings = JSON.parse(fs.readFileSync("settings.json", "utf8"));
+        global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"));
     }
 
     log("AstralMod Configuration loaded.", logType.good);
