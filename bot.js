@@ -133,7 +133,7 @@ stdinInterface.on("line", function(line) {
 });
 
 function shutdown() {
-    if (settings != null) {
+    if (global.settings != null) {
         log("Saving settings...");
         try {
             fs.writeFileSync("settings.json", JSON.stringify(settings, null, 4), "utf8");
@@ -1561,10 +1561,12 @@ function saveSettings() {
 function messageDeleted(message) {
     var channel = null;
     if (message.guild != null) {
-        if (client.channels.has(settings[message.guild.id].chatLogs)) {
-            channel = client.channels.get(settings[message.guild.id].chatLogs);
-        } else {
-            log("Chat Logs channel " + settings[message.guild.id].chatLogs + " not found", logType.critical);
+        if (settings[message.guild.id].chatLogs != null) {
+            if (client.channels.has(settings[message.guild.id].chatLogs)) {
+                channel = client.channels.get(settings[message.guild.id].chatLogs);
+            } else {
+                log("Chat Logs channel " + settings[message.guild.id].chatLogs + " not found", logType.critical);
+            }
         }
     }
     
@@ -1597,10 +1599,12 @@ function messageUpdated(oldMessage, newMessage) {
     if (oldMessage.cleanContent == newMessage.cleanContent) return; //Ignore
     var channel = null;
     if (oldMessage.guild != null) {
-        if (client.channels.has(settings[oldMessage.guild.id].chatLogs)) {
-            channel = client.channels.get(settings[oldMessage.guild.id].chatLogs);
-        } else {
-            log("Chat Logs channel " + settings[oldMessage.guild.id].chatLogs + " not found", logType.critical);
+        if (settings[message.guild.id].chatLogs != null) {
+            if (client.channels.has(settings[oldMessage.guild.id].chatLogs)) {
+                channel = client.channels.get(settings[oldMessage.guild.id].chatLogs);
+            } else {
+                log("Chat Logs channel " + settings[oldMessage.guild.id].chatLogs + " not found", logType.critical);
+            }
         }
     }
     
@@ -1639,10 +1643,12 @@ function messageUpdated(oldMessage, newMessage) {
 function memberAdd(member) {
     var channel = null;
     if (member.guild != null) {
-        if (client.channels.has(settings[member.guild.id].memberAlerts)) {
-            channel = client.channels.get(settings[member.guild.id].memberAlerts);
-        } else {
-            log("Member Alerts channel " + settings[member.guild.id].memberAlerts + " not found", logType.critical);
+        if (settings[message.guild.id].memberAlerts != null) {
+            if (client.channels.has(settings[member.guild.id].memberAlerts)) {
+                channel = client.channels.get(settings[member.guild.id].memberAlerts);
+            } else {
+                log("Member Alerts channel " + settings[member.guild.id].memberAlerts + " not found", logType.critical);
+            }
         }
     }
 
@@ -1667,10 +1673,12 @@ function memberRemove(member) {
     if (member.guild != null) {
         var channel = null;
         if (member.guild != null) {
-            if (client.channels.has(settings[member.guild.id].memberAlerts)) {
-                channel = client.channels.get(settings[member.guild.id].memberAlerts);
-            } else {
-                log("Member Alerts channel " + settings[member.guild.id].memberAlerts + " not found", logType.critical);
+            if (settings[message.guild.id].chatLogs != null) {
+                if (client.channels.has(settings[member.guild.id].memberAlerts)) {
+                    channel = client.channels.get(settings[member.guild.id].memberAlerts);
+                } else {
+                    log("Member Alerts channel " + settings[member.guild.id].memberAlerts + " not found", logType.critical);
+                }
             }
         }
         

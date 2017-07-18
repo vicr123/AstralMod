@@ -56,7 +56,7 @@ function newMessage(message) {
         }
 
         var messageText = message.content.toLowerCase();
-        if (messageText.length > 2) {
+        if (messageText.length > 3) {
             if (lastMessagesOfUser.includes(messageText)) {
                 spamCountingUser++;
 
@@ -87,6 +87,8 @@ function newMessage(message) {
                 if (lastMessagesOfUser.length > 10) {
                     lastMessagesOfUser.splice(0, 1);
                 }
+
+                nonSpamCountingUser++;
             }
             
             if (nonSpamCountingUser == 10) {
