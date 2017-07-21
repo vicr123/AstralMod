@@ -34,7 +34,7 @@ function startup() {
 }
 
 function newMessage(message) {
-    if ((settings[message.guild.id].spamCtl == null || settings[message.guild.id].spamCtl == true) && settings[message.guild.id].requiresConfig == false) {
+    if ((settings.guilds[message.guild.id].spamCtl == null || settings.guilds[message.guild.id].spamCtl == true) && settings.guilds[message.guild.id].requiresConfig == false) {
         //Spam filtering enabled for this server
 
         /** @type{Array} */
@@ -66,10 +66,10 @@ function newMessage(message) {
 
                 if (spamCountingUser >= 3) {
                     if (spamCountingUser == 10) {
-                        if (client.channels.has(settings[message.guild.id].botWarnings)) {
-                            client.channels.get(settings[message.guild.id].botWarnings).send(":red_circle: <@" + message.author.id + "> was spamming on " + message.channel.name + ".");
+                        if (client.channels.has(settings.guild[message.guild.id].botWarnings)) {
+                            client.channels.get(settings.guild[message.guild.id].botWarnings).send(":red_circle: <@" + message.author.id + "> was spamming on " + message.channel.name + ".");
                         } else {
-                            log("Bot Warnings channel " + settings[message.guild.id].botWarnings + " not found", logType.critical);
+                            log("Bot Warnings channel " + settings.guild[message.guild.id].botWarnings + " not found", logType.critical);
                         }
                         message.reply("I've told you way too many times. The staff have been informed. (#" + spamCountingUser + ")");
                     } else if (spamCountingUser > 10) {
@@ -109,10 +109,10 @@ function processCommand(message, isMod, command) {
         if (command.startsWith("spamctl ")) {
             var isOn = command.substr(8);
             if (isOn == "on") {
-                settings[message.guild.id].spamCtl = true;
+                settings.guild[message.guild.id].spamCtl = true;
                 message.reply("Spam filtering is now on for this server.");
             } else if (isOn == "off") {
-                settings[message.guild.id].spamCtl = false;
+                settings.guild[message.guild.id].spamCtl = false;
                 message.reply("Spam filtering is now off for this server.");
             } else {
                 message.reply("Usage: `am:spamctl on|off`\nFor more information, `am:help spamctl`");

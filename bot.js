@@ -21,7 +21,6 @@
 const amVersion = "2.0.0";
 
 const Discord = require('discord.js');
-const api = require('./keys.js');
 const consts = require('./consts.js');
 const fs = require('fs');
 const readline = require('readline');
@@ -61,29 +60,69 @@ global.log = function(logMessage, type = logType.debug) {
 
     var logFormatting;
     var logString;
-    switch (type) {
-        case logType.debug:
-            logString = "[ ] " + logMessage;
-            logFormatting = "\x1b[1m\x1b[34m";
-            break;
-        case logType.info:
-            logString = "[i] " + logMessage;
-            logFormatting = "\x1b[1m\x1b[37m";
-            break;
-        case logType.warning:
-            logString = "[!] " + logMessage;
-            logFormatting = "\x1b[1m\x1b[33m";
-            break;
-        case logType.critical:
-            logString = "[X] " + logMessage;
-            logFormatting = "\x1b[1m\x1b[31m";
-            break;
-        case logType.good:
-            logString = "[>] " + logMessage;
-            logFormatting = "\x1b[1m\x1b[32m";
-            break;
+    
+    var lines = logMessage.split("\n");
+
+    for (i = 0; i < lines.length; i++) {
+        switch (type) {
+            case logType.debug:
+                if (i == 0) {
+                    logString = "[ ] ";
+                } else if (i == lines.length - 1) {
+                    logString = " └─ ";
+                } else {
+                    logString = " ├─ ";
+                }
+                logString += lines[i];
+                logFormatting = "\x1b[1m\x1b[34m";
+                break;
+            case logType.info:
+                if (i == 0) {
+                    logString = "[i] ";
+                } else if (i == lines.length - 1) {
+                    logString = " └─ ";
+                } else {
+                    logString = " ├─ ";
+                }
+                logString += lines[i];
+                logFormatting = "\x1b[1m\x1b[37m";
+                break;
+            case logType.warning:
+                if (i == 0) {
+                    logString = "[!] ";
+                } else if (i == lines.length - 1) {
+                    logString = " └─ ";
+                } else {
+                    logString = " ├─ ";
+                }
+                logString += lines[i];
+                logFormatting = "\x1b[1m\x1b[33m";
+                break;
+            case logType.critical:
+                if (i == 0) {
+                    logString = "[X] ";
+                } else if (i == lines.length - 1) {
+                    logString = " └─ ";
+                } else {
+                    logString = " ├─ ";
+                }
+                logString += lines[i];
+                logFormatting = "\x1b[1m\x1b[31m";
+                break;
+            case logType.good:
+                if (i == 0) {
+                    logString = "[>] ";
+                } else if (i == lines.length - 1) {
+                    logString = " └─ ";
+                } else {
+                    logString = " ├─ ";
+                }
+                logString += lines[i];
+                logFormatting = "\x1b[1m\x1b[32m";
+                break;
+        }
+        console.log(logFormatting + "%s\x1b[0m", logString);
     }
-    console.log(logFormatting + "%s\x1b[0m", logString);
 }
 
 process.on('unhandledRejection', function(err, p) {
@@ -113,7 +152,14 @@ stdinInterface.on("line", function(line) {
 
     var lLine = line.toLowerCase();
     if (lLine == "help") {
-        log("Help coming soon!", logType.info);
+        var help = "AstralMod Console Commands:\n" +
+                   "save                    Saves AstralMod configuration settings to disk. This happens every 30 seconds.\n" +
+                   "load [module]           Loads a module into AstralMod\n" +
+                   "unload [module]         Unloads a module from AstralMod\n" +
+                   "broadcast [message]     Broadcasts a message to every server AstralMod is connected to\n" +
+                   "vacuum                  Check the AstralMod Configuration File for errors\n" +
+                   "exit                    Exits AstralMod";
+        log(help, logType.info);
     } else if (lLine == "exit") {
         shutdown();
     } else if (lLine.startsWith("unload ")) {
@@ -127,6 +173,42 @@ stdinInterface.on("line", function(line) {
         }
     } else if (lLine == "load") {
         log("Usage: load [filename]", logType.critical);
+    } else if (lLine == "save") {
+        saveSettings(true);
+    } else if (lLine.startsWith("broadcast ")) {
+        //Broadcast message to each server in either #general or the bot warnings general
+        var broadcast = line.substr(10);
+        log("Broadcasting message: " + broadcast, logType.info);
+
+        //Iterate over each server
+        for (key in settings.guilds) {
+            var guildSetting = settings.guilds[key];
+            var guild = client.guilds.get(key);
+
+            if (guildSetting != null) {
+                var channel = null;
+                if (guildSetting.botWarnings != null) {
+                    if (guild != null) {
+                        channel = guild.channels.get(guildSetting.botWarnings);
+                    }
+                }
+
+                if (channel == null) {
+                    if (guild != null) {
+                        channel = guild.defaultChannel;
+                    }
+                }
+
+                if (channel != null) {
+                    channel.send("SERVICE ANNOUNCEMENT: " + broadcast);
+                }
+            }
+        }
+        log("Broadcasting message complete", logType.good);
+    } else if (lLine == "broadcast") {
+        log("Usage: broadcast message", logType.critical);
+    } else if (lLine == "vacuum") {
+        vacuumSettings();
     } else {
         log("Unknown command. For help, type \"help\" into the console.", logType.critical);
     }
@@ -137,7 +219,7 @@ function shutdown() {
         log("Saving settings...");
         try {
             fs.writeFileSync("settings.json", JSON.stringify(settings, null, 4), "utf8");
-            log("Settings saved!");
+            log("Settings saved!", logType.good);
         } catch (exception) {
             log("Settings couldn't be saved. You may lose some settings.", logType.critical);
         }
@@ -234,7 +316,7 @@ function setGame() {
             presence.game.name = "with Unicode characters";
             break;
         case 22:
-            presence.game.name = "bot:help for more info";
+            presence.game.name = "am:help for more info";
             break;
         case 26:
             presence.game.name = "trying to DJ";
@@ -271,7 +353,7 @@ function setGame() {
 }
 
 function isMod(member) {
-    var modRoles = settings[member.guild.id].modRoles;
+    var modRoles = settings.guilds[member.guild.id].modRoles;
     if (modRoles != null) {
         for (role of modRoles) {
             if (member.roles.has(role)) {
@@ -334,8 +416,8 @@ function processModCommand(message) {
     //Special cases
     if (lText == "mod:config") {
         //Make sure person isn't configuring any other guild
-        for (key in settings) {
-            var guildSetting = settings[key];
+        for (key in settings.guilds) {
+            var guildSetting = settings.guilds[key];
             if (guildSetting != null) {
                 if (guildSetting.configuringStage != 0) {
                     if (guildSetting.configuringUser == message.author.id) {
@@ -347,19 +429,19 @@ function processModCommand(message) {
         }
 
         //Clear all user configuring for this user
-        for (key in settings) {
-            var guildSetting = settings[key];
+        for (key in settings.guilds) {
+            var guildSetting = settings.guilds[key];
             if (guildSetting != null) {
                 if (guildSetting.configuringUser == message.author.id) {
-                    settings[key].configuringUser = null;
+                    settings.guilds[key].configuringUser = null;
                 }
             }
         }
 
-        if (settings[message.guild.id].requiresConfig) {
+        if (settings.guilds[message.guild.id].requiresConfig) {
             if (message.author.id == consts.users.vicr123 || message.author.id == message.guild.owner.user.id) {
-                settings[message.guild.id].configuringUser = message.author.id;
-                settings[message.guild.id].configuringStage = 0;
+                settings.guilds[message.guild.id].configuringUser = message.author.id;
+                settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, seperated by a space.")
                 
                 var roles = "```";
@@ -380,8 +462,8 @@ function processModCommand(message) {
 
             //Make sure person has neccessary permissions
             if (message.author.id == consts.users.vicr123 || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
-                settings[message.guild.id].configuringUser = message.author.id;
-                settings[message.guild.id].configuringStage = 0;
+                settings.guilds[message.guild.id].configuringUser = message.author.id;
+                settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send(getSingleConfigureWelcomeText(message.guild));
 
                 message.reply(":arrow_left: Continue in DMs.");
@@ -519,7 +601,7 @@ function processAmCommand(message) {
     var text = message.content;
 
     //Make sure configuration is not required
-    if (settings[message.guild.id].requiresConfig) {
+    if (settings.guilds[message.guild.id].requiresConfig) {
         message.reply("AstralMod setup isn't complete. You'll need to wait for " + message.guild.owner.displayName + " to type `mod:config` and set up AstralMod before you can use it.");
     } else {
         var command;
@@ -550,7 +632,7 @@ function processAmCommand(message) {
             uinfo(message.member, message.channel);
             return true;
         } else if (command == "nick") {
-            if (settings[message.guild.id].nickModeration) {
+            if (settings.guilds[message.guild.id].nickModeration) {
                 var nickResult = setNicknameTentative(message.member, "", message.guild);
                 if (nickResult == "cooldown") {
                     message.reply("There is a one day cooldown between use of this command.");
@@ -564,7 +646,7 @@ function processAmCommand(message) {
             }
             return true;
         } else if (command.startsWith("nick ")) {
-            if (settings[message.guild.id].nickModeration) {
+            if (settings.guilds[message.guild.id].nickModeration) {
                 var nickResult = setNicknameTentative(message.member, text.substr(8), message.guild);
                 if (nickResult == "cooldown") {
                     message.reply("There is a one day cooldown between use of this command.");
@@ -583,13 +665,16 @@ function processAmCommand(message) {
         } else if (command.startsWith("suggest ")) {
             message.reply("Suggestions are coming soon. Stay tuned!");
             return true;
+        } else if (command == "version") {
+            message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot");
+            return true;
         } else if (command == "help") { //General help
             var embed = new Discord.RichEmbed();
             embed.setColor("#3C3C96");
             embed.setAuthor("AstralMod Help Contents");
             embed.setDescription("Here are some things you can try. For more information, just `am:help [command]`");
 
-            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\nping\nuinfo\nnick\nhelp", true);
+            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\nping\nuinfo\nnick\nversion\nhelp", true);
 
             for (key in plugins) {
                 var plugin = plugins[key];
@@ -663,6 +748,10 @@ function processAmCommand(message) {
                 case "ping":
                     help.title = "am:ping";
                     help.helpText = "Asks AstralMod to reply with a message";
+                    break;
+                case "version":
+                    help.title = "am:version";
+                    help.helpText = "Queries the current AstralMod version";
                     break;
                 case "uinfo":
                     if (isMod(message.member)) {
@@ -761,6 +850,10 @@ function processAmCommand(message) {
                 if (help.param3 != null) {
                     embed.addField("Parameter 3", help.param3);
                 }
+
+                if (help.remarks != null) {
+                    embed.addField("Remarks", help.remarks);
+                }
             }
             embed.setFooter("AstralMod " + amVersion + ".");
             message.channel.send("", { embed: embed });
@@ -771,13 +864,13 @@ function processAmCommand(message) {
 
 function setNicknameTentative(member, nickname, guild) {
     if (nickname.length >= 32) {
-        settings[guild.id].pendingNicks = pendingNicks;
+        settings.guilds[guild.id].pendingNicks = pendingNicks;
         return "length";
     }
 
     var pendingNicks = {};
-    if (settings[guild.id].pendingNicks != null) {
-        pendingNicks = settings[guild.id].pendingNicks;
+    if (settings.guilds[guild.id].pendingNicks != null) {
+        pendingNicks = settings.guilds[guild.id].pendingNicks;
     }
 
     if (pendingNicks.cooldowns == null) {
@@ -801,14 +894,14 @@ function setNicknameTentative(member, nickname, guild) {
         }, 300000, null);
 
         if (nickname == "") {
-            client.channels.get(settings[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `mod:declnick " + member.user.id + "`");
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `mod:declnick " + member.user.id + "`");
         } else {
-            client.channels.get(settings[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `mod:declnick " + member.user.id + "`");
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `mod:declnick " + member.user.id + "`");
         }
-        settings[guild.id].pendingNicks = pendingNicks;
+        settings.guilds[guild.id].pendingNicks = pendingNicks;
         return "ok";
     } else {
-        settings[guild.id].pendingNicks = pendingNicks;
+        settings.guilds[guild.id].pendingNicks = pendingNicks;
         return "cooldown";
     }
 }
@@ -816,7 +909,7 @@ function setNicknameTentative(member, nickname, guild) {
 function processConfigure(message, guild) {
     var text = message.content.toLowerCase();
 
-    var guildSetting = settings[guild.id];
+    var guildSetting = settings.guilds[guild.id];
 
     if (guildSetting.requiresConfig) {
         switch (guildSetting.configuringStage) {
@@ -1021,11 +1114,11 @@ function processConfigure(message, guild) {
         }
     }
 
-    settings[guild.id] = guildSetting;
+    settings.guilds[guild.id] = guildSetting;
 }
 
 function getSingleConfigureWelcomeText(guild) {
-    var guildSetting = settings[guild.id];
+    var guildSetting = settings.guilds[guild.id];
     var string = "What would you like to configure? Type the number next to the option you want to set:```";
 
     string += "1 Staff Roles        " + guildSetting.modRoles.length + " roles\n";
@@ -1069,7 +1162,7 @@ function getSingleConfigureWelcomeText(guild) {
 
 function processSingleConfigure(message, guild) {
     var text = message.content.toLowerCase();
-    var guildSetting = settings[guild.id];
+    var guildSetting = settings.guilds[guild.id];
 
     switch (guildSetting.configuringStage) {
         case -10: { //Reset AstralMod
@@ -1090,8 +1183,8 @@ function processSingleConfigure(message, guild) {
         case 0: { //Main Menu
             switch (text) {
                 case "1": //Staff Roles
-                    settings[guild.id].configuringUser = message.author.id;
-                    settings[guild.id].configuringStage = 0;
+                    settings.guilds[guild.id].configuringUser = message.author.id;
+                    settings.guilds[guild.id].configuringStage = 0;
                     message.author.send("Enter the roles of mods on this server, seperated by a space. To cancel, just type \"cancel\"");
                     
                     var roles = "```";
@@ -1357,7 +1450,7 @@ function processSingleConfigure(message, guild) {
         }
     }
 
-    settings[guild.id] = guildSetting;
+    settings.guilds[guild.id] = guildSetting;
 }
 
 function processDeal(message) {
@@ -1510,8 +1603,8 @@ function processMessage(message) {
         }
     } else {
         //Determine if this is within a workflow or if this is unsolicited
-        for (key in settings) {
-            var guildSetting = settings[key];
+        for (key in settings.guilds) {
+            var guildSetting = settings.guilds[key];
             if (guildSetting != null) {
                 //First check if user is currently configuring
                 if (guildSetting.configuringUser == message.author.id) {
@@ -1533,7 +1626,7 @@ function processMessage(message) {
 
 function newGuild(guild) {
     log("New Guild: " + guild.id);
-    settings[guild.id] = {
+    settings.guilds[guild.id] = {
         requiresConfig: true
     };
     guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `mod:config`.");
@@ -1541,17 +1634,22 @@ function newGuild(guild) {
 
 function removeGuild(guild) {
     //Delete guild from database
-    settings[guild.id] = null;
+    settings.guilds[guild.id] = null;
+    delete settings.guilds[guild.id];
     log("Removed Guild: " + guild.id);
 }
 
-function saveSettings() {
+function saveSettings(showOkMessage = false) {
     log("Saving settings...");
     fs.writeFile("settings.json", JSON.stringify(settings, null, 4), "utf8", function(error) {
         if (error) {
             log("Settings couldn't be saved.", logType.critical);
         } else {
-            log("Settings saved!");
+            if (showOkMessage) {
+                log("Settings saved!", logType.critical);
+            } else {
+                log("Settings saved!");
+            }
         }
 
         setTimeout(saveSettings, 30000);
@@ -1561,11 +1659,11 @@ function saveSettings() {
 function messageDeleted(message) {
     var channel = null;
     if (message.guild != null) {
-        if (settings[message.guild.id].chatLogs != null) {
-            if (client.channels.has(settings[message.guild.id].chatLogs)) {
-                channel = client.channels.get(settings[message.guild.id].chatLogs);
+        if (settings.guilds[message.guild.id].chatLogs != null) {
+            if (client.channels.has(settings.guilds[message.guild.id].chatLogs)) {
+                channel = client.channels.get(settings.guilds[message.guild.id].chatLogs);
             } else {
-                log("Chat Logs channel " + settings[message.guild.id].chatLogs + " not found", logType.critical);
+                log("Chat Logs channel " + settings.guilds[message.guild.id].chatLogs + " not found", logType.critical);
             }
         }
     }
@@ -1599,11 +1697,11 @@ function messageUpdated(oldMessage, newMessage) {
     if (oldMessage.cleanContent == newMessage.cleanContent) return; //Ignore
     var channel = null;
     if (oldMessage.guild != null) {
-        if (settings[message.guild.id].chatLogs != null) {
-            if (client.channels.has(settings[oldMessage.guild.id].chatLogs)) {
-                channel = client.channels.get(settings[oldMessage.guild.id].chatLogs);
+        if (settings.guilds[oldMessage.guild.id].chatLogs != null) {
+            if (client.channels.has(settings.guilds[oldMessage.guild.id].chatLogs)) {
+                channel = client.channels.get(settings.guilds[oldMessage.guild.id].chatLogs);
             } else {
-                log("Chat Logs channel " + settings[oldMessage.guild.id].chatLogs + " not found", logType.critical);
+                log("Chat Logs channel " + settings.guilds[oldMessage.guild.id].chatLogs + " not found", logType.critical);
             }
         }
     }
@@ -1643,11 +1741,11 @@ function messageUpdated(oldMessage, newMessage) {
 function memberAdd(member) {
     var channel = null;
     if (member.guild != null) {
-        if (settings[message.guild.id].memberAlerts != null) {
-            if (client.channels.has(settings[member.guild.id].memberAlerts)) {
-                channel = client.channels.get(settings[member.guild.id].memberAlerts);
+        if (settings.guilds[member.guild.id].memberAlerts != null) {
+            if (client.channels.has(settings.guilds[member.guild.id].memberAlerts)) {
+                channel = client.channels.get(settings.guilds[member.guild.id].memberAlerts);
             } else {
-                log("Member Alerts channel " + settings[member.guild.id].memberAlerts + " not found", logType.critical);
+                log("Member Alerts channel " + settings.guilds[member.guild.id].memberAlerts + " not found", logType.critical);
             }
         }
     }
@@ -1673,11 +1771,11 @@ function memberRemove(member) {
     if (member.guild != null) {
         var channel = null;
         if (member.guild != null) {
-            if (settings[message.guild.id].chatLogs != null) {
-                if (client.channels.has(settings[member.guild.id].memberAlerts)) {
-                    channel = client.channels.get(settings[member.guild.id].memberAlerts);
+            if (settings.guilds[member.guild.id].chatLogs != null) {
+                if (client.channels.has(settings.guilds[member.guild.id].memberAlerts)) {
+                    channel = client.channels.get(settings.guilds[member.guild.id].memberAlerts);
                 } else {
-                    log("Member Alerts channel " + settings[member.guild.id].memberAlerts + " not found", logType.critical);
+                    log("Member Alerts channel " + settings.guilds[member.guild.id].memberAlerts + " not found", logType.critical);
                 }
             }
         }
@@ -1736,30 +1834,111 @@ function unloadPlugin(file) {
     }
 }
 
+function vacuumSettings() {
+    log("Checking the AstralMod Configuration file...", logType.info);
+    fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
+
+    var changesMade = false;
+    var error = false;
+
+    //Check settings file objects
+    if (!settings.hasOwnProperty("guilds")) {
+        log("Settings does not contain guilds.", logType.critical);
+        error = true;
+    }
+
+    if (!settings.hasOwnProperty("users")) {
+        log("Settings does not contain users.", logType.critical);
+        error = true;
+    }
+
+    if (!settings.hasOwnProperty("generalConfiguration")) {
+        log("Settings does not contain general configuration.", logType.critical);
+        error = true;
+    }
+
+    if (error) {
+        //Quit AstralMod
+        log("AstralMod Configuration contains errors.", logType.critical);
+        log("From here, you can either\n- Attempt to fix the AstralMod configuration file, settings.json\n- Delete the AstralMod configuration file and start again.", logType.info);
+        log("AstralMod Configuration is corrupted. AstralMod cannot continue running. Exiting now.", logType.critical);
+        process.exit(1);
+    }
+
+    //Check that each guild still exists
+    var availableGuilds = [];
+    for (let [id, guild] of client.guilds) {
+        log("Checking Discord guild " + guild.id);
+        availableGuilds.push(guild.id);
+
+        if (!settings.guilds.hasOwnProperty(guild.id)) {
+            //Add guild to database
+            changesMade = true;
+            log("Adding guild " + key + " to the database.", logType.info);
+            newGuild(guild);
+        }
+    }
+
+    //Iterate over all guilds in settings
+    for (key in settings.guilds) {
+        log("Checking internal guild " + key);
+        if (!availableGuilds.includes(key)) {
+            //Delete guild from database
+            changesMade = true;
+            log("Deleting guild " + key + " as this guild is no longer recognised.", logType.info);
+            settings.guilds[key] = null;
+            delete settings.guilds[key];
+        }
+    }
+
+    if (changesMade) {
+        log("AstralMod Configuration was checked and changes were made. No other actions need to be taken.", logType.warning);
+        log("Old settings backed up as .settings-backup.json", logType.info);
+    } else {
+        fs.unlink(".settings-backup.json");
+        log("AstralMod Configuration checked. No changes have been made", logType.good);
+    }
+    return true;
+}
+
 client.once('ready', function() {
     log("Now connected to Discord.", logType.good);
     log("Checking if configuration file exists...");
 
     if (!fs.existsSync("settings.json")) {
         log("AstralMod configuration file does not exist. Creating now.", logType.warning);
-        global.settings = {};
+        global.settings = {
+            guilds: {
+
+            },
+            users: {
+
+            },
+            generalConfiguration: {
+
+            }
+        };
         
         //Load in all guilds
         client.guilds.forEach(newGuild);
     } else {
-        log("Loading AstralMod configuration file...");
+        log("Loading AstralMod configuration file...", logType.info);
         global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"));
     }
 
-    log("AstralMod Configuration loaded.", logType.good);
+    if (vacuumSettings()) {
+        log("AstralMod Configuration loaded.", logType.good);
+    } else {
+        log("AstralMod Configuration contains errors.", logType.critical);
+    }
 
     client.setInterval(setGame, 300000);
     setGame();
     
     log("Loading suggestions channels...");
     //Determine if this is within a workflow or if this is unsolicited
-    for (key in settings) {
-        var guildSetting = settings[key];
+    for (key in settings.guilds) {
+        var guildSetting = settings.guilds[key];
         if (guildSetting != null) {
             if (guildSetting.suggestions != null && guildSetting.suggestions != undefined) {
                 //Get all messages in #suggestions
@@ -1802,8 +1981,30 @@ client.once('ready', function() {
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
 });
 
-log("Establishing connection to Discord...");
-client.login(api.key).catch(function() {
-    log("Couldn't establish a connection to Discord. Exiting.", logType.critical);
+log("Establishing connection to Discord...", logType.info);
+
+try {
+    const api = require('./keys.js');
+    if (api.key != null) {
+        client.login(api.key).catch(function() {
+            log("Couldn't establish a connection to Discord. Exiting.", logType.critical);
+            process.exit(1);
+        });
+    } else {
+        log("Login Token not found.", logType.critical);
+        log("To inform AstralMod about your token,\n" +
+            "1. Create a file called keys.js in the same directory as AstralMod\n" +
+            "2. Save the file with the following:\n" +
+            "   exports.key = \"[your key here]\"", logType.info);
+        log("Exiting AstralMod.", logType.critical);
+        process.exit(1);
+    }
+} catch (err) {
+    log("Login Token not found.", logType.critical);
+    log("To inform AstralMod about your token,\n" +
+        "1. Create a file called keys.js in the same directory as AstralMod\n" +
+        "2. Save the file with the following:\n" +
+        "   exports.key = \"[your key here]\"", logType.info);
+    log("Exiting AstralMod.", logType.critical);
     process.exit(1);
-});
+}
