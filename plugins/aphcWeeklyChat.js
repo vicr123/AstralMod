@@ -38,15 +38,19 @@ function playAudio() {
 }
 
 function startup() {
-    if (client.guilds.has(consts.aphc.id)) {
-        log("AstralPhaser Central has been detected.");
-        log("Now connecting to the waiting room.");
-        //Jump into waiting room
-        client.channels.get(consts.aphc.waitingRoomChannel).join().then(function(conn) {
-            log("Now playing audio in the AstralPhaser Central Waiting Room.", logType.good);
-            connection = conn;
-            playAudio();
-        });
+    try {
+        if (client.guilds.has(consts.aphc.id)) {
+            log("AstralPhaser Central has been detected.");
+            log("Now connecting to the waiting room.");
+            //Jump into waiting room
+            client.channels.get(consts.aphc.waitingRoomChannel).join().then(function(conn) {
+                log("Now playing audio in the AstralPhaser Central Waiting Room.", logType.good);
+                connection = conn;
+                playAudio();
+            });
+        }
+    } catch (err) {
+        log("Couldn't connect to APHC.", logType.critical);
     }
 }
 

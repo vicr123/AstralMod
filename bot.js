@@ -25,6 +25,8 @@ const consts = require('./consts.js');
 const fs = require('fs');
 const readline = require('readline');
 const events = require('events');
+const blessed = require('blessed');
+const moment = require('moment');
 const client = new Discord.Client();
 
 const commandEmitter = new events.EventEmitter();
@@ -49,6 +51,135 @@ global.logType = {
     critical: 3,
     good: 4
 }
+
+//Set up screen
+var screen = blessed.screen({
+    smartCSR: true,
+    dockBorders: true
+});
+screen.title = 'AstralMod ' + amVersion;
+
+var titleBox = blessed.text({
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "1",
+    content: "AstralMod " + amVersion + " Console",
+    tags: true,
+    style: {
+        fg: 'black',
+        bg: 'white'
+    },
+    padding: {
+        left: 1
+    }
+});
+screen.append(titleBox);
+
+var logBox = blessed.log({
+    top: 1,
+    left: 0,
+    width: "100%",
+    height: "100%-2",
+    tags: true,
+    style: {
+        fg: 'white',
+        bg: 'black',
+        scrollbar: {
+            bg: 'white'
+        }
+    },
+    padding: {
+        left: 1,
+        bottom: 2
+    },
+    scrollable: true,
+    alwaysScroll: true,
+    scrollOnInput: true,
+    scrollbar: true
+});
+screen.append(logBox);
+
+var textBox = blessed.textbox({
+    top: "100%-3",
+    left: -1,
+    width: "100%+2",
+    height: 3,
+    tags: true,
+    value: "> ",
+    border: {
+        type: "line"
+    },
+    style: {
+        fg: 'white',
+        bg: 'black',
+        border: {
+            fg: 'white',
+            bg: 'black'
+        }
+    },
+    inputOnFocus: true
+});
+
+screen.append(textBox);
+textBox.focus();
+
+var keyBox = blessed.box({
+    top: "100%-1",
+    left: "0",
+    width: "100%",
+    height: 1,
+    content: "^C Exit   ENTER Issue Command",
+    tags: true,
+    style: {
+        fg: 'black',
+        bg: 'white'
+    },
+    padding: {
+        left: 1
+    }
+});
+screen.append(keyBox);
+
+// Quit on Control-C.
+textBox.key('C-c', function(ch, key) {
+    shutdown();
+});
+
+textBox.key('up', function() {
+    logBox.scroll(-1);
+    renderScreen();
+});
+
+textBox.key('pageup', function() {
+    logBox.scroll(-logBox.height);
+    renderScreen();
+});
+
+textBox.key('down', function() {
+    logBox.scroll(1);
+    renderScreen();
+});
+
+textBox.key('pagedown', function() {
+    logBox.scroll(logBox.height);
+    renderScreen();
+});
+
+textBox.on("cancel", function() {
+    textBox.setValue("> ");
+    textBox.focus();
+});
+
+function renderScreen() {
+    screen.render();
+}
+
+renderScreen();
+
+console.error = function(data, ...args){
+    log(data, logType.warning);
+};
 
 global.log = function(logMessage, type = logType.debug) {
     //Log a message to the console
@@ -121,7 +252,10 @@ global.log = function(logMessage, type = logType.debug) {
                 logFormatting = "\x1b[1m\x1b[32m";
                 break;
         }
-        console.log(logFormatting + "%s\x1b[0m", logString);
+        
+        //console.log(logFormatting + logString + "\x1b[0m");
+        logBox.log(logFormatting + logString + "\x1b[0m");
+        renderScreen();
     }
 }
 
@@ -147,21 +281,34 @@ var stdinInterface = readline.createInterface({
     terminal: false
 });
 
-stdinInterface.on("line", function(line) {
+textBox.on("submit", function() {
     //Input received!
+    var line = textBox.getText().substr(2);
+
+    logBox.log(line);
+    textBox.setValue("> ");
+    textBox.focus();
 
     var lLine = line.toLowerCase();
     if (lLine == "help") {
         var help = "AstralMod Console Commands:\n" +
                    "save                    Saves AstralMod configuration settings to disk. This happens every 30 seconds.\n" +
-                   "load [module]           Loads a module into AstralMod\n" +
-                   "unload [module]         Unloads a module from AstralMod\n" +
+                   "plugins                 List loaded plugins\n" +
+                   "load [plugin]           Loads a plugin into AstralMod\n" +
+                   "unload [plugin]         Unloads a plugin from AstralMod\n" +
+                   "reload [plugin]         Unloads and then loads a plugin into AstralMod\n" +
                    "broadcast [message]     Broadcasts a message to every server AstralMod is connected to\n" +
                    "vacuum                  Check the AstralMod Configuration File for errors\n" +
                    "exit                    Exits AstralMod";
         log(help, logType.info);
     } else if (lLine == "exit") {
         shutdown();
+    } else if (lLine == "plugins") {
+        var pluginsList = "Loaded plugins:";
+        for (plugin in plugins) {
+            pluginsList += "\n" + plugin;
+        }
+        log(pluginsList, logType.info);
     } else if (lLine.startsWith("unload ")) {
         unloadPlugin(line.substr(7));
         log("Plugin " + line.substr(7) + " unloaded.", logType.good);
@@ -173,6 +320,14 @@ stdinInterface.on("line", function(line) {
         }
     } else if (lLine == "load") {
         log("Usage: load [filename]", logType.critical);
+    } else if (lLine.startsWith("reload ")) {
+        unloadPlugin(line.substr(7));
+        log("Plugin " + line.substr(7) + " unloaded.", logType.good);
+        if (loadPlugin(line.substr(7))) {
+            log("Plugin " + line.substr(7) + " loaded.", logType.good);
+        }
+    } else if (lLine == "reload") {
+        log("Usage: reload [filename]", logType.critical);
     } else if (lLine == "save") {
         saveSettings(true);
     } else if (lLine.startsWith("broadcast ")) {
@@ -232,7 +387,7 @@ function shutdown() {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-log("Welcome to AstralMod " + amVersion + "!", logType.good);
+log("Welcome to AstralMod!", logType.good);
 
 function getUserString(user) {
     var u = user;
@@ -511,12 +666,14 @@ function processModCommand(message) {
             return true;
         } else if (command.startsWith("declnick")) {
             var userId = command.substr(9);
-            if (nickTimeouts[message.guild.id][userId] != null) {
-                clearTimeout(nickTimeouts[message.guild.id][userId]);
-                nickTimeouts[message.guild.id][userId] = null;
-                message.channel.send(':white_check_mark: OK: User nickname change has been cancelled.');
-            } else {
-                message.channel.send(':no_entry_sign: ERROR: That didn\'t work. Has 5 minutes passed?');
+            if (nickTimeouts[message.guild.id] != null) {
+                if (nickTimeouts[message.guild.id][userId] != null) {
+                    clearTimeout(nickTimeouts[message.guild.id][userId]);
+                    nickTimeouts[message.guild.id][userId] = null;
+                    message.channel.send(':white_check_mark: OK: User nickname change has been cancelled.');
+                } else {
+                    message.channel.send(':no_entry_sign: ERROR: That didn\'t work. Has 5 minutes passed?');
+                }
             }
         } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
             if (actioningMember[message.guild.id] != null) {
@@ -780,7 +937,7 @@ function processAmCommand(message) {
                                   "If this parameter is not present, we'll list the available commands.";
                     break;
                 default:
-                    //Look thorough modules for help
+                    //Look thorough plugins for help
                     for (key in plugins) {
                         var plugin = plugins[key];
                         if (plugin.acquireHelp != null) {
@@ -1619,7 +1776,7 @@ function processMessage(message) {
             }
         }
 
-        //Pass command onto modules
+        //Pass command onto plugins
         commandEmitter.emit('newDM', message);
     }
 }
@@ -1646,7 +1803,7 @@ function saveSettings(showOkMessage = false) {
             log("Settings couldn't be saved.", logType.critical);
         } else {
             if (showOkMessage) {
-                log("Settings saved!", logType.critical);
+                log("Settings saved!", logType.good);
             } else {
                 log("Settings saved!");
             }
@@ -1895,10 +2052,14 @@ function vacuumSettings() {
         log("AstralMod Configuration was checked and changes were made. No other actions need to be taken.", logType.warning);
         log("Old settings backed up as .settings-backup.json", logType.info);
     } else {
-        fs.unlink(".settings-backup.json");
+        fs.unlinkSync(".settings-backup.json");
         log("AstralMod Configuration checked. No changes have been made", logType.good);
     }
     return true;
+}
+
+function guildUnavailable(guild) {
+    log(guild.id + " has become unavailable.", logType.critical);
 }
 
 client.once('ready', function() {
@@ -1954,10 +2115,10 @@ client.once('ready', function() {
         }
     }
 
-    //Load modules
-    log("Loading modules...");
+    //Load plugins
+    log("Loading plugins...");
     if (!fs.existsSync("plugins/")) {
-        log("AstralMod modules folder does not exist. Creating now.", logType.warning);
+        log("AstralMod plugins folder does not exist. Creating now.", logType.warning);
         fs.mkdirSync("plugins/");
     }
 
@@ -1975,14 +2136,23 @@ client.once('ready', function() {
     client.on('messageUpdate', messageUpdated);
     client.on('guildMemberAdd', memberAdd);
     client.on('guildMemberRemove', memberRemove);
+    client.on('guildUnavailable', guildUnavailable);
 
     setTimeout(saveSettings, 30000);
 
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
+
+    setInterval(function() {
+        titleBox.content = "AstralMod " + amVersion + " Console                    Uptime: " + moment.duration(client.uptime).humanize();
+        renderScreen();
+    }, 1000);
 });
 
-log("Establishing connection to Discord...", logType.info);
+if (process.argv.indexOf("--debug") == -1) {
+    log("Running AstralMod without --debug command line flag. Debug output disabled.", logType.info);
+}
 
+log("Establishing connection to Discord...", logType.info);
 try {
     const api = require('./keys.js');
     if (api.key != null) {

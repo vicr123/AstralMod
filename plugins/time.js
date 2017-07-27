@@ -225,18 +225,18 @@ function utcOffsetFromTimezone(location) {
         case "tot":
             return 13;
         default:
-            return null;
+            return -3000;
     }
 }
 
 function processCommand(message, isMod, command) {
     if (command.startsWith("time ")) {
-        var utcOffset;
+        var utcOffset = -3000;
         var location = command.substr(5);
         var locationString = location;
 
         utcOffset = parseFloat(location);
-        if (isNaN(utcOffset)) {
+        if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
             utcOffset = utcOffsetFromTimezone(location);
             if (utcOffset == null) {
                 var user = location.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
@@ -250,37 +250,57 @@ function processCommand(message, isMod, command) {
 
                     locationString = userSettings.username;
                     utcOffset = userSettings.timezone;
+                } else {
+                    //Search for user by username
+                    
+                    var userObject = null;
+                    for (userObj in settings.users) {
+                        if (settings.users[userObj].username != null) {
+                            if (settings.users[userObj].username.toLowerCase() == user.toLowerCase()) {
+                                userObject = settings.users[userObj];
+                            }
+                        }
+                    }
+
+                    if (userObject != null) {
+                        locationString = userObject.username;
+                        utcOffset = userObject.timezone;
+                    }
                 }
             }
         }
 
-        var localtime = new Date();
-        var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + utcOffset * 60) * 60000);
-        var dateString = date.toString();
-        if (dateString == "Invalid Date") {
+        if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
             message.channel.send("Hmm... Not sure if I like that location...");
         } else {
-            dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-            dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-            message.channel.send("The time at " + locationString + " happens to be " + dateString);
+            var localtime = new Date();
+            var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + utcOffset * 60) * 60000);
+            var dateString = date.toString();
+            if (dateString == "Invalid Date") {
+                message.channel.send("Hmm... Not sure if I like that location...");
+            } else {
+                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
+                message.channel.send("The time at " + locationString + " happens to be " + dateString);
+            }
         }
     } else if (command == "time") {
-        if (settings.users[user] == null) {
-            settings.users[user] = {};
+        if (settings.users[message.author.id] == null) {
+            settings.users[message.author.id] = {};
         }
 
-        if (settings.users[user].timezone == null) {
+        if (settings.users[message.author.id].timezone == null) {
             message.reply("You haven't told me your timezone! To do that, use `am:settz`. For more information, go ahead and `am:help settz`.");
         } else {
             var localtime = new Date();
-            var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + settings.users[user].timezone * 60) * 60000);
+            var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + settings.users[message.author.id].timezone * 60) * 60000);
             var dateString = date.toString();
             if (dateString == "Invalid Date") {
                 message.channel.send("Hmm... Your timezone seems to be corrupted. You'll need to set your timezone again using `am:settz`. For more information, go ahead and `am:help settz`.");
             } else {
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                message.channel.send("The time at " + locationString + " happens to be " + dateString);
+                message.channel.send("The time at " + settings.users[message.author.id].username + " happens to be " + dateString);
             }
         }
     } else if (command.startsWith("settz ")) {
@@ -293,7 +313,7 @@ function processCommand(message, isMod, command) {
         }
 
         if (isNaN(utcOffset) || utcOffset < -14 || utcOffset > 14) {
-            message.reply("Usage: am:settz tz. For more information, `am:help settz`");
+            message.reply("Usage: `am:settz tz`. For more information, `am:help settz`");
         } else {
             var userSettings = settings.users[message.author.id];
             
@@ -305,8 +325,14 @@ function processCommand(message, isMod, command) {
 
             settings.users[message.author.id] = userSettings;
 
-            message.reply("Your timezone is now UTC " + parseFloat(utcOffset));
+            if (isNaN(parseFloat(utcOffset))) {
+                message.reply("That's not a valid timezone.");
+            } else {
+                message.reply("Your timezone is now UTC " + parseFloat(utcOffset));
+            }
         }
+    } else if (command == "settz") {
+        message.reply("Usage: `am:settz tz`. For more information, `am:help settz`");
     } else if (command.startsWith("timer ")) {
         var time;
         var indexOfFirstSplit = command.indexOf(" ", 6);

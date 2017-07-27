@@ -1,0 +1,11 @@
+{
+    "version": "1.0",
+    "debuggerType": "nodejs",
+    "runTypes": [
+        {
+            "name": "Start",
+            "program": "./bot.js",
+            "debug": true
+        }
+    ]
+}
