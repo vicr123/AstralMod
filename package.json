@@ -16,7 +16,9 @@
     "url": "https://github.com/vicr123/AstralMod/issues"
   },
   "dependencies": {
+    "blessed": "^0.1.81",
     "discord.js": "^11.1.0",
+    "moment": "^2.18.1",
     "opusscript": "0.0.3"
   }
 }
