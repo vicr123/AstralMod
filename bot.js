@@ -1992,70 +1992,75 @@ function unloadPlugin(file) {
 }
 
 function vacuumSettings() {
-    log("Checking the AstralMod Configuration file...", logType.info);
-    fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
+    if (process.argv.indexOf("--novacuum") == -1) {
+        log("Checking the AstralMod Configuration file...", logType.info);
+        fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
 
-    var changesMade = false;
-    var error = false;
+        var changesMade = false;
+        var error = false;
 
-    //Check settings file objects
-    if (!settings.hasOwnProperty("guilds")) {
-        log("Settings does not contain guilds.", logType.critical);
-        error = true;
-    }
-
-    if (!settings.hasOwnProperty("users")) {
-        log("Settings does not contain users.", logType.critical);
-        error = true;
-    }
-
-    if (!settings.hasOwnProperty("generalConfiguration")) {
-        log("Settings does not contain general configuration.", logType.critical);
-        error = true;
-    }
-
-    if (error) {
-        //Quit AstralMod
-        log("AstralMod Configuration contains errors.", logType.critical);
-        log("From here, you can either\n- Attempt to fix the AstralMod configuration file, settings.json\n- Delete the AstralMod configuration file and start again.", logType.info);
-        log("AstralMod Configuration is corrupted. AstralMod cannot continue running. Exiting now.", logType.critical);
-        process.exit(1);
-    }
-
-    //Check that each guild still exists
-    var availableGuilds = [];
-    for (let [id, guild] of client.guilds) {
-        log("Checking Discord guild " + guild.id);
-        availableGuilds.push(guild.id);
-
-        if (!settings.guilds.hasOwnProperty(guild.id)) {
-            //Add guild to database
-            changesMade = true;
-            log("Adding guild " + key + " to the database.", logType.info);
-            newGuild(guild);
+        //Check settings file objects
+        if (!settings.hasOwnProperty("guilds")) {
+            log("Settings does not contain guilds.", logType.critical);
+            error = true;
         }
-    }
 
-    //Iterate over all guilds in settings
-    for (key in settings.guilds) {
-        log("Checking internal guild " + key);
-        if (!availableGuilds.includes(key)) {
-            //Delete guild from database
-            changesMade = true;
-            log("Deleting guild " + key + " as this guild is no longer recognised.", logType.info);
-            settings.guilds[key] = null;
-            delete settings.guilds[key];
+        if (!settings.hasOwnProperty("users")) {
+            log("Settings does not contain users.", logType.critical);
+            error = true;
         }
-    }
 
-    if (changesMade) {
-        log("AstralMod Configuration was checked and changes were made. No other actions need to be taken.", logType.warning);
-        log("Old settings backed up as .settings-backup.json", logType.info);
+        if (!settings.hasOwnProperty("generalConfiguration")) {
+            log("Settings does not contain general configuration.", logType.critical);
+            error = true;
+        }
+
+        if (error) {
+            //Quit AstralMod
+            log("AstralMod Configuration contains errors.", logType.critical);
+            log("From here, you can either\n- Attempt to fix the AstralMod configuration file, settings.json\n- Delete the AstralMod configuration file and start again.", logType.info);
+            log("AstralMod Configuration is corrupted. AstralMod cannot continue running. Exiting now.", logType.critical);
+            process.exit(1);
+        }
+
+        //Check that each guild still exists
+        var availableGuilds = [];
+        for (let [id, guild] of client.guilds) {
+            log("Checking Discord guild " + guild.id);
+            availableGuilds.push(guild.id);
+
+            if (!settings.guilds.hasOwnProperty(guild.id)) {
+                //Add guild to database
+                changesMade = true;
+                log("Adding guild " + guild.id + " to the database.", logType.info);
+                newGuild(guild);
+            }
+        }
+
+        //Iterate over all guilds in settings
+        for (key in settings.guilds) {
+            log("Checking internal guild " + key);
+            if (!availableGuilds.includes(key)) {
+                //Delete guild from database
+                changesMade = true;
+                log("Deleting guild " + key + " as this guild is no longer recognised.", logType.info);
+                settings.guilds[key] = null;
+                delete settings.guilds[key];
+            }
+        }
+
+        if (changesMade) {
+            log("AstralMod Configuration was checked and changes were made. No other actions need to be taken.", logType.warning);
+            log("Old settings backed up as .settings-backup.json", logType.info);
+        } else {
+            fs.unlinkSync(".settings-backup.json");
+            log("AstralMod Configuration checked. No changes have been made", logType.good);
+        }
+        return true;
     } else {
-        fs.unlinkSync(".settings-backup.json");
-        log("AstralMod Configuration checked. No changes have been made", logType.good);
+        log("--novacuum argument was passed. Vacuuming has been disabled.", logType.info);
+        return false;
     }
-    return true;
 }
 
 function guildUnavailable(guild) {
