@@ -2166,6 +2166,15 @@ client.on('disconnect', function(closeEvent) {
 
 if (process.argv.indexOf("--debug") == -1) {
     log("Running AstralMod without --debug command line flag. Debug output disabled.", logType.info);
+} else {
+    //Enable debugging output from discord.js
+    
+    client.on('debug', function(info) {
+        log(info);
+    });
+    client.on('warn', function(info) {
+        log(info, logType.warning);
+    });
 }
 
 log("Establishing connection to Discord...", logType.info);
