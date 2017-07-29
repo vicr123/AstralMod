@@ -1786,7 +1786,11 @@ function newGuild(guild) {
     settings.guilds[guild.id] = {
         requiresConfig: true
     };
-    guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `mod:config`.");
+    
+    
+    if (process.argv.indexOf("--nowelcome") == -1) {
+        guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `mod:config`.");
+    }
 }
 
 function removeGuild(guild) {
@@ -2020,6 +2024,7 @@ function vacuumSettings() {
             log("AstralMod Configuration contains errors.", logType.critical);
             log("From here, you can either\n- Attempt to fix the AstralMod configuration file, settings.json\n- Delete the AstralMod configuration file and start again.", logType.info);
             log("AstralMod Configuration is corrupted. AstralMod cannot continue running. Exiting now.", logType.critical);
+            debugger;
             process.exit(1);
         }
 
@@ -2151,6 +2156,12 @@ client.once('ready', function() {
         titleBox.content = "AstralMod " + amVersion + " Console                    Uptime: " + moment.duration(client.uptime).humanize();
         renderScreen();
     }, 1000);
+});
+
+client.on('disconnect', function(closeEvent) {
+    log("AstralMod has disconnected from Discord and will not attempt to reconnect.", logType.critical);
+    log("Close code: " + parseInt(closeEvent.code), logType.critical);
+    log("At this point, you'll need to restart AstralMod.", logType.critical);
 });
 
 if (process.argv.indexOf("--debug") == -1) {
