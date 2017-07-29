@@ -2163,6 +2163,9 @@ client.on('disconnect', function(closeEvent) {
     log("Close code: " + parseInt(closeEvent.code), logType.critical);
     log("At this point, you'll need to restart AstralMod.", logType.critical);
 });
+client.on('reconnecting', function() {
+    log("AstralMod has disconnected from Discord and is now attempting to reconnect.", logType.warning);
+});
 
 if (process.argv.indexOf("--debug") == -1) {
     log("Running AstralMod without --debug command line flag. Debug output disabled.", logType.info);
