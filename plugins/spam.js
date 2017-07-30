@@ -34,7 +34,27 @@ function startup() {
 }
 
 function newMessage(message) {
-    if ((settings.guilds[message.guild.id].spamCtl == null || settings.guilds[message.guild.id].spamCtl == true) && settings.guilds[message.guild.id].requiresConfig == false) {
+    var checkSpam = true;
+    
+    if (settings.guilds[message.guild.id] == null || typeof settings.guilds[message.guild.id] == "undefined") {
+        checkSpam = false;
+    } else {
+        if (settings.guilds[message.guild.id].spamCtl != null) {
+            if (settings.guilds[message.guild.id].spamCtl == false) {
+                checkSpam = false;
+            }
+        }
+        
+        if (settings.guilds[message.guild.id].requiresConfig == true) {
+            checkSpam = false;
+        }
+        
+        if (message.author.bot) {
+            checkSpam = false;
+        }
+    }
+    
+    if (checkSpam) {
         //Spam filtering enabled for this server
 
         /** @type{Array} */

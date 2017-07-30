@@ -32,6 +32,11 @@ function playAudio() {
     try {
         dispatcher = connection.playFile("forecastvoice.mp3");
         dispatcher.on('end', playAudio);
+        dispatcher.on('error', function(err) {
+            dispatcher.end();
+            log("APHC Voice connection encountered an error: " + err, logType.critical);
+            log("Disconnected from the waiting room.", logType.critical);
+        });
     } catch (err) {
         log("Disconnected from the waiting room.", logType.critical);
     }
@@ -46,12 +51,46 @@ function startup() {
             client.channels.get(consts.aphc.waitingRoomChannel).join().then(function(conn) {
                 log("Now playing audio in the AstralPhaser Central Waiting Room.", logType.good);
                 connection = conn;
+                connection.on('disconnect', function() {
+                    log("Disconnected from the waiting room.", logType.critical);
+                });
+                connection.on('reconnecting', function() {
+                    log("Attempting to reconnect to the waiting room.", logType.warning);
+                });
+                connection.on('warn', function(warning) {
+                    if (typeof warning == "string") {
+                        log(warning, logType.warning);
+                    } else {
+                        if (warning.message) {
+                            log(warning.message, logType.critical);
+                        }
+                    }
+                });
+                connection.on('debug', function(message) {
+                    if (typeof message == "string") {
+                        log(message, logType.warning);
+                    } else {
+                        if (message.message) {
+                            log(message.message, logType.critical);
+                        }
+                    }
+                });
+                connection.on('error', function(warning) {
+                    if (warning.message) {
+                        log(warning.message, logType.critical);
+                    }
+                });
                 playAudio();
             });
         }
     } catch (err) {
         log("Couldn't connect to APHC.", logType.critical);
     }
+}
+
+function disconnected() {
+    dispatcher.end("Disconnection");
+    connection.disconnect();
 }
 
 function processCommand(message, isMod, command) {
@@ -154,10 +193,14 @@ module.exports = {
 
         commandEmitter.on('startup', startup);
         commandEmitter.on('processCommand', processCommand);
+        commandEmitter.on('disconnect', disconnected);
+        commandEmitter.on('reconnect', startup);
     },
     destructor: function(commandEmitter) {
         commandEmitter.removeListener('startup', startup);
         commandEmitter.removeListener('processCommand', processCommand);
+        commandEmitter.removeListener('disconnect', disconnected);
+        commandEmitter.removeListener('reconnect', startup);
     },
     availableCommands: {
         general: {

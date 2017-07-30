@@ -44,6 +44,8 @@ var actioningMember = {};
 var actionStage = {};
 var actionToPerform = {};
 
+var finalStdout = "";
+
 global.logType = {
     debug: 0,
     info: 1,
@@ -252,9 +254,12 @@ global.log = function(logMessage, type = logType.debug) {
                 logFormatting = "\x1b[1m\x1b[32m";
                 break;
         }
+
+        var logOutput = logFormatting + logString + "\x1b[0m";
         
-        //console.log(logFormatting + logString + "\x1b[0m");
-        logBox.log(logFormatting + logString + "\x1b[0m");
+        logBox.log("[" + new Date().toLocaleTimeString("us", {
+            hour12: false
+        }) + "] " + logOutput);
         renderScreen();
     }
 }
@@ -299,6 +304,7 @@ textBox.on("submit", function() {
                    "reload [plugin]         Unloads and then loads a plugin into AstralMod\n" +
                    "broadcast [message]     Broadcasts a message to every server AstralMod is connected to\n" +
                    "vacuum                  Check the AstralMod Configuration File for errors\n" +
+                   "reconnect               Attempts to disconnect and reconnect to Discord\n" +
                    "exit                    Exits AstralMod";
         log(help, logType.info);
     } else if (lLine == "exit") {
@@ -330,6 +336,16 @@ textBox.on("submit", function() {
         log("Usage: reload [filename]", logType.critical);
     } else if (lLine == "save") {
         saveSettings(true);
+    } else if (lLine == "reconnect") {
+        const api = require('./keys.js');
+        client.sock
+        if (api.key != null) {
+            client.login(api.key).catch(function() {
+                log("Couldn't establish a connection to Discord.", logType.critical);
+            });
+        } else {
+            log("Couldn't find token", logType.critical);
+        }
     } else if (lLine.startsWith("broadcast ")) {
         //Broadcast message to each server in either #general or the bot warnings general
         var broadcast = line.substr(10);
@@ -2072,7 +2088,33 @@ function guildUnavailable(guild) {
     log(guild.id + " has become unavailable.", logType.critical);
 }
 
-client.once('ready', function() {
+
+function guildMemberUpdate(oldUser, newUser) {
+    if (newUser.nickname != oldUser.nickname) {
+        var guildSetting = settings.guilds[oldUser.guild.id];
+        if (guildSetting.botWarnings != null) {
+            if (oldUser.guild != null) {
+                channel = oldUser.guild.channels.get(guildSetting.botWarnings);
+                if (newUser.nickname == null) {
+                    channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: [cleared]");
+                } else {
+                    channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: " + newUser.nickname);
+                }
+            }
+        }
+    }
+}
+
+function readyAgain() {
+    log("AstralMod has reconnected to Discord.", logType.good);
+
+    client.setInterval(setGame, 300000);
+    setGame();
+
+    commandEmitter.emit('reconnect');
+}
+
+function readyOnce() {
     log("Now connected to Discord.", logType.good);
     log("Checking if configuration file exists...");
 
@@ -2107,7 +2149,6 @@ client.once('ready', function() {
     setGame();
     
     log("Loading suggestions channels...");
-    //Determine if this is within a workflow or if this is unsolicited
     for (key in settings.guilds) {
         var guildSetting = settings.guilds[key];
         if (guildSetting != null) {
@@ -2147,6 +2188,8 @@ client.once('ready', function() {
     client.on('guildMemberAdd', memberAdd);
     client.on('guildMemberRemove', memberRemove);
     client.on('guildUnavailable', guildUnavailable);
+    client.on('guildMemberUpdate', guildMemberUpdate);
+    client.on('ready', readyAgain);
 
     setTimeout(saveSettings, 30000);
 
@@ -2156,15 +2199,21 @@ client.once('ready', function() {
         titleBox.content = "AstralMod " + amVersion + " Console                    Uptime: " + moment.duration(client.uptime).humanize();
         renderScreen();
     }, 1000);
-});
+}
+
+client.once('ready', readyOnce);
 
 client.on('disconnect', function(closeEvent) {
     log("AstralMod has disconnected from Discord and will not attempt to reconnect.", logType.critical);
     log("Close code: " + parseInt(closeEvent.code), logType.critical);
     log("At this point, you'll need to restart AstralMod.", logType.critical);
+
+    commandEmitter.emit('disconnect');
 });
 client.on('reconnecting', function() {
     log("AstralMod has disconnected from Discord and is now attempting to reconnect.", logType.warning);
+
+    commandEmitter.emit('disconnect');
 });
 
 if (process.argv.indexOf("--debug") == -1) {
@@ -2185,8 +2234,7 @@ try {
     const api = require('./keys.js');
     if (api.key != null) {
         client.login(api.key).catch(function() {
-            log("Couldn't establish a connection to Discord. Exiting.", logType.critical);
-            process.exit(1);
+            log("Couldn't establish a connection to Discord.", logType.critical);
         });
     } else {
         log("Login Token not found.", logType.critical);
@@ -2194,8 +2242,6 @@ try {
             "1. Create a file called keys.js in the same directory as AstralMod\n" +
             "2. Save the file with the following:\n" +
             "   exports.key = \"[your key here]\"", logType.info);
-        log("Exiting AstralMod.", logType.critical);
-        process.exit(1);
     }
 } catch (err) {
     log("Login Token not found.", logType.critical);
@@ -2203,6 +2249,4 @@ try {
         "1. Create a file called keys.js in the same directory as AstralMod\n" +
         "2. Save the file with the following:\n" +
         "   exports.key = \"[your key here]\"", logType.info);
-    log("Exiting AstralMod.", logType.critical);
-    process.exit(1);
 }
