@@ -4,7 +4,12 @@
     "runTypes": [
         {
             "name": "Start",
-            "program": "./bot.js",
+            "program": "./bot.js --nowelcome",
+            "debug": true
+        },
+        {
+            "name": "Start with Debug messages",
+            "program": "./bot.js --nowelcome --debug",
             "debug": true
         }
     ]

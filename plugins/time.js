@@ -238,7 +238,7 @@ function processCommand(message, isMod, command) {
         utcOffset = parseFloat(location);
         if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
             utcOffset = utcOffsetFromTimezone(location);
-            if (utcOffset == null) {
+            if (utcOffset == -3000) {
                 var user = location.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
                 var userSettings = settings.users[user];
 

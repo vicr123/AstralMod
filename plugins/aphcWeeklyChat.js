@@ -30,13 +30,17 @@ var connection;
 
 function playAudio() {
     try {
-        dispatcher = connection.playFile("forecastvoice.mp3");
-        dispatcher.on('end', playAudio);
-        dispatcher.on('error', function(err) {
-            dispatcher.end();
-            log("APHC Voice connection encountered an error: " + err, logType.critical);
-            log("Disconnected from the waiting room.", logType.critical);
-        });
+        if (connection.status == 0) {
+            dispatcher = connection.playFile("forecastvoice.mp3");
+            dispatcher.on('end', playAudio);
+            dispatcher.on('error', function(err) {
+                connection.disconnect();
+                log("APHC Voice connection encountered an error: " + err, logType.critical);
+                log("Disconnected from the waiting room.", logType.critical);
+            });
+        } else {
+            log("connection.status " + parseInt(connection.status));
+        }
     } catch (err) {
         log("Disconnected from the waiting room.", logType.critical);
     }
@@ -53,6 +57,7 @@ function startup() {
                 connection = conn;
                 connection.on('disconnect', function() {
                     log("Disconnected from the waiting room.", logType.critical);
+                    //connection.disconnect();
                 });
                 connection.on('reconnecting', function() {
                     log("Attempting to reconnect to the waiting room.", logType.warning);
@@ -76,8 +81,12 @@ function startup() {
                     }
                 });
                 connection.on('error', function(warning) {
-                    if (warning.message) {
-                        log(warning.message, logType.critical);
+                    if (typeof warning == "string") {
+                        log(warning, logType.warning);
+                    } else {
+                        if (warning.message) {
+                            log(warning.message, logType.critical);
+                        }
                     }
                 });
                 playAudio();
@@ -108,7 +117,7 @@ function processCommand(message, isMod, command) {
 
                 for (var i = 0; i < membersInWaitingRoom.length; i++) {
                     var member = membersInWaitingRoom[i];
-                    if (member.selfMute || member.serverMute || member.id == 282048599574052864 || isMod(member)) {
+                    if (member.selfMute || member.serverMute || member.id == 282048599574052864) {// || isMod(member)) {
                         membersInWaitingRoom.splice(i, 1);
                         i--;
                     }
@@ -197,6 +206,9 @@ module.exports = {
         commandEmitter.on('reconnect', startup);
     },
     destructor: function(commandEmitter) {
+        dispatcher.end("Disconnection");
+        connection.disconnect();
+
         commandEmitter.removeListener('startup', startup);
         commandEmitter.removeListener('processCommand', processCommand);
         commandEmitter.removeListener('disconnect', disconnected);

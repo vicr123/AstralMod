@@ -58,6 +58,10 @@ function processCommand(message, isMod, command) {
             }
         } else if (command == "panic") {
             message.channel.send('Panic Mode is coming soon. Stay Tuned!');
+        } else if (command == "chnk") {
+            message.channel.send("Usage: mod:chnk user. For more information, `mod:help chnk`.");
+        } else if (command.startsWith("chnk ")) {
+            
         }
     }
 }
@@ -80,7 +84,8 @@ module.exports = {
             ],
             modCommands: [
                 "rm",
-                "panic"
+                "panic",
+                "chnk"
             ]
         }
     },
@@ -98,6 +103,13 @@ module.exports = {
                 help.title = "mod:panic";
                 help.usageText = "mod:panic";
                 help.helpText = "Switches on Panic Mode. In this mode, no one can send messages.";
+                break;
+            case "chnk":
+                help.title = "mod:chnk";
+                help.usageText = "mod:chnk user";
+                help.helpText = "Sets a random nickname to user.";
+                help.param1 = "- The User ID of the user to apply a new nickname to\n" +
+                              "- Mention of the user to apply a new nickname to";
                 break;
         }
 

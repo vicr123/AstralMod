@@ -76,7 +76,7 @@ function newMessage(message) {
         }
 
         var messageText = message.content.toLowerCase();
-        if (messageText.length > 3) {
+        if (messageText.length > 3 && messageText != "okay" && messageText != "yeah") {
             if (lastMessagesOfUser.includes(messageText)) {
                 spamCountingUser++;
 

@@ -18,7 +18,7 @@
  * 
  * *************************************/
 
-const amVersion = "2.0.0";
+const amVersion = "2.1.0";
 
 const Discord = require('discord.js');
 const consts = require('./consts.js');
@@ -184,6 +184,10 @@ console.error = function(data, ...args){
 };
 
 global.log = function(logMessage, type = logType.debug) {
+    if (logMessage == null) {
+        return;
+    }
+
     //Log a message to the console
     if (type == logType.debug) {
         if (process.argv.indexOf("--debug") == -1) {
@@ -294,6 +298,17 @@ textBox.on("submit", function() {
     textBox.setValue("> ");
     textBox.focus();
 
+    const memberLine = function(member) {
+        var line = member.id + "  " + member.user.tag;
+        if (member.nickname != null) {
+            line += " [" + member.nickname + "]";
+        }
+        if (member.user.bot) {
+            line += " \x1b[46m[BOT]";
+        }
+        return line;
+    };
+
     var lLine = line.toLowerCase();
     if (lLine == "help") {
         var help = "AstralMod Console Commands:\n" +
@@ -305,7 +320,14 @@ textBox.on("submit", function() {
                    "broadcast [message]     Broadcasts a message to every server AstralMod is connected to\n" +
                    "vacuum                  Check the AstralMod Configuration File for errors\n" +
                    "reconnect               Attempts to disconnect and reconnect to Discord\n" +
-                   "exit                    Exits AstralMod";
+                   "guilds                  Lists guilds AstralMod knows about\n" +
+                   "ginfo [guildid]       - Shows information about a guild\n" +
+                   "findc [channelid]       Finds a channel by its ID\n" +
+                   "exit                    Exits AstralMod\n\n" +
+                   "For any commands denoted with a - modifiers on the end can show more information.\n" +
+                   "m - Show members\n" +
+                   "c - Show channels\n\n" +
+                   "Here's an example: ginfom 123456789012345678";
         log(help, logType.info);
     } else if (lLine == "exit") {
         shutdown();
@@ -380,8 +402,127 @@ textBox.on("submit", function() {
         log("Usage: broadcast message", logType.critical);
     } else if (lLine == "vacuum") {
         vacuumSettings();
+    } else if (lLine == "throw") {
+        throw new Error();
+    } else if (lLine.startsWith("findc ")) {
+        var channelId = line.substr(6);
+        var channel = client.channels.get(channelId);
+        if (channel == null) {
+            log("Unknown channel.", logType.info);
+        } else {
+            log("That channel belongs to " + channel.guild.name + ".", logType.info);
+        }
+    } else if (lLine == "findc") {
+        log("Usage: findc [channelid]", logType.critical);
+    } else if (lLine == "guilds") {
+        var response = "Guilds AstralMod is connected to:";
+
+        for ([id, guild] of client.guilds) {
+            response += "\n" + guild.id + "  " + guild.name + "";
+        }
+
+        log(response, logType.info);
+    } else if (lLine.startsWith("ginfo ")) {
+        var guildLine = line.substr(6);
+        var guild = client.guilds.get(guildLine);
+        if (guild == null) {
+            log("Unknown guild.", logType.info);
+        } else {
+            var info = "Information for guild " + guildLine + ":\n" +
+                       "Name: " + guild.name + "\n" +
+                       "Owner: " + memberLine(guild.owner) + "\n" +
+                       "Members: " + parseInt(guild.memberCount) + "\n" +
+                       "Channels: " + parseInt(guild.channels.size);
+            log(info, logType.info);
+        }
+    } else if (lLine.startsWith("ginfom ")) {
+        var guildLine = line.substr(7);
+        var guild = client.guilds.get(guildLine);
+        if (guild == null) {
+            log("Unknown guild.", logType.info);
+        } else {
+            var info = "Information for guild " + guildLine + ":\n" +
+                       "Members: " + parseInt(guild.memberCount);
+            
+            for ([id, member] of guild.members) {
+                info += "\n" + memberLine(member);
+            }
+            
+            log(info, logType.info);
+        }
+    } else if (lLine == "ginfo") {
+        log("Usage: ginfo [guildid]", logType.critical);
     } else {
         log("Unknown command. For help, type \"help\" into the console.", logType.critical);
+    }
+});
+
+textBox.key('backspace', function() {
+    var line = textBox.getText();
+    if (!line.startsWith("> ")) {
+        if (line == ">") {
+            line = "> ";
+        } else if (line.startsWith(" ")) {
+            line = "> " + line.substring(1);
+        } else {
+            line = "> " + line;
+        }
+        textBox.setValue(line);
+    }
+});
+
+textBox.key('tab', function() {
+    //Autocomplete!
+
+    var line = textBox.getText().substr(2, textBox.getText().length - 6);
+    textBox.setValue("> " + line);
+    var lLine = line.toLowerCase();
+
+    if (lLine.startsWith("ginfo ")) {
+        var guildLine = line.substr(6);
+        var guilds = [];
+        for ([id, guild] of client.guilds) {
+            var id = guild.id;
+            if (id.startsWith(guildLine)) {
+                guilds.push(guild.id);
+            }
+        }
+        
+        if (guilds.length == 1) {
+            textBox.setValue("> ginfo " + guilds[0]);
+        } else if (guilds.length == 0) {
+            log("No results.", logType.info)
+        } else {
+            var acOutput = "";
+            for (guild of guilds) {
+                acOutput += guild + " ";
+            }
+            log(acOutput, logType.info);
+        }
+    } else if (lLine.startsWith("ginfom ") || lLine.startsWith("ginfoc ")) {
+        var guildLine = line.substr(7);
+        var guilds = [];
+        for ([id, guild] of client.guilds) {
+            var id = guild.id;
+            if (id.startsWith(guildLine)) {
+                guilds.push(guild.id);
+            }
+        }
+        
+        if (guilds.length == 1) {
+            textBox.setValue("> ginfom " + guilds[0]);
+        } else if (guilds.length == 0) {
+            log("No results.", logType.info)
+        } else {
+            var acOutput = "";
+            for (guild of guilds) {
+                acOutput += guild + " ";
+            }
+            log(acOutput, logType.info);
+        }
+    } else {
+        log("Command autocompletion coming soon.", logType.info);
+        //TODO: Command autocompletion
     }
 });
 
@@ -405,7 +546,7 @@ process.on('SIGTERM', shutdown);
 
 log("Welcome to AstralMod!", logType.good);
 
-function getUserString(user) {
+global.getUserString = function(user) {
     var u = user;
     if (user.user != null) {
         u = user.user;
@@ -649,7 +790,12 @@ function processModCommand(message) {
     }
 
     if (isMod(message.member)) {
-        var command = text.toLowerCase().substr(4);
+        var command;
+        if (text.startsWith("mod:")) {
+            command = text.toLowerCase().substr(4);
+        } else {
+            command = text.toLowerCase().substr(3);
+        }
         if (command.startsWith("uinfo ")) {
             var user = command.substr(6);
             user = user.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
@@ -691,6 +837,7 @@ function processModCommand(message) {
                     message.channel.send(':no_entry_sign: ERROR: That didn\'t work. Has 5 minutes passed?');
                 }
             }
+            return true;
         } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
             if (actioningMember[message.guild.id] != null) {
                 message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember[message.guild.id]) + " is already managing another user.");
@@ -762,10 +909,43 @@ function processModCommand(message) {
                 });
             }
             message.delete();
+            return true;
+        } else if (command == "find") {
+            message.reply("Usage: `mod:find user`. For more information, `mod:help find`");
+            return true;
+        } else if (command.startsWith("find" )) {
+            var query = command.substr(5);
+            var searchResults = [];
+
+            for (let [snowflake, user] of client.users) {
+                if (user.username.toLowerCase().indexOf(query.toLowerCase()) != -1) {
+                    searchResults.push({
+                        tag: user.tag,
+                        id: user.id
+                    });
+                }
+            }
+
+            if (searchResults.length == 0) {
+                message.reply("No results.");
+            } else {
+                var reply = "Here's who I found.```";
+
+                var currentNumber = 0;
+                for (user of searchResults) {
+                    reply += user.tag + ": " + user.id + "\n";
+                    if (currentNumber == 10) {
+                        reply += "\n----- " + parseInt(searchResults.length - currentNumber) + " more. -----\n";
+                        reply += "Please narrow your query.";
+                        break;
+                    }
+                    currentNumber++;
+                }
+                reply += "```";
+                message.channel.send(reply);
+            }
+            return true;
         }
-    } else {
-        message.channel.send("You ain't a mod...");
-        return true;
     }
     return false;
 }
@@ -847,7 +1027,7 @@ function processAmCommand(message) {
             embed.setAuthor("AstralMod Help Contents");
             embed.setDescription("Here are some things you can try. For more information, just `am:help [command]`");
 
-            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\nping\nuinfo\nnick\nversion\nhelp", true);
+            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\n**find**\nping\nuinfo\nnick\nversion\nhelp", true);
 
             for (key in plugins) {
                 var plugin = plugins[key];
@@ -890,6 +1070,7 @@ function processAmCommand(message) {
 
             embed.setFooter("AstralMod " + amVersion + ". mod: commands denoted with bold text.");
             message.channel.send("", { embed: embed });
+            return true;
         } else if (command.startsWith("help ")) { //Contextual help
             //Get help for specific command
             var embed = new Discord.RichEmbed();
@@ -943,6 +1124,13 @@ function processAmCommand(message) {
                     help.usageText = "am:nick nickname";
                     help.helpText = "Sets your nickname after staff have a chance to review it";
                     help.param1 = "The nickname you wish to be known as";
+                    break;
+                case "find":
+                    help.title = "mod:find";
+                    help.usageText = "mod:find user";
+                    help.helpText = "Finds a user and returns their ID";
+                    help.param1 = "The user you want to find.";
+                    help.remarks = "AstralMod will search for users from all connected servers."
                     break;
                 case "help":
                     help.title = "am:help";
@@ -1028,8 +1216,9 @@ function processAmCommand(message) {
                     embed.addField("Remarks", help.remarks);
                 }
             }
-            embed.setFooter("AstralMod " + amVersion + ".");
+            embed.setFooter("AstralMod " + amVersion);
             message.channel.send("", { embed: embed });
+            return true;
         }
     }
     return false;
@@ -1296,25 +1485,25 @@ function getSingleConfigureWelcomeText(guild) {
 
     string += "1 Staff Roles        " + guildSetting.modRoles.length + " roles\n";
 
-    if (guildSetting.memberAlerts == null) {
+    if (guild.channels.get(guildSetting.memberAlerts) == null) {
         string += "2 Member Alerts      Disabled\n";
     } else {
         string += "2 Member Alerts      #" + guild.channels.get(guildSetting.memberAlerts).name + "\n";
     }
 
-    if (guildSetting.chatLogs == null) {
+    if (guild.channels.get(guildSetting.chatLogs) == null) {
         string += "3 Chat Logs          Disabled\n";
     } else {
         string += "3 Chat Logs          #" + guild.channels.get(guildSetting.chatLogs).name + "\n";
     }
 
-    if (guildSetting.botWarnings == null) {
+    if (guild.channels.get(guildSetting.botWarnings) == null) {
         string += "4 Bot Warnings       Disabled\n";
     } else {
         string += "4 Bot Warnings       #" + guild.channels.get(guildSetting.botWarnings).name + "\n";
     }
 
-    if (guildSetting.suggestions == null) {
+    if (guild.channels.get(guildSetting.suggestions) == null) {
         string += "5 Suggestions        Disabled\n";
     } else {
         string += "5 Suggestions        #" + guild.channels.get(guildSetting.suggestions).name + "\n";
@@ -1757,11 +1946,15 @@ function processMessage(message) {
         }
 
         //Determine if this is a command
-        if (text.startsWith("mod:")) { //This is a mod command
+        if (text.startsWith("mod:") || text.startsWith("am")) { //This is a mod command
             if (!processModCommand(message)) {
                 if (!processAmCommand(message)) {
                     //Pass command onto plugins
-                    commandEmitter.emit('processCommand', message, true, text.substr(4).toLowerCase());
+                    if (text.startsWith("mod:")) {
+                        commandEmitter.emit('processCommand', message, true, text.substr(4).toLowerCase());
+                    } else {
+                        commandEmitter.emit('processCommand', message, true, text.substr(3).toLowerCase());
+                    }
                 }
             }
         } else if (text.startsWith("am:")) {
@@ -1963,6 +2156,27 @@ function memberRemove(member) {
     }
 }
 
+function userUpdate(oldUser, newUser) {
+    if (newUser.username != oldUser.username) {
+        for (key in settings.guilds) {
+            var bwChannel = settings.guilds[key].botWarnings;
+            var guild = client.guilds.get(key);
+            if (bwChannel != null) {
+                //Check if member exists
+
+                for ([id, member] of guild.members) {
+                    if (member.user.id == newUser.id) {
+                        var channel = client.channels.get(bwChannel); //282513354118004747
+                        if (channel != null) {
+                            channel.send(":ab: " + getUserString(oldUser) + " :arrow_right: " + newUser.username + ".");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 function loadPlugin(file) {
     try {
         if (plugins[file] != null) {
@@ -2004,6 +2218,7 @@ function unloadPlugin(file) {
         //var module = require.cache[moduleResolve];
         delete require.cache[moduleResolve];
         delete plugins[file];
+        return true;
     } catch (err) {
         log(err.message, logType.critical);
         log("Plugin " + file + " is cannot be unloaded.", logType.critical);
@@ -2095,10 +2310,12 @@ function guildMemberUpdate(oldUser, newUser) {
         if (guildSetting.botWarnings != null) {
             if (oldUser.guild != null) {
                 channel = oldUser.guild.channels.get(guildSetting.botWarnings);
-                if (newUser.nickname == null) {
-                    channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: [cleared]");
-                } else {
-                    channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: " + newUser.nickname);
+                if (channel != null) {
+                    if (newUser.nickname == null) {
+                        channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: [cleared]");
+                    } else {
+                        channel.send(":abcd: " + getUserString(oldUser) + " :arrow_right: " + newUser.nickname);
+                    }
                 }
             }
         }
@@ -2189,6 +2406,7 @@ function readyOnce() {
     client.on('guildMemberRemove', memberRemove);
     client.on('guildUnavailable', guildUnavailable);
     client.on('guildMemberUpdate', guildMemberUpdate);
+    client.on('userUpdate', userUpdate);
     client.on('ready', readyAgain);
 
     setTimeout(saveSettings, 30000);
@@ -2196,7 +2414,8 @@ function readyOnce() {
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
 
     setInterval(function() {
-        titleBox.content = "AstralMod " + amVersion + " Console                    Uptime: " + moment.duration(client.uptime).humanize();
+        titleBox.content = "AstralMod " + amVersion + " Console  │  Uptime: " + moment.duration(client.uptime).humanize() +
+        "  │  Guilds: " + parseInt(client.guilds.size);
         renderScreen();
     }, 1000);
 }

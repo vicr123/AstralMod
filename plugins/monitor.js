@@ -47,7 +47,13 @@ function processCommand(message, isMod, command) {
     } else if (command == "pingtime") {
         pingDate = Date.now();
         message.channel.send("Ping!").then(function(message) {
-            message.edit(parseInt(Date.now() - pingDate) + "ms");
+            var time = Date.now() - pingDate;
+
+            if (time == 420) {
+                message.edit("Either 419ms or 421ms");
+            } else {
+                message.edit(parseInt(time) + "ms");
+            }
         }).catch(function() {
             
         });
