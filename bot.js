@@ -27,6 +27,7 @@ const readline = require('readline');
 const events = require('events');
 const blessed = require('blessed');
 const moment = require('moment');
+const http = require('http');
 const client = new Discord.Client();
 
 const commandEmitter = new events.EventEmitter();
@@ -43,6 +44,8 @@ var actionMember = {};
 var actioningMember = {};
 var actionStage = {};
 var actionToPerform = {};
+
+var banCounts = {};
 
 var finalStdout = "";
 
@@ -82,7 +85,7 @@ var logBox = blessed.log({
     top: 1,
     left: 0,
     width: "100%",
-    height: "100%-2",
+    height: "100%-4",
     tags: true,
     style: {
         fg: 'white',
@@ -92,15 +95,28 @@ var logBox = blessed.log({
         }
     },
     padding: {
-        left: 1,
-        bottom: 2
+        left: 1 // ,
+        // bottom: 2
     },
     scrollable: true,
     alwaysScroll: true,
     scrollOnInput: true,
-    scrollbar: true
+    scrollbar: true //,
+    //clickable: true
 });
 screen.append(logBox);
+
+/*logBox.on('click', function(mouse) {
+    var x = mouse.x;
+    var y = mouse.y;
+
+    //var line = logBox.getScreenLines()[y + 1];
+    var line = logBox.getBaseLine(y - 1);
+    logBox.log(line);
+
+    logBox.focus();
+    screen.render();
+});*/
 
 var textBox = blessed.textbox({
     top: "100%-3",
@@ -268,6 +284,10 @@ global.log = function(logMessage, type = logType.debug) {
     }
 }
 
+global.logPromiseRejection = function(object, action) {
+    log("Couldn't delete " + object.id + " in channel " + object.channel. logType.warning);
+};
+
 process.on('unhandledRejection', function(err, p) {
     log(err.stack, logType.critical);
 });
@@ -321,13 +341,10 @@ textBox.on("submit", function() {
                    "vacuum                  Check the AstralMod Configuration File for errors\n" +
                    "reconnect               Attempts to disconnect and reconnect to Discord\n" +
                    "guilds                  Lists guilds AstralMod knows about\n" +
-                   "ginfo [guildid]       - Shows information about a guild\n" +
-                   "findc [channelid]       Finds a channel by its ID\n" +
-                   "exit                    Exits AstralMod\n\n" +
-                   "For any commands denoted with a - modifiers on the end can show more information.\n" +
-                   "m - Show members\n" +
-                   "c - Show channels\n\n" +
-                   "Here's an example: ginfom 123456789012345678";
+                   "ginfo [guildid]         Shows information about a guild\n" +
+                   "ginfom [guildid]        Shows members inside a guild\n" +
+                   "cinfo [channelid]       Finds a channel by its ID\n" +
+                   "exit                    Exits AstralMod\n\n";
         log(help, logType.info);
     } else if (lLine == "exit") {
         shutdown();
@@ -402,18 +419,19 @@ textBox.on("submit", function() {
         log("Usage: broadcast message", logType.critical);
     } else if (lLine == "vacuum") {
         vacuumSettings();
-    } else if (lLine == "throw") {
-        throw new Error();
-    } else if (lLine.startsWith("findc ")) {
+    } else if (lLine.startsWith("cinfo ")) {
         var channelId = line.substr(6);
         var channel = client.channels.get(channelId);
         if (channel == null) {
             log("Unknown channel.", logType.info);
         } else {
-            log("That channel belongs to " + channel.guild.name + ".", logType.info);
+            var info = "Information for channel " + channelId + ":\n" +
+                       "Name: " + channel.name + "\n" +
+                       "Guild: " + channel.guild.name + " [" + channel.guild.id + "]";
+            log(info, logType.info);
         }
-    } else if (lLine == "findc") {
-        log("Usage: findc [channelid]", logType.critical);
+    } else if (lLine == "cinfo") {
+        log("Usage: cinfo [channelid]", logType.critical);
     } else if (lLine == "guilds") {
         var response = "Guilds AstralMod is connected to:";
 
@@ -450,6 +468,41 @@ textBox.on("submit", function() {
             
             log(info, logType.info);
         }
+    } else if (lLine.startsWith("ginfoc ")) {
+        var guildLine = line.substr(7);
+        var guild = client.guilds.get(guildLine);
+        if (guild == null) {
+            log("Unknown guild.", logType.info);
+        } else {
+            var info = "Information for guild " + guildLine + ":\n" +
+                       "Channels: " + parseInt(guild.channels.size);
+            
+            for ([id, channel] of guild.channels) {
+                info += "\n" + channel.id + " " + (channel.type == "text" ? "#" : ">") + channel.name;
+            }
+            
+            log(info, logType.info);
+        }
+    } else if (lLine.startsWith("send ")) {
+        var args = line.substr(5);
+
+        var split = args.indexOf(" ");
+        if (split == -1) {
+            log("Usage: send [channelid] [message]", logType.critical);
+        } else {
+            var message = args.substr(split + 1);
+            var channel = args.substr(0, split);
+
+            var dChannel = client.channels.get(channel);
+            if (dChannel == null) {
+                log("Couldn't find that channel.", logType.critical);
+            } else {
+                dChannel.send(message);
+                log("Sent.", logType.good);
+            }
+        }
+    } else if (lLine == "send") {
+        log("Usage: send [channelid] [message]", logType.critical);
     } else if (lLine == "ginfo") {
         log("Usage: ginfo [guildid]", logType.critical);
     } else {
@@ -499,7 +552,7 @@ textBox.key('tab', function() {
             }
             log(acOutput, logType.info);
         }
-    } else if (lLine.startsWith("ginfom ") || lLine.startsWith("ginfoc ")) {
+    } else if (lLine.startsWith("ginfom ")) {
         var guildLine = line.substr(7);
         var guilds = [];
         for ([id, guild] of client.guilds) {
@@ -519,6 +572,73 @@ textBox.key('tab', function() {
                 acOutput += guild + " ";
             }
             log(acOutput, logType.info);
+        }
+    } else if (lLine.startsWith("ginfoc ")) {
+        var guildLine = line.substr(7);
+        var guilds = [];
+        for ([id, guild] of client.guilds) {
+            var id = guild.id;
+            if (id.startsWith(guildLine)) {
+                guilds.push(guild.id);
+            }
+        }
+        
+        if (guilds.length == 1) {
+            textBox.setValue("> ginfoc " + guilds[0]);
+        } else if (guilds.length == 0) {
+            log("No results.", logType.info)
+        } else {
+            var acOutput = "";
+            for (guild of guilds) {
+                acOutput += guild + " ";
+            }
+            log(acOutput, logType.info);
+        }
+    } else if (lLine.startsWith("send ")) {
+        var channelLine = line.substr(5);
+        if (channelLine.indexOf(" ") == -1) {
+            var channels = [];
+            for ([id, channel] of client.channels) {
+                var id = channel.id;
+                if (id.startsWith(channelLine)) {
+                    channels.push(channel.id);
+                }
+            }
+            
+            if (channels.length == 1) {
+                textBox.setValue("> send " + channels[0] + " ");
+            } else if (channels.length == 0) {
+                log("No results.", logType.info)
+            } else {
+                var acOutput = "";
+                for (channel of channels) {
+                    acOutput += channel + " ";
+                }
+                log(acOutput, logType.info);
+            }
+        }
+    } else if (lLine.startsWith("cinfo ")) {
+        var channelLine = line.substr(6);
+        if (channelLine.indexOf(" ") == -1) {
+            var channels = [];
+            for ([id, channel] of client.channels) {
+                var id = channel.id;
+                if (id.startsWith(channelLine)) {
+                    channels.push(channel.id);
+                }
+            }
+            
+            if (channels.length == 1) {
+                textBox.setValue("> cinfo " + channels[0]);
+            } else if (channels.length == 0) {
+                log("No results.", logType.info)
+            } else {
+                var acOutput = "";
+                for (channel of channels) {
+                    acOutput += channel + " ";
+                }
+                log(acOutput, logType.info);
+            }
         }
     } else {
         log("Command autocompletion coming soon.", logType.info);
@@ -552,6 +672,22 @@ global.getUserString = function(user) {
         u = user.user;
     }
     return u.tag;
+}
+
+global.parseUser = function(query) {
+    var searchResults = [];
+
+    for (let [snowflake, user] of client.users) {
+        if (user.username.toLowerCase() == query.toLowerCase()) {
+            searchResults.unshift(user);
+        } else if (user.username.toLowerCase().indexOf(query.toLowerCase()) != -1) {
+            searchResults.push(user);
+        } else if (user.id == query) {
+            searchResults.unshift(user);
+        }
+    }
+
+    return searchResults;
 }
 
 function setGame() {
@@ -676,39 +812,81 @@ function isMod(member) {
     return false;
 }
 
-function uinfo(member, channel, compact = false) {
+function uinfo(user, channel, guild = null, compact = false) {
+    channel.startTyping();
+    var member = null;
+    if (guild != null) {
+        for ([id, gMember] of guild.members) {
+            if (gMember.user.id == user.id) {
+                member = gMember;
+                break;
+            }
+        }
+
+        if (member == null) {
+            member = {
+                displayName: user.username,
+                tag: user.tag,
+                noGuild: true,
+                noGuildMessage: "This user is not part of this server."
+            }
+        }
+    } else {
+        member = {
+            displayName: user.username,
+            tag: user.tag,
+            noGuild: true,
+            noGuildMessage: "You are not allowed to view server specific information in this server."
+        }
+    }
+
     var embed = new Discord.RichEmbed("uinfo");
-    embed.setAuthor(member.displayName, member.user.displayAvatarURL);
-    embed.setAuthor(getUserString(member), member.user.displayAvatarURL);
+    embed.setAuthor(member.displayName, user.displayAvatarURL);
+    embed.setAuthor(getUserString(member), user.displayAvatarURL);
     embed.setColor("#00FF00");
-    embed.setFooter("User ID: " + member.user.id);
+    embed.setFooter("User ID: " + user.id);
 
     if (compact) {
-        var msg = "Discriminator: " + member.user.discriminator + "\n" + 
-                    "Created at: " + member.user.createdAt.toUTCString() + "\n";
-        if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
-            msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
-        } else {
-            msg += "Joined at: " + member.joinedAt.toUTCString();
+        var msg = "Discriminator: " + user.discriminator + "\n" + 
+                    "Created at: " + user.createdAt.toUTCString() + "\n";
+
+        if (member.noGuild != true) {
+            if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
+                msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
+            } else {
+                msg += "Joined at: " + member.joinedAt.toUTCString();
+            }
         }
         embed.setDescription(msg);
     } else {
-        embed.setDescription("User Information");
+        if (member.noGuild != true) {
+            embed.setDescription("User Information");
+        } else {
+            embed.setDescription(member.noGuildMessage);
+        }
 
         {
-            var msg = "**Created** " + member.user.createdAt.toUTCString() + "\n";
-            if (member.joinedAt.getTime() == 0) {
-                msg += "**Joined** -∞... and beyond! Discord seems to be giving incorrect info... :(";
-            } else {
-                msg += "**Joined** " + member.joinedAt.toUTCString();
+            var msg = "**Created** " + user.createdAt.toUTCString() + "\n";
+
+            if (member.noGuild != true) {
+                if (member.joinedAt.getTime() == 0) {
+                    msg += "**Joined** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                } else {
+                    msg += "**Joined** " + member.joinedAt.toUTCString();
+                }
             }
 
             embed.addField("Timestamps", msg);
         }
 
-        {
-            var msg = "**Current Display Name** " + member.displayName + "\n";
-            msg += "**Username** " + member.user.username + "\n";
+        var msg;
+        if (member.noGuild) {
+            msg = "**Username** " + user.username + "\n";
+
+            embed.addField("Names", msg);
+        } else {
+            msg = "**Current Display Name** " + member.displayName + "\n";
+            msg += "**Username** " + user.username + "\n";
             if (member.nickname != null) {
                 msg += "**Nickname** " + member.nickname;
             } else {
@@ -717,8 +895,25 @@ function uinfo(member, channel, compact = false) {
 
             embed.addField("Names", msg);
         }
+
+        {
+            var msg = "";
+
+            if (user.bot) {
+                msg += "- This user is a bot account.\n";
+            }
+
+            if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
+                msg += "- This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod.";
+            }
+
+            if (msg != "") {
+                embed.addField("Alerts", msg);
+            }
+        }
     }
     channel.send("", {embed: embed});
+    channel.stopTyping();
 }
 
 function processModCommand(message) {
@@ -799,8 +994,8 @@ function processModCommand(message) {
         if (command.startsWith("uinfo ")) {
             var user = command.substr(6);
             user = user.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-            message.guild.fetchMember(user).then(function(member) {
-                uinfo(member, message.channel);
+            /*message.guild.fetchMember(user).then(function(member) {
+                uinfo(member.user, message.channel, member.guild);
             }).catch(function() {
                 switch (Math.floor(Math.random() * 1000) % 3) {
                     case 0:
@@ -813,7 +1008,19 @@ function processModCommand(message) {
                         message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
                         break;
                 }
-            });
+            });*/
+            /*client.fetchUser(user).then(function(dUser) {
+                uinfo(dUser, message.channel, message.guild);
+            }).catch(function() {
+                message.channel.send("That didn't work.");
+            });*/
+
+            var users = parseUser(user);
+            if (users.length > 0) {
+                uinfo(users[0], message.channel, message.guild);
+            } else {
+                message.channel.send("No such user was found.");
+            }
 
             return true;
         } else if (command == "shoo") {
@@ -908,23 +1115,16 @@ function processModCommand(message) {
                     }
                 });
             }
-            message.delete();
+            message.delete().catch(function() {
+                logPromiseRejection(message, "messageDelete");
+            });
             return true;
         } else if (command == "find") {
             message.reply("Usage: `mod:find user`. For more information, `mod:help find`");
             return true;
-        } else if (command.startsWith("find" )) {
+        } else if (command.startsWith("find ")) {
             var query = command.substr(5);
-            var searchResults = [];
-
-            for (let [snowflake, user] of client.users) {
-                if (user.username.toLowerCase().indexOf(query.toLowerCase()) != -1) {
-                    searchResults.push({
-                        tag: user.tag,
-                        id: user.id
-                    });
-                }
-            }
+            var searchResults = parseUser(query);
 
             if (searchResults.length == 0) {
                 message.reply("No results.");
@@ -933,7 +1133,7 @@ function processModCommand(message) {
 
                 var currentNumber = 0;
                 for (user of searchResults) {
-                    reply += user.tag + ": " + user.id + "\n";
+                    reply += user.tag + ": " + user.id + (user.bot ? " [BOT]" : "") + "\n";
                     if (currentNumber == 10) {
                         reply += "\n----- " + parseInt(searchResults.length - currentNumber) + " more. -----\n";
                         reply += "Please narrow your query.";
@@ -979,10 +1179,24 @@ function processAmCommand(message) {
                     message.channel.send('PONG!');
                     break;
             }
-            message.delete();
+            message.delete().catch(function() {
+                logPromiseRejection(message, "messageDelete");
+            });
             return true;
         } else if (command == "uinfo") {
-            uinfo(message.member, message.channel);
+            uinfo(message.author, message.channel, message.member.guild);
+            return true;
+        } else if (command.startsWith("uinfo ")) {
+            var user = command.substr(6);
+            user = user.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
+
+            var users = parseUser(user);
+            if (users.length > 0) {
+                uinfo(users[0], message.channel);
+            } else {
+                message.channel.send("No such user was found. Have you tried `am:fetchuser`?");
+            }
+
             return true;
         } else if (command == "nick") {
             if (settings.guilds[message.guild.id].nickModeration) {
@@ -1027,7 +1241,7 @@ function processAmCommand(message) {
             embed.setAuthor("AstralMod Help Contents");
             embed.setDescription("Here are some things you can try. For more information, just `am:help [command]`");
 
-            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\n**find**\nping\nuinfo\nnick\nversion\nhelp", true);
+            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\n**find**\nping\nuinfo\nnick\nfetchuser\nversion\nhelp", true);
 
             for (key in plugins) {
                 var plugin = plugins[key];
@@ -1071,6 +1285,14 @@ function processAmCommand(message) {
             embed.setFooter("AstralMod " + amVersion + ". mod: commands denoted with bold text.");
             message.channel.send("", { embed: embed });
             return true;
+        } else if (command.startsWith("fetchuser ")) {
+            var user = command.substr(10);
+            client.fetchUser(user).then(function(dUser) {
+                message.channel.send("User " + dUser.tag + " fetched and cached.");
+            }).catch(function() {
+                message.channel.send("Couldn't fetch user.");
+            });
+            return true;
         } else if (command.startsWith("help ")) { //Contextual help
             //Get help for specific command
             var embed = new Discord.RichEmbed();
@@ -1108,16 +1330,10 @@ function processAmCommand(message) {
                     help.helpText = "Queries the current AstralMod version";
                     break;
                 case "uinfo":
-                    if (isMod(message.member)) {
-                        help.title = "mod:uinfo";
-                        help.usageText = "mod:uinfo user";
-                        help.helpText = "Acquire information about a user";
-                        help.param1 = "- The User ID of the user to acquire information\n" +
-                                      "- Mention of the user to acquire information";
-                    } else {
-                        help.title = "am:uinfo";
-                        help.helpText = "Asks AstralMod to reply with information about you";
-                    }
+                    help.title = "am:uinfo";
+                    help.usageText = "am:uinfo user";
+                    help.helpText = "Acquire information about a user";
+                    help.param1 = "- The user of which to acquire information";
                     break;
                 case "nick":
                     help.title = "am:nick";
@@ -1131,6 +1347,13 @@ function processAmCommand(message) {
                     help.helpText = "Finds a user and returns their ID";
                     help.param1 = "The user you want to find.";
                     help.remarks = "AstralMod will search for users from all connected servers."
+                    break;
+                case "fetchuser":
+                    help.title = "am:fetchuser";
+                    help.usageText = "mod:fetchuser [ID]";
+                    help.helpText = "Tells AstralMod about the existance of a user";
+                    help.param1 = "The user ID you want to tell AstralMod about.";
+                    help.remarks = "AstralMod will search for users from all of Discord."
                     break;
                 case "help":
                     help.title = "am:help";
@@ -1884,7 +2107,9 @@ function processDeal(message) {
             member = null;
             actioningMember[message.guild.id] = null;
         }
-        message.delete();
+        message.delete().catch(function() {
+                logPromiseRejection(message, "messageDelete");
+        });
     } else if (actionStage[message.guild.id] == 1) {
         if (msg == "cancel") {
             message.channel.send(':gear: Cancelled. Exiting action menu.');
@@ -1925,80 +2150,91 @@ function processDeal(message) {
                 actioningMember[message.guild.id] = null;
             });
         }
-        message.delete();
+        message.delete().catch(function() {
+            logPromiseRejection(message, "messageDelete");
+        });
     }
     actionMember[message.guild.id] = member;
 }
 
 function processMessage(message) {
-    //Ignore self
-    if (message.author.id == client.user.id) return;
+    try {
+        //Ignore self
+        if (message.author.id == client.user.id) return;
 
-    var text = message.content;
+        var text = message.content;
 
-    //Determine if this is in a guild
-    if (message.guild != null) {
-        //Determine if we are in a workflow
-        if (actioningMember[message.guild.id] == message.author) {
-            //We are currently in the deal workflow
-            processDeal(message);
-            return;
-        }
+        //Determine if this is in a guild
+        if (message.guild != null) {
+            //Determine if we are in a workflow
+            if (actioningMember[message.guild.id] == message.author) {
+                //We are currently in the deal workflow
+                processDeal(message);
+                return;
+            }
 
-        //Determine if this is a command
-        if (text.startsWith("mod:") || text.startsWith("am")) { //This is a mod command
-            if (!processModCommand(message)) {
-                if (!processAmCommand(message)) {
-                    //Pass command onto plugins
-                    if (text.startsWith("mod:")) {
-                        commandEmitter.emit('processCommand', message, true, text.substr(4).toLowerCase());
-                    } else {
-                        commandEmitter.emit('processCommand', message, true, text.substr(3).toLowerCase());
+            //Determine if this is a command
+            if (text.startsWith("mod:") || text.startsWith("am")) { //This is a mod command
+                if (!processModCommand(message)) {
+                    if (!processAmCommand(message)) {
+                        //Pass command onto plugins
+                        if (text.startsWith("mod:")) {
+                            commandEmitter.emit('processCommand', message, true, text.substr(4).toLowerCase());
+                        } else {
+                            commandEmitter.emit('processCommand', message, true, text.substr(3).toLowerCase());
+                        }
                     }
                 }
+            } else if (text.startsWith("am:")) {
+                    if (!processAmCommand(message)) {
+                        //Pass command onto plugins
+                        commandEmitter.emit('processCommand', message, false, text.substr(3).toLowerCase());
+                    }
+            } else {
+                //Neither workflow or command
+                //Pass onto plugins
+                commandEmitter.emit('newMessage', message);
             }
-        } else if (text.startsWith("am:")) {
-                if (!processAmCommand(message)) {
-                    //Pass command onto plugins
-                    commandEmitter.emit('processCommand', message, false, text.substr(3).toLowerCase());
-                }
         } else {
-            //Neither workflow or command
-            //Pass onto plugins
-            commandEmitter.emit('newMessage', message);
-        }
-    } else {
-        //Determine if this is within a workflow or if this is unsolicited
-        for (key in settings.guilds) {
-            var guildSetting = settings.guilds[key];
-            if (guildSetting != null) {
-                //First check if user is currently configuring
-                if (guildSetting.configuringUser == message.author.id) {
-                    //Check if this is during first time setup
-                    if (guildSetting.requiresConfig) {
-                        processConfigure(message, client.guilds.get(key));
-                    } else {
-                        processSingleConfigure(message, client.guilds.get(key));
+            //Determine if this is within a workflow or if this is unsolicited
+            for (key in settings.guilds) {
+                var guildSetting = settings.guilds[key];
+                if (guildSetting != null) {
+                    //First check if user is currently configuring
+                    if (guildSetting.configuringUser == message.author.id) {
+                        //Check if this is during first time setup
+                        if (guildSetting.requiresConfig) {
+                            processConfigure(message, client.guilds.get(key));
+                        } else {
+                            processSingleConfigure(message, client.guilds.get(key));
+                        }
+                        return;
                     }
-                    return;
                 }
             }
-        }
 
-        //Pass command onto plugins
-        commandEmitter.emit('newDM', message);
+            //Pass command onto plugins
+            commandEmitter.emit('newDM', message);
+        }
+    } catch (err) {
+        log("Uncaught Exception:", logType.critical);
+        log(err.stack, logType.critical);
+
+        message.channel.send("AstralMod encountered an internal error trying to process that command.");
     }
 }
 
 function newGuild(guild) {
-    log("New Guild: " + guild.id);
+    log("New Guild: " + guild.id, logType.info);
     settings.guilds[guild.id] = {
         requiresConfig: true
     };
     
     
     if (process.argv.indexOf("--nowelcome") == -1) {
-        guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `mod:config`.");
+        if (guild.defaultChannel) {
+            guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `mod:config`.");
+        }
     }
 }
 
@@ -2006,23 +2242,34 @@ function removeGuild(guild) {
     //Delete guild from database
     settings.guilds[guild.id] = null;
     delete settings.guilds[guild.id];
-    log("Removed Guild: " + guild.id);
+    log("Removed Guild: " + guild.id, logType.info);
 }
 
 function saveSettings(showOkMessage = false) {
     log("Saving settings...");
-    fs.writeFile("settings.json", JSON.stringify(settings, null, 4), "utf8", function(error) {
+    var contents = JSON.stringify(settings, null, 4);
+    //Write to secondary file first
+    fs.writeFile("settings.prewrite.json", contents, "utf8", function(error) {
         if (error) {
-            log("Settings couldn't be saved.", logType.critical);
+            log("Settings couldn't be saved", logType.critical);
+            setTimeout(saveSettings, 30000);
         } else {
-            if (showOkMessage) {
-                log("Settings saved!", logType.good);
-            } else {
-                log("Settings saved!");
-            }
-        }
+            fs.writeFile("settings.json", contents, "utf8", function(error) {
+                if (error) {
+                    log("Settings couldn't be saved, but the prewrite settings were saved successfully.", logType.critical);
+                } else {
+                    fs.unlinkSync("settings.prewrite.json");
 
-        setTimeout(saveSettings, 30000);
+                    if (showOkMessage) {
+                        log("Settings saved!", logType.good);
+                    } else {
+                        log("Settings saved!");
+                    }
+                }
+
+                setTimeout(saveSettings, 30000);
+            });
+        }
     });
 }
 
@@ -2123,7 +2370,7 @@ function memberAdd(member) {
     if (channel != null) {
         channel.send(":arrow_right: <@" + member.user.id + ">");
         
-        uinfo(member, channel, true);
+        uinfo(member.user, channel, member.guild, true);
 
         if (member.guild.id == 287937616685301762) {
             var now = new Date();
@@ -2303,7 +2550,6 @@ function guildUnavailable(guild) {
     log(guild.id + " has become unavailable.", logType.critical);
 }
 
-
 function guildMemberUpdate(oldUser, newUser) {
     if (newUser.nickname != oldUser.nickname) {
         var guildSetting = settings.guilds[oldUser.guild.id];
@@ -2323,12 +2569,33 @@ function guildMemberUpdate(oldUser, newUser) {
 }
 
 function readyAgain() {
-    log("AstralMod has reconnected to Discord.", logType.good);
+    log("AstralMod is ready again.", logType.good);
+}
+
+function resume(replayed) {
+    log("AstralMod has reconnected to Discord. " + parseInt(replayed) + " events were replayed.", logType.good);
 
     client.setInterval(setGame, 300000);
     setGame();
 
     commandEmitter.emit('reconnect');
+}
+
+function countBans() {
+    banCounts = {};
+    for (let [id, guild] of client.guilds) {
+        guild.fetchBans().then(function(bans) {
+            for ([uid, user] of bans) {
+                if (banCounts[user.id] == null) {
+                    banCounts[user.id] = 1;
+                } else {
+                    banCounts[user.id]++;
+                }
+            }
+        }).catch(function() {
+            
+        });
+    }
 }
 
 function readyOnce() {
@@ -2353,7 +2620,18 @@ function readyOnce() {
         client.guilds.forEach(newGuild);
     } else {
         log("Loading AstralMod configuration file...", logType.info);
-        global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"));
+
+        try {
+            global.settings = JSON.parse(fs.readFileSync("settings.json", "utf8"));
+        } catch (err) {
+            //Try loading the prewrite file
+            global.settings = JSON.parse(fs.readFileSync("settings.prewrite.json", "utf8"));
+
+            log("Settings file was corrupted, but prewrite file is good. Using prewrite file.", logType.warning);
+        
+            fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
+            fs.createReadStream('settings.prewrite.json').pipe(fs.createWriteStream('settings.json'));
+        }
     }
 
     if (vacuumSettings()) {
@@ -2408,10 +2686,13 @@ function readyOnce() {
     client.on('guildMemberUpdate', guildMemberUpdate);
     client.on('userUpdate', userUpdate);
     client.on('ready', readyAgain);
+    client.on('resume', resume)
 
     setTimeout(saveSettings, 30000);
 
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
+
+    countBans();
 
     setInterval(function() {
         titleBox.content = "AstralMod " + amVersion + " Console  │  Uptime: " + moment.duration(client.uptime).humanize() +
@@ -2446,6 +2727,35 @@ if (process.argv.indexOf("--debug") == -1) {
     client.on('warn', function(info) {
         log(info, logType.warning);
     });
+}
+
+if (process.argv.indexOf("--httpserver") != -1) {
+    log("Initializing HTTP server");
+    var httpServer = http.createServer(function(req, res) {
+        if (req.method == "GET") {
+            if (req.url == "/") {
+                res.writeHead(200, "OK");
+                res.end(fs.readFileSync("webserver.html"));
+            } else {
+                res.writeHead(400, "Not Found");
+                res.end();
+            }
+        } else if (req.method == "POST") {
+            var body = "";
+            req.on('data', function(chunk) {
+                body += chunk;
+            });
+            req.on('end', function() {
+                var command = body;
+                textBox.setValue("> " + command);
+                textBox.submit();
+
+                res.writeHead(204, "No Content");
+                res.end();
+            });
+        }
+    });
+    httpServer.listen(28931);
 }
 
 log("Establishing connection to Discord...", logType.info);

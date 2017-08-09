@@ -97,7 +97,9 @@ function newMessage(message) {
                     } else {
                         message.reply("Y'know, we don't appreciate it when you spam. (#" + spamCountingUser + ")");
                     }
-                    message.delete();
+                    message.delete().catch(function() {
+                        logPromiseRejection(message, "messageDelete");
+                    });
                 }
             } else {
                 //Add last message to array

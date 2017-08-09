@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>AstralMod Console</title>
+    </head>
+    <body>
+        <h1>AstralMod Console</h1>
+        <div id="commandBox">
+            <input type="text" id="nextCommand" />
+            <button onclick="sendCommand()" >Go</button>
+        </div>
+        <div id="output">
+        </div>
+
+        <script>
+            function sendCommand() {
+                var textbox = document.getElementById("nextCommand");
+                var httpRequest = new XMLHttpRequest();
+                httpRequest.open("POST", "http://" + window.location.host + "/runCommand");
+                httpRequest.send(textbox.value);
+                textbox.value = "";
+            }
+        </script>
+    </body>
+</html>
