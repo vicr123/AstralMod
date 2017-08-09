@@ -45,6 +45,8 @@ var actioningMember = {};
 var actionStage = {};
 var actionToPerform = {};
 
+var lockBox = false;
+
 var banCounts = {};
 
 var finalStdout = "";
@@ -106,17 +108,233 @@ var logBox = blessed.log({
 });
 screen.append(logBox);
 
-/*logBox.on('click', function(mouse) {
+logBox.on('click', function(mouse) {
     var x = mouse.x;
     var y = mouse.y;
 
     //var line = logBox.getScreenLines()[y + 1];
     var line = logBox.getBaseLine(y - 1);
-    logBox.log(line);
 
-    logBox.focus();
+    //Remove escapes
+    while (line.indexOf("\x1b") != -1) {
+        var removeStart = line.indexOf("\x1b");
+        var removeEnd = line.indexOf("m", removeStart);
+        line = line.replace(line.slice(removeStart, removeEnd + 1), "");
+    }
+    //logBox.log(line);
+
+    //Get word around line
+    var previousSpace = line.lastIndexOf(" ", x);
+    var nextSpace = line.indexOf(" ", x);
+    
+    previousSpace++;
+
+    if (nextSpace == -1) {
+        nextSpace = line.length;// - previousSpace;
+    }
+    var word = line.substring(previousSpace, nextSpace);
+    
+    var top = y + 1;
+    if (top + 7 > screen.height) {
+        top = y - 7;
+    }
+
+    var left = x + 1;
+    if (left + 50 > screen.width) {
+        left = screen.width - 50;
+    }
+
+    var boxOptions = {
+        top: top,
+        left: left,
+        height: 7,
+        width: 50,
+        style: {
+            fg: "black",
+            bg: "white",
+            border: {
+                fg: 'white',
+                bg: 'black'
+            }
+        },
+        border: {
+            type: "line"
+        },
+        padding: {
+            left: 2,
+            top: 1,
+            right: 2,
+            bottom: 1
+        }
+    };
+
+    if (lockBox != false) {
+        lockBox.hide();
+    }
+
+    //Determine type of object clicked
+    if (client.guilds.has(word)) {
+        //This is a guild
+        var guild = client.guilds.get(word);
+        var box = blessed.box(boxOptions);
+        box.content = "For Guild " + word + "\n" +
+                      "Name: " + guild.name;
+        screen.append(box);
+
+        var moreInfoButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
+        });
+        moreInfoButton.content = "More Info";
+        moreInfoButton.left = 0;
+        moreInfoButton.top = 2;
+        moreInfoButton.width = 9;
+        moreInfoButton.height = 1;
+        moreInfoButton.on('click', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+
+            processConsoleInput("ginfo " + word);
+        });
+        box.append(moreInfoButton);
+
+        var membersButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
+        });
+        membersButton.content = "Members";
+        membersButton.left = 10;
+        membersButton.top = 2;
+        membersButton.width = 7;
+        membersButton.height = 1;
+        membersButton.on('click', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+
+            processConsoleInput("ginfom " + word);
+        });
+        box.append(membersButton);
+
+        var channelsButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
+        });
+        channelsButton.content = "Channels";
+        channelsButton.left = 18;
+        channelsButton.top = 2;
+        channelsButton.width = 8;
+        channelsButton.height = 1;
+        channelsButton.on('click', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+
+            processConsoleInput("ginfoc " + word);
+        });
+        box.append(channelsButton);
+
+        box.on('hide', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+        });
+        lockBox = box;
+    } else if (client.channels.has(word)) {
+        //This is a channel
+        var channel = client.channels.get(word);
+        var box = blessed.box(boxOptions);
+        box.content = "For Channel " + word + "\n" +
+                      "Name: " + channel.name;
+        screen.append(box);
+        
+        box.on('hide', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+        });
+        lockBox = box;
+    } else if (client.users.has(word)) {
+        //This is a user
+        var user = client.users.get(word);
+        var box = blessed.box(boxOptions);
+        box.content = "For User " + word + "\n" +
+                      "Name: " + user.username;
+        screen.append(box);
+        
+        box.on('hide', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+        });
+        lockBox = box;
+    } else if (plugins.hasOwnProperty(word)) {
+        //This is a plugin
+        var plugin = plugins[word];
+        var box = blessed.box(boxOptions);
+        box.content = "For Plugin \"" + plugin.name + "\"\n" +
+                      "Filename: " + word;
+        screen.append(box);
+
+        var unloadButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
+        });
+        unloadButton.content = "Unload";
+        unloadButton.left = 0;
+        unloadButton.top = 2;
+        unloadButton.width = 6;
+        unloadButton.height = 1;
+        unloadButton.on('click', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+
+            processConsoleInput("unload " + word);
+        });
+        box.append(unloadButton);
+
+        var reloadButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
+        });
+        reloadButton.content = "Reload";
+        reloadButton.left = 7;
+        reloadButton.top = 2;
+        reloadButton.width = 6;
+        reloadButton.height = 1;
+        reloadButton.on('click', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+
+            processConsoleInput("reload " + word);
+        });
+        box.append(reloadButton);
+
+        box.on('hide', function() {
+            lockBox = false;
+            renderScreen();
+            box.destroy();
+        });
+        lockBox = box;
+    } else if (word == "save" || word == "plugins" || word == "vacuum" || word == "guilds" || word == "exit") {
+        processConsoleInput(word);
+    }
+
     screen.render();
-});*/
+});
 
 var textBox = blessed.textbox({
     top: "100%-3",
@@ -138,16 +356,13 @@ var textBox = blessed.textbox({
     },
     inputOnFocus: true
 });
-
 screen.append(textBox);
-textBox.focus();
 
 var keyBox = blessed.box({
     top: "100%-1",
     left: "0",
     width: "100%",
     height: 1,
-    content: "^C Exit   ENTER Issue Command",
     tags: true,
     style: {
         fg: 'black',
@@ -159,34 +374,110 @@ var keyBox = blessed.box({
 });
 screen.append(keyBox);
 
+var guildsButton = blessed.button({
+    style: {
+        fg: "yellow",
+        bg: "blue"
+    },
+    content: "Guilds",
+    left: 10,
+    width: 6,
+    height: 1,
+    top: "100%-1"
+});
+guildsButton.on('click', function() {
+    processConsoleInput("guilds");
+});
+screen.append(guildsButton);
+
 // Quit on Control-C.
 textBox.key('C-c', function(ch, key) {
     shutdown();
 });
 
-textBox.key('up', function() {
+screen.key('C-c', function() {
+    shutdown();
+});
+
+screen.key('up', function() {
     logBox.scroll(-1);
     renderScreen();
 });
 
-textBox.key('pageup', function() {
+screen.on('keypress', function(key) {
+    if (lockBox != false) {
+        lockBox.hide();
+    } else if (key != undefined && !textBox.focused && key != "\r") {
+        showTextBox();
+
+        if (key != ":") {
+            textBox.setValue("> " + key);
+        }
+    }
+});
+
+screen.key('pageup', function() {
     logBox.scroll(-logBox.height);
     renderScreen();
 });
 
-textBox.key('down', function() {
+screen.key('down', function() {
     logBox.scroll(1);
     renderScreen();
 });
 
-textBox.key('pagedown', function() {
+screen.key('pagedown', function() {
     logBox.scroll(logBox.height);
     renderScreen();
 });
 
-textBox.on("cancel", function() {
-    textBox.setValue("> ");
+function showTextBox() {
+    logBox.height = "100%-4";
+    keyBox.content = "ESC Cancel Command   ENTER Issue Command";
+    textBox.show();
     textBox.focus();
+    guildsButton.hide();
+
+    renderScreen();
+}
+
+var currentHistoryEntry = -1;
+function hideTextBox() {
+    textBox.setValue("> ");
+    logBox.height = "100%-2";
+    keyBox.content = "^C Exit";
+    textBox.hide();
+    logBox.focus();
+    guildsButton.show();
+    currentHistoryEntry = -1;
+
+    renderScreen();
+}
+
+textBox.key("up", function() {
+    currentHistoryEntry++;
+    if (commandHistory[currentHistoryEntry] != null) {
+        textBox.setValue("> " + commandHistory[currentHistoryEntry]);
+    } else {
+        currentHistoryEntry = -1;
+        textBox.setValue("> ");
+    }
+    renderScreen();
+});
+
+textBox.key("down", function() {
+    currentHistoryEntry--
+    if (commandHistory[currentHistoryEntry] != null) {
+        textBox.setValue("> " + commandHistory[currentHistoryEntry]);
+    } else {
+        currentHistoryEntry = -1;
+        textBox.setValue("> ");
+    }
+    renderScreen();
+});
+
+textBox.on("cancel", function() {
+    hideTextBox();
 });
 
 function renderScreen() {
@@ -194,6 +485,7 @@ function renderScreen() {
 }
 
 renderScreen();
+hideTextBox();
 
 console.error = function(data, ...args){
     log(data, logType.warning);
@@ -310,13 +602,12 @@ var stdinInterface = readline.createInterface({
     terminal: false
 });
 
-textBox.on("submit", function() {
-    //Input received!
-    var line = textBox.getText().substr(2);
+var commandHistory = [];
+
+function processConsoleInput(line) {
+    commandHistory.unshift(line);
 
     logBox.log(line);
-    textBox.setValue("> ");
-    textBox.focus();
 
     const memberLine = function(member) {
         var line = member.id + "  " + member.user.tag;
@@ -344,7 +635,7 @@ textBox.on("submit", function() {
                    "ginfo [guildid]         Shows information about a guild\n" +
                    "ginfom [guildid]        Shows members inside a guild\n" +
                    "cinfo [channelid]       Finds a channel by its ID\n" +
-                   "exit                    Exits AstralMod\n\n";
+                   "exit                    Exits AstralMod";
         log(help, logType.info);
     } else if (lLine == "exit") {
         shutdown();
@@ -478,7 +769,7 @@ textBox.on("submit", function() {
                        "Channels: " + parseInt(guild.channels.size);
             
             for ([id, channel] of guild.channels) {
-                info += "\n" + channel.id + " " + (channel.type == "text" ? "#" : ">") + channel.name;
+                info += "\n" + channel.id + " " + (channel.type == "text" ? "#" : " ") + channel.name;
             }
             
             log(info, logType.info);
@@ -508,6 +799,14 @@ textBox.on("submit", function() {
     } else {
         log("Unknown command. For help, type \"help\" into the console.", logType.critical);
     }
+}
+
+textBox.on("submit", function() {
+    //Input received!
+    var line = textBox.getText().substr(2);
+    hideTextBox();
+
+    processConsoleInput(line);
 });
 
 textBox.key('backspace', function() {
@@ -2442,7 +2741,7 @@ function loadPlugin(file) {
 
         plugin.constructor(client, commandEmitter, consts);
         plugins[file] = plugin;
-        log("Plugin \"" + plugin.name + "\" has been loaded successfully.", logType.good);
+        log("Plugin \"" + plugin.name + "\" from file " + file + " has been loaded successfully.", logType.good);
         return true;
     } catch (err) {
         log(err.message, logType.critical);
