@@ -45,7 +45,7 @@ var actioningMember = {};
 var actionStage = {};
 var actionToPerform = {};
 
-var lockBox = false;
+var lockBox = [];
 
 var banCounts = {};
 
@@ -108,6 +108,15 @@ var logBox = blessed.log({
 });
 screen.append(logBox);
 
+function clearBoxes() {
+    while (lockBox.length > 0) {
+        var box = lockBox.pop();
+        box.hide();
+        box.destroy();
+    }
+
+}
+
 logBox.on('click', function(mouse) {
     var x = mouse.x;
     var y = mouse.y;
@@ -124,8 +133,8 @@ logBox.on('click', function(mouse) {
     //logBox.log(line);
 
     //Get word around line
-    var previousSpace = line.lastIndexOf(" ", x);
-    var nextSpace = line.indexOf(" ", x);
+    var previousSpace = line.lastIndexOf(" ", x - 2);
+    var nextSpace = line.indexOf(" ", x - 2);
     
     previousSpace++;
 
@@ -133,21 +142,27 @@ logBox.on('click', function(mouse) {
         nextSpace = line.length;// - previousSpace;
     }
     var word = line.substring(previousSpace, nextSpace);
+
+    if (word.startsWith("[")) word = word.substr(1);
+    if (word.endsWith("]")) word = word.substr(0, word.length - 2);
     
+    var goUpwards = false;
     var top = y + 1;
     if (top + 7 > screen.height) {
         top = y - 7;
+        goUpwards = true;
     }
 
-    var left = x + 1;
+    var left = x - 10;
     if (left + 50 > screen.width) {
         left = screen.width - 50;
+    } else if (left < 0) {
+        left = 0;
     }
 
     var boxOptions = {
         top: top,
         left: left,
-        height: 7,
         width: 50,
         style: {
             fg: "black",
@@ -168,18 +183,23 @@ logBox.on('click', function(mouse) {
         }
     };
 
-    if (lockBox != false) {
-        lockBox.hide();
-    }
+    clearBoxes();
 
     //Determine type of object clicked
     if (client.guilds.has(word)) {
         //This is a guild
         var guild = client.guilds.get(word);
-        var box = blessed.box(boxOptions);
+        var box = blessed.box(JSON.parse(JSON.stringify(boxOptions)));
         box.content = "For Guild " + word + "\n" +
                       "Name: " + guild.name;
+        box.height = 7;
         screen.append(box);
+
+        if (goUpwards) {
+            boxOptions.top -= 6;
+        } else {
+            boxOptions.top += 6;
+        }
 
         var moreInfoButton = blessed.button({
             style: {
@@ -193,9 +213,8 @@ logBox.on('click', function(mouse) {
         moreInfoButton.width = 9;
         moreInfoButton.height = 1;
         moreInfoButton.on('click', function() {
-            lockBox = false;
+            clearBoxes();
             renderScreen();
-            box.destroy();
 
             processConsoleInput("ginfo " + word);
         });
@@ -213,9 +232,8 @@ logBox.on('click', function(mouse) {
         membersButton.width = 7;
         membersButton.height = 1;
         membersButton.on('click', function() {
-            lockBox = false;
+            clearBoxes();
             renderScreen();
-            box.destroy();
 
             processConsoleInput("ginfom " + word);
         });
@@ -233,55 +251,107 @@ logBox.on('click', function(mouse) {
         channelsButton.width = 8;
         channelsButton.height = 1;
         channelsButton.on('click', function() {
-            lockBox = false;
+            clearBoxes();
             renderScreen();
-            box.destroy();
 
             processConsoleInput("ginfoc " + word);
         });
         box.append(channelsButton);
 
-        box.on('hide', function() {
-            lockBox = false;
-            renderScreen();
-            box.destroy();
-        });
-        lockBox = box;
-    } else if (client.channels.has(word)) {
+        lockBox.push(box);
+    }
+
+    if (client.channels.has(word)) {
         //This is a channel
         var channel = client.channels.get(word);
-        var box = blessed.box(boxOptions);
+        var box = blessed.box(JSON.parse(JSON.stringify(boxOptions)));
         box.content = "For Channel " + word + "\n" +
                       "Name: " + channel.name;
+        box.height = 7;
         screen.append(box);
-        
-        box.on('hide', function() {
-            lockBox = false;
-            renderScreen();
-            box.destroy();
+
+        if (goUpwards) {
+            boxOptions.top -= 6;
+        } else {
+            boxOptions.top += 6;
+        }
+
+        var moreInfoButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
         });
-        lockBox = box;
-    } else if (client.users.has(word)) {
+        moreInfoButton.content = "More Info";
+        moreInfoButton.left = 0;
+        moreInfoButton.top = 2;
+        moreInfoButton.width = 9;
+        moreInfoButton.height = 1;
+        moreInfoButton.on('click', function() {
+            clearBoxes();
+            renderScreen();
+
+            processConsoleInput("cinfo " + word);
+        });
+        box.append(moreInfoButton);
+
+        var sendButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
+        });
+        sendButton.content = "Send";
+        sendButton.left = 10;
+        sendButton.top = 2;
+        sendButton.width = 4;
+        sendButton.height = 1;
+        sendButton.on('click', function() {
+            clearBoxes();
+            renderScreen();
+
+            //processConsoleInput("cinfo " + word);
+            showTextBox();
+            textBox.setValue("> send " + word + " ");
+            renderScreen();
+        });
+        box.append(sendButton);
+        
+        lockBox.push(box);
+    }
+    
+    if (client.users.has(word)) {
         //This is a user
         var user = client.users.get(word);
-        var box = blessed.box(boxOptions);
+        var box = blessed.box(JSON.parse(JSON.stringify(boxOptions)));
         box.content = "For User " + word + "\n" +
                       "Name: " + user.username;
+        box.height = 7;
         screen.append(box);
+
+        if (goUpwards) {
+            boxOptions.top -= 6;
+        } else {
+            boxOptions.top += 6;
+        }
         
-        box.on('hide', function() {
-            lockBox = false;
-            renderScreen();
-            box.destroy();
-        });
-        lockBox = box;
-    } else if (plugins.hasOwnProperty(word)) {
+        lockBox.push(box);
+    }
+    
+    if (plugins.hasOwnProperty(word)) {
         //This is a plugin
         var plugin = plugins[word];
-        var box = blessed.box(boxOptions);
+        var box = blessed.box(JSON.parse(JSON.stringify(boxOptions)));
         box.content = "For Plugin \"" + plugin.name + "\"\n" +
                       "Filename: " + word;
+        box.height = 7;
         screen.append(box);
+
+        if (goUpwards) {
+            boxOptions.top -= 6;
+        } else {
+            boxOptions.top += 6;
+        }
 
         var unloadButton = blessed.button({
             style: {
@@ -295,9 +365,8 @@ logBox.on('click', function(mouse) {
         unloadButton.width = 6;
         unloadButton.height = 1;
         unloadButton.on('click', function() {
-            lockBox = false;
+            clearBoxes();
             renderScreen();
-            box.destroy();
 
             processConsoleInput("unload " + word);
         });
@@ -315,21 +384,17 @@ logBox.on('click', function(mouse) {
         reloadButton.width = 6;
         reloadButton.height = 1;
         reloadButton.on('click', function() {
-            lockBox = false;
+            clearBoxes();
             renderScreen();
-            box.destroy();
 
             processConsoleInput("reload " + word);
         });
         box.append(reloadButton);
 
-        box.on('hide', function() {
-            lockBox = false;
-            renderScreen();
-            box.destroy();
-        });
-        lockBox = box;
-    } else if (word == "save" || word == "plugins" || word == "vacuum" || word == "guilds" || word == "exit") {
+        lockBox.push(box);
+    }
+
+    if (word == "save" || word == "plugins" || word == "vacuum" || word == "guilds" || word == "exit") {
         processConsoleInput(word);
     }
 
@@ -405,8 +470,8 @@ screen.key('up', function() {
 });
 
 screen.on('keypress', function(key) {
-    if (lockBox != false) {
-        lockBox.hide();
+    if (lockBox.length != 0) {
+        clearBoxes();
     } else if (key != undefined && !textBox.focused && key != "\r") {
         showTextBox();
 
@@ -445,7 +510,7 @@ var currentHistoryEntry = -1;
 function hideTextBox() {
     textBox.setValue("> ");
     logBox.height = "100%-2";
-    keyBox.content = "^C Exit";
+    keyBox.content = "^C Exit                          To issue a command, just start typing away.";
     textBox.hide();
     logBox.focus();
     guildsButton.show();
@@ -1355,64 +1420,83 @@ function processModCommand(message) {
                 }
                 var memberID = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
 
-                message.guild.fetchMember(memberID).then(function (member) {
-                    if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                        message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
-                    } else {
-                        var canDoActions = false;
-                        var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
-                        if (member.kickable) {
-                            msg += '`(k)ick` ';
-                            canDoActions = true;
-                        }
-                        
-                        if (member.bannable) {
-                            msg += '`(b)an` ';
-                            canDoActions = true;
-                        }
+                var users = parseUser(memberID);
+                if (users.length > 0) {
+                    var user = null;
 
-                        if (!member.highestRole.comparePositionTo(message.guild.me.highestRole) >= 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
-                            msg += '`(n)ick` ';
-                            canDoActions = true;
-                        }
-                        
-                        if (message.guild.id == 287937616685301762 || message.guild.id == consts.aphc.id) {
-                            msg += "`(i)nterrogate` ";
-                            canDoActions = true;
-                        }
-                        
-                        if (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040) {
-                            msg += "`(j)ail` ";
-                            canDoActions = true;
-                        }
-                        
-                        if (message.guild.id == consts.aphc.id) {
-                            msg += "`(m)ute` ";
-                            canDoActions = true;
-                        }
-                        
-                        if (canDoActions) {
-                            actionMember[message.guild.id] = member;
-                            actioningMember[message.guild.id] = message.author;
-                            actionStage[message.guild.id] = 0;
-                            message.channel.send(msg);
-                        } else {
-                            message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
+                    //Filter out members
+                    for (var i = 0; i < users.length; i++) {
+                        if (message.guild.members.has(users[i].id)) {
+                            user = users[i].id;
+                            i = users.length;
                         }
                     }
-                }).catch(function (reason) {
-                    switch (Math.floor(Math.random() * 1000) % 3) {
-                        case 0:
-                            message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                            break;
-                        case 1:
-                            message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                            break;
-                        case 2:
-                            message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                            break;
+
+                    if (user == null) {
+                        message.channel.send("No such user was found.");
+                    } else {
+                        message.guild.fetchMember(user).then(function(member) {
+                            if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
+                                message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
+                            } else {
+                                var canDoActions = false;
+                                var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
+                                if (member.kickable) {
+                                    msg += '`(k)ick` ';
+                                    canDoActions = true;
+                                }
+                                
+                                if (member.bannable) {
+                                    msg += '`(b)an` ';
+                                    canDoActions = true;
+                                }
+
+                                if (!member.highestRole.comparePositionTo(message.guild.me.highestRole) >= 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
+                                    msg += '`(n)ick` ';
+                                    canDoActions = true;
+                                }
+                                
+                                if (message.guild.id == 287937616685301762 || message.guild.id == consts.aphc.id) {
+                                    msg += "`(i)nterrogate` ";
+                                    canDoActions = true;
+                                }
+                                
+                                if (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040) {
+                                    msg += "`(j)ail` ";
+                                    canDoActions = true;
+                                }
+                                
+                                if (message.guild.id == consts.aphc.id) {
+                                    msg += "`(m)ute` ";
+                                    canDoActions = true;
+                                }
+                                
+                                if (canDoActions) {
+                                    actionMember[message.guild.id] = member;
+                                    actioningMember[message.guild.id] = message.author;
+                                    actionStage[message.guild.id] = 0;
+                                    message.channel.send(msg);
+                                } else {
+                                    message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
+                                }
+                            }
+                        }).catch(function (reason) {
+                            switch (Math.floor(Math.random() * 1000) % 3) {
+                                case 0:
+                                    message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
+                                    break;
+                                case 1:
+                                    message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
+                                    break;
+                                case 2:
+                                    message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
+                                    break;
+                            }
+                        });
                     }
-                });
+                } else {
+                    message.channel.send("No such user was found.");
+                }
             }
             message.delete().catch(function() {
                 logPromiseRejection(message, "messageDelete");
