@@ -258,6 +258,25 @@ logBox.on('click', function(mouse) {
         });
         box.append(channelsButton);
 
+        var bansButton = blessed.button({
+            style: {
+                fg: "yellow",
+                bg: "blue"
+            }
+        });
+        bansButton.content = "Bans";
+        bansButton.left = 27;
+        bansButton.top = 2;
+        bansButton.width = 4;
+        bansButton.height = 1;
+        bansButton.on('click', function() {
+            clearBoxes();
+            renderScreen();
+
+            processConsoleInput("ginfob " + word);
+        });
+        box.append(bansButton);
+
         lockBox.push(box);
     }
 
@@ -444,9 +463,9 @@ var guildsButton = blessed.button({
         fg: "yellow",
         bg: "blue"
     },
-    content: "Guilds",
+    content: "^G Guilds",
     left: 10,
-    width: 6,
+    width: 9,
     height: 1,
     top: "100%-1"
 });
@@ -455,13 +474,36 @@ guildsButton.on('click', function() {
 });
 screen.append(guildsButton);
 
-// Quit on Control-C.
+var pluginsButton = blessed.button({
+    style: {
+        fg: "yellow",
+        bg: "blue"
+    },
+    content: "^P Plugins",
+    left: 20,
+    width: 10,
+    height: 1,
+    top: "100%-1"
+});
+pluginsButton.on('click', function() {
+    processConsoleInput("plugins");
+});
+screen.append(pluginsButton);
+
 textBox.key('C-c', function(ch, key) {
     shutdown();
 });
 
 screen.key('C-c', function() {
     shutdown();
+});
+
+screen.key('C-g', function() {
+    processConsoleInput("guilds");
+});
+
+screen.key('C-p', function() {
+    processConsoleInput("plugins");
 });
 
 screen.key('up', function() {
@@ -502,6 +544,7 @@ function showTextBox() {
     textBox.show();
     textBox.focus();
     guildsButton.hide();
+    pluginsButton.hide();
 
     renderScreen();
 }
@@ -514,6 +557,7 @@ function hideTextBox() {
     textBox.hide();
     logBox.focus();
     guildsButton.show();
+    pluginsButton.show();
     currentHistoryEntry = -1;
 
     renderScreen();
@@ -699,6 +743,8 @@ function processConsoleInput(line) {
                    "guilds                  Lists guilds AstralMod knows about\n" +
                    "ginfo [guildid]         Shows information about a guild\n" +
                    "ginfom [guildid]        Shows members inside a guild\n" +
+                   "ginfoc [guildid]        Shows channels inside a guild\n" +
+                   "ginfob [guildid]        Shows bans of a guild\n" +
                    "cinfo [channelid]       Finds a channel by its ID\n" +
                    "exit                    Exits AstralMod";
         log(help, logType.info);
@@ -831,13 +877,32 @@ function processConsoleInput(line) {
             log("Unknown guild.", logType.info);
         } else {
             var info = "Information for guild " + guildLine + ":\n" +
-                       "Channels: " + parseInt(guild.channels.size);
+                       "Members: " + parseInt(guild.channels.size);
             
             for ([id, channel] of guild.channels) {
                 info += "\n" + channel.id + " " + (channel.type == "text" ? "#" : " ") + channel.name;
             }
             
             log(info, logType.info);
+        }
+    } else if (lLine.startsWith("ginfob ")) {
+        var guildLine = line.substr(7);
+        var guild = client.guilds.get(guildLine);
+        if (guild == null) {
+            log("Unknown guild.", logType.info);
+        } else {
+            guild.fetchBans().then(function(bans) {
+                var info = "Information for guild " + guildLine + ":\n" +
+                        "Bans: " + parseInt(bans.size);
+                
+                for ([id, user] of bans) {
+                    info += "\n" + user.id + " " + user.username + "#" + user.discriminator;
+                }
+                
+                log(info, logType.info);
+            }).catch(function() {
+                log("Couldn't fetch bans for that guild.", logType.critical);
+            });
         }
     } else if (lLine.startsWith("send ")) {
         var args = line.substr(5);
@@ -949,6 +1014,27 @@ textBox.key('tab', function() {
         
         if (guilds.length == 1) {
             textBox.setValue("> ginfoc " + guilds[0]);
+        } else if (guilds.length == 0) {
+            log("No results.", logType.info)
+        } else {
+            var acOutput = "";
+            for (guild of guilds) {
+                acOutput += guild + " ";
+            }
+            log(acOutput, logType.info);
+        }
+    } else if (lLine.startsWith("ginfob ")) {
+        var guildLine = line.substr(7);
+        var guilds = [];
+        for ([id, guild] of client.guilds) {
+            var id = guild.id;
+            if (id.startsWith(guildLine)) {
+                guilds.push(guild.id);
+            }
+        }
+        
+        if (guilds.length == 1) {
+            textBox.setValue("> ginfob " + guilds[0]);
         } else if (guilds.length == 0) {
             log("No results.", logType.info)
         } else {
@@ -1435,7 +1521,10 @@ function processModCommand(message) {
                     if (user == null) {
                         message.channel.send("No such user was found.");
                     } else {
-                        message.guild.fetchMember(user).then(function(member) {
+                        var member = message.guild.member(user);
+                        if (member == null) {
+                            message.channel.send("That didn't work.");
+                        } else {
                             if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
                                 message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
                             } else {
@@ -1480,19 +1569,7 @@ function processModCommand(message) {
                                     message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
                                 }
                             }
-                        }).catch(function (reason) {
-                            switch (Math.floor(Math.random() * 1000) % 3) {
-                                case 0:
-                                    message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                    break;
-                                case 1:
-                                    message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                                    break;
-                                case 2:
-                                    message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                                    break;
-                            }
-                        });
+                        }
                     }
                 } else {
                     message.channel.send("No such user was found.");
