@@ -2503,7 +2503,7 @@ function processDeal(message) {
     var msg = message.content;
     var member = actionMember[message.guild.id];
     if (actionStage[message.guild.id] == 0) { //Select Action
-        if (msg == "cancel") { //Cancel Action
+        if (msg.toLowerCase() == "cancel") { //Cancel Action
             message.channel.send(':gear: Cancelled. Exiting action menu.');
             member = null;
             actioningMember[message.guild.id] = null;
@@ -2571,7 +2571,7 @@ function processDeal(message) {
                 logPromiseRejection(message, "messageDelete");
         });
     } else if (actionStage[message.guild.id] == 1) {
-        if (msg == "cancel") {
+        if (msg.toLowerCase() == "cancel") {
             message.channel.send(':gear: Cancelled. Exiting action menu.');
             member = null;
             actioningMember[message.guild.id] = null;
@@ -2596,7 +2596,7 @@ function processDeal(message) {
                 actioningMember[message.guild.id] = null;
             });
         } else if (actionToPerform[message.guild.id] == "nick") {
-            if (msg == "clear") {
+            if (msg.toLowerCase() == "clear") {
                 msg = "";
             }
             
