@@ -18,7 +18,14 @@
  * 
  * *************************************/
 
-const amVersion = "2.1.0";
+var amVersion;
+if (process.argv.indexOf("--blueprint") == -1) {
+    amVersion = "2.1.0";
+} else {
+    amVersion = "Blueprint";
+}
+
+global.prefix = "a::";
 
 const Discord = require('discord.js');
 const consts = require('./consts.js');
@@ -1214,7 +1221,7 @@ function setGame() {
             presence.game.name = "with Unicode characters";
             break;
         case 22:
-            presence.game.name = "am:help for more info";
+            presence.game.name = prefix + "help for more info";
             break;
         case 26:
             presence.game.name = "trying to DJ";
@@ -1371,7 +1378,7 @@ function processModCommand(message) {
     var lText = text.toLowerCase();
 
     //Special cases
-    if (lText == "mod:config") {
+    if (lText == prefix + "config") {
         //Make sure person isn't configuring any other guild
         for (key in settings.guilds) {
             var guildSetting = settings.guilds[key];
@@ -1426,7 +1433,7 @@ function processModCommand(message) {
                 message.reply(":arrow_left: Continue in DMs.");
             }
         }
-    } else if (lText == "mod:poweroff") {
+    } else if (lText == prefix + "poweroff") {
         if (message.author.id == consts.users.vicr123 || message.author.id == consts.users.nebble) {
             message.reply("AstralMod is now exiting.").then(function() {
                 shutdown();
@@ -1436,11 +1443,8 @@ function processModCommand(message) {
 
     if (isMod(message.member)) {
         var command;
-        if (text.startsWith("mod:")) {
-            command = text.toLowerCase().substr(4);
-        } else {
-            command = text.toLowerCase().substr(3);
-        }
+        command = text.toLowerCase().substr(prefix.length);
+
         if (command.startsWith("uinfo ")) {
             var user = command.substr(6);
             user = user.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
@@ -1580,7 +1584,7 @@ function processModCommand(message) {
             });
             return true;
         } else if (command == "find") {
-            message.reply("Usage: `mod:find user`. For more information, `mod:help find`");
+            message.reply("Usage: `" + prefix + "find user`. For more information, `" + prefix + "help find`");
             return true;
         } else if (command.startsWith("find ")) {
             var query = command.substr(5);
@@ -1615,14 +1619,15 @@ function processAmCommand(message) {
 
     //Make sure configuration is not required
     if (settings.guilds[message.guild.id].requiresConfig) {
-        message.reply("AstralMod setup isn't complete. You'll need to wait for " + message.guild.owner.displayName + " to type `mod:config` and set up AstralMod before you can use it.");
+        message.reply("AstralMod setup isn't complete. You'll need to wait for " + message.guild.owner.displayName + " to type `" + prefix + "config` and set up AstralMod before you can use it.");
     } else {
-        var command;
+        var command;/*
         if (text.startsWith("am:")) {
             command = text.toLowerCase().substr(3);
         } else {
             command = text.toLowerCase().substr(4);
-        }
+        }*/
+        command = text.toLowerCase().substr(prefix.length);
 
         if (command == "ping") {
             switch (Math.floor(Math.random() * 1000) % 4) {
@@ -1654,7 +1659,7 @@ function processAmCommand(message) {
             if (users.length > 0) {
                 uinfo(users[0], message.channel);
             } else {
-                message.channel.send("No such user was found. Have you tried `am:fetchuser`?");
+                message.channel.send("No such user was found. Have you tried `" + prefix + "fetchuser`?");
             }
 
             return true;
@@ -1699,7 +1704,7 @@ function processAmCommand(message) {
             var embed = new Discord.RichEmbed();
             embed.setColor("#3C3C96");
             embed.setAuthor("AstralMod Help Contents");
-            embed.setDescription("Here are some things you can try. For more information, just `am:help [command]`");
+            embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
 
             embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\n**find**\nping\nuinfo\nnick\nfetchuser\nversion\nhelp", true);
 
@@ -1742,7 +1747,7 @@ function processAmCommand(message) {
                 }
             }
 
-            embed.setFooter("AstralMod " + amVersion + ". mod: commands denoted with bold text.");
+            embed.setFooter("AstralMod " + amVersion + ". Moderator commands denoted with bold text.");
             message.channel.send("", { embed: embed });
             return true;
         } else if (command.startsWith("fetchuser ")) {
@@ -1763,61 +1768,61 @@ function processAmCommand(message) {
             var help = {};
             switch (helpCmd) {
                 case "config":
-                    help.title = "mod:config";
+                    help.title = prefix + "config";
                     help.helpText = "Configures AstralMod for this server";
                     break;
                 case "shoo":
-                    help.title = "mod:shoo";
+                    help.title = prefix + "shoo";
                     help.helpText = "Leave the server, purging all configuration";
                     break;
                 case "declnick":
-                    help.title = "mod:declnick";
+                    help.title = prefix + "declnick";
                     help.helpText = "Declines a nickname";
                     break;
                 case "deal":
-                    help.title = "mod:deal";
-                    help.usageText = "mod:deal user";
+                    help.title = prefix + "deal";
+                    help.usageText = prefix + "deal user";
                     help.helpText = "Manages a user";
                     help.param1 = "- The User ID of the user to manage\n" +
                                   "- Mention of the user to manage";
                     break;
                 case "ping":
-                    help.title = "am:ping";
+                    help.title = prefix + "ping";
                     help.helpText = "Asks AstralMod to reply with a message";
                     break;
                 case "version":
-                    help.title = "am:version";
+                    help.title = prefix + "version";
                     help.helpText = "Queries the current AstralMod version";
                     break;
                 case "uinfo":
-                    help.title = "am:uinfo";
-                    help.usageText = "am:uinfo user";
+                    help.title = prefix + "uinfo";
+                    help.usageText = prefix + "uinfo user";
                     help.helpText = "Acquire information about a user";
                     help.param1 = "- The user of which to acquire information";
                     break;
                 case "nick":
-                    help.title = "am:nick";
-                    help.usageText = "am:nick nickname";
+                    help.title = prefix + "nick";
+                    help.usageText = prefix + "nick nickname";
                     help.helpText = "Sets your nickname after staff have a chance to review it";
                     help.param1 = "The nickname you wish to be known as";
                     break;
                 case "find":
-                    help.title = "mod:find";
-                    help.usageText = "mod:find user";
+                    help.title = prefix + "find";
+                    help.usageText = prefix + "find user";
                     help.helpText = "Finds a user and returns their ID";
                     help.param1 = "The user you want to find.";
                     help.remarks = "AstralMod will search for users from all connected servers."
                     break;
                 case "fetchuser":
-                    help.title = "am:fetchuser";
-                    help.usageText = "mod:fetchuser [ID]";
+                    help.title = prefix + "fetchuser";
+                    help.usageText = prefix + "fetchuser [ID]";
                     help.helpText = "Tells AstralMod about the existance of a user";
                     help.param1 = "The user ID you want to tell AstralMod about.";
                     help.remarks = "AstralMod will search for users from all of Discord."
                     break;
                 case "help":
-                    help.title = "am:help";
-                    help.usageText = "am:help [command]";
+                    help.title = prefix + "help";
+                    help.usageText = prefix + "help [command]";
                     help.helpText = "Acquire information about how to use AstralMod and any available commands";
                     help.param1 = "*Optional Parameter*\n" +
                                   "The command to acquire information about.\n" +
@@ -1902,6 +1907,10 @@ function processAmCommand(message) {
             embed.setFooter("AstralMod " + amVersion);
             message.channel.send("", { embed: embed });
             return true;
+        } else if (command.startsWith("throw ")) {
+            var msg = command.substr(6);
+            throw new Error(msg);
+            return true;
         }
     }
     return false;
@@ -1939,9 +1948,9 @@ function setNicknameTentative(member, nickname, guild) {
         }, 300000, null);
 
         if (nickname == "") {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `mod:declnick " + member.user.id + "`");
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "declnick " + member.user.id + "`");
         } else {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `mod:declnick " + member.user.id + "`");
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "declnick " + member.user.id + "`");
         }
         settings.guilds[guild.id].pendingNicks = pendingNicks;
         return "ok";
@@ -2217,7 +2226,7 @@ function processSingleConfigure(message, guild) {
                     requiresConfig: true
                 };
                 log("Configuration for " + guild.id + " purged.", logType.good);
-                message.author.send("AstralMod configuration for this server has been reset. To set up AstralMod, just `mod:config` in the server.");
+                message.author.send("AstralMod configuration for this server has been reset. To set up AstralMod, just `" + prefix + "config` in the server.");
             } else { //Cancel
                 message.author.send("Returning to Main Menu.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
@@ -2634,22 +2643,13 @@ function processMessage(message) {
             }
 
             //Determine if this is a command
-            if (text.startsWith("mod:") || text.startsWith("am")) { //This is a mod command
+            if (text.startsWith(prefix)) { //This is a mod command
                 if (!processModCommand(message)) {
                     if (!processAmCommand(message)) {
                         //Pass command onto plugins
-                        if (text.startsWith("mod:")) {
-                            commandEmitter.emit('processCommand', message, true, text.substr(4).toLowerCase());
-                        } else {
-                            commandEmitter.emit('processCommand', message, true, text.substr(3).toLowerCase());
-                        }
+                        commandEmitter.emit('processCommand', message, true, text.substr(prefix.length).toLowerCase());
                     }
                 }
-            } else if (text.startsWith("am:")) {
-                    if (!processAmCommand(message)) {
-                        //Pass command onto plugins
-                        commandEmitter.emit('processCommand', message, false, text.substr(3).toLowerCase());
-                    }
             } else {
                 //Neither workflow or command
                 //Pass onto plugins
@@ -2680,7 +2680,15 @@ function processMessage(message) {
         log("Uncaught Exception:", logType.critical);
         log(err.stack, logType.critical);
 
-        message.channel.send("AstralMod encountered an internal error trying to process that command.");
+        var embed = new Discord.RichEmbed;
+        embed.setTitle("<:exception:346458871893590017> Internal Error");
+        embed.setFooter("This error has been logged, and we'll look into it.");
+        embed.setColor("#FF0000");
+        embed.setDescription("AstralMod has run into a problem trying to process that command.");
+        embed.addField("Details", err.message);
+        
+        message.channel.send("", {embed: embed});
+        //message.channel.send("<:exception:346458871893590017> **Internal Error**\nMessage: `" + err.message + "`\nThis error has been logged.");
     }
 }
 
@@ -2693,7 +2701,7 @@ function newGuild(guild) {
     
     if (process.argv.indexOf("--nowelcome") == -1) {
         if (guild.defaultChannel) {
-            guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `mod:config`.");
+            guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `" + prefix + "config`.");
         }
     }
 }
