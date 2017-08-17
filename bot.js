@@ -21,11 +21,12 @@
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
     amVersion = "2.1.0";
+    global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
+    global.prefix = "a::";
 }
 
-global.prefix = "a::";
 
 const Discord = require('discord.js');
 const consts = require('./consts.js');
@@ -693,7 +694,7 @@ global.log = function(logMessage, type = logType.debug) {
 }
 
 global.logPromiseRejection = function(object, action) {
-    log("Couldn't delete " + object.id + " in channel " + object.channel. logType.warning);
+    log("Couldn't delete message " + object.id + " in channel " + object.channel.id, logType.warning);
 };
 
 process.on('unhandledRejection', function(err, p) {
@@ -1148,10 +1149,13 @@ global.parseUser = function(query) {
 }
 
 function setGame() {
-    var presence = {};
-    presence.game = {};
-    presence.status = "online";
-    presence.afk = false;
+    var presence = {
+        game: {
+            type: 0
+        },
+        status: "online",
+        afk: false
+    };
     
     switch (Math.floor(Math.random() * 1000) % 35) {
         case 0:
@@ -1630,7 +1634,7 @@ function processAmCommand(message) {
         command = text.toLowerCase().substr(prefix.length);
 
         if (command == "ping") {
-            switch (Math.floor(Math.random() * 1000) % 4) {
+            switch (Math.floor(Math.random() * 1000) % 5) {
                 case 0:
                     message.channel.send('PONG! I want to play pong too... :\'(');
                     break;
@@ -1642,6 +1646,9 @@ function processAmCommand(message) {
                     break;
                 case 3:
                     message.channel.send('PONG!');
+                    break;
+                case 4:
+                    message.channel.send('Just going to break convention here and not start this reply normally.');
                     break;
             }
             message.delete().catch(function() {
