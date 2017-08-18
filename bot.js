@@ -2649,18 +2649,21 @@ function processMessage(message) {
                 return;
             }
 
-            //Determine if this is a command
-            if (text.startsWith(prefix)) { //This is a mod command
-                if (!processModCommand(message)) {
+            if (text.toLowerCase().startsWith(prefix)) {
+                //Determine if this is a command
+                if (isMod(message.member)) { //This is a mod command
+                    if (!processModCommand(message)) {
+                        if (!processAmCommand(message)) {
+                            //Pass command onto plugins
+                            commandEmitter.emit('processCommand', message, true, text.substr(prefix.length).toLowerCase());
+                        }
+                    }
+                } else {
                     if (!processAmCommand(message)) {
                         //Pass command onto plugins
-                        commandEmitter.emit('processCommand', message, true, text.substr(prefix.length).toLowerCase());
+                        commandEmitter.emit('processCommand', message, false, text.substr(prefix.length).toLowerCase());
                     }
                 }
-            } else {
-                //Neither workflow or command
-                //Pass onto plugins
-                commandEmitter.emit('newMessage', message);
             }
         } else {
             //Determine if this is within a workflow or if this is unsolicited

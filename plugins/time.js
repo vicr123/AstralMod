@@ -18,6 +18,8 @@
  * 
  * *************************************/
 
+const Discord = require('discord.js');
+const moment = require('moment');
 var client;
 var consts;
 
@@ -229,6 +231,44 @@ function utcOffsetFromTimezone(location) {
     }
 }
 
+function pollTimers() {
+    var date = new Date().getTime();
+    for (key in settings.users) {
+        var userSetting = settings.users[key];
+        if (userSetting != null) {
+            if (userSetting.timers != null) {
+                for (index in userSetting.timers) {
+                    var timer = userSetting.timers[index];
+                    if (timer.timeout < date) {
+                        var embed = new Discord.RichEmbed();
+
+                        embed.setTitle(":alarm_clock: Timer Elapsed");
+                        embed.setColor("#FFC000");
+                        
+                        if (timer.reason == "") {
+                            embed.setDescription("<@" + timer.author + "> I've been told to ping you.");
+                        } else {
+                            embed.setDescription("<@" + timer.author + "> I've been told to remind you about this.");
+                            embed.addField("Reason", timer.reason, false);
+                        }
+
+                        embed.addField("Timeout Date", new Date().toUTCString(), false);
+                        embed.setFooter("To see all your timers, use " + prefix + "timers.");
+
+                        if (timer.isChannelUser) {
+                            client.users.get(timer.channel).send("", {embed: embed});
+                        } else {
+                            client.channels.get(timer.channel).send("<@" + timer.author + ">", {embed: embed});
+                        }
+
+                        settings.users[key].timers.splice(index, 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
 function processCommand(message, isMod, command) {
     if (command.startsWith("time ")) {
         var utcOffset = -3000;
@@ -342,7 +382,7 @@ function processCommand(message, isMod, command) {
             time = command.substr(6);
         } else {
             time = command.substr(6, indexOfFirstSplit - 6);
-            reason = command.substr(indexOfFirstSplit).trim();
+            reason = message.content.substr(indexOfFirstSplit + prefix.length).trim();
         }
 
         var seconds;
@@ -350,20 +390,127 @@ function processCommand(message, isMod, command) {
             seconds = parseInt(time.substr(0, time.length - 1)) * 60;
         } else if (time.endsWith("h")) {
             seconds = parseInt(time.substr(0, time.length - 1)) * 60 * 60;
+        } else if (time.endsWith("d")) {
+            seconds = parseInt(time.substr(0, time.length - 1)) * 60 * 60 * 24;
         } else if (time.endsWith("s")) {
             seconds = parseInt(time.substr(0, time.length - 1));
         } else {
             seconds = parseInt(time) * 60;
         }
 
-        if (reason == "") {
-            message.reply("Ok, setting a timer for " + seconds + " seconds.");
+        if (isMod) {
+            if (reason == "") {
+                message.reply("Ok, setting a timer for " + seconds + " seconds.");
+            } else {
+                message.reply("Ok, setting a timer for " + seconds + " seconds.```" + reason + "```");
+            }
         } else {
-            message.reply("Ok, setting a timer for " + seconds + " seconds.```" + reason + "```");
+            if (reason == "") {
+                message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.");
+            } else {
+                message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.```" + reason + "```");
+            }
         }
+
+        var endDate = new Date().getTime() + seconds * 1000;
+
+        var timerObject = {
+            reason: reason,
+            timeout: endDate,
+            channel: isMod ? message.channel.id : message.author.id,
+            isChannelUser: !isMod,
+            author: message.author.id
+        }
+
+        if (settings.users[message.author.id] == null) {
+            settings.users[message.author.id] = {};
+        }
+
+        if (settings.users[message.author.id].timers == null) {
+            settings.users[message.author.id].timers = [];
+        }
+
+        settings.users[message.author.id].timers.push(timerObject);
+    } else if (command == "timers") {
+        var userSetting = settings.users[message.author.id];
+
+        if (userSetting == null) {
+            message.reply("You have no timers.");
+            return;
+        }
+
+        if (userSetting.timers == null) {
+            message.reply("You have no timers.");
+            return;
+        }
+
+        if (userSetting.timers.length == 0) {
+            message.reply("You have no timers.");
+            return;
+        }
+
+        var embed = new Discord.RichEmbed();
+        embed.setColor("#FFC000");
+        embed.setTitle("Running Timers");
+        embed.setDescription("Timers that AstralMod is currently keeping track of for you")
+        for (index in userSetting.timers) {
+            var timer = userSetting.timers[index];
+            
+            var field = "";
+            field += "This timer will elapse in about " + moment.duration(timer.timeout - new Date().getTime()).humanize() + "\n";
+            field += "**Timeout date:** " + new Date(timer.timeout).toUTCString() + "\n";
+
+            if (timer.reason == "") {
+                field += "**Reason:** No reason was provided\n";
+            } else {
+                field += "**Reason:** " + timer.reason + "\n";
+            }
+
+            if (timer.isChannelUser) {
+                field += "**Channel:** A DM will be sent";
+            } else {
+                field += "**Channel:** <#" + timer.channel + ">";
+            }
+
+            embed.addField("Timer #" + parseInt(index), field);
+        }
+
+        message.channel.send("", {embed: embed});
+    } else if (command.startsWith("rmtimer ")) {
+        var timerToRemove = command.substr(8);
+        var index = parseInt(timerToRemove);
+        
+        if (isNaN(index)) {
+            message.reply("Usage: `" + prefix + "rmtimer index`. For the `index` parameter, use `" + prefix + "timers`. For more information, `" + prefix + "help rmtimer`");
+            return;
+        }
+
+        if (settings.users[message.author.id] == null) {
+            message.reply("You have no timers.");
+            return;
+        }
+
+        if (settings.users[message.author.id].timers == null) {
+            message.reply("You have no timers.");
+            return;
+        }
+
+        if (settings.users[message.author.id].timers.length == 0) {
+            message.reply("You have no timers.");
+            return;
+        }
+
+        if (settings.users[message.author.id].timers.length <= index) {
+            message.reply("You don't have that many timers.");
+            return;
+        }
+
+        settings.users[message.author.id].timers.splice(index, 1);
+        message.reply("That timer has been deleted. For new timer indexes, use `" + prefix + "timers`.");
     }
 }
 
+var pollTimer;
 module.exports = {
     name: "Time",
     constructor: function(discordClient, commandEmitter, constants) {
@@ -371,16 +518,22 @@ module.exports = {
         consts = constants;
 
         commandEmitter.on('processCommand', processCommand);
+
+        pollTimer = setInterval(pollTimers, 1000)
     },
     destructor: function(commandEmitter) {
         commandEmitter.removeListener('processCommand', processCommand);
+
+        clearInterval(pollTimer);
     },
     availableCommands: {
         general: {
             commands: [
                 "time",
                 "settz",
-                "timer"
+                "timer",
+                "timers",
+                "rmtimer"
             ],
             modCommands: [
                 
@@ -392,29 +545,39 @@ module.exports = {
 
         switch (helpCmd) {
             case "time":
-                help.title = "am:time";
-                help.usageText = "am:time tz";
+                help.title = prefix + "time";
+                help.usageText = prefix + "time tz";
                 help.helpText = "Returns the time at tz";
                 help.param1 = "- A UTC Offset\n" +
                               "- A timezone code known to AstralMod\n" +
                               "- A user known to AstralMod";
                 break;
             case "settz":
-                help.title = "am:settz";
-                help.usageText = "am:settz tz";
+                help.title = prefix + "settz";
+                help.usageText = prefix + "settz tz";
                 help.helpText = "Sets your timezone to tz";
                 help.param1 = "- A UTC Offset detailing your timezone\n"
                               "- A timezone code known to AstralMod representing your timezone\n";
                 help.remarks = "By using this command, your timezone will be available to anyone who asks AstralMod.";
                 break;
             case "timer":
-                help.title = "am:timer";
-                help.usageText = "am:timer time [rem]";
+                help.title = prefix + "timer";
+                help.usageText = prefix + "timer time [rem]";
                 help.helpText = "Sets a timer for the amount of time specified in time";
                 help.param1 = "- A number, in minutes\n"
                               "- A number followed by either `s`, `m`, `h`.\n";
                 help.param2 = "*Optional Parameter*\n" +
                               "Text to be sent when timer expires";
+                break;
+            case "timers":
+                help.title = prefix + "timer";
+                help.helpText = "Lists your current timers";
+                break;
+            case "rmtime":
+                help.title = prefix + "rmtime";
+                help.usageText = prefix + "rmtime index";
+                help.helpText = "Removes the timer at index";
+                help.param1 = "Index of the timer you wish to remove. This can be obtained with " + prefix + "timers";
                 break;
         }
 
