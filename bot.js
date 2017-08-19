@@ -1554,11 +1554,11 @@ function processDeal(message) {
             }
             
             member.setNickname(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
+                message.channel.send(':gear: ' + getUserString(member) + " has changed their nickname.");
                 member = null;
                 actioningMember[message.guild.id] = null;
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't have his nickname changed. Exiting action menu");
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't have their nickname changed. Exiting action menu");
                 member = null;
                 actioningMember[message.guild.id] = null;
             });
