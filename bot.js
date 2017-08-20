@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.1.0";
+    amVersion = "2.1.1";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -1622,7 +1622,7 @@ function processAmCommand(message) {
     var text = message.content;
 
     //Make sure configuration is not required
-    if (settings.guilds[message.guild.id].requiresConfig) {
+    if (settings.guilds[message.guild.id].requiresConfig && text != prefix + "config") {
         message.reply("AstralMod setup isn't complete. You'll need to wait for " + message.guild.owner.displayName + " to type `" + prefix + "config` and set up AstralMod before you can use it.");
     } else {
         var command;/*
