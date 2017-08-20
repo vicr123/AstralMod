@@ -61,7 +61,7 @@ function processCommand(message, isMod, command) {
         } else if (command == "chnk") {
             message.channel.send("Usage: mod:chnk user. For more information, `mod:help chnk`.");
         } else if (command.startsWith("chnk ")) {
-            
+            message.reply("This command is not ready yet.");
         }
     }
 }

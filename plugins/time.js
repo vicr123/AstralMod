@@ -311,13 +311,13 @@ function processCommand(message, isMod, command) {
         }
 
         if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
-            message.channel.send("Hmm... Not sure if I like that location...");
+            throw new UserInputError("Invalid UTC Offset");
         } else {
             var localtime = new Date();
             var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + utcOffset * 60) * 60000);
             var dateString = date.toString();
             if (dateString == "Invalid Date") {
-                message.channel.send("Hmm... Not sure if I like that location...");
+                throw new UserInputError("Invalid UTC Offset");
             } else {
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
@@ -330,13 +330,13 @@ function processCommand(message, isMod, command) {
         }
 
         if (settings.users[message.author.id].timezone == null) {
-            message.reply("You haven't told me your timezone! To do that, use `am:settz`. For more information, go ahead and `am:help settz`.");
+            throw new CommandError("Unknowm timezone. Please set your timezone with `am:settz`");
         } else {
             var localtime = new Date();
             var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + settings.users[message.author.id].timezone * 60) * 60000);
             var dateString = date.toString();
             if (dateString == "Invalid Date") {
-                message.channel.send("Hmm... Your timezone seems to be corrupted. You'll need to set your timezone again using `am:settz`. For more information, go ahead and `am:help settz`.");
+                throw new CommandError("Corrupted timezone. Please set your timezone with `am:settz`");
             } else {
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
@@ -366,7 +366,7 @@ function processCommand(message, isMod, command) {
             settings.users[message.author.id] = userSettings;
 
             if (isNaN(parseFloat(utcOffset))) {
-                message.reply("That's not a valid timezone.");
+                throw new UserInputError("Invalid Timezone");
             } else {
                 message.reply("Your timezone is now UTC " + parseFloat(utcOffset));
             }
@@ -398,39 +398,43 @@ function processCommand(message, isMod, command) {
             seconds = parseInt(time) * 60;
         }
 
-        if (isMod) {
-            if (reason == "") {
-                message.reply("Ok, setting a timer for " + seconds + " seconds.");
-            } else {
-                message.reply("Ok, setting a timer for " + seconds + " seconds.```" + reason + "```");
-            }
+        if (isNaN(seconds)) {
+            throw new UserInputError("Invalid length of time.");
         } else {
-            if (reason == "") {
-                message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.");
+            if (isMod) {
+                if (reason == "") {
+                    message.reply("Ok, setting a timer for " + seconds + " seconds.");
+                } else {
+                    message.reply("Ok, setting a timer for " + seconds + " seconds.```" + reason + "```");
+                }
             } else {
-                message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.```" + reason + "```");
+                if (reason == "") {
+                    message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.");
+                } else {
+                    message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.```" + reason + "```");
+                }
             }
+
+            var endDate = new Date().getTime() + seconds * 1000;
+
+            var timerObject = {
+                reason: reason,
+                timeout: endDate,
+                channel: isMod ? message.channel.id : message.author.id,
+                isChannelUser: !isMod,
+                author: message.author.id
+            }
+
+            if (settings.users[message.author.id] == null) {
+                settings.users[message.author.id] = {};
+            }
+
+            if (settings.users[message.author.id].timers == null) {
+                settings.users[message.author.id].timers = [];
+            }
+
+            settings.users[message.author.id].timers.push(timerObject);
         }
-
-        var endDate = new Date().getTime() + seconds * 1000;
-
-        var timerObject = {
-            reason: reason,
-            timeout: endDate,
-            channel: isMod ? message.channel.id : message.author.id,
-            isChannelUser: !isMod,
-            author: message.author.id
-        }
-
-        if (settings.users[message.author.id] == null) {
-            settings.users[message.author.id] = {};
-        }
-
-        if (settings.users[message.author.id].timers == null) {
-            settings.users[message.author.id].timers = [];
-        }
-
-        settings.users[message.author.id].timers.push(timerObject);
     } else if (command == "timers") {
         var userSetting = settings.users[message.author.id];
 
