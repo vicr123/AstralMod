@@ -92,6 +92,18 @@ CommandError.prototype = Object.create(Error.prototype, {
     }
 });
 
+global.getRandom = function() {
+    if (arguments.length == 1) {
+        if (typeof arguments[0] == Array) {
+            var random = Math.floor(Math.random() * 1000) % arguments[0].length;
+            return arguments[0][random];
+        }
+    } else {
+        var random = Math.floor(Math.random() * 1000) % arguments.length;
+        return arguments[random];
+    }
+}
+
 global.logType = {
     debug: 0,
     info: 1,
@@ -1162,8 +1174,7 @@ function shutdown() {
 
             //Encrypt the contents
             var cipher = crypto.createCipher(cipherAlg, keys.settingsKey);
-            var settingsJson = cipher.update(contents, "urf8", "hex");
-            settingsJson += cipher.final("hex");
+            var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8"), cipher.final())]);
 
             fs.writeFileSync("settings.json", settingsJson, "utf8");
             log("Settings saved!", logType.good);
@@ -1220,108 +1231,14 @@ function setGame() {
         status: "online",
         afk: false
     };
-    
-    switch (Math.floor(Math.random() * 1000) % 35) {
-        case 0:
-            presence.game.name = "with ban buttons";
-            break;
-        case 1:
-            presence.game.name = "Fighting JXBot";
-            break;
-        case 2:
-            presence.game.name = "Annoy Victor";
-            break;
-        case 3:
-            presence.game.name = "with an internal bug";
-            break;
-        case 4:
-            presence.game.name = "around";
-            break;
-        case 5:
-            presence.game.name = "bot games";
-            break;
-        case 6:
-            presence.game.name = "with ones and zeroes";
-            break;
-        case 7:
-            presence.game.name = "thyShell";
-            break;
-        case 8:
-            presence.game.name = "with supa weapon";
-            break;
-        case 9:
-            presence.game.name = "solving puzzles";
-            break;
-        case 10:
-            presence.game.name = "rewinding time";
-            break;
-        case 11:
-            presence.game.name = "checking archives";
-            break;
-        case 12:
-            presence.game.name = "being unbreakable";
-            break;
-        case 13:
-            presence.game.name = "sandwiches";
-            break;
-        case 14:
-            presence.game.name = "drawing pokemon";
-            break;
-        case 15:
-            presence.game.name = "obsessing";
-            break;
-        case 16:
-            presence.game.name = "the waiting game";
-            break;
-        case 17:
-            presence.game.name = "bending space";
-            break;
-        case 18:
-            presence.game.name = "with hexagons";
-            break;
-        case 19:
-            presence.game.name = "with music";
-            break;
-        case 20:
-            presence.game.name = "being a ninja";
-            break;
-        case 21:
-            presence.game.name = "with Unicode characters";
-            break;
-        case 22:
-            presence.game.name = prefix + "help for more info";
-            break;
-        case 26:
-            presence.game.name = "trying to DJ";
-            break;
-        case 27:
-	        presence.game.name = "Sausages";
-	        break;
-        case 28:
-	        presence.game.name = "59 6f 75 20 64 65 63 6f 64 65 64 20 74 68 69 73 20 6d 65 73 73 61 67 65 21";
-	        break;
-        case 29:
-        case 23:
-        case 24:
-        case 25:
-            presence.game.name = "v." + amVersion;
-            break;
-        case 30:
-            presence.game.name = "Locked and loaded!";
-            break;
-        case 31:
-            presence.game.name = "Android Pay";
-            break;
-        case 32:
-            presence.game.name = "translating English into Dutch";
-            break;
-        case 33:
-            presence.game.name = "translating Dutch into English";
-            break;
-        case 34:
-            presence.game.name = "Hallo hoe gaat het vandaag?";
-	    break;
-    }
+
+    presence.game.name = getRandom("with ban buttons",
+                                   "Fighting JXBot",
+                                   "Annoying Victor",
+                                   prefix + "help",
+                                   "v." + amVersion,
+                                   "v." + amVersion,
+                                   "Android Pay");
     client.user.setPresence(presence);
 }
 
@@ -1559,14 +1476,14 @@ function processModCommand(message) {
                     }
 
                     if (user == null) {
-                        message.channel.send("No such user was found.");
+                        throw new CommandError("No user found with that name on this server");
                     } else {
                         var member = message.guild.member(user);
                         if (member == null) {
-                            message.channel.send("That didn't work.");
+                            throw new CommandError("An internal error was encountered.");
                         } else {
                             if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                                message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
+                                throw new CommandError("You're not allowed to manage this user.");
                             } else {
                                 var canDoActions = false;
                                 var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
@@ -1606,13 +1523,13 @@ function processModCommand(message) {
                                     actionStage[message.guild.id] = 0;
                                     message.channel.send(msg);
                                 } else {
-                                    message.channel.send(":gear: Cannot manage " + getUserString(member) + ".");
+                                    throw new CommandError("No actions can be perfomed on this user.");
                                 }
                             }
                         }
                     }
                 } else {
-                    message.channel.send("No such user was found.");
+                        throw new CommandError("No user found with that name");
                 }
             }
             message.delete().catch(function() {
@@ -1640,23 +1557,11 @@ function processAmCommand(message) {
         command = text.toLowerCase().substr(prefix.length);
 
         if (command == "ping") {
-            switch (Math.floor(Math.random() * 1000) % 5) {
-                case 0:
-                    message.channel.send('PONG! I want to play pong too... :\'(');
-                    break;
-                case 1:
-                    message.channel.send('PONG! I love playing pong!'); 
-                    break;
-                case 2:
-                    message.channel.send('PONG! Thanks for playing pong with me!');
-                    break;
-                case 3:
-                    message.channel.send('PONG!');
-                    break;
-                case 4:
-                    message.channel.send('Just going to break convention here and not start this reply normally.');
-                    break;
-            }
+            message.channel.send(getRandom('PONG! I want to play pong too... :\'(',
+                                           'PONG! I love playing pong!',
+                                           'PONG! Thanks for playing pong with me!',
+                                           'PONG!',
+                                           'Just going to break convention here and not start this reply normally.'));
             message.delete().catch(function() {
                 logPromiseRejection(message, "messageDelete");
             });
@@ -2724,8 +2629,7 @@ function saveSettings(showOkMessage = false) {
 
     //Encrypt the contents
     var cipher = crypto.createCipher(cipherAlg, keys.settingsKey);
-    var settingsJson = cipher.update(contents, "urf8", "hex");
-    settingsJson += cipher.final("hex");
+    var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8")), cipher.final()]);
 
     //Write to secondary file first
     fs.writeFile("settings.prewrite.json", settingsJson, "utf8", function(error) {
@@ -2860,6 +2764,31 @@ function memberAdd(member) {
                 }
             }
         }
+    }
+}
+
+function banAdd(guild, user) {
+    var channel = null;
+    if (guild != null) {
+        if (settings.guilds[guild.id].memberAlerts != null) {
+            if (client.channels.has(settings.guilds[guild.id].memberAlerts)) {
+                channel = client.channels.get(settings.guilds[guild.id].memberAlerts);
+            } else {
+                log("Member Alerts channel " + settings.guilds[guild.id].memberAlerts + " not found", logType.critical);
+            }
+        }
+    }
+
+    if (channel != null) {
+        var embed = new Discord.RichEmbed();
+        embed.setColor("#FF0000");
+        embed.setTitle(":hammer: User Banned");
+        embed.setDescription("A user was banned from this server.");
+
+        embed.addField("User", user.tag, true);
+        embed.addField("User ID", user.id, true);
+
+        channel.send("", {embed: embed});
     }
 }
 
@@ -3101,7 +3030,6 @@ function readyOnce() {
         log("Loading AstralMod configuration file...", logType.info);
 
         try {
-
             var file = fs.readFileSync("settings.json", "utf8");
 
             if (file.startsWith("{")) {
@@ -3111,31 +3039,46 @@ function readyOnce() {
                 log("settings.js file is unencrypted. Creating a backup copy...", logType.info);
                 fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-beforeEncrypt.json'));
 
-                log("Encrypting the settings.js file...", logType.info);
-
-                var cipher = crypto.createCipher(cipherAlg, keys.settingsKey);
-                var settingsJson = cipher.update(file, "utf8", "hex");
-                settingsJson += cipher.final("hex");
-                fs.writeFileSync('settings.json', settingsJson, "utf8");
-
-                log("settings.js file has been encrypted.", logType.good);
+                log("settings.js file will be encrypted on next save.", logType.warning);
 
                 global.settings = intermediarySettings;
             } else {
                 //File encrypted
                 log("Decrypting the settings.js file...", logType.info);
 
+                var buf = fs.readFileSync("settings.json");
                 var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
-                var settingsJson = cipher.update(file, "hex", "utf8");
-                settingsJson += cipher.final("utf8");
+                var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
+                settingsJson = settingsJson.toString("utf8");
 
                 global.settings = JSON.parse(settingsJson);
             }
 
         } catch (err) {
             //Try loading the prewrite file
-            var file = fs.readFileSync("settings.prewrite.json", "utf8")
-            global.settings = JSON.parse(file);
+            var file = fs.readFileSync("settings.prewrite.json", "utf8");
+
+            if (file.startsWith("{")) {
+                //File unencrypted
+                var intermediarySettings = JSON.parse(file);
+
+                log("settings.js file is unencrypted. Creating a backup copy...", logType.info);
+                fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-beforeEncrypt.json'));
+
+                log("settings.js file will be encrypted on next save.", logType.warning);
+
+                global.settings = intermediarySettings;
+            } else {
+                //File encrypted
+                log("Decrypting the settings.js file...", logType.info);
+
+                var buf = fs.readFileSync("settings.json");
+                var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
+                var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
+                settingsJson = settingsJson.toString("utf8");
+
+                global.settings = JSON.parse(settingsJson);
+            }
 
             log("Settings file was corrupted, but prewrite file is good. Using prewrite file.", logType.warning);
         
@@ -3196,7 +3139,8 @@ function readyOnce() {
     client.on('guildMemberUpdate', guildMemberUpdate);
     client.on('userUpdate', userUpdate);
     client.on('ready', readyAgain);
-    client.on('resume', resume)
+    client.on('resume', resume);
+    client.on('guildBanAdd', banAdd);
 
     setTimeout(saveSettings, 30000);
 
@@ -3277,6 +3221,9 @@ if (keys.settingsKey == null) {
         "   exports.settingsKey = \"[a random password]\"", logType.info);
 } else {
     log("Establishing connection to Discord...", logType.info);
+    client.options.disabledEvents = [
+        "TYPING_START"
+    ]
     try {
         if (keys.key != null) {
             client.login(keys.key).catch(function() {
