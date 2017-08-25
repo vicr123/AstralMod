@@ -2543,7 +2543,7 @@ function processMessage(message) {
 
             if (text.toLowerCase().startsWith(prefix)) {
                 //Determine if this is a command
-                if (isMod(message.member)) { //This is a mod command
+                if (isMod(message.member) || text == prefix + "config") { //This is a mod command
                     if (!processModCommand(message)) {
                         if (!processAmCommand(message)) {
                             //Pass command onto plugins
@@ -3055,35 +3055,40 @@ function readyOnce() {
             }
 
         } catch (err) {
-            //Try loading the prewrite file
-            var file = fs.readFileSync("settings.prewrite.json", "utf8");
+            try {
+                //Try loading the prewrite file
+                var file = fs.readFileSync("settings.prewrite.json", "utf8");
 
-            if (file.startsWith("{")) {
-                //File unencrypted
-                var intermediarySettings = JSON.parse(file);
+                if (file.startsWith("{")) {
+                    //File unencrypted
+                    var intermediarySettings = JSON.parse(file);
 
-                log("settings.js file is unencrypted. Creating a backup copy...", logType.info);
-                fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-beforeEncrypt.json'));
+                    log("settings.js file is unencrypted. Creating a backup copy...", logType.info);
+                    fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-beforeEncrypt.json'));
 
-                log("settings.js file will be encrypted on next save.", logType.warning);
+                    log("settings.js file will be encrypted on next save.", logType.warning);
 
-                global.settings = intermediarySettings;
-            } else {
-                //File encrypted
-                log("Decrypting the settings.js file...", logType.info);
+                    global.settings = intermediarySettings;
+                } else {
+                    //File encrypted
+                    log("Decrypting the settings.js file...", logType.info);
 
-                var buf = fs.readFileSync("settings.json");
-                var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
-                var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
-                settingsJson = settingsJson.toString("utf8");
+                    var buf = fs.readFileSync("settings.json");
+                    var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
+                    var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
+                    settingsJson = settingsJson.toString("utf8");
 
-                global.settings = JSON.parse(settingsJson);
+                    global.settings = JSON.parse(settingsJson);
+                }
+
+                log("Settings file was corrupted, but prewrite file is good. Using prewrite file.", logType.warning);
+            
+                fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
+                fs.createReadStream('settings.prewrite.json').pipe(fs.createWriteStream('settings.json'));
+            } catch (err2) {
+                log("Either the settings file is corrupted, or the encryption key is incorrect. AstralMod cannot start.", logType.critical);
+                return;
             }
-
-            log("Settings file was corrupted, but prewrite file is good. Using prewrite file.", logType.warning);
-        
-            fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
-            fs.createReadStream('settings.prewrite.json').pipe(fs.createWriteStream('settings.json'));
         }
     }
 
