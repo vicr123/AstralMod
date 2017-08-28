@@ -2556,6 +2556,8 @@ function processMessage(message) {
                         commandEmitter.emit('processCommand', message, false, text.substr(prefix.length).toLowerCase());
                     }
                 }
+            } else {
+                commandEmitter.emit('newMessage', message);
             }
         } else {
             //Determine if this is within a workflow or if this is unsolicited
