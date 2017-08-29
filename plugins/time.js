@@ -330,7 +330,7 @@ function processCommand(message, isMod, command) {
         }
 
         if (settings.users[message.author.id].timezone == null) {
-            throw new CommandError("Unknowm timezone. Please set your timezone with `am:settz`");
+            throw new CommandError("Unknown timezone. Please set your timezone with `am:settz`");
         } else {
             var localtime = new Date();
             var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + settings.users[message.author.id].timezone * 60) * 60000);
