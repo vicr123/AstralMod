@@ -577,11 +577,11 @@ module.exports = {
                 help.title = prefix + "timer";
                 help.helpText = "Lists your current timers";
                 break;
-            case "rmtime":
-                help.title = prefix + "rmtime";
-                help.usageText = prefix + "rmtime index";
+            case "rmtimer":
+                help.title = prefix + "rmtimer";
+                help.usageText = prefix + "rmtimer index";
                 help.helpText = "Removes the timer at index";
-                help.param1 = "Index of the timer you wish to remove. This can be obtained with " + prefix + "timers";
+                help.param1 = "Index of the timer you wish to remove. This can be obtained with `" + prefix + "timers`";
                 break;
         }
 
