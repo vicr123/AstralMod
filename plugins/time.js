@@ -231,6 +231,30 @@ function utcOffsetFromTimezone(location) {
     }
 }
 
+function getClockEmoji(date = new Date()) {
+    var hour = date.getHours();
+    if (hour > 11) {
+        hour -= 12;
+    }
+    if (hour == 0) {
+        hour = 12;
+    }
+
+    var firstPart = ":clock" + parseInt(hour);
+    var secondPart = ":";
+
+    var min = date.getMinutes();
+    if (min > 45) {
+        firstPart = ":clock" + parseInt(hour + 1);
+        if (hour == 12) {
+            firstPart = ":clock1";
+        }
+    } else if (min > 15) {
+        secondPart = "30:";
+    }
+    return firstPart + secondPart;
+}
+
 function pollTimers() {
     var date = new Date().getTime();
     for (key in settings.users) {
@@ -279,35 +303,28 @@ function processCommand(message, isMod, command) {
         if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
             utcOffset = utcOffsetFromTimezone(location);
             if (utcOffset == -3000) {
-                var user = location.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-                var userSettings = settings.users[user];
+                var users = parseUser(location);
 
-                if (userSettings != null) {
-                    //Retrieve an updated username (if applicable)
-                    client.fetchUser(user).then(function (dUser) {
-                        settings.users[user].username = dUser.username;
-                    });
-
-                    locationString = userSettings.username;
-                    utcOffset = userSettings.timezone;
-                } else {
-                    //Search for user by username
-                    
-                    var userObject = null;
-                    for (userObj in settings.users) {
-                        if (settings.users[userObj].username != null) {
-                            if (settings.users[userObj].username.toLowerCase() == user.toLowerCase()) {
-                                userObject = settings.users[userObj];
+                if (users.length > 0) {
+                    if (settings.users.hasOwnProperty(users[0].id)) {
+                        var userObject = settings.users[users[0].id];
+                        if (userObject != null) {
+                            if (userObject.hasOwnProperty("timezone")) {
+                                locationString = users[0].username;
+                                utcOffset = userObject.timezone;
+                            } else {
+                                throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
                             }
+                        } else {
+                            throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
                         }
-                    }
-
-                    if (userObject != null) {
-                        locationString = userObject.username;
-                        utcOffset = userObject.timezone;
+                    } else {
+                        throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");                        
                     }
                 }
             }
+        } else {
+            locationString = "UTC " + parseFloat(utcOffset);
         }
 
         if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
@@ -321,7 +338,7 @@ function processCommand(message, isMod, command) {
             } else {
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                message.channel.send("The time at " + locationString + " happens to be " + dateString);
+                message.channel.send(getClockEmoji(date) + " **" + locationString + "**: " + dateString);
             }
         }
     } else if (command == "time") {
@@ -330,17 +347,17 @@ function processCommand(message, isMod, command) {
         }
 
         if (settings.users[message.author.id].timezone == null) {
-            throw new CommandError("Unknowm timezone. Please set your timezone with `am:settz`");
+            throw new CommandError("Unknown timezone. Please set your timezone with `" + prefix + "settz`");
         } else {
             var localtime = new Date();
             var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + settings.users[message.author.id].timezone * 60) * 60000);
             var dateString = date.toString();
             if (dateString == "Invalid Date") {
-                throw new CommandError("Corrupted timezone. Please set your timezone with `am:settz`");
+                throw new CommandError("Corrupted timezone. Please set your timezone with `" + prefix + "settz`");
             } else {
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
                 dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                message.channel.send("The time at " + settings.users[message.author.id].username + " happens to be " + dateString);
+                message.channel.send(getClockEmoji(date) + " **" + message.author.username + "**: " + dateString);
             }
         }
     } else if (command.startsWith("settz ")) {
@@ -353,7 +370,7 @@ function processCommand(message, isMod, command) {
         }
 
         if (isNaN(utcOffset) || utcOffset < -14 || utcOffset > 14) {
-            message.reply("Usage: `am:settz tz`. For more information, `am:help settz`");
+            message.reply("Usage: `" + prefix + "settz tz`. For more information, `" + prefix + "help settz`");
         } else {
             var userSettings = settings.users[message.author.id];
             
@@ -361,7 +378,6 @@ function processCommand(message, isMod, command) {
                 userSettings = {};
             }
             userSettings.timezone = utcOffset;
-            userSettings.username = message.author.username;
 
             settings.users[message.author.id] = userSettings;
 
@@ -372,7 +388,7 @@ function processCommand(message, isMod, command) {
             }
         }
     } else if (command == "settz") {
-        message.reply("Usage: `am:settz tz`. For more information, `am:help settz`");
+        message.reply("Usage: `" + prefix + "settz tz`. For more information, `" + prefix + "help settz`");
     } else if (command.startsWith("timer ")) {
         var time;
         var indexOfFirstSplit = command.indexOf(" ", 6);
@@ -577,11 +593,11 @@ module.exports = {
                 help.title = prefix + "timer";
                 help.helpText = "Lists your current timers";
                 break;
-            case "rmtime":
-                help.title = prefix + "rmtime";
-                help.usageText = prefix + "rmtime index";
+            case "rmtimer":
+                help.title = prefix + "rmtimer";
+                help.usageText = prefix + "rmtimer index";
                 help.helpText = "Removes the timer at index";
-                help.param1 = "Index of the timer you wish to remove. This can be obtained with " + prefix + "timers";
+                help.param1 = "Index of the timer you wish to remove. This can be obtained with `" + prefix + "timers`";
                 break;
         }
 
