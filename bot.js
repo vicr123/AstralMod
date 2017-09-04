@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.2.0";
+    amVersion = "2.3.0";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -875,10 +875,9 @@ function processConsoleInput(line) {
                     }
                 }
 
-                if (channel == null) {
-                    if (guild != null) {
-                        channel = guild.defaultChannel;
-                    }
+                if (channel == null && guild != null && guild.channels.size > 0) {
+                    //channel = guild.defaultChannel;
+                    channel = guild.channels.array()[0];
                 }
 
                 if (channel != null) {
@@ -2601,6 +2600,7 @@ function processMessage(message) {
         }
         
         message.channel.send("", {embed: embed});
+        message.channel.stopTyping(true);
     }
 }
 
@@ -2612,8 +2612,9 @@ function newGuild(guild) {
     
     
     if (process.argv.indexOf("--nowelcome") == -1) {
-        if (guild.defaultChannel) {
-            guild.defaultChannel.send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `" + prefix + "config`.");
+        //if (guild.defaultChannel) {
+        if (guild.channels.size > 0) {
+            guild.channels.array()[0].send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `" + prefix + "config`.");
         }
     }
 }
@@ -2790,7 +2791,22 @@ function banAdd(guild, user) {
         embed.addField("User", user.tag, true);
         embed.addField("User ID", user.id, true);
 
-        channel.send("", {embed: embed});
+        guild.fetchInvites().then(function(invites) {
+            var inviteString = "";
+
+            for ([code, invite] of invites) {
+                if (invite.inviter != null && invite.inviter.id == user.id) {
+                    inviteString += invite.code + "\n";
+                }
+            }
+
+            if (inviteString != "") {
+                embed.addField("Created Invites", inviteString);
+            }
+            channel.send("", {embed: embed});
+        }).catch(function() {
+            channel.send("", {embed: embed});
+        });
     }
 }
 
