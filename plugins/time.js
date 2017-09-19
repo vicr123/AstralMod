@@ -417,19 +417,21 @@ function processCommand(message, isMod, command) {
         if (isNaN(seconds)) {
             throw new UserInputError("Invalid length of time.");
         } else {
-            if (isMod) {
-                if (reason == "") {
-                    message.reply("Ok, setting a timer for " + seconds + " seconds.");
-                } else {
-                    message.reply("Ok, setting a timer for " + seconds + " seconds.```" + reason + "```");
-                }
-            } else {
-                if (reason == "") {
-                    message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.");
-                } else {
-                    message.reply("Ok, setting a timer for " + seconds + " seconds. Since you're not a moderator, I'll DM you the timer when it elapses.```" + reason + "```");
-                }
+            var embed = new Discord.RichEmbed();
+            
+            embed.setTitle(":alarm_clock: Timer Set");
+            embed.setColor("#FFC000");
+            embed.setDescription("Ok, I'll set that timer now.");
+            embed.addField("Duration", seconds + " seconds.", false);
+            
+            if (reason != "") {
+                embed.addField("Reason", reason, false);
             }
+
+            if (!isMod) {
+                embed.addField("Alert", "Since you're not a moderator, I'll DM you the timer. Make sure that you allow DMs from this server, or you won't receive it.");
+            }
+            message.channel.send("", {embed: embed});
 
             var endDate = new Date().getTime() + seconds * 1000;
 
