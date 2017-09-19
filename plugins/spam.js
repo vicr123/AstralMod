@@ -52,6 +52,10 @@ function newMessage(message) {
         if (message.author.bot) {
             checkSpam = false;
         }
+
+        if (message.startsWith("jx:") || message.startsWith("jxr:")) {
+            checkSpam = false;
+        }
     }
     
     if (checkSpam) {
@@ -76,7 +80,7 @@ function newMessage(message) {
         }
 
         var messageText = message.content.toLowerCase();
-        if (messageText.length > 3 && messageText != "okay" && messageText != "yeah" && messageText != "what") {
+        if (messageText.length > 4) {
             if (lastMessagesOfUser.includes(messageText)) {
                 spamCountingUser++;
 
@@ -84,7 +88,7 @@ function newMessage(message) {
                     nonSpamCountingUser--;
                 }
 
-                if (spamCountingUser >= 3) {
+                if (spamCountingUser >= 4) {
                     if (spamCountingUser == 10) {
                         if (client.channels.has(settings.guilds[message.guild.id].botWarnings)) {
                             client.channels.get(settings.guilds[message.guild.id].botWarnings).send(":red_circle: <@" + message.author.id + "> was spamming on " + message.channel.name + ".");
