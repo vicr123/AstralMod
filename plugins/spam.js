@@ -53,7 +53,7 @@ function newMessage(message) {
             checkSpam = false;
         }
 
-        if (message.startsWith("jx:") || message.startsWith("jxr:")) {
+        if (message.content.startsWith("jx:") || message.content.startsWith("jxr:")) {
             checkSpam = false;
         }
     }
