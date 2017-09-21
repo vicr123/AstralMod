@@ -112,6 +112,19 @@ global.logType = {
     good: 4
 }
 
+var capture = null;
+global.captureInput = function(func, guild, author) {
+    capture = {
+        function: func,
+        guild: guild,
+        author: author
+    };
+}
+
+global.releaseInput = function() {
+    capture = null;
+}
+
 //Set up screen
 var screen = blessed.screen({
     smartCSR: true,
@@ -2540,7 +2553,9 @@ function processMessage(message) {
                 return;
             }
 
-            if (text.toLowerCase().startsWith(prefix)) {
+            if (capture != null && capture.guild == message.guild.id && capture.author == message.author.id) {
+                capture.function(message);
+            } else if (text.toLowerCase().startsWith(prefix)) {
                 //Determine if this is a command
                 if (isMod(message.member) || text == prefix + "config") { //This is a mod command
                     if (!processModCommand(message)) {
