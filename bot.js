@@ -1895,7 +1895,7 @@ function processConfigure(message, guild) {
                     guildSetting.modRoles = guildSetting.tentativeModRoles;
                     guildSetting.tentativeModRoles = null;
 
-                    message.author.send("Thanks. Next, I'll need the ID of the channel where I can post member alerts. Alternatively, enter \"none\" if you want to disable member alerts.");
+                    message.author.send("Thanks. Next, I'll need the ID of the channel where I can post member alerts. Alternatively, enter \"none\" if you want to disable member alerts. If you don't know how to get the ID, enable developer mode in user settings > Appearance, right click the channel on your server, then click \"Copy ID\".");
                     guildSetting.configuringStage = 2;
                 } else if (text == "no" || text == "n") {
                     guildSetting.tentativeModRoles = null;
