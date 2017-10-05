@@ -27,7 +27,7 @@ var currentWarnings = {
 };
 
 function processResponse(message) {
-    releaseInput();
+    releaseInput(message.guild.id);
 
     var tracker = currentWarnings[message.guild.id];
     currentWarnings[message.guild.id] = null;
@@ -64,7 +64,7 @@ function processCommand(message, isMod, command) {
             var user = command.substr(5);
 
             if (currentWarnings[message.guild.id] == null) {
-                var users = parseUser(user);
+                var users = parseUser(user, message.guild);
                 if (users.length > 0) {
                     var user = null;
 
@@ -98,7 +98,7 @@ function processCommand(message, isMod, command) {
             }
         } else if (command.startsWith("lswarn ")) {
             var user = command.substr(7);
-            var users = parseUser(user);
+            var users = parseUser(user, message.guild);
             if (users.length > 0) {
                 var user = null;
 
@@ -165,7 +165,7 @@ function processCommand(message, isMod, command) {
                 throw new UserInputError("Invalid ID. Use the `lswarn` command to retrieve a list of IDs.");
             }
 
-            var users = parseUser(user);
+            var users = parseUser(user, message.guild);
             if (users.length > 0) {
                 var user = null;
 
@@ -201,7 +201,7 @@ function processCommand(message, isMod, command) {
                     }
 
                     userWarnings.splice(id, 1);
-                    message.reply(":gear: That warning has been deleted. For new warning indexes, use `" + prefix + "lswarn`.");
+                    message.reply(":gear: That warning has been deleted. For new warning indices, use `" + prefix + "lswarn`.");
 
                     warnings[user] = userWarnings;
                     settings.guilds[message.guild.id].warnings = warnings;
@@ -210,6 +210,46 @@ function processCommand(message, isMod, command) {
                 throw new CommandError("No user found with that name");
             }
         }
+    }
+
+    if (command == "lswarn") {
+        var user = message.author.id;
+        var warnings = settings.guilds[message.guild.id].warnings;
+        if (warnings == null) {
+            warnings = {}
+        }
+
+        var userWarnings = warnings[user];
+        if (userWarnings == null) {
+            userWarnings = [];
+        }
+
+        if (userWarnings.length == 0) {
+            message.reply(getUserString(message.guild.member(user)) + " has no warnings.");
+            return;
+        }
+
+        var embed = new Discord.RichEmbed();
+        embed.setColor("#3C3C96");
+        embed.setTitle("Warnings");
+        embed.setDescription("Warnings that have been recorded by moderators of this server")
+        for (index in userWarnings) {
+            var warning = userWarnings[index];
+
+            var warner = warning.warner;
+            if (message.guild.members.has(warning.warner)) {
+                warner = message.guild.member(warning.warner);
+            }
+            
+            var field = "";
+            field += warning.reason + "\n\n";
+            field += "**Timestamp:** " + warning.timestamp + "\n";
+            field += "**Warned by:** " + warner;
+
+            embed.addField("Warning #" + (parseInt(index) + 1), field);
+        }
+
+        message.channel.send("", {embed: embed});
     }
 }
 
@@ -227,11 +267,10 @@ module.exports = {
     availableCommands: {
         general: {
             commands: [
-                
+                "lswarn"
             ],
             modCommands: [
                 "warn",
-                "lswarn",
                 "rmwarn"
             ]
         }

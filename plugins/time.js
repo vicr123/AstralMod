@@ -303,7 +303,7 @@ function processCommand(message, isMod, command) {
         if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
             utcOffset = utcOffsetFromTimezone(location);
             if (utcOffset == -3000) {
-                var users = parseUser(location);
+                var users = parseUser(location, message.guild);
 
                 if (users.length > 0) {
                     if (settings.users.hasOwnProperty(users[0].id)) {
@@ -370,7 +370,7 @@ function processCommand(message, isMod, command) {
         }
 
         if (isNaN(utcOffset) || utcOffset < -14 || utcOffset > 14) {
-            message.reply("Usage: `" + prefix + "settz tz`. For more information, `" + prefix + "help settz`");
+            message.reply("Usage: `" + prefix + "settz [your timezone]`. For more information, `" + prefix + "help settz`");
         } else {
             var userSettings = settings.users[message.author.id];
             
@@ -388,7 +388,7 @@ function processCommand(message, isMod, command) {
             }
         }
     } else if (command == "settz") {
-        message.reply("Usage: `" + prefix + "settz tz`. For more information, `" + prefix + "help settz`");
+        message.reply("Usage: `" + prefix + "settz [your timezone]`. For more information, `" + prefix + "help settz`");
     } else if (command.startsWith("timer ")) {
         var time;
         var indexOfFirstSplit = command.indexOf(" ", 6);
@@ -528,7 +528,7 @@ function processCommand(message, isMod, command) {
         }
 
         settings.users[message.author.id].timers.splice(index, 1);
-        message.reply("That timer has been deleted. For new timer indexes, use `" + prefix + "timers`.");
+        message.reply("That timer has been deleted. For new timer indices, use `" + prefix + "timers`.");
     }
 }
 
@@ -576,8 +576,8 @@ module.exports = {
                 break;
             case "settz":
                 help.title = prefix + "settz";
-                help.usageText = prefix + "settz tz";
-                help.helpText = "Sets your timezone to tz";
+                help.usageText = prefix + "settz timezone";
+                help.helpText = "Sets your timezone to timezonez";
                 help.param1 = "- A UTC Offset detailing your timezone\n"
                               "- A timezone code known to AstralMod representing your timezone\n";
                 help.remarks = "By using this command, your timezone will be available to anyone who asks AstralMod.";

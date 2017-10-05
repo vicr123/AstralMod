@@ -24,7 +24,7 @@ var consts;
 function processCommand(message, isMod, command) {
     if (command.startsWith("pic ")) {
         var user = command.substr(4);
-        var users = parseUser(user);
+        var users = parseUser(user, message.guild);
 
         if (users.length == 0) {
             message.reply("No results");

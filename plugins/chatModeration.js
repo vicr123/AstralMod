@@ -20,41 +20,163 @@
 
 var client;
 var consts;
+const Discord = require('discord.js');
 
 function processCommand(message, isMod, command) {
     if (isMod) {
         if (command.startsWith("rm ")) {
-            var number = command.substr(3);
-            var num = parseInt(number);
-            if (num != number) {
-                message.channel.send(":no_entry_sign: ERROR: That's not a number...");
-            } else {
-                num = num + 1; //Also remove the mod:rm command
-                message.channel.bulkDelete(num).then(function () {
-                    if (num == 2) {
-                        message.channel.send(":white_check_mark: OK: I successfully deleted 1 message.");
-                    } else if (num >= 99) {
-                        message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");
+            var num;
+            var numString;
+            var user = "";
+            var args = command.substr(3);
+            var split = args.indexOf(" ");
+
+            var successfulDelete = function(messages) {
+                var messagesDeleted = messages.size;
+
+                if (messages.size != num && num != -1) {
+                    if (messagesDeleted == 1) {
+                        throw new CommandError("Catastrophic Failure");
                     } else {
-                        message.channel.send(":white_check_mark: OK: I successfully deleted " + number + " messages.");
+                        message.channel.send(":large_orange_diamond: Only " + (messagesDeleted - 1) + " messages were deleted.");
                     }
-                }).catch(function () {
-                    if (num >= 99) {
-                        message.channel.send(":no_entry_sign: ERROR: I am unable to delete more than 99 messages at one time.");
+                } else {
+                    if (num == 2) {
+                        message.channel.send(":white_check_mark: Deleted 1 message.");
                     } else {
-                        switch (Math.floor(Math.random() * 1000) % 3) {
-                            case 0:
-                                message.channel.send(':no_entry_sign: ERROR: That didn\'t work. You might want to try again.');
-                                break;
-                            case 1:
-                                message.channel.send(':no_entry_sign: ERROR: Something\'s blocking us! You might want to try again.');
-                                break;
-                            case 2:
-                                message.channel.send(':no_entry_sign: ERROR: Too much cosmic interference! You might want to try again.');
-                                break;
+                        message.channel.send(":white_check_mark: Deleted " + (messagesDeleted - 1) + " messages.");
+                    }
+                }
+            }
+            var failedDelete = function(err) {
+                if (num >= 99) {
+                    message.channel.send("", new Discord.RichEmbed({
+                        fields: [
+                            {
+                                name: "Details",
+                                value: "Only 99 messages can be deleted at once."
+                            }
+                        ],
+                        title: "<:userexception:348796878709850114> User Input Error",
+                        description: "AstralMod didn't understand what you were trying to say.",
+                    }).setColor("#FF0000"));
+                } else {
+                    message.channel.send("", new Discord.RichEmbed({
+                        fields: [
+                            {
+                                name: "Details",
+                                value: "Catastrophic Failure"
+                            }
+                        ],
+                        title: "<:userexception:348796878709850114> Command Error",
+                        description: "AstralMod couldn't complete that command.",
+                    }).setColor("#FF0000"));
+                }
+            }
+
+            if (split == -1) {
+                numString = args;
+
+                if (numString == "all") {
+                    num = -1;
+                } else {
+                    num = parseInt(numString);
+                }
+            } else {
+                numString = args.substr(0, split);
+                if (numString == "all") {
+                    num = -1;
+                } else {
+                    num = parseInt(numString);
+                }
+
+                var userString = args.substr(split + 1);
+                
+                var users = parseUser(userString, message.guild);
+                if (users.length > 0) {
+                    user = null;
+
+                    //Filter out members
+                    for (var i = 0; i < users.length; i++) {
+                        if (message.guild.members.has(users[i].id)) {
+                            user = users[i].id;
+                            i = users.length;
                         }
                     }
-                });
+
+                    if (user == null) {
+                        throw new CommandError("No user found with that name on this server");
+                    }
+                } else {
+                    throw new CommandError("No user found with that name");
+                }
+            }
+
+            if (num != numString && num != -1) {
+                throw new UserInputError("Invalid number");
+            } else if (user == "") {
+                if (num == -1) {
+                    throw new UserInputError("The \"all\" option can only be used when passing a user as the second argument");
+                } else {
+                    num = num + 1; //Also remove the mod:rm command
+                    message.channel.bulkDelete(num, true).then(successfulDelete).catch(failedDelete);
+                }
+            } else {
+                if (num != -1) {
+                    num = num + 1; //Also remove the mod:rm command
+                }
+
+                var messagesToDelete = [
+                    message
+                ]
+                var userMember = message.guild.member(user);
+
+                //Search for the previous num messages from user
+                var messagesFound = 0;
+                var forceStop = false;
+                
+                function nextBatch(allMessages) {
+                    for (let [id, message] of allMessages) {
+                        if (message.author.id == user) {
+                            messagesToDelete.push(message);
+                            messagesFound++;
+    
+                            if (messagesFound == num - 1) {
+                                break;
+                            }
+                            if (messagesFound == 100) {
+                                forceStop = true;
+                                break;
+                            }
+                        }
+                        lastMessage = id;
+
+                        if (message.createdAt.getTime() - new Date().getTime() > 86400000) {
+                            forceStop = true;
+                            break;
+                        }
+                    }
+
+                    if (messagesFound == num - 1 || forceStop || allMessages.size == 0) {
+                        if (messagesFound.length == 0) {
+                            message.channel.send(":no_entry_sign: No messages from that user found");
+                        } else {
+                            message.channel.bulkDelete(messagesToDelete, true).then(successfulDelete).catch(failedDelete);
+                        }
+                    } else {
+                        message.channel.fetchMessages({limit: 50, before: lastMessage}).then(nextBatch).catch(function() {
+                            message.channel.bulkDelete(messagesToDelete, true).then(successfulDelete).catch(failedDelete);
+                        });
+                    }
+                }
+
+                message.channel.fetchMessages({limit: 50, before: message.id}).then(nextBatch).catch(failedDelete);
+
+                if (num != -1) {
+                    message.reply("Give us a minute to find " + (num - 1) + " messages from " + getUserString(userMember));
+                } else {
+                    message.reply("Give us a minute to find all the messages from " + getUserString(userMember) + " within the past day");
+                }
             }
         } else if (command == "panic") {
             message.channel.send('Panic Mode is coming soon. Stay Tuned!');
@@ -94,19 +216,21 @@ module.exports = {
 
         switch (helpCmd) {
             case "rm":
-                help.title = "mod:rm";
-                help.usageText = "mod:rm number";
+                help.title = prefix + "rm";
+                help.usageText = prefix + "rm number [user]";
                 help.helpText = "Removes a number of messages";
-                help.param1 = "The number of messages to remove";
+                help.param1 = "The number of messages to remove, or `all` to remove up to 100 messages within the past day";
+                help.param2 = "*Optional Parameter*\n" +
+                              "The user to delete messages from";
                 break;
             case "panic":
-                help.title = "mod:panic";
-                help.usageText = "mod:panic";
+                help.title = prefix + "panic";
+                help.usageText = prefix + "panic";
                 help.helpText = "Switches on Panic Mode. In this mode, no one can send messages.";
                 break;
             case "chnk":
-                help.title = "mod:chnk";
-                help.usageText = "mod:chnk user";
+                help.title = prefix + "chnk";
+                help.usageText = prefix + "chnk user";
                 help.helpText = "Sets a random nickname to user.";
                 help.param1 = "- The User ID of the user to apply a new nickname to\n" +
                               "- Mention of the user to apply a new nickname to";

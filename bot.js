@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.4.0";
+    amVersion = "2.5.0";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -49,12 +49,6 @@ global.settings = null;
 var listening = true;
 
 var nickTimeouts = {};
-
-//Variables for the deal command
-var actionMember = {};
-var actioningMember = {};
-var actionStage = {};
-var actionToPerform = {};
 
 var lockBox = [];
 
@@ -112,17 +106,17 @@ global.logType = {
     good: 4
 }
 
-var capture = null;
+var capture = {};
 global.captureInput = function(func, guild, author) {
-    capture = {
+    capture[guild] = {
         function: func,
         guild: guild,
         author: author
     };
 }
 
-global.releaseInput = function() {
-    capture = null;
+global.releaseInput = function(guild) {
+    capture[guild] = null;
 }
 
 //Set up screen
@@ -1212,7 +1206,7 @@ global.getUserString = function(user) {
     return u.tag;
 }
 
-global.parseUser = function(query) {
+global.parseUser = function(query, guild = null) {
     if (query.startsWith("<@!") && query.endsWith(">")) {
         query = query.substr(3);
         query = query.slice(0, -1);
@@ -1227,8 +1221,29 @@ global.parseUser = function(query) {
             searchResults.unshift(user);
         } else if (user.username.toLowerCase().indexOf(query.toLowerCase()) != -1) {
             searchResults.push(user);
+        } else if ((user.username.toLowerCase() + "#" + user.discriminator).indexOf(query.toLowerCase()) != -1) {
+            searchResults.push(user);
         } else if (user.id == query) {
             searchResults.unshift(user);
+        }
+    }
+
+    if (guild != null) {
+        var guildSpecificResults = [];
+        for (let [snowflake, member] of guild.members) {
+            if (member.nickname != null) {
+                if (member.nickname.toLowerCase() == query.toLowerCase()) {
+                    guildSpecificResults.unshift(member.user);
+                } else if (member.nickname.toLowerCase().indexOf(query.toLowerCase()) != -1) {
+                    searchResults.push(member.user);
+                }
+            }
+        }
+        
+        var pop = guildSpecificResults.pop();
+        while (pop != undefined) {
+            searchResults.unshift(pop);
+            pop = guildSpecificResults.pop();
         }
     }
 
@@ -1464,90 +1479,6 @@ function processModCommand(message) {
                 }
             }
             return true;
-        } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
-            if (actioningMember[message.guild.id] != null) {
-                message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember[message.guild.id]) + " is already managing another user.");
-            } else {
-                if (command.startsWith("deal")) {
-                    command = command.substr(5);
-                } else if (command.startsWith("manage")) {
-                    command = command.substr(7);
-                }
-                var memberID = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-
-                var users = parseUser(memberID);
-                if (users.length > 0) {
-                    var user = null;
-
-                    //Filter out members
-                    for (var i = 0; i < users.length; i++) {
-                        if (message.guild.members.has(users[i].id)) {
-                            user = users[i].id;
-                            i = users.length;
-                        }
-                    }
-
-                    if (user == null) {
-                        throw new CommandError("No user found with that name on this server");
-                    } else {
-                        var member = message.guild.member(user);
-                        if (member == null) {
-                            throw new CommandError("An internal error was encountered.");
-                        } else {
-                            if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                                throw new CommandError("You're not allowed to manage this user.");
-                            } else {
-                                var canDoActions = false;
-                                var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
-                                if (member.kickable) {
-                                    msg += '`(k)ick` ';
-                                    canDoActions = true;
-                                }
-                                
-                                if (member.bannable) {
-                                    msg += '`(b)an` ';
-                                    canDoActions = true;
-                                }
-
-                                if (!member.highestRole.comparePositionTo(message.guild.me.highestRole) >= 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
-                                    msg += '`(n)ick` ';
-                                    canDoActions = true;
-                                }
-                                
-                                if (message.guild.id == 287937616685301762 || message.guild.id == consts.aphc.id) {
-                                    msg += "`(i)nterrogate` ";
-                                    canDoActions = true;
-                                }
-                                
-                                if (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040) {
-                                    msg += "`(j)ail` ";
-                                    canDoActions = true;
-                                }
-                                
-                                if (message.guild.id == consts.aphc.id) {
-                                    msg += "`(m)ute` ";
-                                    canDoActions = true;
-                                }
-                                
-                                if (canDoActions) {
-                                    actionMember[message.guild.id] = member;
-                                    actioningMember[message.guild.id] = message.author;
-                                    actionStage[message.guild.id] = 0;
-                                    message.channel.send(msg);
-                                } else {
-                                    throw new CommandError("No actions can be perfomed on this user.");
-                                }
-                            }
-                        }
-                    }
-                } else {
-                        throw new CommandError("No user found with that name");
-                }
-            }
-            message.delete().catch(function() {
-                logPromiseRejection(message, "messageDelete");
-            });
-            return true;
         }
     }
     return false;
@@ -1621,7 +1552,7 @@ function processAmCommand(message) {
             embed.setAuthor("AstralMod Help Contents");
             embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
 
-            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\n**deal**\nping\nnick\nfetchuser\nversion\nhelp", true);
+            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\nping\nnick\nfetchuser\nversion\nhelp", true);
 
             for (key in plugins) {
                 var plugin = plugins[key];
@@ -1693,13 +1624,6 @@ function processAmCommand(message) {
                 case "declnick":
                     help.title = prefix + "declnick";
                     help.helpText = "Declines a nickname";
-                    break;
-                case "deal":
-                    help.title = prefix + "deal";
-                    help.usageText = prefix + "deal user";
-                    help.helpText = "Manages a user";
-                    help.param1 = "- The User ID of the user to manage\n" +
-                                  "- Mention of the user to manage";
                     break;
                 case "ping":
                     help.title = prefix + "ping";
@@ -2193,7 +2117,7 @@ function processSingleConfigure(message, guild) {
                     break;
                 case "<": //Reset AstralMod
                     message.author.send("**Reset AstralMod**\n" +
-                                        "Resetting AstralMod for this server. This will clear all settings for this server and you'll need to set up AstralMod again to use it.\n" +
+                                        "Resetting AstralMod for this server. This will clear all settings **and warnings** for this server and you'll need to set up AstralMod again to use it.\n" +
                                         "To reset AstralMod, respond with `Reset AstralMod`.");
                     guildSetting.configuringStage = -10;
                     break;
@@ -2418,125 +2342,6 @@ function processSingleConfigure(message, guild) {
     settings.guilds[guild.id] = guildSetting;
 }
 
-function processDeal(message) {
-    //Handle the deal command
-    var msg = message.content;
-    var member = actionMember[message.guild.id];
-    if (actionStage[message.guild.id] == 0) { //Select Action
-        if (msg.toLowerCase() == "cancel") { //Cancel Action
-            message.channel.send(':gear: Cancelled. Exiting action menu.');
-            member = null;
-            actioningMember[message.guild.id] = null;
-        } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == consts.aphc.id || message.guild.id == 287937616685301762 || message.guild.id == 305039436490735627)) {
-            if (message.guild.id == consts.aphc.id) {
-                member.addRole(member.guild.roles.get(consts.aphc.interrogationRole));
-            } else if (message.guild.id == 287937616685301762) {
-                member.addRole(member.guild.roles.get("319847521440497666"));
-            } else if (message.guild.id == 305039436490735627) {
-                member.addRole(member.guild.roles.get("326250571692769281"));
-            }
-            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
-            message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
-            member = null;
-            actioningMember[message.guild.id] = null;
-        } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040 || message.guild.id == 305039436490735627)) {
-            if (message.guild.id == consts.aphc.id) {
-                member.addRole(member.guild.roles.get(consts.aphc.jailRole));
-            } else if (message.guild.id == 305039436490735627) {
-                member.addRole(member.guild.roles.get("310196007919157250"));
-            } else {
-                member.addRole(member.guild.roles.get("267731524734943233"));
-            }
-            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
-            message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
-            member = null;
-            actioningMember[message.guild.id] = null;
-        } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && (message.guild.id == consts.aphc.id || message.guild.id == 305039436490735627)) {
-            var roleId;
-            if (message.guild.id == consts.aphc.id) {
-                roleId = consts.aphc.jailRole;
-            } else if (message.guild.id == 305039436490735627) {
-                roleId = "309883481024888842";
-            }
-            
-            if (member.roles.get(roleId)) {
-                member.removeRole(member.roles.get(roleId));
-                message.channel.send(':gear: ' + getUserString(member) + " has been removed from time out.");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            } else {
-                member.addRole(member.guild.roles.get(roleId));
-                message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            }
-        } else if (msg.toLowerCase() == "kick" || msg.toLowerCase() == "k") {
-            actionStage[message.guild.id] = 1;
-            message.channel.send(":gear: Enter reason for kicking " + getUserString(member) + " or `cancel`.");
-            actionToPerform[message.guild.id] = "kick";
-        } else if (msg.toLowerCase() == "ban" || msg.toLowerCase() == "b") {
-            actionStage[message.guild.id] = 1;
-            message.channel.send(":gear: Enter reason for banning " + getUserString(member) + " or `cancel`.");
-            actionToPerform[message.guild.id] = "ban";
-        } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname" || msg.toLowerCase() == "n") {
-            actionStage[message.guild.id] = 1;
-            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
-            actionToPerform[message.guild.id] = "nick";
-        } else {
-            message.channel.send(':gear: Unknown command. Exiting action menu.');
-            member = null;
-            actioningMember[message.guild.id] = null;
-        }
-        message.delete().catch(function() {
-                logPromiseRejection(message, "messageDelete");
-        });
-    } else if (actionStage[message.guild.id] == 1) {
-        if (msg.toLowerCase() == "cancel") {
-            message.channel.send(':gear: Cancelled. Exiting action menu.');
-            member = null;
-            actioningMember[message.guild.id] = null;
-        } else if (actionToPerform[message.guild.id] == "kick") {
-            member.kick(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has been kicked from the server.");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't be kicked from the server. Exiting action menu");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            });
-        } else if (actionToPerform[message.guild.id] == "ban") {
-            member.ban(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            });
-        } else if (actionToPerform[message.guild.id] == "nick") {
-            if (msg.toLowerCase() == "clear") {
-                msg = "";
-            }
-            
-            member.setNickname(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't have his nickname changed. Exiting action menu");
-                member = null;
-                actioningMember[message.guild.id] = null;
-            });
-        }
-        message.delete().catch(function() {
-            logPromiseRejection(message, "messageDelete");
-        });
-    }
-    actionMember[message.guild.id] = member;
-}
-
 function processMessage(message) {
     try {
         //Ignore self
@@ -2546,15 +2351,8 @@ function processMessage(message) {
 
         //Determine if this is in a guild
         if (message.guild != null) {
-            //Determine if we are in a workflow
-            if (actioningMember[message.guild.id] == message.author) {
-                //We are currently in the deal workflow
-                processDeal(message);
-                return;
-            }
-
-            if (capture != null && capture.guild == message.guild.id && capture.author == message.author.id) {
-                capture.function(message);
+            if (capture[message.guild.id] != null && capture[message.guild.id].author == message.author.id) {
+                capture[message.guild.id].function(message);
             } else if (text.toLowerCase().startsWith(prefix)) {
                 //Determine if this is a command
                 if (isMod(message.member) || text == prefix + "config") { //This is a mod command
@@ -2674,6 +2472,25 @@ function saveSettings(showOkMessage = false) {
     });
 }
 
+function parseCleanContent(content) {
+    let inCode = false;
+    for (let i = 0; i < content.length; i++) {
+        let char = content[i];
+        if (char == "`") {
+            if (content[i + 1] == "`" && content[i + 2] == "`") {
+                if (inCode) {
+                    content = content.substr(0, i) + "]" + content.substr(i + 3, content.length - 2);
+                } else {
+                    content = content.substr(0, i) + "[" + content.substr(i + 3, content.length - 2);
+                }
+                inCode = !inCode;
+            }
+        }
+    }
+    //content.replace("```", "[");
+    return content;
+}
+
 function messageDeleted(message) {
     var channel = null;
     if (message.guild != null) {
@@ -2691,7 +2508,7 @@ function messageDeleted(message) {
         
         if (message.cleanContent.length) {
             msg += "\n```\n" +
-                message.cleanContent + "\n" +
+                parseCleanContent(message.cleanContent) + "\n" +
                 "```";
         }
         
