@@ -577,7 +577,7 @@ module.exports = {
             case "settz":
                 help.title = prefix + "settz";
                 help.usageText = prefix + "settz timezone";
-                help.helpText = "Sets your timezone to timezonez";
+                help.helpText = "Sets your timezone to timezone";
                 help.param1 = "- A UTC Offset detailing your timezone\n"
                               "- A timezone code known to AstralMod representing your timezone\n";
                 help.remarks = "By using this command, your timezone will be available to anyone who asks AstralMod.";
