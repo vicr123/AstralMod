@@ -94,7 +94,7 @@ function processCommand(message, isMod, command) {
                     throw new CommandError("No user found with that name");
                 }
             } else {
-                throw new CommandError(getUserString(currentWarnings[message.guild.id].warner) + " is currently warning. Please wait for them to finish first.");
+                throw new CommandError(getUserString(currentWarnings[message.guild.id].warner) + " is currently warning someone else. Please wait for them to finish first.");
             }
         } else if (command.startsWith("lswarn ")) {
             var user = command.substr(7);
@@ -232,7 +232,7 @@ function processCommand(message, isMod, command) {
         var embed = new Discord.RichEmbed();
         embed.setColor("#3C3C96");
         embed.setTitle("Warnings");
-        embed.setDescription("Warnings that have been recorded by moderators of this server")
+        embed.setDescription("Warnings that have been recorded by moderators on this server")
         for (index in userWarnings) {
             var warning = userWarnings[index];
 
@@ -282,20 +282,20 @@ module.exports = {
             case "warn":
                 help.title = prefix + "warn";
                 help.usageText = prefix + "warn [user]";
-                help.helpText = "Warns a user";
+                help.helpText = "Warns a user.";
                 help.param1 = "The user to warn";
                 break;
             case "lswarn":
                 help.title = prefix + "lswarn";
                 help.usageText = prefix + "lswarn [user]";
-                help.helpText = "Lists warnings for a user.";
+                help.helpText = "Lists all warnings for a user.";
                 break;
             case "rmwarn":
                 help.title = prefix + "rmwarn";
                 help.usageText = prefix + "rmwarn [#id] [user]";
                 help.helpText = "Removes a warning from a user.";
                 help.param1 = "The ID of the warning you want to remove";
-                help.param2 = "The User that you want to remove the warning from";
+                help.param2 = "The user that you want to remove the warning from";
                 break;
         }
 
