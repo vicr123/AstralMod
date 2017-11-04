@@ -212,7 +212,7 @@ module.exports = {
             case "spamctl":
                 help.title = "mod:spamctl";
                 help.usageText = "mod:spamctl on|off";
-                help.helpText = "Switches spam control on this server";
+                help.helpText = "Toggles spam control on or off for this server";
                 help.param1 = "Either `on` or `off`.";
                 break;
             case "spamdata":
