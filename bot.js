@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.5.0";
+    amVersion = "2.6.0";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -1235,7 +1235,7 @@ global.parseUser = function(query, guild = null) {
                 if (member.nickname.toLowerCase() == query.toLowerCase()) {
                     guildSpecificResults.unshift(member.user);
                 } else if (member.nickname.toLowerCase().indexOf(query.toLowerCase()) != -1) {
-                    searchResults.push(member.user);
+                    guildSpecificResults.push(member.user);
                 }
             }
         }
@@ -2346,6 +2346,9 @@ function processMessage(message) {
     try {
         //Ignore self
         if (message.author.id == client.user.id) return;
+
+        //Ignore bots
+        if (message.author.bot) return;
 
         var text = message.content;
 

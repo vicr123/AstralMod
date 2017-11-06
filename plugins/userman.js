@@ -241,6 +241,34 @@ function processCommand(message, isMod, command) {
         message.reply("Usage: `" + prefix + "find user`. For more information, `" + prefix + "help find`");
     } else if (command.startsWith("find ")) {
         var query = command.substr(5);
+
+        if (query == "my phone") {
+            message.channel.send(getRandom("In your pocket",
+                                           "On your table",
+                                           "Run over by a car",
+                                           "Accidentally fell off the table"));
+            return;
+        } else if (query == "my iphone") {
+            message.channel.send("https://icloud.com/#find");
+        } else if (query == "my android" || query == "my android phone") {
+            message.channel.send("https://www.google.com/android/find");
+            return;
+        } else if (query == "my keys") {
+            message.channel.send(getRandom("On a keyring",
+                                           "In the keyhole on the door"));
+            return;
+        } else if (query == "victor something to do" || query == "me something to do" || query == "a cure for boredom") {
+            message.channel.send(getRandom("Boating :sailboat:",
+                                           "Skiing :skier:",
+                                           "\"Codding\" :computer:",
+                                           "Walking :walking:",
+                                           "Singing :microphone:",
+                                           "Eating Sushi :sushi:",
+                                           "Insulting Tatsumaki :snake:",
+                                           "Plucking flowers :sunflower:"));
+            return;
+        }
+
         var searchResults = parseUser(query, message.guild);
 
         if (searchResults.length == 0) {
@@ -273,7 +301,7 @@ function processCommand(message, isMod, command) {
             }
             var memberID = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
 
-            var users = parseUser(memberID);
+            var users = parseUser(memberID, message.guild);
             if (users.length > 0) {
                 var user = null;
 

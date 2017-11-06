@@ -37,13 +37,23 @@ function processCommand(message, isMod, command) {
             uptimeMinutes = uptimeMinutes - 60;
         }
 
-        if (uptimeMinutes < 10) {
-            timeString = hours + ":0" + uptimeMinutes // We need to add an additional 0 to the minutes
-        } else {
-            timeString = hours + ":" + uptimeMinutes // We don't need to add an extra 0.
+        let days = 0;
+        while (hours >= 24) {
+            days++;
+            hours = hours - 24;
         }
 
-        message.reply(":clock1: AstralMod has been up for " + timeString + " hours.");
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+
+        if (uptimeMinutes < 10) {
+            timeString = days + ":" + hours + ":0" + uptimeMinutes // We need to add an additional 0 to the minutes
+        } else {
+            timeString = days + ":" + hours + ":" + uptimeMinutes // We don't need to add an extra 0.
+        }
+
+        message.reply(":clock1: AstralMod has been up for " + timeString + " days.");
     } else if (command == "pingtime") {
         pingDate = Date.now();
         message.channel.send("Ping!").then(function(message) {
