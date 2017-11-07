@@ -94,7 +94,7 @@ function processDeal(message) {
             actionToPerform[message.guild.id] = "ban";
         } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname" || msg.toLowerCase() == "n") {
             actionStage[message.guild.id] = 1;
-            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
+            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively, type `clear` or `cancel`.");
             actionToPerform[message.guild.id] = "nick";
         } else {
             message.channel.send(':gear: Unknown command. Exiting action menu.');
@@ -130,7 +130,7 @@ function processDeal(message) {
                 actioningMember[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu.");
                 member = null;
                 actioningMember[message.guild.id] = null;
                 releaseInput(message.guild.id);
@@ -141,12 +141,12 @@ function processDeal(message) {
             }
             
             member.setNickname(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
+                message.channel.send(':gear: ' + getUserString(member) + " has changed their nickname.");
                 member = null;
                 actioningMember[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't have his nickname changed. Exiting action menu");
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't have their nickname changed. Exiting action menu.");
                 member = null;
                 actioningMember[message.guild.id] = null;
                 releaseInput(message.guild.id);
