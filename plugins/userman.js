@@ -119,6 +119,7 @@ function processDeal(message) {
             message.channel.send(":gear: Enter reason for banning " + getUserString(member) + " or `cancel`.");
             actions[message.guild.id].actionToPerform = "ban";
         } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname" || msg.toLowerCase() == "n") {
+<<<<<<< HEAD
             actions[message.guild.id].actionStage = 1;
             message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
             actions[message.guild.id].actionToPerform = "nick";
@@ -126,6 +127,11 @@ function processDeal(message) {
             actions[message.guild.id].actionStage = 1;
             message.channel.send(":gear: Enter time to ban " + getUserString(member) + " for, or `cancel`.");
             actions[message.guild.id].actionToPerform = "tempban";
+=======
+            actionStage[message.guild.id] = 1;
+            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively, type `clear` or `cancel`.");
+            actionToPerform[message.guild.id] = "nick";
+>>>>>>> 40686a9550d29edd6986f7a9618e0430dd023ab2
         } else {
             message.channel.send(':gear: Unknown command. Exiting action menu.');
             member = null;
@@ -160,7 +166,7 @@ function processDeal(message) {
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu.");
                 member = null;
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
@@ -182,12 +188,12 @@ function processDeal(message) {
             }
             
             member.setNickname(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
+                message.channel.send(':gear: ' + getUserString(member) + " has changed their nickname.");
                 member = null;
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't have his nickname changed. Exiting action menu");
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't have their nickname changed. Exiting action menu.");
                 member = null;
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
