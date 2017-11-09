@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.6.0";
+    amVersion = "2.7.0";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -770,6 +770,22 @@ var stdinInterface = readline.createInterface({
     output: process.stdout,
     terminal: false
 });
+
+global.parseTime = function(time) {
+    if (time.endsWith("m")) {
+        return parseInt(time.substr(0, time.length - 1)) * 60;
+    } else if (time.endsWith("h")) {
+        return parseInt(time.substr(0, time.length - 1)) * 60 * 60;
+    } else if (time.endsWith("d")) {
+        return parseInt(time.substr(0, time.length - 1)) * 60 * 60 * 24;
+    } else if (time.endsWith("w")) {
+        return parseInt(time.substr(0, time.length - 1)) * 60 * 60 * 24 * 7;
+    } else if (time.endsWith("s")) {
+        return parseInt(time.substr(0, time.length - 1));
+    } else {
+        return parseInt(time) * 60;
+    }
+}
 
 var commandHistory = [];
 

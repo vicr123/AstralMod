@@ -401,18 +401,7 @@ function processCommand(message, isMod, command) {
             reason = message.content.substr(indexOfFirstSplit + prefix.length).trim();
         }
 
-        var seconds;
-        if (time.endsWith("m")) {
-            seconds = parseInt(time.substr(0, time.length - 1)) * 60;
-        } else if (time.endsWith("h")) {
-            seconds = parseInt(time.substr(0, time.length - 1)) * 60 * 60;
-        } else if (time.endsWith("d")) {
-            seconds = parseInt(time.substr(0, time.length - 1)) * 60 * 60 * 24;
-        } else if (time.endsWith("s")) {
-            seconds = parseInt(time.substr(0, time.length - 1));
-        } else {
-            seconds = parseInt(time) * 60;
-        }
+        var seconds = parseTime(time);
 
         if (isNaN(seconds)) {
             throw new UserInputError("Invalid length of time.");

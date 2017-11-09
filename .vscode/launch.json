@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}/bot.js",
+            "program": "${workspaceFolder}/bot.js",
             "console": "integratedTerminal",
             "args": [
                 "--blueprint"
@@ -18,7 +18,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program with debug messages",
-            "program": "${workspaceRoot}/bot.js",
+            "program": "${workspaceFolder}/bot.js",
             "console": "integratedTerminal",
             "args": [
                 "--debug",

@@ -22,20 +22,46 @@ var client;
 var consts;
 
 //Variables for the deal command
-var actionMember = {};
+/*var actionMember = {};
 var actioningMember = {};
 var actionStage = {};
-var actionToPerform = {};
+var actionToPerform = {};*/
+var actions = {};
+
+function pollBans() {
+    var date = new Date().getTime();
+    for (key in settings.guilds) {
+        let guildSetting = settings.guilds[key];
+        if (guildSetting != null) {
+            if (guildSetting.tempbans != null) {
+                for (index in guildSetting.tempbans) {
+                    let tempban = guildSetting.tempbans[index];
+                    if (tempban.timeout < date) {
+                        //Unban user
+                        client.guilds.get(key).unban(tempban.user, "Temporary Ban lifted");
+
+                        //Notify server staff
+                        client.channels.get(guildSetting.botWarnings).send(":asterisk: <@" + tempban.user + ">'s temporary ban has been lifted.");
+
+                        settings.guilds[key].tempbans.splice(index, 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 function processDeal(message) {
     //Handle the deal command
+
     var msg = message.content;
-    var member = actionMember[message.guild.id];
-    if (actionStage[message.guild.id] == 0) { //Select Action
+    var member = actions[message.guild.id].actionMember;
+    if (actions[message.guild.id].actionStage == 0) { //Select Action
         if (msg.toLowerCase() == "cancel") { //Cancel Action
             message.channel.send(':gear: Cancelled. Exiting action menu.');
             member = null;
-            actioningMember[message.guild.id] = null;
+            actions[message.guild.id] = null;
             releaseInput(message.guild.id);
         } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == consts.aphc.id || message.guild.id == 287937616685301762 || message.guild.id == 305039436490735627)) {
             if (message.guild.id == consts.aphc.id) {
@@ -48,7 +74,7 @@ function processDeal(message) {
             member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
             member = null;
-            actioningMember[message.guild.id] = null;
+            actions[message.guild.id] = null;
             releaseInput(message.guild.id);
         } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040 || message.guild.id == 305039436490735627)) {
             if (message.guild.id == consts.aphc.id) {
@@ -61,7 +87,7 @@ function processDeal(message) {
             member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
             message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
             member = null;
-            actioningMember[message.guild.id] = null;
+            actions[message.guild.id] = null;
             releaseInput(message.guild.id);
         } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && (message.guild.id == consts.aphc.id || message.guild.id == 305039436490735627)) {
             var roleId;
@@ -75,67 +101,82 @@ function processDeal(message) {
                 member.removeRole(member.roles.get(roleId));
                 message.channel.send(':gear: ' + getUserString(member) + " has been removed from time out.");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             } else {
                 member.addRole(member.guild.roles.get(roleId));
                 message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }
         } else if (msg.toLowerCase() == "kick" || msg.toLowerCase() == "k") {
-            actionStage[message.guild.id] = 1;
+            actions[message.guild.id].actionStage = 1;
             message.channel.send(":gear: Enter reason for kicking " + getUserString(member) + " or `cancel`.");
-            actionToPerform[message.guild.id] = "kick";
+            actions[message.guild.id].actionToPerform = "kick";
         } else if (msg.toLowerCase() == "ban" || msg.toLowerCase() == "b") {
-            actionStage[message.guild.id] = 1;
+            actions[message.guild.id].actionStage = 1;
             message.channel.send(":gear: Enter reason for banning " + getUserString(member) + " or `cancel`.");
-            actionToPerform[message.guild.id] = "ban";
+            actions[message.guild.id].actionToPerform = "ban";
         } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname" || msg.toLowerCase() == "n") {
-            actionStage[message.guild.id] = 1;
+            actions[message.guild.id].actionStage = 1;
             message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
-            actionToPerform[message.guild.id] = "nick";
+            actions[message.guild.id].actionToPerform = "nick";
+        } else if (msg.toLowerCase() == "tempban" || msg.toLowerCase() == "t") {
+            actions[message.guild.id].actionStage = 1;
+            message.channel.send(":gear: Enter time to ban " + getUserString(member) + " for, or `cancel`.");
+            actions[message.guild.id].actionToPerform = "tempban";
         } else {
             message.channel.send(':gear: Unknown command. Exiting action menu.');
             member = null;
-            actioningMember[message.guild.id] = null;
+            actions[message.guild.id] = null;
             releaseInput(message.guild.id);
         }
         message.delete().catch(function() {
                 logPromiseRejection(message, "messageDelete");
         });
-    } else if (actionStage[message.guild.id] == 1) {
+    } else if (actions[message.guild.id].actionStage == 1) {
         if (msg.toLowerCase() == "cancel") {
             message.channel.send(':gear: Cancelled. Exiting action menu.');
             member = null;
-            actioningMember[message.guild.id] = null;
+            actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if (actionToPerform[message.guild.id] == "kick") {
+        } else if (actions[message.guild.id].actionToPerform == "kick") {
             member.kick(msg).then(function(member) {
                 message.channel.send(':gear: ' + getUserString(member) + " has been kicked from the server.");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
                 message.channel.send(':gear: ' + getUserString(member) + " couldn't be kicked from the server. Exiting action menu");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             });
-        } else if (actionToPerform[message.guild.id] == "ban") {
+        } else if (actions[message.guild.id].actionToPerform == "ban") {
             member.ban(msg).then(function(member) {
                 message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
                 message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             });
-        } else if (actionToPerform[message.guild.id] == "nick") {
+        } else if (actions[message.guild.id].actionToPerform == "tempban") {
+            let timeToParse = msg.toLowerCase();
+            let time = parseTime(timeToParse);
+            if (isNaN(time)) {
+                message.channel.send(":gear: You'll need to supply a time for this user to be banned for. For example, `5d` for five days, or `30m` for 30 minutes. Alternatively, type `cancel` to cancel the temporary ban.");                
+            } else {
+                let endDate = new Date().getTime() + time * 1000;
+                actions[message.guild.id].time = endDate;
+                actions[message.guild.id].actionStage = 2;
+                message.channel.send(":gear: Enter reason for temporarily banning " + getUserString(member) + " for " + parseInt(time) + " seconds until " + new Date(endDate).toUTCString() + ", or `cancel`.");
+            }
+        } else if (actions[message.guild.id].actionToPerform == "nick") {
             if (msg.toLowerCase() == "clear") {
                 msg = "";
             }
@@ -143,20 +184,53 @@ function processDeal(message) {
             member.setNickname(msg).then(function(member) {
                 message.channel.send(':gear: ' + getUserString(member) + " has changed his nickname.");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
                 message.channel.send(':gear: ' + getUserString(member) + " couldn't have his nickname changed. Exiting action menu");
                 member = null;
-                actioningMember[message.guild.id] = null;
+                actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             });
         }
         message.delete().catch(function() {
             logPromiseRejection(message, "messageDelete");
         });
+    } else if (actions[message.guild.id].actionStage == 2) {
+        if (msg.toLowerCase() == "cancel") {
+            message.channel.send(':gear: Cancelled. Exiting action menu.');
+            member = null;
+            actions[message.guild.id] = null;
+            releaseInput(message.guild.id);
+        } else if (actions[message.guild.id].actionToPerform == "tempban") {
+            member.ban(msg).then(function(member) {
+                let banObject = {
+                    timeout: actions[message.guild.id].time,
+                    user: member.user.id
+                };
+
+                if (settings.guilds[message.guild.id].tempbans == null) {
+                    settings.guilds[message.guild.id].tempbans = [];
+                }
+    
+                settings.guilds[message.guild.id].tempbans.push(banObject);
+
+                message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server. This ban will be lifted at " + new Date(actions[message.guild.id].time).toUTCString() + ".");
+                member = null;
+                actions[message.guild.id] = null;
+                releaseInput(message.guild.id);
+            }).catch(function() {
+                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
+                member = null;
+                actions[message.guild.id] = null;
+                releaseInput(message.guild.id);
+            });
+        }
     }
-    actionMember[message.guild.id] = member;
+
+    if (actions[message.guild.id] != null) {
+        actions[message.guild.id].actionMember = member;
+    }
 }
 
 function processCommand(message, isMod, command) {
@@ -291,8 +365,8 @@ function processCommand(message, isMod, command) {
         }
         return true;
     } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
-        if (actioningMember[message.guild.id] != null) {
-            message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actioningMember[message.guild.id]) + " is already managing another user.");
+        if (actions[message.guild.id] != null) {
+            message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actions[message.guild.id].actioningMember) + " is already managing another user.");
         } else {
             if (command.startsWith("deal")) {
                 command = command.substr(5);
@@ -331,7 +405,7 @@ function processCommand(message, isMod, command) {
                             }
                             
                             if (member.bannable) {
-                                msg += '`(b)an` ';
+                                msg += '`(b)an` `(t)empban` ';
                                 canDoActions = true;
                             }
 
@@ -356,9 +430,10 @@ function processCommand(message, isMod, command) {
                             }
                             
                             if (canDoActions) {
-                                actionMember[message.guild.id] = member;
-                                actioningMember[message.guild.id] = message.author;
-                                actionStage[message.guild.id] = 0;
+                                actions[message.guild.id] = {};
+                                actions[message.guild.id].actionMember = member;
+                                actions[message.guild.id].actioningMember = message.author;
+                                actions[message.guild.id].actionStage = 0;
                                 message.channel.send(msg);
                                 captureInput(processDeal, message.guild.id, message.author.id);
                             } else {
@@ -378,6 +453,7 @@ function processCommand(message, isMod, command) {
     }
 }
 
+var pollBan;
 module.exports = {
     name: "Users",
     constructor: function(discordClient, commandEmitter, constants) {
@@ -385,9 +461,13 @@ module.exports = {
         consts = constants;
 
         commandEmitter.on('processCommand', processCommand);
+        
+        pollBan = setInterval(pollBans, 1000)
     },
     destructor: function(commandEmitter) {
         commandEmitter.removeListener('processCommand', processCommand);
+
+        clearInterval(pollBans);
     },
     availableCommands: {
         general: {
