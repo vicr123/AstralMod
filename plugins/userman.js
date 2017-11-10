@@ -119,7 +119,6 @@ function processDeal(message) {
             message.channel.send(":gear: Enter reason for banning " + getUserString(member) + " or `cancel`.");
             actions[message.guild.id].actionToPerform = "ban";
         } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname" || msg.toLowerCase() == "n") {
-<<<<<<< HEAD
             actions[message.guild.id].actionStage = 1;
             message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
             actions[message.guild.id].actionToPerform = "nick";
@@ -127,11 +126,6 @@ function processDeal(message) {
             actions[message.guild.id].actionStage = 1;
             message.channel.send(":gear: Enter time to ban " + getUserString(member) + " for, or `cancel`.");
             actions[message.guild.id].actionToPerform = "tempban";
-=======
-            actionStage[message.guild.id] = 1;
-            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively, type `clear` or `cancel`.");
-            actionToPerform[message.guild.id] = "nick";
->>>>>>> 40686a9550d29edd6986f7a9618e0430dd023ab2
         } else {
             message.channel.send(':gear: Unknown command. Exiting action menu.');
             member = null;
@@ -148,29 +142,41 @@ function processDeal(message) {
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
         } else if (actions[message.guild.id].actionToPerform == "kick") {
-            member.kick(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has been kicked from the server.");
-                member = null;
-                actions[message.guild.id] = null;
-                releaseInput(message.guild.id);
-            }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't be kicked from the server. Exiting action menu");
-                member = null;
-                actions[message.guild.id] = null;
-                releaseInput(message.guild.id);
-            });
+            let kickFunction = function() {
+                member.kick(msg).then(function(member) {
+                    message.channel.send(':gear: ' + getUserString(member) + " has been kicked from the server.");
+                    member = null;
+                    actions[message.guild.id] = null;
+                    releaseInput(message.guild.id);
+                }).catch(function() {
+                    message.channel.send(':gear: ' + getUserString(member) + " couldn't be kicked from the server. Exiting action menu");
+                    member = null;
+                    actions[message.guild.id] = null;
+                    releaseInput(message.guild.id);
+                });
+            }
+
+            member.send(":arrow_backward: You have been kicked from **" + message.guild.name + "** for the following reason:```\n" + msg + "```" + 
+                getRandom("Come back once you've grown up.",
+                          "You may re-enter, but it may be a good idea to step back for a bit.") + " :slight_smile:")
+                .then(kickFunction).catch(kickFunction);
         } else if (actions[message.guild.id].actionToPerform == "ban") {
-            member.ban(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
-                member = null;
-                actions[message.guild.id] = null;
-                releaseInput(message.guild.id);
-            }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu.");
-                member = null;
-                actions[message.guild.id] = null;
-                releaseInput(message.guild.id);
-            });
+            let banFunction = function() {
+                member.ban(msg).then(function(member) {
+                    message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
+                    member = null;
+                    actions[message.guild.id] = null;
+                    releaseInput(message.guild.id);
+                }).catch(function() {
+                    message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu.");
+                    member = null;
+                    actions[message.guild.id] = null;
+                    releaseInput(message.guild.id);
+                });
+            }
+
+            member.send(":rewind: You have been banned from **" + message.guild.name + "** for the following reason:```\n" + msg + "```Have a good day, and we hope never to see you again. :slight_smile:")
+                .then(banFunction).catch(banFunction);
         } else if (actions[message.guild.id].actionToPerform == "tempban") {
             let timeToParse = msg.toLowerCase();
             let time = parseTime(timeToParse);
@@ -209,28 +215,33 @@ function processDeal(message) {
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
         } else if (actions[message.guild.id].actionToPerform == "tempban") {
-            member.ban(msg).then(function(member) {
-                let banObject = {
-                    timeout: actions[message.guild.id].time,
-                    user: member.user.id
-                };
+            //Send a message to member
+            let banFunction = function() {
+                member.ban(msg).then(function(member) {
+                    let banObject = {
+                        timeout: actions[message.guild.id].time,
+                        user: member.user.id
+                    };
 
-                if (settings.guilds[message.guild.id].tempbans == null) {
-                    settings.guilds[message.guild.id].tempbans = [];
-                }
-    
-                settings.guilds[message.guild.id].tempbans.push(banObject);
+                    if (settings.guilds[message.guild.id].tempbans == null) {
+                        settings.guilds[message.guild.id].tempbans = [];
+                    }
+        
+                    settings.guilds[message.guild.id].tempbans.push(banObject);
 
-                message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server. This ban will be lifted at " + new Date(actions[message.guild.id].time).toUTCString() + ".");
-                member = null;
-                actions[message.guild.id] = null;
-                releaseInput(message.guild.id);
-            }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
-                member = null;
-                actions[message.guild.id] = null;
-                releaseInput(message.guild.id);
-            });
+                    message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server. This ban will be lifted at " + new Date(actions[message.guild.id].time).toUTCString() + ".");
+                    member = null;
+                    actions[message.guild.id] = null;
+                    releaseInput(message.guild.id);
+                }).catch(function() {
+                    message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
+                    member = null;
+                    actions[message.guild.id] = null;
+                    releaseInput(message.guild.id);
+                });
+            }
+            member.send(":rewind: You have been temporarily banned from **" + message.guild.name + "** for the following reason:```\n" + msg + "```Your ban will be lifted on " + new Date(actions[message.guild.id].time).toUTCString() + ". Have a good day. :slight_smile:")
+                .then(banFunction).catch(banFunction);
         }
     }
 
