@@ -1276,7 +1276,6 @@ function setGame() {
     };
 
     presence.game.name = getRandom("with ban buttons",
-                                   "Fighting JXBot",
                                    "Annoying Victor",
                                    prefix + "help",
                                    "v." + amVersion,
