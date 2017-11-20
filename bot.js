@@ -2691,7 +2691,7 @@ function userUpdate(oldUser, newUser) {
                     if (member.user.id == newUser.id) {
                         var channel = client.channels.get(bwChannel); //282513354118004747
                         if (channel != null) {
-                            channel.send(":ab: `" + getUserString(oldUser).replace("`", "") + "` :arrow_right: `" + newUser.username.toString().replace("`", "") + "`");
+                            channel.send(":ab: " + getUserString(oldUser).replace("@", "@​") + " :arrow_right: " + newUser.username.toString().replace("@", "@​"));
                         }
                     }
                 }
@@ -2834,9 +2834,9 @@ function guildMemberUpdate(oldUser, newUser) {
                 channel = oldUser.guild.channels.get(guildSetting.botWarnings);
                 if (channel != null) {
                     if (newUser.nickname == null) {
-                        channel.send(":abcd: `" + getUserString(oldUser).replace("`", "") + "` :arrow_right: [cleared]" + "`");
+                        channel.send(":abcd: " + getUserString(oldUser).replace("@", "@​") + " :arrow_right: [cleared]");
                     } else {
-                        channel.send(":abcd: `" + getUserString(oldUser).replace("`", "") + "` :arrow_right: `" + newUser.nickname.toString().replace("`", "") + "`");
+                        channel.send(":abcd: " + getUserString(oldUser).replace("@", "@​") + " :arrow_right: " + newUser.nickname.toString().replace("@", "@​"));
                     }
                 }
             }
