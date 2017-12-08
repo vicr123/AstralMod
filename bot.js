@@ -37,9 +37,48 @@ const moment = require('moment');
 const http = require('http');
 const crypto = require('crypto');
 const client = new Discord.Client();
+const localize = require('localize');
+
+//Load translations
+let translator;
+{
+    let translations = {};
+    let dates = {};
+    let locales = fs.readdirSync("./translations");
+    for (let key in locales) {
+        let locale = locales[key];
+        if (fs.existsSync("./translations/" + locale + "/translations.json")) {
+            let strings = JSON.parse(fs.readFileSync("./translations/" + locale + "/translations.json"));
+            for (let phrase in strings.translations) {
+                if (translations[phrase] == null) translations[phrase] = {};
+                translations[phrase][locale] = strings.translations[phrase];
+            }
+        }
+
+
+        if (fs.existsSync("./translations/" + locale + "/dates.json")) {
+            let d = JSON.parse(fs.readFileSync("./translations/" + locale + "/dates.json"));
+            dates[locale] = d;
+        }
+    }
+    translator = new localize(translations);
+    translator.loadDateFormats(dates);
+    translator.throwOnMissingTranslation(false);
+}
+
+global.tr = function() {
+    let translation;
+    translation = translator.translate.apply(this, arguments);
+    if (translation == "") {
+        return arguments[0];
+    }
+    return translation;
+}
 
 const keys = require('./keys.js');
 const cipherAlg = "aes-256-ctr";
+const sha256 = crypto.createHash("sha256");
+const settingsKey = keys.settingsKey.slice(0, 32);
 
 const commandEmitter = new events.EventEmitter();
 var plugins = {};
@@ -48,7 +87,7 @@ var plugins = {};
 global.settings = null;
 var listening = true;
 
-var nickTimeouts = {};
+var nickChanges = {};
 
 var lockBox = [];
 
@@ -1195,10 +1234,13 @@ function shutdown() {
             var contents = JSON.stringify(settings, null, 4);
 
             //Encrypt the contents
-            var cipher = crypto.createCipher(cipherAlg, keys.settingsKey);
+            let iv = new Buffer(crypto.randomBytes(16)).toString("hex").slice(0, 16);
+
+            var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
             var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8"), cipher.final())]);
 
             fs.writeFileSync("settings.json", settingsJson, "utf8");
+            fs.writeFileSync("iv.txt", iv);
             log("Settings saved!", logType.good);
         } catch (exception) {
             log("Settings couldn't be saved. You may lose some settings.", logType.critical);
@@ -1328,71 +1370,71 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
     embed.setAuthor(member.displayName, user.displayAvatarURL);
     embed.setAuthor(getUserString(member), user.displayAvatarURL);
     embed.setColor("#00FF00");
-    embed.setFooter("User ID: " + user.id);
+    embed.setFooter(tr("User ID:") + " " + user.id);
 
     if (compact) {
-        var msg = "Discriminator: " + user.discriminator + "\n" + 
-                    "Created at: " + user.createdAt.toUTCString() + "\n";
+        var msg = tr("Discriminator:") + " " + user.discriminator + "\n" + 
+                    tr("Created at:") + " " + translator.localDate(user.createdAt, "ddd, dd MMM yyyy, hh:mm:ss", true) + "\n";
 
         if (member.noGuild != true) {
             if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
                 msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
             } else {
-                msg += "Joined at: " + member.joinedAt.toUTCString();
+                msg += tr("Joined at:") + " " + translator.localDate(user.joinedAt, "default", true);
             }
         }
         embed.setDescription(msg);
     } else {
         if (member.noGuild != true) {
-            embed.setDescription("User Information");
+            embed.setDescription(tr("User Information"));
         } else {
             embed.setDescription(member.noGuildMessage);
         }
 
         {
-            var msg = "**Created** " + user.createdAt.toUTCString() + "\n";
+            var msg = "**" + tr("Created") + "** " + translator.localDate(user.createdAt, "default", true) + "\n";
 
             if (member.noGuild != true) {
                 if (member.joinedAt.getTime() == 0) {
-                    msg += "**Joined** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                    msg += "**" + tr("Joined") + "** -∞... and beyond! Discord seems to be giving incorrect info... :(";
                 } else {
-                    msg += "**Joined** " + member.joinedAt.toUTCString();
+                    msg += "**" + tr("Joined") + "** " + translator.localDate(user.joinedAt, "default", true);
                 }
             }
 
-            embed.addField("Timestamps", msg);
+            embed.addField(tr("Timestamps"), msg);
         }
 
         var msg;
         if (member.noGuild) {
-            msg = "**Username** " + user.username + "\n";
+            msg = "**" + tr("Username") + "** " + user.username + "\n";
 
-            embed.addField("Names", msg);
+            embed.addField(tr("Names"), msg);
         } else {
-            msg = "**Current Display Name** " + member.displayName + "\n";
-            msg += "**Username** " + user.username + "\n";
+            msg = "**" + tr("Current Display Name") + "** " + member.displayName + "\n";
+            msg += "**" + tr("Username") + "** " + user.username + "\n";
             if (member.nickname != null) {
-                msg += "**Nickname** " + member.nickname;
+                msg += "**" + tr("Nickname") + "** " + member.nickname;
             } else {
-                msg += "**Nickname** No nickname";
+                msg += "**" + tr("Nickname") + "** " + tr("No nickname");
             }
 
-            embed.addField("Names", msg);
+            embed.addField(tr("Names"), msg);
         }
 
         {
             var msg = "";
 
             if (user.bot) {
-                msg += "- This user is a bot account.\n";
+                msg += "- " + tr("This user is a bot account.") + "\n";
             }
 
             if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
-                msg += "- This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod.";
+                msg += "- " + tr("This user has been banned from $[1] servers known to AstralMod.", + parseInt(banCounts[user.id]));
             }
 
             if (msg != "") {
-                embed.addField("Alerts", msg);
+                embed.addField(tr("Alerts"), msg);
             }
         }
     }
@@ -1482,15 +1524,21 @@ function processModCommand(message) {
                 message.reply(":arrow_left: Only the owner or vicr123 can use this command. Alternatively, if you have permissions to kick me, just do that.");
             }
             return true;
-        } else if (command.startsWith("declnick")) {
-            var userId = command.substr(9);
-            if (nickTimeouts[message.guild.id] != null) {
-                if (nickTimeouts[message.guild.id][userId] != null) {
-                    clearTimeout(nickTimeouts[message.guild.id][userId]);
-                    nickTimeouts[message.guild.id][userId] = null;
-                    message.channel.send(':white_check_mark: OK: User nickname change has been cancelled.');
+        } else if (command.startsWith("oknick")) {
+            var userId = command.substr(7);
+            if (nickChanges[message.guild.id] != null) {
+                if (nickChanges[message.guild.id][userId] != null) {
+                    client.fetchUser(userId).then(function(user) {
+                        return message.guild.fetchMember(user);
+                    }).then(function(member) {
+                        member.setNickname(nickChanges[message.guild.id][userId]);
+                        nickChanges[message.guild.id][userId] = null;
+                        message.channel.send(':white_check_mark: ' + tr('User nickname has been accepted.'));
+                    }).catch(function() {
+                        message.channel.send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
+                    });
                 } else {
-                    message.channel.send(':no_entry_sign: ERROR: That didn\'t work. Has 5 minutes passed?');
+                    message.channel.send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
                 }
             }
             return true;
@@ -1506,12 +1554,8 @@ function processAmCommand(message) {
     if (settings.guilds[message.guild.id].requiresConfig && text != prefix + "config") {
         message.reply("AstralMod setup isn't complete. You'll need to wait for " + message.guild.owner.displayName + " to type `" + prefix + "config` and set up AstralMod before you can use it.");
     } else {
-        var command;/*
-        if (text.startsWith("am:")) {
-            command = text.toLowerCase().substr(3);
-        } else {
-            command = text.toLowerCase().substr(4);
-        }*/
+        var command;
+        
         command = text.toLowerCase().substr(prefix.length);
 
         if (command == "ping") {
@@ -1528,28 +1572,28 @@ function processAmCommand(message) {
             if (settings.guilds[message.guild.id].nickModeration) {
                 var nickResult = setNicknameTentative(message.member, "", message.guild);
                 if (nickResult == "cooldown") {
-                    message.reply("There is a one day cooldown between use of this command.");
+                    message.reply(tr("There is a one day cooldown between use of this command."));
                 } else if (nickResult == "length") {
-                    message.reply("Nicknames need to be less than 32 characters.");
+                    message.reply(tr("Nicknames need to be less than 32 characters."));
                 } else {
-                    message.reply("Ok, give us a bit to make sure the mods are ok with that.");
+                    message.reply(tr("Ok, give us a bit to make sure the mods are ok with that."));
                 }
             } else {
-                message.reply("Nickname changes are not accepted on this server via AstralMod.");
+                message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
             }
             return true;
         } else if (command.startsWith("nick ")) {
             if (settings.guilds[message.guild.id].nickModeration) {
                 var nickResult = setNicknameTentative(message.member, text.substr(8), message.guild);
                 if (nickResult == "cooldown") {
-                    message.reply("There is a one day cooldown between use of this command.");
+                    message.reply(tr("There is a one day cooldown between use of this command."));
                 } else if (nickResult == "length") {
-                    message.reply("Nicknames need to be less than 32 characters.");
+                    message.reply(tr("Nicknames need to be less than 32 characters."));
                 } else {
-                    message.reply("Ok, give us a bit to make sure the mods are ok with that.");
+                    message.reply(tr("Ok, give us a bit to make sure the mods are ok with that."));
                 }
             } else {
-                message.reply("Nickname changes are not accepted on this server via AstralMod.");
+                message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
             }
             return true;
         } else if (command == "suggest") {
@@ -1561,13 +1605,23 @@ function processAmCommand(message) {
         } else if (command == "version") {
             message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot");
             return true;
+        } else if (command.startsWith("setlocale ")) {
+            let locale = command.substr(10);
+            if (!fs.existsSync("./translations/" + locale)) {
+                message.channel.send(tr("Unfortunately we don't have that locale in AstralMod."));
+            } else {
+                settings.users[message.author.id].locale = locale;
+                translator.setLocale(locale);
+                message.channel.send(tr("Alright, your locale is now English."));
+            }
+            return true;
         } else if (command == "help") { //General help
             var embed = new Discord.RichEmbed();
             embed.setColor("#3C3C96");
             embed.setAuthor("AstralMod Help Contents");
             embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
 
-            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**declnick**\nping\nnick\nfetchuser\nversion\nhelp", true);
+            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nsetlocale\nhelp", true);
 
             for (key in plugins) {
                 var plugin = plugins[key];
@@ -1614,9 +1668,9 @@ function processAmCommand(message) {
         } else if (command.startsWith("fetchuser ")) {
             var user = command.substr(10);
             client.fetchUser(user).then(function(dUser) {
-                message.channel.send("User " + dUser.tag + " fetched and cached.");
+                message.channel.send(tr("User $[1] fetched and cached.", dUser.tag));
             }).catch(function() {
-                message.channel.send("Couldn't fetch user.");
+                message.channel.send(tr("Couldn't fetch user."));
             });
             return true;
         } else if (command.startsWith("help ")) { //Contextual help
@@ -1636,9 +1690,9 @@ function processAmCommand(message) {
                     help.title = prefix + "shoo";
                     help.helpText = "Leave the server, purging all configuration";
                     break;
-                case "declnick":
-                    help.title = prefix + "declnick";
-                    help.helpText = "Declines a nickname";
+                case "oknick":
+                    help.title = prefix + "oknick";
+                    help.helpText = "Accepts a nickname";
                     break;
                 case "ping":
                     help.title = prefix + "ping";
@@ -1660,6 +1714,11 @@ function processAmCommand(message) {
                     help.helpText = "Tells AstralMod about the existance of a user";
                     help.param1 = "The user ID you want to tell AstralMod about.";
                     help.remarks = "AstralMod will search for users from all of Discord."
+                    break;
+                case "setlocale":
+                    help.title = prefix + "setlocale";
+                    help.usageText = prefix + "setlocale [locale]";
+                    help.helpText = "Sets the language AstralMod will use when processing your commands";
                     break;
                 case "help":
                     help.title = prefix + "help";
@@ -1788,19 +1847,16 @@ function setNicknameTentative(member, nickname, guild) {
     if (new Date().getTime() > pendingNicks.cooldowns[member.user.id]) {
         pendingNicks.cooldowns[member.user.id] = new Date().getTime() + 86400000;
 
-        if (nickTimeouts[guild.id] == null) {
-            nickTimeouts[guild.id] = {};
+        if (nickChanges[guild.id] == null) {
+            nickChanges[guild.id] = {};
         }
 
-        nickTimeouts[guild.id][member.user.id] = setTimeout(function() {
-            member.setNickname(nickname);
-            nickTimeouts[guild.id][member.user.id] = null;
-        }, 300000, null);
+        nickChanges[guild.id][member.user.id] = nickname;
 
         if (nickname == "") {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "declnick " + member.user.id + "`");
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "oknick " + member.user.id + "`");
         } else {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "declnick " + member.user.id + "`");
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "oknick " + member.user.id + "`");
         }
         settings.guilds[guild.id].pendingNicks = pendingNicks;
         return "ok";
@@ -2365,6 +2421,16 @@ function processMessage(message) {
         //Ignore bots
         if (message.author.bot) return;
 
+        //Get language
+        if (settings.users[message.author.id] == null) {
+            settings.users[message.author.id] = {};
+        }
+
+        if (settings.users[message.author.id].locale == null) {
+            settings.users[message.author.id].locale = "en";
+        }
+        translator.setLocale(settings.users[message.author.id].locale);
+
         var text = message.content;
 
         //Determine if this is in a guild
@@ -2445,7 +2511,9 @@ function newGuild(guild) {
     if (process.argv.indexOf("--nowelcome") == -1) {
         //if (guild.defaultChannel) {
         if (guild.channels.size > 0) {
-            guild.channels.array()[0].send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `" + prefix + "config`.");
+            if (guild.channels.array()[0].type == "text") {
+                guild.channels.array()[0].send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `" + prefix + "config`.");
+            }
         }
     }
 }
@@ -2462,8 +2530,13 @@ function saveSettings(showOkMessage = false) {
     var contents = JSON.stringify(settings, null, 4);
 
     //Encrypt the contents
-    var cipher = crypto.createCipher(cipherAlg, keys.settingsKey);
-    var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8")), cipher.final()]);
+    let iv = new Buffer(crypto.randomBytes(16));
+    
+    var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
+    var settingsJson = Buffer.concat([
+        cipher.update(Buffer.from(contents, "utf8")),
+        cipher.final()
+    ]);
 
     //Write to secondary file first
     fs.writeFile("settings.prewrite.json", settingsJson, "utf8", function(error) {
@@ -2471,21 +2544,27 @@ function saveSettings(showOkMessage = false) {
             log("Settings couldn't be saved", logType.critical);
             setTimeout(saveSettings, 30000);
         } else {
-            fs.writeFile("settings.json", settingsJson, "utf8", function(error) {
+            fs.writeFile("iv.txt", iv, "utf8", function(error) {
                 if (error) {
-                    log("Settings couldn't be saved, but the prewrite settings were saved successfully.", logType.critical);
+                    log("IV couldn't be saved. Aborting save of normal settings file.", logType.critical);                    
                 } else {
-                    fs.unlinkSync("settings.prewrite.json");
-
-                    if (showOkMessage) {
-                        log("Settings saved!", logType.good);
-                    } else {
-                        log("Settings saved!");
-                    }
+                    fs.writeFile("settings.json", settingsJson, "utf8", function(error) {
+                        if (error) {
+                            log("Settings couldn't be saved, but the prewrite settings were saved successfully.", logType.critical);
+                        } else {
+                            fs.unlinkSync("settings.prewrite.json");
+        
+                            if (showOkMessage) {
+                                log("Settings saved!", logType.good);
+                            } else {
+                                log("Settings saved!");
+                            }
+                        }
+        
+                        setTimeout(saveSettings, 30000);
+                    });
                 }
-
-                setTimeout(saveSettings, 30000);
-            });
+            })
         }
     });
 }
@@ -2874,6 +2953,43 @@ function countBans() {
     }
 }
 
+function loadSettingsFile(file) {
+    if (file.startsWith("{")) {
+        //File unencrypted
+        var intermediarySettings = JSON.parse(file);
+
+        log("settings.js file is unencrypted. Creating a backup copy...", logType.info);
+        fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-beforeEncrypt.json'));
+
+        log("settings.js file will be encrypted on next save.", logType.warning);
+
+        global.settings = intermediarySettings;
+    } else if (!fs.existsSync("iv.txt")) {
+        //File encrypted
+        log("Decrypting the settings.js file...", logType.info);
+
+        var buf = fs.readFileSync("settings.json");
+        var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
+        var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
+        settingsJson = settingsJson.toString("utf8");
+
+        global.settings = JSON.parse(settingsJson);
+        log("settings.js encryption will be upgraded on next save.", logType.warning);
+    } else {
+        //File encrypted with IV
+        log("Decrypting the settings.js file...", logType.info);
+
+        let iv = fs.readFileSync("iv.txt");
+
+        var buf = fs.readFileSync("settings.json");
+        var cipher = crypto.createDecipheriv(cipherAlg, settingsKey, iv);
+        var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
+        settingsJson = settingsJson.toString("utf8");
+
+        global.settings = JSON.parse(settingsJson);
+    }
+}
+
 function readyOnce() {
     log("Now connected to Discord.", logType.good);
     log("Checking if configuration file exists...");
@@ -2900,54 +3016,12 @@ function readyOnce() {
         try {
             var file = fs.readFileSync("settings.json", "utf8");
 
-            if (file.startsWith("{")) {
-                //File unencrypted
-                var intermediarySettings = JSON.parse(file);
-
-                log("settings.js file is unencrypted. Creating a backup copy...", logType.info);
-                fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-beforeEncrypt.json'));
-
-                log("settings.js file will be encrypted on next save.", logType.warning);
-
-                global.settings = intermediarySettings;
-            } else {
-                //File encrypted
-                log("Decrypting the settings.js file...", logType.info);
-
-                var buf = fs.readFileSync("settings.json");
-                var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
-                var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
-                settingsJson = settingsJson.toString("utf8");
-
-                global.settings = JSON.parse(settingsJson);
-            }
-
+            loadSettingsFile(file);
         } catch (err) {
             try {
                 //Try loading the prewrite file
                 var file = fs.readFileSync("settings.prewrite.json", "utf8");
-
-                if (file.startsWith("{")) {
-                    //File unencrypted
-                    var intermediarySettings = JSON.parse(file);
-
-                    log("settings.js file is unencrypted. Creating a backup copy...", logType.info);
-                    fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-beforeEncrypt.json'));
-
-                    log("settings.js file will be encrypted on next save.", logType.warning);
-
-                    global.settings = intermediarySettings;
-                } else {
-                    //File encrypted
-                    log("Decrypting the settings.js file...", logType.info);
-
-                    var buf = fs.readFileSync("settings.json");
-                    var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
-                    var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
-                    settingsJson = settingsJson.toString("utf8");
-
-                    global.settings = JSON.parse(settingsJson);
-                }
+                loadSettingsFile(file);
 
                 log("Settings file was corrupted, but prewrite file is good. Using prewrite file.", logType.warning);
             
