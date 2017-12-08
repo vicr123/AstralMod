@@ -1612,7 +1612,13 @@ function processAmCommand(message) {
             } else {
                 settings.users[message.author.id].locale = locale;
                 translator.setLocale(locale);
-                message.channel.send(tr("Alright, your locale is now English."));
+
+                let embed = new Discord.RichEmbed();
+                embed.setColor("#003CFF");
+                embed.setAuthor(tr("AstralMod Localisation"));
+                embed.setDescription(tr("Alright, your locale is now English."));
+                embed.setFooter(tr("AstralMod Localisation is in the preview stage. Many items will not be translated."))
+                message.channel.send(embed);
             }
             return true;
         } else if (command == "help") { //General help
