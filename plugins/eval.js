@@ -147,7 +147,10 @@ module.exports = {
 
             ],
             modCommands: [
-                'exec'
+                
+            ],
+            hiddenCommands: [
+                "exec"
             ]
         }
     },

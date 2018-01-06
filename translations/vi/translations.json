@@ -2,6 +2,9 @@
 	"translations": {
 		"Alright, your locale is now English.": "Xong, ngôn ngữ của bạn bây giờ là tiếng Việt",
 		"Unfortunately we don't have that locale in AstralMod.": "Xin lỗi, chúng tôi không có ngôn ngữ đó trong AstralMod",
+		"AstralMod Localisation": "Địa phương hóa AstralMod",
+		"AstralMod Localisation is in the preview stage. Many items will not be translated.": "Địa phương hóa AstralMod đang ở giai đoạn beta. Nhiều thư chưa được dịch.",
+
 		"User $[1] fetched and cached.": "Người $[1] được tìm nạp và lưu.",
 		"Couldn't fetch user.": "Không thể tìm nạp người.",
 		"User ID:": "ID của người:",
