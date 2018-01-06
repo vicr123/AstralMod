@@ -67,12 +67,13 @@ let translator;
 }
 
 global.tr = function() {
-    let translation;
+    /*let translation;
     translation = translator.translate.apply(this, arguments);
     if (translation == "") {
         return arguments[0];
     }
-    return translation;
+    return translation;*/
+    return arguments[0];
 }
 
 const keys = require('./keys.js');
@@ -135,6 +136,12 @@ global.getRandom = function() {
         var random = Math.floor(Math.random() * 1000) % arguments.length;
         return arguments[random];
     }
+}
+
+global.filterOffensive = function(offensive) {
+    offensive = offensive.replace("shit", "s•••");
+    offensive = offensive.replace("fuck", "f•••");
+    return offensive;
 }
 
 global.logType = {
@@ -1605,7 +1612,7 @@ function processAmCommand(message) {
         } else if (command == "version") {
             message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot");
             return true;
-        } else if (command.startsWith("setlocale ")) {
+        /*} else if (command.startsWith("setlocale ")) {
             let locale = command.substr(10);
             if (!fs.existsSync("./translations/" + locale)) {
                 message.channel.send(tr("Unfortunately we don't have that locale in AstralMod."));
@@ -1620,7 +1627,7 @@ function processAmCommand(message) {
                 embed.setFooter(tr("AstralMod Localisation is in the preview stage. Many items will not be translated."))
                 message.channel.send(embed);
             }
-            return true;
+            return true;*/
         } else if (command == "help") { //General help
             var embed = new Discord.RichEmbed();
             embed.setColor("#3C3C96");
@@ -1741,6 +1748,13 @@ function processAmCommand(message) {
                         if (plugin.acquireHelp != null) {
                             if (plugin.availableCommands != null) {
                                 if (plugin.availableCommands.general != null) {
+                                    if (plugin.availableCommands.general.hiddenCommands != null) {
+                                        if (plugin.availableCommands.general.hiddenCommands.indexOf(helpCmd) != -1) {
+                                            help = plugin.acquireHelp(helpCmd);
+                                            break;
+                                        } 
+                                    }
+
                                     if (plugin.availableCommands.general.modCommands != null) {
                                         if (plugin.availableCommands.general.modCommands.indexOf(helpCmd) != -1) {
                                             help = plugin.acquireHelp(helpCmd);
@@ -2119,6 +2133,13 @@ function getSingleConfigureWelcomeText(guild) {
         string += "a Nick Moderation    Enabled\n";
     }
 
+
+    if (guildSetting.echoOffensive == null || guildSetting.echoOffensive == false) {
+        string += "b Offensive Words    Disabled\n";
+    } else {
+        string += "b Offensive Words    Enabled\n";
+    }
+
     string += "\n";
     string += "0 Exit Configuration Menu\n";
     string += "< Reset AstralMod```"
@@ -2189,7 +2210,17 @@ function processSingleConfigure(message, guild) {
                         guildSetting.nickModeration = true;
                     }
 
-                    message.author.send("Ok, I've changed that.");
+                    message.author.send("Ok, I've toggled nickname moderation.");
+                    message.author.send(getSingleConfigureWelcomeText(guild));
+                    break;
+                case "b": //Nick Moderation
+                    if (guildSetting.echoOffensive) {
+                        guildSetting.echoOffensive = false;
+                    } else {
+                        guildSetting.echoOffensive = true;
+                    }
+
+                    message.author.send("Ok, I've toggled offensive words.");
                     message.author.send(getSingleConfigureWelcomeText(guild));
                     break;
                 case "<": //Reset AstralMod

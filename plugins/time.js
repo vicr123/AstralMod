@@ -462,7 +462,7 @@ function processCommand(message, isMod, command) {
 
         var embed = new Discord.RichEmbed();
         embed.setColor("#FFC000");
-        embed.setTitle("Running Timers");
+        embed.setTitle(":alarm_clock: Running Timers");
         embed.setDescription("Timers that AstralMod is currently keeping track of for you")
         for (index in userSetting.timers) {
             var timer = userSetting.timers[index];
