@@ -279,10 +279,14 @@ function pollTimers() {
                         embed.addField("Timeout Date", new Date().toUTCString(), false);
                         embed.setFooter("To see all your timers, use " + prefix + "timers.");
 
-                        if (timer.isChannelUser) {
-                            client.users.get(timer.channel).send("", {embed: embed});
-                        } else {
-                            client.channels.get(timer.channel).send("<@" + timer.author + ">", {embed: embed});
+                        try {
+                            if (timer.isChannelUser) {
+                                client.users.get(timer.channel).send("", {embed: embed});
+                            } else {
+                                client.channels.get(timer.channel).send("<@" + timer.author + ">", {embed: embed});
+                            }
+                        } catch (err) {
+                            //Couldn't send timer
                         }
 
                         settings.users[key].timers.splice(index, 1);
