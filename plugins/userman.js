@@ -416,19 +416,24 @@ function processCommand(message, isMod, command) {
                         } else {
                             var canDoActions = false;
                             var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
+                            let reactions = ["🇨"];
                             if (member.kickable) {
                                 msg += '`(k)ick` ';
                                 canDoActions = true;
+                                reactions.push("🇰");
                             }
                             
                             if (member.bannable) {
                                 msg += '`(b)an` `(t)empban` ';
                                 canDoActions = true;
+                                reactions.push("🇧");
+                                reactions.push("🇹");
                             }
 
                             if (!member.highestRole.comparePositionTo(message.guild.me.highestRole) >= 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
                                 msg += '`(n)ick` ';
                                 canDoActions = true;
+                                reactions.push("🇳");
                             }
                             
                             if (message.guild.id == 287937616685301762 || message.guild.id == consts.aphc.id) {
@@ -451,7 +456,44 @@ function processCommand(message, isMod, command) {
                                 actions[message.guild.id].actionMember = member;
                                 actions[message.guild.id].actioningMember = message.author;
                                 actions[message.guild.id].actionStage = 0;
-                                message.channel.send(msg);
+                                message.channel.send(msg).then(function(message) {
+                                    for (reaction in reactions) {
+                                        message.react(reactions[reaction]);
+                                    }
+                                    
+                                    message.awaitReactions(function(reaction) {
+                                        if (reaction.count > 1 && reaction.users.has(message.author.id)) {
+                                            return true;
+                                        }
+                                        return false;
+                                    }, {
+                                        max: 1
+                                    }).then(function(reactions) {
+                                        message.clearReactions();
+
+                                        let msg = {};
+                                        let reaction = reactions.first();
+                                        if (reaction.emoji.name == "🇨") {
+                                            msg.content = "c";
+                                        } else if (reaction.emoji.name == "🇰") {
+                                            msg.content = "k";
+                                        } else if (reaction.emoji.name == "🇧") {
+                                            msg.content = "b";
+                                        } else if (reaction.emoji.name == "🇹") {
+                                            msg.content = "t";
+                                        } else if (reaction.emoji.name == "🇳") {
+                                            msg.content = "n";
+                                        }
+                                        msg.guild = message.guild;
+                                        msg.channel = message.channel;
+                                        msg.delete = function() {
+                                            return new Promise(function(resolve, reject) {
+                                                resolve();
+                                            });
+                                        }
+                                        processDeal(msg);
+                                    });
+                                });
                                 captureInput(processDeal, message.guild.id, message.author.id);
                             } else {
                                 throw new CommandError("No actions can be perfomed on this user.");
