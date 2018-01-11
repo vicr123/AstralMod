@@ -36,7 +36,9 @@ const blessed = require('blessed');
 const moment = require('moment');
 const http = require('http');
 const crypto = require('crypto');
-const client = new Discord.Client();
+const client = new Discord.Client({
+    restTimeOffset: 10
+});
 const localize = require('localize');
 
 //Load translations
@@ -82,6 +84,7 @@ const sha256 = crypto.createHash("sha256");
 const settingsKey = keys.settingsKey.slice(0, 32);
 
 const commandEmitter = new events.EventEmitter();
+commandEmitter.setMaxListeners(100);
 var plugins = {};
 
 /** @type{Object} */
