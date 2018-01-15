@@ -69,12 +69,12 @@ let translator;
 }
 
 global.tr = function() {
-    /*let translation;
+    let translation;
     translation = translator.translate.apply(this, arguments);
     if (translation == "") {
         return arguments[0];
     }
-    return translation;*/
+    return translation;
     return arguments[0];
 }
 
