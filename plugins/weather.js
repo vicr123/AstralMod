@@ -20,50 +20,55 @@
 
 const Discord = require('discord.js');
 const moment = require('moment');
-const yql = require('yql');
+const YQL = require('yql');
 var keys = require('../keys.js');
 var client;
 var consts;
 
 function getBGFromCode(code) {
     switch (code) {
-        case 32, 34:
+        case 32:
+        case 34:
             return "images/dayclearw.png";
-        case 0, 1, 2, 3, 4:
+        case 0:
+        case 1: 
+        case 2:
+        case 3:
+        case 4:
             return "images/nightcloudw.png";
     }
 }
 
 function sendCurrentWeather(message, location, type, user = "") {
-    var query = new YQL("select * from weather.forecast where woeid="+location+" and u=c");
+    var query = new YQL("select * from weather.forecast where woeid="+location+" and u=\"c\"");
     
     query.exec(function(err, data) {
         try {
             if (err) {
                 throw new CommandError(err);
             } else {
-                const { createCanvas, loadImage, Image } = require('canvas');
-                const canvas = createCanvas(500, 400);
-                const ctx = canvas.getContext('2d');
+                var C = require('canvas');
+                var canvas = new C(500, 400);
+                var ctx = canvas.getContext('2d');
                 var drawing = true;
+                var bg = getBGFromCode(data.query.results.channel.item.condition.code);
                 
-                var image = new Image();
+                var image = new C.Image();
                 image.onload = function(){
                     ctx.drawImage(image, 0, 0);
                     drawing = false;
                 };
-                image.src = getBGFromCode(data.query.results.item.condition.code);
-                
-                while (drawing) {};
+                image.src = bg;
+                while (drawing){};
                 
                 ctx.font = "18px Contemporary";
                 ctx.fillStyle = "white";
-                ctx.fillText(data.query.results.item.condition.text);
+                ctx.fillText(data.query.results.channel.item.condition.text);
 
                 message.channel.send(new Discord.Attachment(canvas.toBuffer()));
             }
         } catch (err) {
-            message.channel.send("Catastrophic Failure");
+            message.channel.send(err.toString());
         }
     });
 }
@@ -121,14 +126,20 @@ function processCommand(message, isMod, command) {
                         if (userSettings == null) {
                             userSettings = {};
                         }
-                        userSettings.location = data.query.results.place.woeid;
+                        var place;
+                        if (data.query.results.place[0] != null) place = data.query.results.place[0];
+                        else place = data.query.results.place;
+                        
+                        userSettings.location = place.woeid;
             
                         settings.users[message.author.id] = userSettings;
                         
-                        message.reply(tr("Your location is now $[1], $[2] ($[3], $[4])."), data.query.results.place.name, data.query.results.place.country.code, data.query.results.place.centroid.latitude, data.query.results.place.centroid.longitude);
+                        log(place);
+                        
+                        message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
                     }
                 } catch (err) {
-                    message.channel.send("Catastrophic Failure");
+                    message.channel.send(err.toString());
                 }
             });
         }
