@@ -169,13 +169,13 @@ function processCommand(message, isMod, command) {
                     embed.setDescription("The message has been portably pinned.");
                     embed.setColor("#00C000");
                     
-                    let embedContent;
-                    if (message.content != "") {
-                        embedContent = message.content;
+                    let embedContent = "";
+                    if (currentMessage.content != "") {
+                        embedContent = currentMessage.content;
                     }
 
-                    if (message.attachments.size > 0) {
-                        for (let [key, attachment] of message.attachments) {
+                    if (currentMessage.attachments.size > 0) {
+                        for (let [key, attachment] of currentMessage.attachments) {
                             if (attachment.height != null) {
                                 if (embedContent == "") embedContent = "Image";
                                 embed.setImage(attachment.proxyURL);
@@ -183,10 +183,10 @@ function processCommand(message, isMod, command) {
                             }
                         }
 
-                        embed.setFooter(message.attachments.size + " attachments");
+                        embed.setFooter(currentMessage.attachments.size + " attachments");
                     }
 
-                    embed.addField(message.author.tag, embedContent);
+                    embed.addField(currentMessage.author.tag, embedContent);
                     flaggingMessage.edit(embed);
 
                     //Flag the message
