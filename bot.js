@@ -1,5 +1,5 @@
 /****************************************
- * 
+ *
  *   AstralMod: Moderation bot for AstralPhaser Central and other Discord servers
  *   Copyright (C) 2017 Victor Tran
  *
@@ -15,12 +15,12 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * *************************************/
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.7.0";
+    amVersion = "2.7.2";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -37,7 +37,8 @@ const moment = require('moment');
 const http = require('http');
 const crypto = require('crypto');
 const client = new Discord.Client({
-    restTimeOffset: 10
+    restTimeOffset: 10,
+    disableEveryone: true
 });
 const localize = require('localize');
 
@@ -90,13 +91,9 @@ var plugins = {};
 /** @type{Object} */
 global.settings = null;
 var listening = true;
-
 var nickChanges = {};
-
 var lockBox = [];
-
 var banCounts = {};
-
 var finalStdout = "";
 
 global.UserInputError = function() {
@@ -244,7 +241,7 @@ logBox.on('click', function(mouse) {
     //Get word around line
     var previousSpace = line.lastIndexOf(" ", x - 2);
     var nextSpace = line.indexOf(" ", x - 2);
-    
+
     previousSpace++;
 
     if (nextSpace == -1) {
@@ -254,7 +251,7 @@ logBox.on('click', function(mouse) {
 
     if (word.startsWith("[")) word = word.substr(1);
     if (word.endsWith("]")) word = word.substr(0, word.length - 2);
-    
+
     var goUpwards = false;
     var top = y + 1;
     if (top + 7 > screen.height) {
@@ -444,10 +441,10 @@ logBox.on('click', function(mouse) {
             renderScreen();
         });
         box.append(sendButton);
-        
+
         lockBox.push(box);
     }
-    
+
     if (client.users.has(word)) {
         //This is a user
         var user = client.users.get(word);
@@ -462,10 +459,10 @@ logBox.on('click', function(mouse) {
         } else {
             boxOptions.top += 6;
         }
-        
+
         lockBox.push(box);
     }
-    
+
     if (plugins.hasOwnProperty(word)) {
         //This is a plugin
         var plugin = plugins[word];
@@ -723,7 +720,7 @@ global.log = function(logMessage, type = logType.debug) {
 
     var logFormatting;
     var logString;
-    
+
     var lines = logMessage.split("\n");
 
     for (i = 0; i < lines.length; i++) {
@@ -786,7 +783,7 @@ global.log = function(logMessage, type = logType.debug) {
         }
 
         var logOutput = logFormatting + logString + "\x1b[0m";
-        
+
         logBox.log("[" + new Date().toLocaleTimeString("us", {
             hour12: false
         }) + "] " + logOutput);
@@ -1004,11 +1001,11 @@ function processConsoleInput(line) {
         } else {
             var info = "Information for guild " + guildLine + ":\n" +
                        "Members: " + parseInt(guild.memberCount);
-            
+
             for ([id, member] of guild.members) {
                 info += "\n" + memberLine(member);
             }
-            
+
             log(info, logType.info);
         }
     } else if (lLine.startsWith("ginfoc ")) {
@@ -1019,11 +1016,11 @@ function processConsoleInput(line) {
         } else {
             var info = "Information for guild " + guildLine + ":\n" +
                        "Members: " + parseInt(guild.channels.size);
-            
+
             for ([id, channel] of guild.channels) {
                 info += "\n" + channel.id + " " + (channel.type == "text" ? "#" : " ") + channel.name;
             }
-            
+
             log(info, logType.info);
         }
     } else if (lLine.startsWith("ginfob ")) {
@@ -1035,11 +1032,11 @@ function processConsoleInput(line) {
             guild.fetchBans().then(function(bans) {
                 var info = "Information for guild " + guildLine + ":\n" +
                         "Bans: " + parseInt(bans.size);
-                
+
                 for ([id, user] of bans) {
                     info += "\n" + user.id + " " + user.username + "#" + user.discriminator;
                 }
-                
+
                 log(info, logType.info);
             }).catch(function() {
                 log("Couldn't fetch bans for that guild.", logType.critical);
@@ -1110,7 +1107,7 @@ textBox.key('tab', function() {
                 guilds.push(guild.id);
             }
         }
-        
+
         if (guilds.length == 1) {
             textBox.setValue("> ginfo " + guilds[0]);
         } else if (guilds.length == 0) {
@@ -1131,7 +1128,7 @@ textBox.key('tab', function() {
                 guilds.push(guild.id);
             }
         }
-        
+
         if (guilds.length == 1) {
             textBox.setValue("> ginfom " + guilds[0]);
         } else if (guilds.length == 0) {
@@ -1152,7 +1149,7 @@ textBox.key('tab', function() {
                 guilds.push(guild.id);
             }
         }
-        
+
         if (guilds.length == 1) {
             textBox.setValue("> ginfoc " + guilds[0]);
         } else if (guilds.length == 0) {
@@ -1173,7 +1170,7 @@ textBox.key('tab', function() {
                 guilds.push(guild.id);
             }
         }
-        
+
         if (guilds.length == 1) {
             textBox.setValue("> ginfob " + guilds[0]);
         } else if (guilds.length == 0) {
@@ -1195,7 +1192,7 @@ textBox.key('tab', function() {
                     channels.push(channel.id);
                 }
             }
-            
+
             if (channels.length == 1) {
                 textBox.setValue("> send " + channels[0] + " ");
             } else if (channels.length == 0) {
@@ -1218,7 +1215,7 @@ textBox.key('tab', function() {
                     channels.push(channel.id);
                 }
             }
-            
+
             if (channels.length == 1) {
                 textBox.setValue("> cinfo " + channels[0]);
             } else if (channels.length == 0) {
@@ -1307,7 +1304,7 @@ global.parseUser = function(query, guild = null) {
                 }
             }
         }
-        
+
         var pop = guildSpecificResults.pop();
         while (pop != undefined) {
             searchResults.unshift(pop);
@@ -1383,7 +1380,7 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
     embed.setFooter(tr("User ID:") + " " + user.id);
 
     if (compact) {
-        var msg = tr("Discriminator:") + " " + user.discriminator + "\n" + 
+        var msg = tr("Discriminator:") + " " + user.discriminator + "\n" +
                     tr("Created at:") + " " + translator.localDate(user.createdAt, "ddd, dd MMM yyyy, hh:mm:ss", true) + "\n";
 
         if (member.noGuild != true) {
@@ -1448,8 +1445,11 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
             }
         }
     }
-    channel.send("", {embed: embed});
-    channel.stopTyping();
+    channel.send("", {embed: embed}).then(mes => {
+      channel.stopTyping();
+    }).catch(err => {
+      channel.stopTyping(true);
+    });
 }
 
 function processModCommand(message) {
@@ -1486,7 +1486,7 @@ function processModCommand(message) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, seperated by a space.")
-                
+
                 var roles = "```";
                 for (let [id, role] of message.guild.roles) {
                     roles += role.id + " = " + role.name + "\n";
@@ -1531,7 +1531,7 @@ function processModCommand(message) {
                     saveSettings();
                 });
             } else {
-                message.reply(":arrow_left: Only the owner or vicr123 can use this command. Alternatively, if you have permissions to kick me, just do that.");
+                message.reply(":arrow_left: Only the owner of this server (" + message.guild.owner.displayName + ") can use this command. Alternatively, if you have permissions to kick me, just do that.");
             }
             return true;
         } else if (command.startsWith("oknick")) {
@@ -1565,7 +1565,7 @@ function processAmCommand(message) {
         message.reply("AstralMod setup isn't complete. You'll need to wait for " + message.guild.owner.displayName + " to type `" + prefix + "config` and set up AstralMod before you can use it.");
     } else {
         var command;
-        
+
         command = text.toLowerCase().substr(prefix.length);
 
         if (command == "ping") {
@@ -1600,7 +1600,7 @@ function processAmCommand(message) {
                 } else if (nickResult == "length") {
                     message.reply(tr("Nicknames need to be less than 32 characters."));
                 } else {
-                    message.reply(tr("Ok, give us a bit to make sure the mods are ok with that."));
+                    message.reply(tr("Alright, give us a bit to make sure the mods are OK with that."));
                 }
             } else {
                 message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
@@ -1755,21 +1755,21 @@ function processAmCommand(message) {
                                         if (plugin.availableCommands.general.hiddenCommands.indexOf(helpCmd) != -1) {
                                             help = plugin.acquireHelp(helpCmd);
                                             break;
-                                        } 
+                                        }
                                     }
 
                                     if (plugin.availableCommands.general.modCommands != null) {
                                         if (plugin.availableCommands.general.modCommands.indexOf(helpCmd) != -1) {
                                             help = plugin.acquireHelp(helpCmd);
                                             break;
-                                        } 
+                                        }
                                     }
 
                                     if (plugin.availableCommands.general.commands != null) {
                                         if (plugin.availableCommands.general.commands.indexOf(helpCmd) != -1) {
                                             help = plugin.acquireHelp(helpCmd);
                                             break;
-                                        } 
+                                        }
                                     }
                                 }
 
@@ -1778,14 +1778,14 @@ function processAmCommand(message) {
                                         if (plugin.availableCommands[message.guild.id].modCommands.indexOf(helpCmd) != -1) {
                                             help = plugin.acquireHelp(helpCmd);
                                             break;
-                                        } 
+                                        }
                                     }
 
                                     if (plugin.availableCommands[message.guild.id].commands != null) {
                                         if (plugin.availableCommands[message.guild.id].commands.indexOf(helpCmd) != -1) {
                                             help = plugin.acquireHelp(helpCmd);
                                             break;
-                                        } 
+                                        }
                                     }
                                 }
                             }
@@ -1918,7 +1918,7 @@ function processConfigure(message, guild) {
                     message.author.send("Is this correct?");
                     guildSetting.configuringStage = 1;
                 }
-                
+
                 break;
             }
             case 1: { //Mod roles - confirm
@@ -1926,7 +1926,7 @@ function processConfigure(message, guild) {
                     guildSetting.modRoles = guildSetting.tentativeModRoles;
                     guildSetting.tentativeModRoles = null;
 
-                    message.author.send("Thanks. Next, I'll need the ID of the channel where I can post member alerts. Alternatively, enter \"none\" if you want to disable member alerts.");
+                    message.author.send("Thanks. Next, I'll need the ID of the channel where I can post member alerts. Alternatively, enter \"none\" if you want to disable member alerts. If you don't know how to get the ID, enable developer mode in user settings > Appearance, right click the channel on your server, then click \"Copy ID\".");
                     guildSetting.configuringStage = 2;
                 } else if (text == "no" || text == "n") {
                     guildSetting.tentativeModRoles = null;
@@ -2176,14 +2176,14 @@ function processSingleConfigure(message, guild) {
                     settings.guilds[guild.id].configuringUser = message.author.id;
                     settings.guilds[guild.id].configuringStage = 0;
                     message.author.send("Enter the roles of mods on this server, seperated by a space. To cancel, just type \"cancel\"");
-                    
+
                     var roles = "```";
                     for (let [id, role] of guild.roles) {
                         roles += role.id + " = " + role.name + "\n";
                     }
                     roles += "```";
                     message.author.send(roles);
-                    
+
                     guildSetting.configuringStage = 10;
                     break;
                 case "2": //Member Alerts
@@ -2409,7 +2409,7 @@ function processSingleConfigure(message, guild) {
             }
             break;
         }
-        
+
         case 50: { //Suggestions Channel
             if (text == "none") {
                 message.author.send("You're disabling suggestions. Is that correct?");
@@ -2535,7 +2535,7 @@ function processMessage(message) {
             embed.setFooter("This error has been logged, and we'll look into it.");
             embed.setDescription("AstralMod has run into a problem trying to process that command.");
         }
-        
+
         message.channel.send("", {embed: embed});
         message.channel.stopTyping(true);
     }
@@ -2546,8 +2546,8 @@ function newGuild(guild) {
     settings.guilds[guild.id] = {
         requiresConfig: true
     };
-    
-    
+
+
     if (process.argv.indexOf("--nowelcome") == -1) {
         //if (guild.defaultChannel) {
         if (guild.channels.size > 0) {
@@ -2571,7 +2571,7 @@ function saveSettings(showOkMessage = false) {
 
     //Encrypt the contents
     let iv = new Buffer(crypto.randomBytes(16));
-    
+
     var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
     var settingsJson = Buffer.concat([
         cipher.update(Buffer.from(contents, "utf8")),
@@ -2586,21 +2586,21 @@ function saveSettings(showOkMessage = false) {
         } else {
             fs.writeFile("iv.txt", iv, "utf8", function(error) {
                 if (error) {
-                    log("IV couldn't be saved. Aborting save of normal settings file.", logType.critical);                    
+                    log("IV couldn't be saved. Aborting save of normal settings file.", logType.critical);
                 } else {
                     fs.writeFile("settings.json", settingsJson, "utf8", function(error) {
                         if (error) {
                             log("Settings couldn't be saved, but the prewrite settings were saved successfully.", logType.critical);
                         } else {
                             fs.unlinkSync("settings.prewrite.json");
-        
+
                             if (showOkMessage) {
                                 log("Settings saved!", logType.good);
                             } else {
                                 log("Settings saved!");
                             }
                         }
-        
+
                         setTimeout(saveSettings, 30000);
                     });
                 }
@@ -2639,19 +2639,19 @@ function messageDeleted(message) {
             }
         }
     }
-    
+
     if (channel != null && message.channel != channel) {
         var msg = ":wastebasket: **" + getUserString(message.author) + "** <#" + message.channel.id + "> `" + message.createdAt.toUTCString() + "`.";
-        
+
         if (message.cleanContent.length) {
             msg += "\n```\n" +
                 parseCleanContent(message.cleanContent) + "\n" +
                 "```";
         }
-        
+
         if (message.attachments.size > 0) {
             msg += "\nThe following files were attached to this message:";
-            
+
             for (let [key, attachment] of message.attachments) {
                 if (attachment.height == null) {
                     msg += "\n```" + attachment.filename + " @ " + parseInt(attachment.filesize) + " bytes long```";
@@ -2660,7 +2660,7 @@ function messageDeleted(message) {
                 }
             }
         }
-        
+
         channel.send(msg);
     }
 }
@@ -2677,11 +2677,11 @@ function messageUpdated(oldMessage, newMessage) {
             }
         }
     }
-    
+
     if (channel != null && oldMessage.channel != channel) {
         var msg = ":pencil2: **" + getUserString(oldMessage.author) + "** <#" + oldMessage.channel.id + "> `" + oldMessage.createdAt.toUTCString() + "`.\n";
-        
-        
+
+
         if (oldMessage.cleanContent.length) {
             msg += "```\n" +
                 oldMessage.cleanContent + "\n" +
@@ -2689,14 +2689,14 @@ function messageUpdated(oldMessage, newMessage) {
         } else {
             msg += "```\n[no content]\n```";
         }
-        
+
         msg += "```\n" +
             newMessage.cleanContent + "\n" +
             "```";
-            
+
         if (oldMessage.attachments.size > 0) {
             msg += "\nThe following files were attached to this message:";
-            
+
             for (let [key, attachment] of oldMessage.attachments) {
                 if (attachment.height == null) {
                     msg += "\n```" + attachment.filename + " @ " + parseInt(attachment.filesize) + " bytes long```";
@@ -2705,7 +2705,7 @@ function messageUpdated(oldMessage, newMessage) {
                 }
             }
         }
-            
+
         channel.send(msg);
     }
 }
@@ -2724,7 +2724,7 @@ function memberAdd(member) {
 
     if (channel != null) {
         channel.send(":arrow_right: <@" + member.user.id + ">");
-        
+
         uinfo(member.user, channel, member.guild, true);
 
         if (member.guild.id == 287937616685301762) {
@@ -2791,7 +2791,7 @@ function memberRemove(member) {
                 }
             }
         }
-        
+
         if (channel != null) {
             channel.send(":arrow_left: <@" + member.user.id + "> (" + member.displayName + "#" + member.user.discriminator + ")");
         }
@@ -2988,7 +2988,7 @@ function countBans() {
                 }
             }
         }).catch(function() {
-            
+          
         });
     }
 }
@@ -3047,7 +3047,7 @@ function readyOnce() {
 
             }
         };
-        
+
         //Load in all guilds
         client.guilds.forEach(newGuild);
     } else {
@@ -3064,7 +3064,7 @@ function readyOnce() {
                 loadSettingsFile(file);
 
                 log("Settings file was corrupted, but prewrite file is good. Using prewrite file.", logType.warning);
-            
+
                 fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
                 fs.createReadStream('settings.prewrite.json').pipe(fs.createWriteStream('settings.json'));
             } catch (err2) {
@@ -3082,7 +3082,7 @@ function readyOnce() {
 
     client.setInterval(setGame, 300000);
     setGame();
-    
+
     log("Loading suggestions channels...");
     for (key in settings.guilds) {
         var guildSetting = settings.guilds[key];
@@ -3161,7 +3161,7 @@ if (process.argv.indexOf("--debug") == -1) {
     log("Running AstralMod without --debug command line flag. Debug output disabled.", logType.info);
 } else {
     //Enable debugging output from discord.js
-    
+
     client.on('debug', function(info) {
         log(info);
     });
