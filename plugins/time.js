@@ -1,5 +1,5 @@
 /****************************************
- * 
+ *
  *   Time: Plugin for AstralMod that contains time functions
  *   Copyright (C) 2017 Victor Tran
  *
@@ -15,7 +15,7 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * *************************************/
 
 const Discord = require('discord.js');
@@ -268,7 +268,7 @@ function pollTimers() {
 
                         embed.setTitle(":alarm_clock: Timer Elapsed");
                         embed.setColor("#FFC000");
-                        
+
                         if (timer.reason == "") {
                             embed.setDescription("<@" + timer.author + "> I've been told to ping you.");
                         } else {
@@ -279,10 +279,14 @@ function pollTimers() {
                         embed.addField("Timeout Date", new Date().toUTCString(), false);
                         embed.setFooter("To see all your timers, use " + prefix + "timers.");
 
-                        if (timer.isChannelUser) {
-                            client.users.get(timer.channel).send("", {embed: embed});
-                        } else {
-                            client.channels.get(timer.channel).send("<@" + timer.author + ">", {embed: embed});
+                        try {
+                            if (timer.isChannelUser) {
+                                client.users.get(timer.channel).send("", {embed: embed});
+                            } else {
+                                client.channels.get(timer.channel).send("<@" + timer.author + ">", {embed: embed});
+                            }
+                        } catch (err) {
+                            //Couldn't send timer
                         }
 
                         settings.users[key].timers.splice(index, 1);
@@ -319,7 +323,7 @@ function processCommand(message, isMod, command) {
                             throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
                         }
                     } else {
-                        throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");                        
+                        throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
                     }
                 }
             }
@@ -373,7 +377,7 @@ function processCommand(message, isMod, command) {
             message.reply("Usage: `" + prefix + "settz [your timezone]`. For more information, `" + prefix + "help settz`");
         } else {
             var userSettings = settings.users[message.author.id];
-            
+
             if (userSettings == null) {
                 userSettings = {};
             }
@@ -388,7 +392,7 @@ function processCommand(message, isMod, command) {
             }
         }
     } else if (command == "settz") {
-        message.reply("Usage: `" + prefix + "settz [your timezone]`. For more information, `" + prefix + "help settz`");
+        message.reply("Usage: `" + prefix + "settz [UTC offset]`. For more information, `" + prefix + "help settz`");
     } else if (command.startsWith("timer ")) {
         var time;
         var indexOfFirstSplit = command.indexOf(" ", 6);
@@ -407,12 +411,12 @@ function processCommand(message, isMod, command) {
             throw new UserInputError("Invalid length of time.");
         } else {
             var embed = new Discord.RichEmbed();
-            
+
             embed.setTitle(":alarm_clock: Timer Set");
             embed.setColor("#FFC000");
             embed.setDescription("Ok, I'll set that timer now.");
             embed.addField("Duration", seconds + " seconds.", false);
-            
+
             if (reason != "") {
                 embed.addField("Reason", reason, false);
             }
@@ -466,7 +470,7 @@ function processCommand(message, isMod, command) {
         embed.setDescription("Timers that AstralMod is currently keeping track of for you")
         for (index in userSetting.timers) {
             var timer = userSetting.timers[index];
-            
+
             var field = "";
             field += "This timer will elapse in about " + moment.duration(timer.timeout - new Date().getTime()).humanize() + "\n";
             field += "**Timeout date:** " + new Date(timer.timeout).toUTCString() + "\n";
@@ -490,7 +494,7 @@ function processCommand(message, isMod, command) {
     } else if (command.startsWith("rmtimer ")) {
         var timerToRemove = command.substr(8);
         var index = parseInt(timerToRemove);
-        
+
         if (isNaN(index)) {
             message.reply("Usage: `" + prefix + "rmtimer index`. For the `index` parameter, use `" + prefix + "timers`. For more information, `" + prefix + "help rmtimer`");
             return;
@@ -547,7 +551,7 @@ module.exports = {
                 "rmtimer"
             ],
             modCommands: [
-                
+
             ]
         }
     },
