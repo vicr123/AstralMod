@@ -1,5 +1,5 @@
 /****************************************
- * 
+ *
  *   Spam: Plugin for AstralMod that filters spam
  *   Copyright (C) 2017 Victor Tran
  *
@@ -15,7 +15,7 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * *************************************/
 
 const Discord = require("discord.js");
@@ -35,7 +35,7 @@ function startup() {
 
 function newMessage(message) {
     var checkSpam = true;
-    
+
     if (settings.guilds[message.guild.id] == null || typeof settings.guilds[message.guild.id] == "undefined") {
         checkSpam = false;
     } else {
@@ -44,11 +44,11 @@ function newMessage(message) {
                 checkSpam = false;
             }
         }
-        
+
         if (settings.guilds[message.guild.id].requiresConfig == true) {
             checkSpam = false;
         }
-        
+
         if (message.author.bot) {
             checkSpam = false;
         }
@@ -57,7 +57,7 @@ function newMessage(message) {
             checkSpam = false;
         }
     }
-    
+
     if (checkSpam) {
         //Spam filtering enabled for this server
 
@@ -97,7 +97,7 @@ function newMessage(message) {
                         }
                         message.reply("I've told you way too many times. The staff have been informed. (#" + spamCountingUser + ")");
                     } else if (spamCountingUser > 10) {
-                        
+
                     } else {
                         message.reply("Y'know, we don't appreciate it when you spam. (#" + spamCountingUser + ")");
                     }
@@ -116,7 +116,7 @@ function newMessage(message) {
 
                 nonSpamCountingUser++;
             }
-            
+
             if (nonSpamCountingUser == 10) {
                 spamCountingUser = 0;
                 nonSpamCountingUser = 0;
@@ -174,8 +174,10 @@ function processCommand(message, isMod, command) {
 
         embed.addField("Anger Levels", "Spam Detected: " + spamCountingUser + "\nSpam Forgiveness: " + nonSpamCountingUser, true);
 
-        message.reply("Here's how close I am to getting annoyed at you:", { embed: embed}).then(function() {
+        message.reply("Here's how close I am to getting annoyed at you:", { embed: embed }).then(function() {
             message.channel.stopTyping();
+        }).catch(err => {
+            message.channel.stopTyping(true);
         });
     }
 }
