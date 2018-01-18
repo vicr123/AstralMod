@@ -1445,9 +1445,9 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
             }
         }
     }
-    channel.send("", {embed: embed}).then(mes => {
+    channel.send("", {embed: embed}).then(function() {
       channel.stopTyping();
-    }).catch(err => {
+    }).catch(function() {
       channel.stopTyping(true);
     });
 }
