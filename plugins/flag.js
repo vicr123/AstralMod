@@ -324,9 +324,9 @@ function processCommand(message, isMod, command) {
         let getMessageNumber = function(i) {
             if (i >= (flagArray.length > 10 * number + 10 ? 10 * number + 10 : flagArray.length)) {
                 //End the loop
-                message.channel.send(embed).then(mes => {
+                message.channel.send(embed).then(function() {
                     message.channel.stopTyping();
-                }).catch(err => {
+                }).catch(function() {
                     message.channel.stopTyping(true);
                 });
                 return;
