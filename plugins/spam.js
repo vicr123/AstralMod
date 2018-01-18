@@ -176,7 +176,7 @@ function processCommand(message, isMod, command) {
 
         message.reply("Here's how close I am to getting annoyed at you:", { embed: embed }).then(function() {
             message.channel.stopTyping();
-        }).catch(err => {
+        }).catch(function() {
             message.channel.stopTyping(true);
         });
     }
