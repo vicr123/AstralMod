@@ -51,7 +51,7 @@ function processResponse(message) {
 
         warnings[tracker.user.id] = userWarnings;
         settings.guilds[message.guild.id].warnings = warnings;
-        message.channel.send(":gear: Hey <@" + tracker.user.id + ">! " + getUserString(tracker.warner) + " has warned you for `" + message.content + "`. You currently have " + parseInt(userWarnings.length) + " warning" + (userWarnings.length == 1 ? "s" : "") + ".");
+        message.channel.send(":gear: Hey <@" + tracker.user.id + ">! " + getUserString(tracker.warner) + " has warned you for `" + message.content + "`. You currently have " + parseInt(userWarnings.length) + " warnings.");
     }
     message.delete();
 }
