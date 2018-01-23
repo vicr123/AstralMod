@@ -1319,7 +1319,7 @@ global.parseUser = function(query, guild = null) {
 }
 
 function setGame() {
-    var presence = {
+    /*var presence = {
         game: {
             type: 0
         },
@@ -1333,7 +1333,18 @@ function setGame() {
                                    "v." + amVersion,
                                    "v." + amVersion,
                                    "Android Pay");
-    client.user.setPresence(presence);
+    client.user.setPresence(presence);*/
+
+    client.user.setActivity(getRandom("with ban buttons",
+                                      "Annoying Victor",
+                                      prefix + "help",
+                                      "v." + amVersion,
+                                      "v." + amVersion,
+                                      "Android Pay"),
+                                {
+                                    type: "PLAYING"
+                                }
+                            );
 }
 
 function isMod(member) {
@@ -2552,7 +2563,7 @@ function newGuild(guild) {
         //if (guild.defaultChannel) {
         if (guild.channels.size > 0) {
             if (guild.channels.array()[0].type == "text") {
-                guild.channels.array()[0].send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " or vicr123 needs to type `" + prefix + "config`.");
+                guild.channels.array()[0].send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " needs to type `" + prefix + "config`.");
             }
         }
     }
@@ -3200,34 +3211,42 @@ if (process.argv.indexOf("--httpserver") != -1) {
 }
 
 log("Checking configuration...", logType.info);
-if (keys.settingsKey == null) {
-    log("Settings Encryption Key not found.", logType.critical);
-    log("To inform AstralMod about your settings encryption key,\n" +
-        "1. Create a file called keys.js in the same directory as AstralMod\n" +
-        "2. Save the file with the following:\n" +
-        "   exports.settingsKey = \"[a random password]\"", logType.info);
+
+const requireDiscordVersion = "11.3.0";
+if (Discord.version != requireDiscordVersion) {
+    log("Invalid Discord.JS version", logType.critical);
+    log("This version of AstralMod requires Discord.JS version " + requireDiscordVersion, logType.info);
+    log("Execution halted.", logType.critical);
 } else {
-    log("Establishing connection to Discord...", logType.info);
-    client.options.disabledEvents = [
-        "TYPING_START"
-    ]
-    try {
-        if (keys.key != null) {
-            client.login(keys.key).catch(function() {
-                log("Couldn't establish a connection to Discord.", logType.critical);
-            });
-        } else {
+    if (keys.settingsKey == null) {
+        log("Settings Encryption Key not found.", logType.critical);
+        log("To inform AstralMod about your settings encryption key,\n" +
+            "1. Create a file called keys.js in the same directory as AstralMod\n" +
+            "2. Save the file with the following:\n" +
+            "   exports.settingsKey = \"[a random password]\"", logType.info);
+    } else {
+        log("Establishing connection to Discord...", logType.info);
+        client.options.disabledEvents = [
+            "TYPING_START"
+        ]
+        try {
+            if (keys.key != null) {
+                client.login(keys.key).catch(function() {
+                    log("Couldn't establish a connection to Discord.", logType.critical);
+                });
+            } else {
+                log("Login Token not found.", logType.critical);
+                log("To inform AstralMod about your token,\n" +
+                    "1. Create a file called keys.js in the same directory as AstralMod\n" +
+                    "2. Save the file with the following:\n" +
+                    "   exports.key = \"[your key here]\"", logType.info);
+            }
+        } catch (err) {
             log("Login Token not found.", logType.critical);
             log("To inform AstralMod about your token,\n" +
                 "1. Create a file called keys.js in the same directory as AstralMod\n" +
                 "2. Save the file with the following:\n" +
                 "   exports.key = \"[your key here]\"", logType.info);
         }
-    } catch (err) {
-        log("Login Token not found.", logType.critical);
-        log("To inform AstralMod about your token,\n" +
-            "1. Create a file called keys.js in the same directory as AstralMod\n" +
-            "2. Save the file with the following:\n" +
-            "   exports.key = \"[your key here]\"", logType.info);
     }
 }
