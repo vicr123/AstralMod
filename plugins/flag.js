@@ -1,5 +1,5 @@
 /****************************************
- * 
+ *
  *   Flags: Plugin for AstralMod that contains flagging commands
  *   Copyright (C) 2017 Victor Tran
  *
@@ -15,7 +15,7 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * *************************************/
 
 var client;
@@ -47,7 +47,7 @@ function processCommand(message, isMod, command) {
             embed.setTitle("Portably pin a message");
             embed.setDescription("Select a message to portably pin");
             embed.setColor("#00C000");
-    
+
             let message = messages.array()[number - 1]
             currentMessage = message;
 
@@ -72,16 +72,16 @@ function processCommand(message, isMod, command) {
                     embed.setTitle("Portably pin a message");
                     embed.setDescription("Select a message to pin");
                     embed.setColor("#00C000");
-            
+
                     let message = messages.first();
                     currentMessage = message;
-        
+
                     let embedContent;
                     if (message.content != "") {
                         embedContent = message.content;
                     }
 
-                    if (message.attachments.size > 0) {                        
+                    if (message.attachments.size > 0) {
                         for (let [key, attachment] of message.attachments) {
                             if (attachment.height != null) {
                                 if (embedContent == "") embedContent = "Image";
@@ -114,10 +114,10 @@ function processCommand(message, isMod, command) {
                     embed.setTitle("Portably pin a message");
                     embed.setDescription("Select a message to pin");
                     embed.setColor("#00C000");
-            
+
                     let message = messages.first();
                     currentMessage = message;
-        
+
                     let embedContent;
                     if (message.content != "") {
                         embedContent = message.content;
@@ -147,7 +147,7 @@ function processCommand(message, isMod, command) {
 
             let reactionCollectionFunction = function(reactions) {
                 let reaction = reactions.first();
-                
+
                 let currentUser;
                 for (let [id, user] of reaction.users) {
                     if (id != client.user.id) {
@@ -155,7 +155,7 @@ function processCommand(message, isMod, command) {
                         currentUser = user;
                     }
                 }
-                
+
                 let continueReactions = false;
                 if (reaction.emoji.name == "⬆") {
                     continueReactions = true;
@@ -168,7 +168,7 @@ function processCommand(message, isMod, command) {
                     embed.setTitle("Portably pin a message");
                     embed.setDescription("The message has been portably pinned.");
                     embed.setColor("#00C000");
-                    
+
                     let embedContent;
                     if (message.content != "") {
                         embedContent = message.content;
@@ -208,7 +208,7 @@ function processCommand(message, isMod, command) {
                     embed.setTitle("Portably pin a message");
                     embed.setDescription("Message pinning cancelled.");
                     embed.setColor("#00C000");
-                    
+
                     flaggingMessage.edit(embed);
                 }
 
@@ -240,7 +240,7 @@ function processCommand(message, isMod, command) {
         let number = command.substr(5);
         //Get flags
         let flagArray = settings.users[message.author.id].flags;
-        
+
         if (flagArray == null || flagArray.length == 0) {
             embed.addField("No Pins", "You haven't pinned any messages. To pin a message, use `" + prefix + "pin`.");
             message.channel.send(embed);
@@ -324,8 +324,11 @@ function processCommand(message, isMod, command) {
         let getMessageNumber = function(i) {
             if (i >= (flagArray.length > 10 * number + 10 ? 10 * number + 10 : flagArray.length)) {
                 //End the loop
-                message.channel.send(embed);
-                message.channel.stopTyping();
+                message.channel.send(embed).then(function() {
+                    message.channel.stopTyping();
+                }).catch(function() {
+                    message.channel.stopTyping(true);
+                });
                 return;
             }
 
@@ -350,7 +353,6 @@ function processCommand(message, isMod, command) {
                 if (message.content == "") {
                     for (let [key, attachment] of message.attachments) {
                         if (attachment.height != null) {
-
                             if (message.content == "") flagMessage = "Image. Use `" + prefix + "pins --image " + (i + 1) + "` to view.\n";
                             break;
                         }
@@ -369,7 +371,7 @@ function processCommand(message, isMod, command) {
     } else if (command.startsWith("unpin ")) {
         var unflagging = command.substr(6);
         var index = parseInt(unflagging) - 1;
-        
+
         if (isNaN(index)) {
             message.reply("Usage: `" + prefix + "unpin id`. For the `id` parameter, use `" + prefix + "pins`. For more information, `" + prefix + "help unpin`");
             return;
@@ -419,7 +421,7 @@ module.exports = {
                 "unpin"
             ],
             modCommands: [
-                
+
             ]
         }
     },
