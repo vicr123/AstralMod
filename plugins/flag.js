@@ -54,7 +54,7 @@ function processCommand(message, isMod, command) {
             if (message.content == "") {
                 embed.addField(message.author.tag, "Nontextual context");
             } else {
-                embed.addField(message.author.tag, message.content);
+                embed.addField(message.author.tag, message.content.substr(0, 1000));
             }
             return message.channel.send(embed)
         }).then(function(message) {
@@ -76,7 +76,7 @@ function processCommand(message, isMod, command) {
                     let message = messages.first();
                     currentMessage = message;
 
-                    let embedContent;
+                    let embedContent = "";
                     if (message.content != "") {
                         embedContent = message.content;
                     }
@@ -90,6 +90,10 @@ function processCommand(message, isMod, command) {
                             }
                         }
 
+                        if (embedContent == "") {
+                            embedContent = "Nontextual Content"
+                        }
+
                         embed.setFooter(message.attachments.size + " attachments");
                     }
 
@@ -97,7 +101,7 @@ function processCommand(message, isMod, command) {
                         //Attempt to go up again
                         goUp();
                     } else {
-                        embed.addField(message.author.tag, embedContent);
+                        embed.addField(message.author.tag, embedContent.substr(0, 1000));
                         flaggingMessage.edit(embed);
                     }
                 });
@@ -118,7 +122,7 @@ function processCommand(message, isMod, command) {
                     let message = messages.first();
                     currentMessage = message;
 
-                    let embedContent;
+                    let embedContent = "";
                     if (message.content != "") {
                         embedContent = message.content;
                     }
@@ -131,6 +135,10 @@ function processCommand(message, isMod, command) {
                                 break;
                             }
                         }
+                        
+                        if (embedContent == "") {
+                            embedContent = "Nontextual Content"
+                        }
 
                         embed.setFooter(message.attachments.size + " attachments");
                     }
@@ -139,7 +147,7 @@ function processCommand(message, isMod, command) {
                         //Attempt to go down again
                         goDown();
                     } else {
-                        embed.addField(message.author.tag, embedContent);
+                        embed.addField(message.author.tag, embedContent.substr(0, 1000));
                         flaggingMessage.edit(embed);
                     }
                 });
@@ -168,17 +176,10 @@ function processCommand(message, isMod, command) {
                     embed.setTitle("Portably pin a message");
                     embed.setDescription("The message has been portably pinned.");
                     embed.setColor("#00C000");
-<<<<<<< HEAD
                     
                     let embedContent = "";
                     if (currentMessage.content != "") {
                         embedContent = currentMessage.content;
-=======
-
-                    let embedContent;
-                    if (message.content != "") {
-                        embedContent = message.content;
->>>>>>> 86f6cff55d3f35fc70a14530d494972fe50852d3
                     }
 
                     if (currentMessage.attachments.size > 0) {
@@ -193,7 +194,11 @@ function processCommand(message, isMod, command) {
                         embed.setFooter(currentMessage.attachments.size + " attachments");
                     }
 
-                    embed.addField(currentMessage.author.tag, embedContent);
+                    if (embedContent == "") {
+                        embedContent = "Nontextual Content";
+                    }
+
+                    embed.addField(currentMessage.author.tag, embedContent.substr(0, 1000));
                     flaggingMessage.edit(embed);
 
                     //Flag the message
@@ -274,34 +279,48 @@ function processCommand(message, isMod, command) {
                 throw new CommandError("Can't find channel");
             }
 
-            channel.fetchMessage(flagItem.message).then(function(message) {
+            channel.fetchMessage(flagItem.message).then(function(fMessage) {
                 let flagMessage;
 
                 if (settings.guilds[channel.guild.id].echoOffensive) {
-                    flagMessage = filterOffensive(message.content) + "\n";
+                    flagMessage = filterOffensive(fMessage.content) + "\n";
                 } else {
-                    flagMessage = message.content + "\n";
+                    flagMessage = fMessage.content + "\n";
                 }
 
-                if (message.content == "") {
-                    if (message.attachments.size > 0) {
-                        for (let [key, attachment] of message.attachments) {
+                if (fMessage.content == "") {
+                    if (fMessage.attachments.size > 0) {
+                        for (let [key, attachment] of fMessage.attachments) {
                             if (attachment.height != null) {
-                                if (message.content == "") flagMessage = "Image";
+                                if (fMessage.content == "") flagMessage = "Image";
                                 embed.setImage(attachment.proxyURL);
                                 break;
                             }
                         }
 
-                        embed.setFooter(message.attachments.size + " attachments");
+                        embed.setFooter(fMessage.attachments.size + " attachments");
                     }
                 }
 
-                embed.addField(message.author.tag, flagMessage);
+                if (flagMessage.trim() != "") {
+                    embed.addField(fMessage.author.tag, flagMessage.substr(0, 1000));
+                }
+                
+                if (fMessage.attachments.size > 0) {
+                    let attachments = "";
+                    for (let [key, attachment] of fMessage.attachments) {
+                        attachments += "[" + attachment.filename + "](" + attachment.url + ")\n";
+                    }
+
+                    embed.addField("Attachments", attachments);
+                }
+
                 message.channel.send(embed);
+                message.channel.stopTyping();
             }).catch(function() {
                 embed.addField("Error", "Can't find message");
                 message.channel.send(embed);
+                message.channel.startTyping();
             });
 
             return;
@@ -315,11 +334,11 @@ function processCommand(message, isMod, command) {
         embed.setDescription("Here are all the messages you've pinned");
         embed.setColor("#00C000");
 
-        if (number > (flagArray.length / 10) + 1) {
+        if (number > (flagArray.length / 5) + 1) {
             throw new UserInputError("Invalid Page.");
         }
 
-        let fullPages = Math.floor((flagArray.length / 10) + 1);
+        let fullPages = Math.floor((flagArray.length / 5) + 1);
         if (fullPages == 1) {
             embed.setFooter("To pin a message, use the " + prefix + "pin command");
         } else {
@@ -329,7 +348,7 @@ function processCommand(message, isMod, command) {
         number--;
 
         let getMessageNumber = function(i) {
-            if (i >= (flagArray.length > 10 * number + 10 ? 10 * number + 10 : flagArray.length)) {
+            if (i >= (flagArray.length > 5 * number + 5 ? 5 * number + 5 : flagArray.length)) {
                 //End the loop
                 message.channel.send(embed).then(function() {
                     message.channel.stopTyping();
@@ -367,14 +386,14 @@ function processCommand(message, isMod, command) {
                 }
 
                 flagMessage += "     - *" + message.author.tag + "* in " + message.channel;
-                embed.addField("Pin #" + (i + 1), flagMessage);
+                embed.addField("Pin #" + (i + 1), flagMessage.substr(0, 1000));
                 getMessageNumber(++i);
             }).catch(function() {
                 embed.addField("Pin #" + (i + 1), "Can't find message");
                 getMessageNumber(++i);
             });
         };
-        getMessageNumber(10 * number);
+        getMessageNumber(5 * number);
     } else if (command.startsWith("unpin ")) {
         var unflagging = command.substr(6);
         var index = parseInt(unflagging) - 1;
