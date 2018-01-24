@@ -3125,8 +3125,10 @@ function readyOnce() {
     }
 
     fs.readdirSync('plugins').forEach(function(file, index) {//Load plugin
-        log("Plugin " + file + " detected. Attempting to load now.");
-        loadPlugin(file);
+        if (!fs.lstatSync("./plugins/" + file).isDirectory()) {
+            log("Plugin " + file + " detected. Attempting to load now.");
+            loadPlugin(file);
+        }
     });
 
     commandEmitter.emit('startup');
