@@ -20,152 +20,55 @@
 
 const Discord = require('discord.js');
 const moment = require('moment');
-const owm = require('openweathermap-js');
+const YQL = require('yql');
 var keys = require('../keys.js');
 var client;
 var consts;
 
-function getDescription(id) {
-    switch (id) {
-        case 200:
-        case 201:
-        case 210:
-        case 230:
-        case 231:
-        case 960:
-        case 211:
-            return "thunderstorms";
-        case 202:
-        case 212:
-        case 221:
-        case 232:
-            return "heavy thunderstorms";
-        case 300:
-        case 301:
-        case 310:
-        case 311:
-        case 313:
-        case 321:
-        case 501:
-        case 501:
-        case 521:
-        case 531:
-        case 616:
-        case 621:
-            return "rain";
-        case 500:
-        case 520:
-        case 615:
-        case 620:
-            return "light rain";
-        case 314:
-        case 302:
-        case 312:
-        case 502:
-        case 502:
-        case 504:
-        case 522:
-        case 622:
-            return "heavy rain"
-        case 600:
-        case 601:
-        case 602:
-            return "snow";
-        case 611:
-        case 612:
-            return "sleet"
-        case 701:
-        case 711:
-        case 721:
-        case 741:
-        case 771:
-            return "fog";
-        case 731:
-        case 751:
-            return "sand";
-        case 761:
-            return "dust";
-        case 762:
-            return "volcanic ash";
-        case 781:
-        case 900:
-            return "a tornado";
-        case 800:
-            return "clear, immaculate skies";
-        case 801:
-        case 802:
-            return "clear skies"; //Yes, there is a difference.
-        case 803:
-        case 804:
-            return "clouds"
-        case 901:
-        case 961:
-            return "a tropical storm";
-        case 902:
-        case 962:
-            return "a hurricane";
-        case 903:
-            return "cold conditions;";
-        case 904:
-            return "hot conditions";
-        case 905:
-        case 956:
-            return "windy conditions";
-        case 906:
-            return "hail";
-        case 957:
-        case 958:
-        case 959:
-            return "extreme wind";
-        case 955:
-        case 954:
-        case 953:
-        case 952:
-            return "breezy conditions"
-        case 951:
-            return "calm winds";
-        default:
-            return "Weather condition #" + parseInt(id);
+function getBGFromCode(code) {
+    switch (code) {
+        case 32:
+        case 34:
+            return "images/dayclearw.png";
+        case 0:
+        case 1: 
+        case 2:
+        case 3:
+        case 4:
+            return "images/nightcloudw.png";
     }
 }
 
 function sendCurrentWeather(message, location, type, user = "") {
-    owm.current({
-        appid: keys.owmKey,
-        location: location,
-        cityID: location,
-        method: type,
-        format: 'JSON',
-        accuracy: 'accurate',
-        units: 'metric'
-    }, function(err, data) {
+    var query = new YQL("select * from weather.forecast where woeid="+location+" and u=\"c\"");
+    
+    query.exec(function(err, data) {
         try {
             if (err) {
-                message.channel.send("Catastrophic Failure");
+                throw new CommandError(err);
             } else {
-                let embed = new Discord.RichEmbed();
-                embed.setTitle("Weather in " + data.name + ", " + data.sys.country + (user != "" ? " @ " + user : ""));
-                embed.setColor("#00FF00");
-
-                let desc = [];
-                for (key in data.weather) {
-                    let info = data.weather[key];
-                    desc.push(getDescription(info.id));
-                }
-
-                let overview = "Right now, in " + data.name + ", it's " + parseInt(data.main.temp) + "°C with " + desc.join(", ") + ". The wind is blowing at " + parseFloat(data.wind.speed) + "km/h";
-                if (!isNaN(parseInt(data.wind.deg))) {
-                    overview += " at a bearing of " + parseInt(data.wind.deg) + "°"
-                }
-                overview += ".";
-                embed.addField("Overview", overview);
+                var C = require('canvas');
+                var canvas = new C(500, 400);
+                var ctx = canvas.getContext('2d');
+                var drawing = true;
+                var bg = getBGFromCode(data.query.results.channel.item.condition.code);
                 
-                embed.setFooter("Data provided by OpenWeatherMap");
+                var image = new C.Image();
+                image.onload = function(){
+                    ctx.drawImage(image, 0, 0);
+                    drawing = false;
+                };
+                image.src = bg;
+                while (drawing){};
+                
+                ctx.font = "18px Contemporary";
+                ctx.fillStyle = "white";
+                ctx.fillText(data.query.results.channel.item.condition.text);
 
-                message.channel.send(embed);
+                message.channel.send(new Discord.Attachment(canvas.toBuffer()));
             }
         } catch (err) {
-            message.channel.send("Catastrophic Failure");
+            message.channel.send(err.toString());
         }
     });
 }
@@ -211,14 +114,9 @@ function processCommand(message, isMod, command) {
         if (location == "") {
             message.reply("Usage: `" + prefix + "setloc [your location]`. For more information, `" + prefix + "help setloc`");
         } else {
-            owm.current({
-                appid: keys.owmKey,
-                location: location,
-                method: 'name',
-                format: 'JSON',
-                accuracy: 'accurate',
-                units: 'metric'
-            }, function(err, data) {
+            var query = new YQL("select * from geo.places where text=\""+ location +"\"");
+            
+            query.exec(function(err, data) {
                 try {
                     if (err) {
                         throw new CommandError("Unknown City");
@@ -228,31 +126,20 @@ function processCommand(message, isMod, command) {
                         if (userSettings == null) {
                             userSettings = {};
                         }
-                        userSettings.location = data.id;
+                        var place;
+                        if (data.query.results.place[0] != null) place = data.query.results.place[0];
+                        else place = data.query.results.place;
+                        
+                        userSettings.location = place.woeid;
             
                         settings.users[message.author.id] = userSettings;
-            
-                        let lat, lon;
-                        if (data.coord.lat == 0) {
-                            lat = "0°";
-                        } else if (data.coord.lat < 0) {
-                            lat = Math.abs(data.coord.lat) + "° S";
-                        } else {
-                            lat = Math.abs(data.coord.lat) + "° N";
-                        }
-
-                        if (data.coord.lon == 0) {
-                            lon = "0°";
-                        } else if (data.coord.lon < 0) {
-                            lon = Math.abs(data.coord.lon) + "° W";
-                        } else {
-                            lon = Math.abs(data.coord.lon) + "° E";
-                        }
                         
-                        message.reply("Your location is now " + data.name + ", " + data.sys.country + " (" + lat + ", " + lon + ")");
+                        log(place);
+                        
+                        message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
                     }
                 } catch (err) {
-                    message.channel.send("Catastrophic Failure");
+                    message.channel.send(err.toString());
                 }
             });
         }
