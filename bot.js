@@ -35,6 +35,7 @@ const events = require('events');
 const blessed = require('blessed');
 const moment = require('moment');
 const http = require('http');
+const https = require('https');
 const crypto = require('crypto');
 const client = new Discord.Client({
     restTimeOffset: 10,
@@ -2567,6 +2568,8 @@ function newGuild(guild) {
             }
         }
     }
+
+    postDBL();
 }
 
 function removeGuild(guild) {
@@ -2574,6 +2577,8 @@ function removeGuild(guild) {
     settings.guilds[guild.id] = null;
     delete settings.guilds[guild.id];
     log("Removed Guild: " + guild.id, logType.info);
+
+    postDBL();
 }
 
 function saveSettings(showOkMessage = false) {
@@ -3151,6 +3156,8 @@ function readyOnce() {
         "  │  Guilds: " + parseInt(client.guilds.size);
         renderScreen();
     }, 1000);
+
+    postDBL();
 }
 
 client.once('ready', readyOnce);
@@ -3167,6 +3174,48 @@ client.on('reconnecting', function() {
 
     commandEmitter.emit('disconnect');
 });
+
+function postDBL() {
+    if (process.argv.indexOf("--nodbl") == -1) {
+        //Post server count to DBL
+        let payload;
+
+        if (client.shard == null) {
+            payload = JSON.stringify({
+                server_count: client.guilds.size
+            });
+        } else {
+            payload = JSON.stringify({
+                server_count: client.guilds.size,
+                shard_id: client.shard.id,
+                shard_count: client.shard.count
+            });
+        }
+
+        let request = https.request({
+            host: "discordbots.org",
+            port: 443,
+            path: "/api/bots/" + client.user.id + "/stats",
+            method: "POST",
+            headers: {
+                "User-Agent": "AstralMod/" + amVersion,
+                "Authorization": keys.dblKey,
+                "Content-Type": "application/json"
+            }
+        }, function(res) {
+            res.setEncoding("utf8");
+            res.on("data", function(data) {
+                let response = JSON.parse(data);
+                if (response.hasOwnProperty("error")) {
+                    log("DBL: " + response.error, logType.error);
+                }
+            });
+        })
+
+        request.write(payload);
+        request.end();
+    }
+}
 
 if (process.argv.indexOf("--debug") == -1) {
     log("Running AstralMod without --debug command line flag. Debug output disabled.", logType.info);
