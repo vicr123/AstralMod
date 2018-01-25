@@ -48,7 +48,8 @@ let translator;
 {
     let translations = {};
     let dates = {};
-    let locales = fs.readdirSync("./translations");
+    //let locales = fs.readdirSync("./translations");
+    let locales = ["en"];
     for (let key in locales) {
         let locale = locales[key];
         if (fs.existsSync("./translations/" + locale + "/translations.json")) {
@@ -71,12 +72,12 @@ let translator;
 }
 
 global.tr = function() {
-    let translation;
-    translation = translator.translate.apply(this, arguments);
-    if (translation == "") {
-        return arguments[0];
-    }
-    return translation;
+    //let translation;
+    //translation = translator.translate.apply(this, arguments);
+    //if (translation == "") {
+        //return arguments[0];
+    //}
+    //return translation;
     return arguments[0];
 }
 
@@ -1832,6 +1833,10 @@ function processAmCommand(message) {
                     embed.addField("Options", options);
                 }
 
+                if (help.availableOptions != null) {
+                    embed.addField("Available Options", help.availableOptions);
+                }
+
                 if (help.param1 != null) {
                     embed.addField("Parameter 1", help.param1);
                 }
@@ -2481,7 +2486,7 @@ function processMessage(message) {
         if (settings.users[message.author.id].locale == null) {
             settings.users[message.author.id].locale = "en";
         }
-        translator.setLocale(settings.users[message.author.id].locale);
+        //translator.setLocale(settings.users[message.author.id].locale);
 
         var text = message.content;
 
