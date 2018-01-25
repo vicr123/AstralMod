@@ -27,9 +27,10 @@ var keys = require('../keys.js');
 var client;
 var consts;
 
-let sunnyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage;
+let sunnyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage;
 
 function getDataFromCode(code, ctx) {
+    log(code.toString(), logType.debug);
     let retval = {}
     
     switch (code) {
@@ -45,14 +46,9 @@ function getDataFromCode(code, ctx) {
             retval.secondary = "rgb(50, 180, 255)";
             retval.image = sunnyImage;
             break;
-        case 0:
         case 1: 
         case 2:
         case 7:
-        case 13:
-        case 14:
-        case 15:
-        case 16:
         case 17:
         case 18:
         case 22:
@@ -63,11 +59,7 @@ function getDataFromCode(code, ctx) {
         case 29:
         case 30:
         case 35:
-        case 41:
-        case 42:
-        case 43:
         case 44:
-        case 46:
             //Cloudy
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
@@ -75,7 +67,6 @@ function getDataFromCode(code, ctx) {
             retval.secondary = "rgb(170, 170, 170)";
             retval.image = cloudyImage;
             break;
-        case 5:
         case 6:
         case 8:
         case 9:
@@ -89,6 +80,7 @@ function getDataFromCode(code, ctx) {
             retval.secondary = "rgb(170, 170, 170)";
             retval.image = rainImage;
             break;
+        case 0:
         case 24:
             //Windy
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
@@ -131,9 +123,25 @@ function getDataFromCode(code, ctx) {
             retval.secondary = "rgb(170, 170, 170)";
             retval.image = thunderImage;
             break;
-        default:
-            //gradient.addColorStop(0, "rgba(0, 200, 255, 0.5)");
-            //gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 41:
+        case 43:
+            //Snow
+            retval.gradient = "rgb(200, 200, 200)";
+            retval.secondary = "rgb(170, 170, 170)";
+            retval.image = snowImage;
+            break;
+        case 5:
+        case 42:
+        case 46:
+            //Rain + Snow
+            retval.gradient = "rgb(200, 200, 200)";
+            retval.secondary = "rgb(170, 170, 170)";
+            retval.image = rainsnowImage;
+            break;
     }
     return retval;
 }
@@ -153,6 +161,19 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
             if (err) {
                 throw new CommandError(err);
             } else {
+                if (data.query.results == null) {
+                    var embed = new Discord.RichEmbed;
+                    embed.setTitle(":thunder_cloud_rain: Weather Error");
+                    embed.setDescription("AstralMod couldn't retrieve weather.");
+                    embed.setColor("#FF0000");
+                    embed.addField("Details", "That city wasn't found");
+                    embed.addField("Try this", "AstralMod has just been updated. If you're trying to retrieve your own weather, try resetting your location with `am#setloc`.");
+
+                    message.channel.send(embed)
+                    message.channel.stopTyping(true);
+                    return;
+                }
+
                 var canvas = new Canvas(500, 410);
                 var ctx = canvas.getContext('2d');
                 let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx);
@@ -207,7 +228,7 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     txtCtx.fillStyle = "black";
                     txtCtx.fillText(data.query.results.channel.item.condition.text, 0, 40);
 
-                    ctx.drawImage(textCanvas, 13, 230, 325, 50);
+                    ctx.drawImage(textCanvas, 13, 240, 325, 50);
                 } else {
                     ctx.fillText(data.query.results.channel.item.condition.text, 175 - conditionWidth.width / 2, 280);
                 }
@@ -223,16 +244,6 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                 let currentWind = data.query.results.channel.wind.speed + " " + speedUnit;
                 let windWidth = ctx.measureText(currentWind);
                 ctx.fillText(currentWind, 77, 345);
-
-                /*ctx.save();
-                //ctx.textAlign = "center";
-                ctx.font = "20px Contemporary";
-                ctx.translate(85 + windWidth.width, 335);
-
-                let angle = parseInt(data.query.results.channel.wind.direction);
-                ctx.rotate(angle * Math.PI / 180);
-                ctx.fillText("↑", -ctx.measureText("↑").width / 2, 5);
-                ctx.restore();*/
 
                 //Draw humidity info
                 ctx.drawImage(humidImage, 50, 355, 20, 20);
@@ -258,7 +269,7 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     cardinal = "SE";
                 } else if (compass < 202) {
                     cardinal = "S";
-                } else if (command < 247) {
+                } else if (compass < 247) {
                     cardinal = "SW";
                 } else if (compass < 292) {
                     cardinal = "W";
@@ -331,6 +342,10 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                 e.setTitle("Weather");
                 e.setURL(data.query.results.channel.link);
                 e.setColor("#00C0FF");
+                e.setFooter(getRandom("Feel free to print this",
+                                      "Please tear on the perforated line",
+                                      "So many degrees...",
+                                      "Are the days getting longer?"));
                 message.channel.send(e);
                 message.channel.stopTyping();
             }
@@ -350,6 +365,18 @@ function processCommand(message, isMod, command) {
     } else {
         unit = "f";
     }
+
+    if (command.indexOf("--metric") != -1 && command.indexOf("--fahrenheit") != -1) {
+        throw new UserInputError("Specify only one of `--metric` or `--imperial`");
+    } else if (command.indexOf("--metric") != -1) {
+        command = command.replace("--metric", "");
+        unit = "c";
+    } else if (command.indexOf("--imperial") != -1) {
+        command = command.replace("--imperial", "");
+        unit = "f";
+    }
+
+    command = command.trim();
 
     if (command.startsWith("weather ")) {
         var location = command.substr(8);
@@ -433,91 +460,68 @@ module.exports = {
 
         sunnyImage = new Canvas.Image();
         fs.readFile("./plugins/images/sunny.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             sunnyImage.src = data;
         });
 
         cloudyImage = new Canvas.Image();
         fs.readFile("./plugins/images/cloudy.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             cloudyImage.src = data;
         });
 
 
         thunderImage = new Canvas.Image();
         fs.readFile("./plugins/images/thunder.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             thunderImage.src = data;
         });
 
         rainImage = new Canvas.Image();
         fs.readFile("./plugins/images/rain.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             rainImage.src = data;
         });
 
         windImage = new Canvas.Image();
         fs.readFile("./plugins/images/wind.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             windImage.src = data;
         });
 
         fogImage = new Canvas.Image();
         fs.readFile("./plugins/images/fog.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             fogImage.src = data;
         });
         
         pressureImage = new Canvas.Image();
         fs.readFile("./plugins/images/pressure.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             pressureImage.src = data;
         });
 
         humidImage = new Canvas.Image();
         fs.readFile("./plugins/images/humidity.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             humidImage.src = data;
         });
 
         sunsetImage = new Canvas.Image();
         fs.readFile("./plugins/images/sunset.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             sunsetImage.src = data;
         });
 
         sunriseImage = new Canvas.Image();
         fs.readFile("./plugins/images/sunrise.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             sunriseImage.src = data;
         });
 
         compassImage = new Canvas.Image();
         fs.readFile("./plugins/images/compass.png", function(err, data) {
-            if (err != null) {
-                log(err.stack, logType.error);
-            }
             compassImage.src = data;
+        });
+
+        snowImage = new Canvas.Image();
+        fs.readFile("./plugins/images/snow.png", function(err, data) {
+            snowImage.src = data;
+        });
+
+        rainsnowImage = new Canvas.Image();
+        fs.readFile("./plugins/images/rainsnow.png", function(err, data) {
+            rainsnowImage.src = data;
         });
 
         commandEmitter.on('processCommand', processCommand);
@@ -542,10 +546,13 @@ module.exports = {
         switch (helpCmd) {
             case "weather":
                 help.title = prefix + "weather";
-                help.usageText = prefix + "weather [location]";
+                help.usageText = prefix + "weather [options] [location]";
                 help.helpText = "Returns the weather at [location]";
                 help.param1 = "- A location\n" +
                               "- A user whose location is known to AstralMod\n";
+                help.availableOptions = "`--metric` Return results in metric\n" +
+                               "`--imperial` Return results in imperial";
+                help.remarks = "You can set your preferred units using `" + prefix + "setunit`.";
                 break;
             case "setloc":
                 help.title = prefix + "setloc";

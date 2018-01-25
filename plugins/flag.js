@@ -254,7 +254,9 @@ function processCommand(message, isMod, command) {
         let flagArray = settings.users[message.author.id].flags;
 
         if (flagArray == null || flagArray.length == 0) {
-            embed.addField("No Pins", "You haven't pinned any messages. To pin a message, use `" + prefix + "pin`.");
+            let embed = new Discord.RichEmbed;
+            embed.setTitle("No Pins");
+            embed.setDescription("You haven't pinned any messages. To pin a message, use `" + prefix + "pin`.");
             message.channel.send(embed);
             return;
         }
@@ -468,6 +470,7 @@ module.exports = {
                 help.helpText = "Show pinned messages";
                 help.param2 = "*Optional Parameter*\n" +
                               "The page number you wish to view";
+                break;
             case "unpin":
                 help.title = prefix + "unpin";
                 help.usageText = prefix + "unpin id";
