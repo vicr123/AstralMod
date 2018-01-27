@@ -1,5 +1,5 @@
 /****************************************
- * 
+ *
  *   Warnings: Plugin for AstralMod that manages warnings
  *   Copyright (C) 2017 Victor Tran
  *
@@ -15,16 +15,14 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * *************************************/
 
 const Discord = require('discord.js');
 var client;
 var consts;
 
-var currentWarnings = {
-    
-};
+var currentWarnings = {};
 
 function processResponse(message) {
     releaseInput(message.guild.id);
@@ -117,7 +115,7 @@ function processCommand(message, isMod, command) {
                     if (warnings == null) {
                         warnings = {}
                     }
-            
+
                     var userWarnings = warnings[user];
                     if (userWarnings == null) {
                         userWarnings = [];
@@ -139,7 +137,7 @@ function processCommand(message, isMod, command) {
                         if (message.guild.members.has(warning.warner)) {
                             warner = message.guild.member(warning.warner);
                         }
-                        
+
                         var field = "";
                         field += warning.reason + "\n\n";
                         field += "**Timestamp:** " + warning.timestamp + "\n";
@@ -184,7 +182,7 @@ function processCommand(message, isMod, command) {
                     if (warnings == null) {
                         warnings = {}
                     }
-            
+
                     var userWarnings = warnings[user];
                     if (userWarnings == null) {
                         userWarnings = [];
@@ -201,7 +199,7 @@ function processCommand(message, isMod, command) {
                     }
 
                     userWarnings.splice(id, 1);
-                    message.reply(":gear: That warning has been deleted. For new warning indices, use `" + prefix + "lswarn`.");
+                    message.reply(":gear: That warning has been removed. For new warning indices, use `" + prefix + "lswarn`.");
 
                     warnings[user] = userWarnings;
                     settings.guilds[message.guild.id].warnings = warnings;
@@ -240,7 +238,7 @@ function processCommand(message, isMod, command) {
             if (message.guild.members.has(warning.warner)) {
                 warner = message.guild.member(warning.warner);
             }
-            
+
             var field = "";
             field += warning.reason + "\n\n";
             field += "**Timestamp:** " + warning.timestamp + "\n";

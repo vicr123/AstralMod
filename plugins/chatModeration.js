@@ -183,7 +183,42 @@ function processCommand(message, isMod, command) {
         } else if (command == "chnk") {
             message.channel.send("Usage: mod:chnk user. For more information, `mod:help chnk`.");
         } else if (command.startsWith("chnk ")) {
-            message.reply("This command is not ready yet.");
+            //message.reply("This command is not ready yet.");
+            let userStr = command.substr(5);
+            let users = parseUser(userStr);
+
+            if (users.length == 0) {
+                throw new UserInputError("Unknown User");
+            }
+
+            //Filter out members
+            let user = null;
+            for (var i = 0; i < users.length; i++) {
+                if (message.guild.members.has(users[i].id)) {
+                    user = message.guild.members.get(users[i].id);
+                    i = users.length;
+                }
+            }
+
+            if (user == null) {
+                throw new UserInputError("Unknown User");
+            }
+
+            if (user.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
+                throw new CommandError("You're not allowed to manage this user.");
+            }
+
+            let nick = "";
+            let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{};':\",./<>?`~";
+
+            for (var i = 0; i < Math.floor(Math.random() * 31) + 1; i++) {
+                nick += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+
+            user.setNickname(nick);
+
+            message.delete();
+            message.channel.send(":abcd: I've changed the nickname of " + getUserString(user) + " to `" + nick.replace("`", "\`") + "`");
         }
     }
 }

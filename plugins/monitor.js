@@ -1,5 +1,5 @@
 /****************************************
- * 
+ *
  *   Monitor: Plugin for AstralMod that gives monitoring information about AstralMod
  *   Copyright (C) 2017 Victor Tran
  *
@@ -15,7 +15,7 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * *************************************/
 
 var client;
@@ -65,7 +65,7 @@ function processCommand(message, isMod, command) {
                 message.edit(parseInt(time) + "ms");
             }
         }).catch(function() {
-            
+
         });
     } else if (command == "settingssize") {
         message.reply("The settings file is " + JSON.stringify(settings).length + " bytes long.");

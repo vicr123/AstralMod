@@ -31,6 +31,22 @@ function processCommand(message, isMod, command) {
         } else {
             message.reply(users[0].displayAvatarURL);
         }
+    } else if (command.startsWith("setunit ")) {
+        let units = command.substr(8);
+        
+        if (settings.users[message.author.id] == null) {
+            settings.users[message.author.id] = {};
+        }
+
+        if (units.toLowerCase() == "metric") {
+            settings.users[message.author.id].units = "metric";
+            message.reply("Ok, we'll use the metric system for your units from now on");
+        } else if (units.toLowerCase() == "imperial") {
+            settings.users[message.author.id].units = "imperial";
+            message.reply("Ok, we'll use the imperial system for your units from now on");
+        } else {
+            throw new UserInputError("Units need to be `metric` or `imperial`");
+        }
     }
 }
 
@@ -48,7 +64,8 @@ module.exports = {
     availableCommands: {
         general: {
             commands: [
-                "pic"
+                "pic",
+                "setunit"
             ],
             modCommands: [
                 
@@ -64,6 +81,11 @@ module.exports = {
                 help.usageText = prefix + "pic user";
                 help.helpText = "Returns the user's profile picture";
                 help.param1 = "A user to retrieve the profile picture";
+            case "setunit":
+                help.title = prefix + "setunit";
+                help.usageText = prefix + "setunit units";
+                help.helpText = "Sets units used by AstralMod";
+                help.param1 = "Either `metric` or `imperial`";
         }
 
         return help;

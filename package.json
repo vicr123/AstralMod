@@ -17,9 +17,12 @@
   },
   "dependencies": {
     "blessed": "^0.1.81",
-    "discord.js": "^11.2.1",
-    "moment": "^2.18.1",
+    "discord.js": "^11.3.0",
+    "localize": "^0.4.7",
+    "moment": "^2.20.1",
     "openweathermap-js": "^1.0.1",
-    "opusscript": "0.0.3"
+    "opusscript": "0.0.3",
+    "canvas": "^1.6.9",
+    "yql": "^1.0.2"
   }
 }
