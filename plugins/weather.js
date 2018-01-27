@@ -440,7 +440,8 @@ function processCommand(message, isMod, command) {
                         
                         //log(place);
                         
-                        message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
+                        //message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
+                        message.reply("Your location is now " + place.name + ", " + place.country.code + " (" + place.centroid.latitude + ", " + place.centroid.longitude + ")");
                     }
                 } catch (err) {
                     message.channel.send(err.toString());
