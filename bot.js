@@ -20,11 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-<<<<<<< HEAD
-    amVersion = "2.7.2";
-=======
     amVersion = "2.8.0";
->>>>>>> blueprint
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
