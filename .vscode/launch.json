@@ -11,7 +11,8 @@
             "program": "${workspaceFolder}/bot.js",
             "console": "integratedTerminal",
             "args": [
-                "--blueprint"
+                "--blueprint",
+                "--nodbl"
             ]
         },
         {
@@ -22,7 +23,8 @@
             "console": "integratedTerminal",
             "args": [
                 "--debug",
-                "--blueprint"
+                "--blueprint",
+                "--nodbl"
             ]
         },
         {

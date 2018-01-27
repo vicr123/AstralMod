@@ -54,10 +54,13 @@ module.exports = {
     availableCommands: {
         general: {
             commands: [
-                "retrsettings"
+
             ],
             modCommands: [
                 
+            ],
+            hiddenCommands: [
+                "retrsettings"
             ]
         }
     },
@@ -69,7 +72,7 @@ module.exports = {
                 help.title = "am:retrsettings";
                 help.usageText = "am:retrsettings";
                 help.helpText = "Retrieves AstralMod settings in a DM";
-                help.remarks = "Only vicr123#5096 and Nebble#2810 can use this command.";
+                help.remarks = "Only vicr123#5096 can use this command.";
                 break;
         }
 
