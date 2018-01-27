@@ -51,12 +51,34 @@ function processCommand(message, isMod, command) {
             let message = messages.array()[number - 1]
             currentMessage = message;
 
-            if (message.content == "") {
-                embed.addField(message.author.tag, "Nontextual context");
-            } else {
-                embed.addField(message.author.tag, message.content.substr(0, 1000));
+            let embedContent = "";
+            if (message.content != "") {
+                embedContent = message.content;
             }
-            return message.channel.send(embed)
+
+            if (message.attachments.size > 0) {
+                for (let [key, attachment] of message.attachments) {
+                    if (attachment.height != null) {
+                        if (embedContent == "") embedContent = "Image";
+                        embed.setImage(attachment.proxyURL);
+                        break;
+                    }
+                }
+
+                if (embedContent == "") {
+                    embedContent = "Nontextual Content"
+                }
+
+                embed.setFooter(message.attachments.size + " attachments");
+            }
+
+            if (embedContent == "") {
+                //Fail to pin this message
+                throw new UserInputError("Cannot pin this message. Please specify another message.");
+            } else {
+                embed.addField(message.author.tag, embedContent.substr(0, 1000));
+                return message.channel.send(embed)
+            }
         }).then(function(message) {
             flaggingMessage = message;
             message.react("⬆").then(message.react("⬇")).then(message.react("📌")).then(message.react("🚫"));
@@ -246,7 +268,11 @@ function processCommand(message, isMod, command) {
             }, {
                 max: 1
             }).then(reactionCollectionFunction);
+        }).catch(function(err) {
+            message.channel.send(err.message);
         });
+    } else if (command == "pin") {
+        message.reply("To pin a message, you'll need to specify which one to pin. For more information")
     } else if (command.startsWith("pins")) {
         message.channel.startTyping();
         let number = command.substr(5);

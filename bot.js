@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.7.2";
+    amVersion = "2.8.0";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -2560,6 +2560,12 @@ function processMessage(message) {
 
 function newGuild(guild) {
     log("New Guild: " + guild.id, logType.info);
+
+    if (settings.guilds[guild.id] != null) {
+        log("Preserving information about guild!" + guild.id, logType.info);
+        return;
+    }
+
     settings.guilds[guild.id] = {
         requiresConfig: true
     };
