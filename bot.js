@@ -3057,6 +3057,10 @@ function loadSettingsFile(file) {
     }
 }
 
+function clientError(err) {
+    log(err.stack, logType.critical);
+}
+
 function readyOnce() {
     log("Now connected to Discord.", logType.good);
     log("Checking if configuration file exists...");
@@ -3157,6 +3161,7 @@ function readyOnce() {
     client.on('ready', readyAgain);
     client.on('resume', resume);
     client.on('guildBanAdd', banAdd);
+    client.on('error', clientError);
 
     setTimeout(saveSettings, 30000);
 
