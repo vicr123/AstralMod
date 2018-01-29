@@ -1450,7 +1450,7 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
             }
 
             if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
-                msg += "- " + tr("This user has been banned from " + parseInt(banCounts[user.id] + " servers known to AstralMod."));
+                msg += "- " + tr("This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod."));
             }
 
             if (msg != "") {
