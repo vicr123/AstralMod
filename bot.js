@@ -1394,7 +1394,7 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
 
     if (compact) {
         var msg = tr("Discriminator:") + " " + user.discriminator + "\n" +
-                    tr("Created at:") + " " + translator.localDate(user.createdAt, "ddd, dd MMM yyyy, hh:mm:ss", true) + "\n";
+                    tr("Created at:") + " " + translator.localDate(user.createdAt, "default", true) + "\n";
 
         if (member.noGuild != true) {
             if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
@@ -1450,7 +1450,7 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
             }
 
             if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
-                msg += "- " + tr("This user has been banned from $[1] servers known to AstralMod.", + parseInt(banCounts[user.id]));
+                msg += "- " + tr("This user has been banned from " +  + parseInt(banCounts[user.id] + " servers known to AstralMod."));
             }
 
             if (msg != "") {
@@ -1697,7 +1697,7 @@ function processAmCommand(message) {
         } else if (command.startsWith("fetchuser ")) {
             var user = command.substr(10);
             client.fetchUser(user).then(function(dUser) {
-                message.channel.send(tr("User $[1] fetched and cached.", dUser.tag));
+                message.channel.send(tr("User " + dUser.tag + " fetched and cached."));
             }).catch(function() {
                 message.channel.send(tr("Couldn't fetch user."));
             });
