@@ -55,9 +55,11 @@ function pollBans() {
     }
 }
 
+let dealMessage = null;
 
 function processDeal(message) {
     //Handle the deal command
+    dealMessage.clearReactions();
 
     var msg = message.content;
     var member = actions[message.guild.id].actionMember;
@@ -456,17 +458,21 @@ function processCommand(message, isMod, command) {
                             }
                             
                             if (canDoActions) {
+                                let messageAuthor = message.author.id;
                                 actions[message.guild.id] = {};
                                 actions[message.guild.id].actionMember = member;
                                 actions[message.guild.id].actioningMember = message.author;
                                 actions[message.guild.id].actionStage = 0;
                                 message.channel.send(msg).then(function(message) {
+                                    dealMessage = message;
+                                    captureInput(processDeal, message.guild.id, messageAuthor);
+
                                     for (reaction in reactions) {
                                         message.react(reactions[reaction]);
                                     }
                                     
                                     message.awaitReactions(function(reaction) {
-                                        if (reaction.count > 1 && reaction.users.has(message.author.id)) {
+                                        if (reaction.count > 1 && reaction.users.has(messageAuthor)) {
                                             return true;
                                         }
                                         return false;
@@ -498,7 +504,6 @@ function processCommand(message, isMod, command) {
                                         processDeal(msg);
                                     });
                                 });
-                                captureInput(processDeal, message.guild.id, message.author.id);
                             } else {
                                 throw new CommandError("No actions can be perfomed on this user.");
                             }
