@@ -247,7 +247,7 @@ function processCommand(message, isMod, command) {
             message.channel.send("`" + c + "` is now blocked in this channel.");
         } else if (command == "unblock") {
             settings.guilds[message.guild.id].blocked = [];
-            message.channel.send("All commands in this channel are no longer blocked.");
+            message.channel.send("All commands in this channel are now unblocked.");
         } else if (command.startsWith("unblock ")) {
             let c = command.substr(8).trim().toLowerCase();
 
