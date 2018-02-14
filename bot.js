@@ -2503,7 +2503,8 @@ function processMessage(message) {
                 for (let key in settings.guilds[message.guild.id].blocked) {
                     let c = settings.guilds[message.guild.id].blocked[key];
                     let triedCommand = text.toLowerCase().substr(prefix.length);
-                    if (triedCommand.startsWith(c + " ") || (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
+                    if (triedCommand.startsWith(c) || triedCommand == c || 
+                        (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
                         //Block this command and treat it like a normal message
                         commandEmitter.emit('newMessage', message);
                         return;
