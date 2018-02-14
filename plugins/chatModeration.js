@@ -219,6 +219,50 @@ function processCommand(message, isMod, command) {
 
             message.delete();
             message.channel.send(":abcd: I've changed the nickname of " + getUserString(user) + " to `" + nick.replace("`", "\`") + "`");
+        } else if (command == "block") {
+            settings.guilds[message.guild.id].blocked = [
+                "all"
+            ];
+            
+            message.channel.send("All commands in this channel will now be ignored.");
+        } else if (command.startsWith("block ")) {
+            let c = command.substr(6).trim().toLowerCase();
+
+            if (c.indexOf(" ") != -1) {
+                message.channel.send("Commands are one word. Please specify a valid command.");
+                return;
+            }
+
+            if (c == "block") {
+                message.channel.send("Can't block the `block` command. Please try another command.");
+                return;
+            }
+
+            if (c == "unblock") {
+                message.channel.send("Can't block the `unblock` command. Please try another command.");
+                return;
+            }
+
+            settings.guilds[message.guild.id].blocked.push(c);
+            message.channel.send("`" + c + "` is now blocked in this channel.");
+        } else if (command == "unblock") {
+            settings.guilds[message.guild.id].blocked = [];
+            message.channel.send("All commands in this channel are no longer blocked.");
+        } else if (command.startsWith("unblock ")) {
+            let c = command.substr(8).trim().toLowerCase();
+
+            if (c.indexOf(" ") != -1) {
+                message.channel.send("Commands are one word. Please specify a valid command.");
+                return;
+            }
+
+            if (settings.guilds[message.guild.id].blocked.indexOf(c) == -1) {
+                message.channel.send("This command has not been blocked.");
+                return;
+            }
+
+            settings.guilds[message.guild.id].blocked.splice(settings.guilds[message.guild.id].blocked.indexOf(c), 1);
+            message.channel.send("`" + c + "` is now unblocked in this channel.");
         }
     }
 }
@@ -242,7 +286,9 @@ module.exports = {
             modCommands: [
                 "rm",
                 "panic",
-                "chnk"
+                "chnk",
+                "block",
+                "unblock"
             ]
         }
     },
@@ -269,6 +315,20 @@ module.exports = {
                 help.helpText = "Sets a random nickname to user.";
                 help.param1 = "- The User ID of the user to apply a new nickname to\n" +
                               "- Mention of the user to apply a new nickname to";
+                break;
+            case "block":
+                help.title = prefix + "block";
+                help.usageText = prefix + "block [command]";
+                help.helpText = "Blocks users from using a command in the current channel.";
+                help.param1 = "*Optional Parameter*\n" +
+                              "The command to block, or `all` for all commands. If no command is specified, all commands will be blocked.";
+                break;
+            case "unblock":
+                help.title = prefix + "unblock";
+                help.usageText = prefix + "unblock [command]";
+                help.helpText = "Unblocks users from using a command in the current channel.";
+                help.param1 = "*Optional Parameter*\n" +
+                              "The command to unblock. If no command is specified, all commands will be unblocked.";
                 break;
         }
 

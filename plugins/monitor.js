@@ -99,15 +99,15 @@ module.exports = {
 
         switch (helpCmd) {
             case "uptime":
-                help.title = "am:uptime";
+                help.title = prefix + "uptime";
                 help.helpText = "Queries AstralMod for the amount of time since it started.";
                 break;
             case "pingtime":
-                help.title = "am:pingtime";
+                help.title = prefix + "pingtime";
                 help.helpText = "Returns the amount of time that it takes for a message to get from AstralMod to Discord and back.";
                 break;
             case "pingtime":
-                help.title = "am:settingssize";
+                help.title = prefix + "settingssize";
                 help.helpText = "Returns the approximate file size of the settings file";
                 break;
         }

@@ -29,7 +29,7 @@ var consts;
 
 let sunnyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage;
 
-function getDataFromCode(code, ctx) {
+function getDataFromCode(code, ctx, isDay = true) {
     log(code.toString(), logType.debug);
     let retval = {}
     
@@ -173,6 +173,9 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     message.channel.stopTyping(true);
                     return;
                 }
+
+                /*let date = new Date(data.query.results.channel.lastBuildDate);
+                log(date.toUTCString(), logType.debug);*/
 
                 var canvas = new Canvas(500, 410);
                 var ctx = canvas.getContext('2d');

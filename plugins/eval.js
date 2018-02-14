@@ -87,6 +87,8 @@ function processEval(message) {
             splitOptions.prepend = "```js\n";
         }
 
+        m = m.replace(client.token, "[client token redacted]");
+
         message.channel.send(m, {
             split: splitOptions
         }).then(function(message) {
@@ -102,14 +104,15 @@ function processEval(message) {
                         edit = "[promise output suppressed]";
                     }
 
+                    edit = edit.replace(client.token, "[client token redacted]");
                     message.edit(edit);
                 }).catch(function(err) {
-                    message.edit("[promise: :large_orange_diamond: " + err.message + "]")  
+                    message.edit("[promise: :large_orange_diamond: " + err.message.replace(client.token, "[client token redacted]") + "]")  
                 });
             }
         });
     } catch (err) {
-        message.channel.send(":large_orange_diamond: " + err.message);
+        message.channel.send(":large_orange_diamond: " + err.message.replace(client.token, "[client token redacted]"));
     }
 }
 

@@ -2492,9 +2492,24 @@ function processMessage(message) {
 
         //Determine if this is in a guild
         if (message.guild != null) {
+            if (settings.guilds[message.guild.id].blocked == null) {
+                settings.guilds[message.guild.id].blocked = [];
+            }
+
             if (capture[message.guild.id] != null && capture[message.guild.id].author == message.author.id) {
                 capture[message.guild.id].function(message);
             } else if (text.toLowerCase().startsWith(prefix)) {
+                //Check if the command has been blocked
+                for (let key in settings.guilds[message.guild.id].blocked) {
+                    let c = settings.guilds[message.guild.id].blocked[key];
+                    let triedCommand = text.toLowerCase().substr(prefix.length);
+                    if (triedCommand.startsWith(c + " ") || (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
+                        //Block this command and treat it like a normal message
+                        commandEmitter.emit('newMessage', message);
+                        return;
+                    }
+                }
+
                 //Determine if this is a command
                 if (isMod(message.member) || text == prefix + "config") { //This is a mod command
                     if (!processModCommand(message)) {
