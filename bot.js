@@ -100,6 +100,10 @@ var lockBox = [];
 var banCounts = {};
 var finalStdout = "";
 
+let logFile = fs.createWriteStream("./log.log", {flags: 'a'});
+logFile.write("\n\n-----NEW SESSION START-----\n");
+logFile.write("ASTRALMOD " + amVersion + "\n");
+
 global.UserInputError = function() {
     var temp = Error.apply(this, arguments);
     temp.name = "UserInputError";
@@ -791,6 +795,11 @@ global.log = function(logMessage, type = logType.debug) {
         logBox.log("[" + new Date().toLocaleTimeString("us", {
             hour12: false
         }) + "] " + logOutput);
+
+        logFile.write("[" + new Date().toLocaleTimeString("us", {
+            hour12: false
+        }) + "] " + logString + "\n");
+        
         renderScreen();
     }
 }
