@@ -43,6 +43,8 @@ const client = new Discord.Client({
 });
 const localize = require('localize');
 
+let doNotDeleteGuilds = [];
+
 //Load translations
 let translator;
 {
@@ -2600,12 +2602,16 @@ function newGuild(guild) {
 }
 
 function removeGuild(guild) {
-    //Delete guild from database
-    settings.guilds[guild.id] = null;
-    delete settings.guilds[guild.id];
-    log("Removed Guild: " + guild.id, logType.info);
+    if (doNotDeleteGuilds.indexOf(guild.id) == -1) {
+        //Delete guild from database
+        settings.guilds[guild.id] = null;
+        delete settings.guilds[guild.id];
+        log("Removed Guild: " + guild.id, logType.info);
 
-    postDBL();
+        postDBL();
+    } else {
+        log("Attempted to delete unavailable guild: " + guild.id, logType.warning);
+    }
 }
 
 function saveSettings(showOkMessage = false) {
@@ -2986,6 +2992,7 @@ function vacuumSettings() {
 
 function guildUnavailable(guild) {
     log(guild.id + " has become unavailable.", logType.critical);
+    doNotDeleteGuilds.push(guild);
 }
 
 function guildMemberUpdate(oldUser, newUser) {
