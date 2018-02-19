@@ -3001,7 +3001,7 @@ function vacuumSettings() {
 
 function guildUnavailable(guild) {
     log(guild.id + " has become unavailable.", logType.critical);
-    doNotDeleteGuilds.push(guild);
+    doNotDeleteGuilds.push(guild.id);
 }
 
 function guildMemberUpdate(oldUser, newUser) {
@@ -3255,9 +3255,13 @@ function postDBL() {
         }, function(res) {
             res.setEncoding("utf8");
             res.on("data", function(data) {
-                let response = JSON.parse(data);
-                if (response.hasOwnProperty("error")) {
-                    log("DBL: " + response.error, logType.error);
+                try {
+                    let response = JSON.parse(data);
+                    if (response.hasOwnProperty("error")) {
+                        log("DBL: " + response.error, logType.error);
+                    }
+                } catch (err) {
+                    log("DBL: " + data, logType.error);
                 }
             });
         })
