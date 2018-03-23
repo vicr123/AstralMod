@@ -327,15 +327,14 @@ module.exports = {
     availableCommands: {
         general: {
             commands: [
-                
+                "features"
             ],
             modCommands: [
                 "rm",
                 "panic",
                 "chnk",
                 "block",
-                "unblock",
-                "features"
+                "unblock"
             ]
         }
     },

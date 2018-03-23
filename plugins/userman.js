@@ -167,6 +167,15 @@ function processDeal(message) {
                           "You may re-enter, but it may be a good idea to step back for a bit.") + " :slight_smile:")
                 .then(kickFunction).catch(kickFunction);
         } else if (actions[message.guild.id].actionToPerform == "ban") {
+            if (banDescriptor[message.guild.id] == null) {
+                banDescriptor[message.guild.id] = {};
+            }
+
+            banDescriptor[message.guild.id][member.user.id] = {
+                author: message.author,
+                reason: msg
+            };
+
             let banFunction = function() {
                 member.ban(msg).then(function(member) {
                     message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
