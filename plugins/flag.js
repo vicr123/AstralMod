@@ -274,8 +274,10 @@ function processCommand(message, isMod, command) {
     } else if (command == "pin") {
         message.reply("To pin a message, you'll need to specify which one to pin. For more information")
     } else if (command.startsWith("pins")) {
-        message.channel.startTyping();
+        //message.channel.startTyping();
         let number = command.substr(5);
+        let nsfw = message.channel.nsfw;
+
         //Get flags
         let flagArray = settings.users[message.author.id].flags;
 
@@ -305,6 +307,10 @@ function processCommand(message, isMod, command) {
             let channel = client.channels.get(flagItem.channel);
             if (channel == null) {
                 throw new CommandError("Can't find channel");
+            }
+
+            if (channel.nsfw && !nsfw) {
+                throw new CommandError("Pin in NSFW channel. View pins in NSFW channel to see pin.");
             }
 
             channel.fetchMessage(flagItem.message).then(function(fMessage) {
@@ -391,6 +397,12 @@ function processCommand(message, isMod, command) {
             let channel = client.channels.get(flagItem.channel);
             if (channel == null) {
                 embed.addField("Pin #" + (i + 1), "Can't find channel");
+                getMessageNumber(++i);
+                return;
+            }
+
+            if (channel.nsfw && !nsfw) {
+                embed.addField("Pin #" + (i + 1), "Pin in NSFW channel. View pins in NSFW channel to see pin.");
                 getMessageNumber(++i);
                 return;
             }

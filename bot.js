@@ -2507,12 +2507,30 @@ function processMessage(message) {
                 settings.guilds[message.guild.id].blocked = [];
             }
 
+            if (settings.guilds[message.guild.id].blocked[message.channel.id] == null) {
+                settings.guilds[message.guild.id].blocked[message.channel.id] = [];
+            }
+            if (settings.guilds[message.guild.id].blocked.guild == null) {
+                settings.guilds[message.guild.id].blocked.guild = [];
+            }
+
             if (capture[message.guild.id] != null && capture[message.guild.id].author == message.author.id) {
                 capture[message.guild.id].function(message);
             } else if (text.toLowerCase().startsWith(prefix)) {
                 //Check if the command has been blocked
-                for (let key in settings.guilds[message.guild.id].blocked) {
-                    let c = settings.guilds[message.guild.id].blocked[key];
+                for (let key in settings.guilds[message.guild.id].blocked[message.channel.id]) {
+                    let c = settings.guilds[message.guild.id].blocked[message.channel.id][key];
+                    let triedCommand = text.toLowerCase().substr(prefix.length);
+                    if (triedCommand.startsWith(c) || triedCommand == c || 
+                        (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
+                        //Block this command and treat it like a normal message
+                        commandEmitter.emit('newMessage', message);
+                        return;
+                    }
+                }
+
+                for (let key in settings.guilds[message.guild.id].blocked.guild) {
+                    let c = settings.guilds[message.guild.id].blocked.guild[key];
                     let triedCommand = text.toLowerCase().substr(prefix.length);
                     if (triedCommand.startsWith(c) || triedCommand == c || 
                         (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
