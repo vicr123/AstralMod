@@ -7,3 +7,7 @@ node_modules/
 td.js
 settings.json
 iv.txt
+.settings-beforeEncrypt.json
+gce
+log.log
+.kdev4/AstralMod.kdev4
