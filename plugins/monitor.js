@@ -54,19 +54,6 @@ function processCommand(message, isMod, command) {
         }
 
         message.reply(":clock1: AstralMod has been up for " + timeString + " days.");
-    } else if (command == "pingtime") {
-        pingDate = Date.now();
-        message.channel.send("Ping!").then(function(message) {
-            var time = Date.now() - pingDate;
-
-            if (time == 420) {
-                message.edit("Either 419ms or 421ms");
-            } else {
-                message.edit(parseInt(time) + "ms");
-            }
-        }).catch(function() {
-
-        });
     } else if (command == "settingssize") {
         message.reply("The settings file is " + JSON.stringify(settings).length + " bytes long.");
     }
@@ -89,7 +76,6 @@ module.exports = {
         general: {
             commands: [
                 "uptime",
-                "pingtime",
                 "settingssize"
             ]
         }
@@ -102,11 +88,7 @@ module.exports = {
                 help.title = prefix + "uptime";
                 help.helpText = "Queries AstralMod for the amount of time since it started.";
                 break;
-            case "pingtime":
-                help.title = prefix + "pingtime";
-                help.helpText = "Returns the amount of time that it takes for a message to get from AstralMod to Discord and back.";
-                break;
-            case "pingtime":
+            case "settingssize":
                 help.title = prefix + "settingssize";
                 help.helpText = "Returns the approximate file size of the settings file";
                 break;

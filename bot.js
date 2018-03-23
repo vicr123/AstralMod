@@ -20,12 +20,13 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.8.2";
+    amVersion = "2.9";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
     global.prefix = "am#";
 }
+const emojiServer = "426703640082776065"; //Change this if you're forking AM :)
 
 const Discord = require('discord.js');
 const consts = require('./consts.js');
@@ -46,7 +47,6 @@ const localize = require('localize');
 let doNotDeleteGuilds = [];
 
 //Load translations
-let translator;
 {
     let translations = {};
     let dates = {};
@@ -68,7 +68,7 @@ let translator;
             dates[locale] = d;
         }
     }
-    translator = new localize(translations);
+    global.translator = new localize(translations);
     translator.loadDateFormats(dates);
     translator.throwOnMissingTranslation(false);
 }
@@ -99,6 +99,7 @@ var nickChanges = {};
 var lockBox = [];
 var banCounts = {};
 var finalStdout = "";
+global.banDescriptor = {};
 
 let logFile = fs.createWriteStream("./log.log", {flags: 'a'});
 logFile.write("\n\n-----NEW SESSION START-----\n");
@@ -150,6 +151,15 @@ global.filterOffensive = function(offensive) {
     offensive = offensive.replace("shit", "s•••");
     offensive = offensive.replace("fuck", "f•••");
     return offensive;
+}
+
+global.getEmoji = function(emojiName) {
+    let e = client.guilds.get(emojiServer).emojis.find("name", emojiName);
+    if (e == null) {
+        return ":arrow_right:";
+    } else {
+        return e.toString();
+    }
 }
 
 global.logType = {
@@ -1370,7 +1380,6 @@ function isMod(member) {
 }
 
 global.uinfo = function(user, channel, guild = null, compact = false) {
-    channel.startTyping();
     var member = null;
     if (guild != null) {
         for ([id, gMember] of guild.members) {
@@ -1469,11 +1478,7 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
             }
         }
     }
-    channel.send("", {embed: embed}).then(function() {
-      channel.stopTyping();
-    }).catch(function() {
-      channel.stopTyping(true);
-    });
+    channel.send("", {embed: embed});
 }
 
 function processModCommand(message) {
@@ -1583,295 +1588,316 @@ function processModCommand(message) {
 
 function processAmCommand(message) {
     var text = message.content;
+    var command;
 
-    //Make sure configuration is not required
-    if (settings.guilds[message.guild.id].requiresConfig && text != prefix + "config") {
-        message.reply("AstralMod setup isn't complete. You'll need to wait for " + message.guild.owner.displayName + " to type `" + prefix + "config` and set up AstralMod before you can use it.");
-    } else {
-        var command;
+    command = text.toLowerCase().substr(prefix.length);
 
-        command = text.toLowerCase().substr(prefix.length);
+    if (command == "ping") {
+        let pingDate = Date.now();
+        message.channel.send(getEmoji("signal0") + " I'm here!").then(function(message) {
+            let time = Date.now() - pingDate;
 
-        if (command == "ping") {
-            message.channel.send(getRandom('PONG! I want to play pong too... :\'(',
-                                           'PONG! I love playing pong!',
-                                           'PONG! Thanks for playing pong with me!',
-                                           'PONG!',
-                                           'Just going to break convention here and not start this reply normally.'));
-            message.delete().catch(function() {
-                logPromiseRejection(message, "messageDelete");
-            });
-            return true;
-        } else if (command == "nick") {
-            if (settings.guilds[message.guild.id].nickModeration) {
-                var nickResult = setNicknameTentative(message.member, "", message.guild);
-                if (nickResult == "cooldown") {
-                    message.reply(tr("There is a one day cooldown between use of this command."));
-                } else if (nickResult == "length") {
-                    message.reply(tr("Nicknames need to be less than 32 characters."));
+            /* Times:
+                0 - 100ms:    signal5
+                100 - 200ms:  signal4
+                200 - 300ms:  signal3
+                300 - 500ms:  signal2
+                500 - 1000ms: signal1
+                1000ms+:      signal0
+            */
+
+            if (time == 420) {
+                message.edit(getEmoji("signal2") + " I'm here! It took either 419ms or 421ms to respond.");
+            } else {
+                let e;
+                if (time < 100) {
+                    e = getEmoji("signal5");
+                } else if (time <= 200) {
+                    e = getemoji("signal4");
+                } else if (time <= 300) {
+                    e = getEmoji("signal3");
+                } else if (time <= 500) {
+                    e = getEmoji("signal2");
+                } else if (time <= 1000) {
+                    e = getEmoji("signal1");
                 } else {
-                    message.reply(tr("Ok, give us a bit to make sure the mods are ok with that."));
+                    e = getEmoji("signal0");
                 }
+                message.edit(e + " I'm here! It took " + parseInt(time) + "ms to respond.");
+            }
+        }).catch(function() {
+
+        });
+        return true;
+    } else if (command == "nick") {
+        if (settings.guilds[message.guild.id].nickModeration) {
+            var nickResult = setNicknameTentative(message.member, "", message.guild);
+            if (nickResult == "cooldown") {
+                message.reply(tr("There is a one day cooldown between use of this command."));
+            } else if (nickResult == "length") {
+                message.reply(tr("Nicknames need to be less than 32 characters."));
             } else {
-                message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
+                message.reply(tr("Ok, give us a bit to make sure the mods are ok with that."));
             }
-            return true;
-        } else if (command.startsWith("nick ")) {
-            if (settings.guilds[message.guild.id].nickModeration) {
-                var nickResult = setNicknameTentative(message.member, text.substr(8), message.guild);
-                if (nickResult == "cooldown") {
-                    message.reply(tr("There is a one day cooldown between use of this command."));
-                } else if (nickResult == "length") {
-                    message.reply(tr("Nicknames need to be less than 32 characters."));
-                } else {
-                    message.reply(tr("Alright, give us a bit to make sure the mods are OK with that."));
-                }
-            } else {
-                message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
-            }
-            return true;
-        } else if (command == "suggest") {
-            message.reply("Suggestions are coming soon. Stay tuned!");
-            return true;
-        } else if (command.startsWith("suggest ")) {
-            message.reply("Suggestions are coming soon. Stay tuned!");
-            return true;
-        } else if (command == "version") {
-            message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot");
-            return true;
-        /*} else if (command.startsWith("setlocale ")) {
-            let locale = command.substr(10);
-            if (!fs.existsSync("./translations/" + locale)) {
-                message.channel.send(tr("Unfortunately we don't have that locale in AstralMod."));
-            } else {
-                settings.users[message.author.id].locale = locale;
-                translator.setLocale(locale);
-
-                let embed = new Discord.RichEmbed();
-                embed.setColor("#003CFF");
-                embed.setAuthor(tr("AstralMod Localisation"));
-                embed.setDescription(tr("Alright, your locale is now English."));
-                embed.setFooter(tr("AstralMod Localisation is in the preview stage. Many items will not be translated."))
-                message.channel.send(embed);
-            }
-            return true;*/
-        } else if (command == "help") { //General help
-            var embed = new Discord.RichEmbed();
-            embed.setColor("#3C3C96");
-            embed.setAuthor("AstralMod Help Contents");
-            embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
-
-            embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nsetlocale\nhelp", true);
-
-            for (key in plugins) {
-                var plugin = plugins[key];
-                if (plugin.availableCommands != null) {
-                    var commandsList = "";
-
-                    if (plugin.availableCommands.general != null) {
-                        if (plugin.availableCommands.general.modCommands != null) {
-                            for (command of plugin.availableCommands.general.modCommands) {
-                                commandsList += "**" + command + "**\n";
-                            }
-                        }
-
-                        if (plugin.availableCommands.general.commands != null) {
-                            for (command of plugin.availableCommands.general.commands) {
-                                commandsList += command + "\n";
-                            }
-                        }
-                    }
-
-                    if (plugin.availableCommands[message.guild.id] != null) {
-                        if (plugin.availableCommands[message.guild.id].modCommands != null) {
-                            for (command of plugin.availableCommands[message.guild.id].modCommands) {
-                                commandsList += "**" + command + "**\n";
-                            }
-                        }
-
-                        if (plugin.availableCommands[message.guild.id].commands != null) {
-                            for (command of plugin.availableCommands[message.guild.id].commands) {
-                                commandsList += command + "\n";
-                            }
-                        }
-                    }
-
-                    if (commandsList != "") {
-                        embed.addField(plugin.name, commandsList, true);
-                    }
-                }
-            }
-
-            embed.setFooter("AstralMod " + amVersion + ". Moderator commands denoted with bold text.");
-            message.channel.send("", { embed: embed });
-            return true;
-        } else if (command.startsWith("fetchuser ")) {
-            var user = command.substr(10);
-            client.fetchUser(user).then(function(dUser) {
-                message.channel.send(tr("User " + dUser.tag + " fetched and cached."));
-            }).catch(function() {
-                message.channel.send(tr("Couldn't fetch user."));
-            });
-            return true;
-        } else if (command.startsWith("help ")) { //Contextual help
-            //Get help for specific command
-            var embed = new Discord.RichEmbed();
-            embed.setAuthor("AstralMod Help Contents");
-
-            var helpCmd = command.substr(5);
-
-            var help = {};
-            switch (helpCmd) {
-                case "config":
-                    help.title = prefix + "config";
-                    help.helpText = "Configures AstralMod for this server";
-                    break;
-                case "shoo":
-                    help.title = prefix + "shoo";
-                    help.helpText = "Leave the server, purging all configuration";
-                    break;
-                case "oknick":
-                    help.title = prefix + "oknick";
-                    help.helpText = "Accepts a nickname";
-                    break;
-                case "ping":
-                    help.title = prefix + "ping";
-                    help.helpText = "Asks AstralMod to reply with a message";
-                    break;
-                case "version":
-                    help.title = prefix + "version";
-                    help.helpText = "Queries the current AstralMod version";
-                    break;
-                case "nick":
-                    help.title = prefix + "nick";
-                    help.usageText = prefix + "nick nickname";
-                    help.helpText = "Sets your nickname after staff have a chance to review it";
-                    help.param1 = "The nickname you wish to be known as";
-                    break;
-                case "fetchuser":
-                    help.title = prefix + "fetchuser";
-                    help.usageText = prefix + "fetchuser [ID]";
-                    help.helpText = "Tells AstralMod about the existance of a user";
-                    help.param1 = "The user ID you want to tell AstralMod about.";
-                    help.remarks = "AstralMod will search for users from all of Discord."
-                    break;
-                case "setlocale":
-                    help.title = prefix + "setlocale";
-                    help.usageText = prefix + "setlocale [locale]";
-                    help.helpText = "Sets the language AstralMod will use when processing your commands";
-                    break;
-                case "help":
-                    help.title = prefix + "help";
-                    help.usageText = prefix + "help [command]";
-                    help.helpText = "Acquire information about how to use AstralMod and any available commands";
-                    help.param1 = "*Optional Parameter*\n" +
-                                  "The command to acquire information about.\n" +
-                                  "If this parameter is not present, we'll list the available commands.";
-                    break;
-                default:
-                    //Look thorough plugins for help
-                    for (key in plugins) {
-                        var plugin = plugins[key];
-                        if (plugin.acquireHelp != null) {
-                            if (plugin.availableCommands != null) {
-                                if (plugin.availableCommands.general != null) {
-                                    if (plugin.availableCommands.general.hiddenCommands != null) {
-                                        if (plugin.availableCommands.general.hiddenCommands.indexOf(helpCmd) != -1) {
-                                            help = plugin.acquireHelp(helpCmd);
-                                            break;
-                                        }
-                                    }
-
-                                    if (plugin.availableCommands.general.modCommands != null) {
-                                        if (plugin.availableCommands.general.modCommands.indexOf(helpCmd) != -1) {
-                                            help = plugin.acquireHelp(helpCmd);
-                                            break;
-                                        }
-                                    }
-
-                                    if (plugin.availableCommands.general.commands != null) {
-                                        if (plugin.availableCommands.general.commands.indexOf(helpCmd) != -1) {
-                                            help = plugin.acquireHelp(helpCmd);
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                if (plugin.availableCommands[message.guild.id] != null) {
-                                    if (plugin.availableCommands[message.guild.id].modCommands != null) {
-                                        if (plugin.availableCommands[message.guild.id].modCommands.indexOf(helpCmd) != -1) {
-                                            help = plugin.acquireHelp(helpCmd);
-                                            break;
-                                        }
-                                    }
-
-                                    if (plugin.availableCommands[message.guild.id].commands != null) {
-                                        if (plugin.availableCommands[message.guild.id].commands.indexOf(helpCmd) != -1) {
-                                            help = plugin.acquireHelp(helpCmd);
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-            }
-
-            if (help.helpText == null) {
-                embed.setColor("#FF0000");
-                embed.setDescription("Couldn't obtain help for that command.");
-            } else {
-                embed.setColor("#3C3C96");
-                if (help.title == null) {
-                    embed.setDescription("Command Help");
-                } else {
-                    embed.setDescription("for " + help.title)
-                }
-
-                if (help.usageText != null) {
-                    embed.addField("Usage", help.usageText);
-                }
-
-                embed.addField("Description", help.helpText);
-
-
-                if (help.options != null) {
-                    var options = "```";
-                    for (value of help.options) {
-                        options += value + "\n";
-                    }
-                    options += "```";
-                    embed.addField("Options", options);
-                }
-
-                if (help.availableOptions != null) {
-                    embed.addField("Available Options", help.availableOptions);
-                }
-
-                if (help.param1 != null) {
-                    embed.addField("Parameter 1", help.param1);
-                }
-
-                if (help.param2 != null) {
-                    embed.addField("Parameter 2", help.param2);
-                }
-
-                if (help.param3 != null) {
-                    embed.addField("Parameter 3", help.param3);
-                }
-
-                if (help.remarks != null) {
-                    embed.addField("Remarks", help.remarks);
-                }
-            }
-            embed.setFooter("AstralMod " + amVersion);
-            message.channel.send("", { embed: embed });
-            return true;
-        } else if (command.startsWith("throw ")) {
-            var msg = command.substr(6);
-            throw new Error(msg);
-            return true;
+        } else {
+            message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
         }
+        return true;
+    } else if (command.startsWith("nick ")) {
+        if (settings.guilds[message.guild.id].nickModeration) {
+            var nickResult = setNicknameTentative(message.member, text.substr(8), message.guild);
+            if (nickResult == "cooldown") {
+                message.reply(tr("There is a one day cooldown between use of this command."));
+            } else if (nickResult == "length") {
+                message.reply(tr("Nicknames need to be less than 32 characters."));
+            } else {
+                message.reply(tr("Alright, give us a bit to make sure the mods are OK with that."));
+            }
+        } else {
+            message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
+        }
+        return true;
+    } else if (command == "suggest") {
+        message.reply("Suggestions are coming soon. Stay tuned!");
+        return true;
+    } else if (command.startsWith("suggest ")) {
+        message.reply("Suggestions are coming soon. Stay tuned!");
+        return true;
+    } else if (command == "version") {
+        message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot");
+        return true;
+    /*} else if (command.startsWith("setlocale ")) {
+        let locale = command.substr(10);
+        if (!fs.existsSync("./translations/" + locale)) {
+            message.channel.send(tr("Unfortunately we don't have that locale in AstralMod."));
+        } else {
+            settings.users[message.author.id].locale = locale;
+            translator.setLocale(locale);
+
+            let embed = new Discord.RichEmbed();
+            embed.setColor("#003CFF");
+            embed.setAuthor(tr("AstralMod Localisation"));
+            embed.setDescription(tr("Alright, your locale is now English."));
+            embed.setFooter(tr("AstralMod Localisation is in the preview stage. Many items will not be translated."))
+            message.channel.send(embed);
+        }
+        return true;*/
+    } else if (command == "help") { //General help
+        var embed = new Discord.RichEmbed();
+        embed.setColor("#3C3C96");
+        embed.setAuthor("AstralMod Help Contents");
+        embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
+
+        embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nsetlocale\nhelp", true);
+
+        for (key in plugins) {
+            var plugin = plugins[key];
+            if (plugin.availableCommands != null) {
+                var commandsList = "";
+
+                if (plugin.availableCommands.general != null) {
+                    if (plugin.availableCommands.general.modCommands != null) {
+                        for (command of plugin.availableCommands.general.modCommands) {
+                            commandsList += "**" + command + "**\n";
+                        }
+                    }
+
+                    if (plugin.availableCommands.general.commands != null) {
+                        for (command of plugin.availableCommands.general.commands) {
+                            commandsList += command + "\n";
+                        }
+                    }
+                }
+
+                if (plugin.availableCommands[message.guild.id] != null) {
+                    if (plugin.availableCommands[message.guild.id].modCommands != null) {
+                        for (command of plugin.availableCommands[message.guild.id].modCommands) {
+                            commandsList += "**" + command + "**\n";
+                        }
+                    }
+
+                    if (plugin.availableCommands[message.guild.id].commands != null) {
+                        for (command of plugin.availableCommands[message.guild.id].commands) {
+                            commandsList += command + "\n";
+                        }
+                    }
+                }
+
+                if (commandsList != "") {
+                    embed.addField(plugin.name, commandsList, true);
+                }
+            }
+        }
+
+        embed.setFooter("AstralMod " + amVersion + ". Moderator commands denoted with bold text.");
+        message.channel.send("", { embed: embed });
+        return true;
+    } else if (command.startsWith("fetchuser ")) {
+        var user = command.substr(10);
+        client.fetchUser(user).then(function(dUser) {
+            message.channel.send(tr("User " + dUser.tag + " fetched and cached."));
+        }).catch(function() {
+            message.channel.send(tr("Couldn't fetch user."));
+        });
+        return true;
+    } else if (command.startsWith("help ")) { //Contextual help
+        //Get help for specific command
+        var embed = new Discord.RichEmbed();
+        embed.setAuthor("AstralMod Help Contents");
+
+        var helpCmd = command.substr(5);
+
+        var help = {};
+        switch (helpCmd) {
+            case "config":
+                help.title = prefix + "config";
+                help.helpText = "Configures AstralMod for this server";
+                break;
+            case "shoo":
+                help.title = prefix + "shoo";
+                help.helpText = "Leave the server, purging all configuration";
+                break;
+            case "oknick":
+                help.title = prefix + "oknick";
+                help.helpText = "Accepts a nickname";
+                break;
+            case "ping":
+                help.title = prefix + "ping";
+                help.helpText = "Asks AstralMod to reply with a message";
+                break;
+            case "version":
+                help.title = prefix + "version";
+                help.helpText = "Queries the current AstralMod version";
+                break;
+            case "nick":
+                help.title = prefix + "nick";
+                help.usageText = prefix + "nick nickname";
+                help.helpText = "Sets your nickname after staff have a chance to review it";
+                help.param1 = "The nickname you wish to be known as";
+                break;
+            case "fetchuser":
+                help.title = prefix + "fetchuser";
+                help.usageText = prefix + "fetchuser [ID]";
+                help.helpText = "Tells AstralMod about the existance of a user";
+                help.param1 = "The user ID you want to tell AstralMod about.";
+                help.remarks = "AstralMod will search for users from all of Discord."
+                break;
+            case "setlocale":
+                help.title = prefix + "setlocale";
+                help.usageText = prefix + "setlocale [locale]";
+                help.helpText = "Sets the language AstralMod will use when processing your commands";
+                break;
+            case "help":
+                help.title = prefix + "help";
+                help.usageText = prefix + "help [command]";
+                help.helpText = "Acquire information about how to use AstralMod and any available commands";
+                help.param1 = "*Optional Parameter*\n" +
+                                "The command to acquire information about.\n" +
+                                "If this parameter is not present, we'll list the available commands.";
+                break;
+            default:
+                //Look thorough plugins for help
+                for (key in plugins) {
+                    var plugin = plugins[key];
+                    if (plugin.acquireHelp != null) {
+                        if (plugin.availableCommands != null) {
+                            if (plugin.availableCommands.general != null) {
+                                if (plugin.availableCommands.general.hiddenCommands != null) {
+                                    if (plugin.availableCommands.general.hiddenCommands.indexOf(helpCmd) != -1) {
+                                        help = plugin.acquireHelp(helpCmd);
+                                        break;
+                                    }
+                                }
+
+                                if (plugin.availableCommands.general.modCommands != null) {
+                                    if (plugin.availableCommands.general.modCommands.indexOf(helpCmd) != -1) {
+                                        help = plugin.acquireHelp(helpCmd);
+                                        break;
+                                    }
+                                }
+
+                                if (plugin.availableCommands.general.commands != null) {
+                                    if (plugin.availableCommands.general.commands.indexOf(helpCmd) != -1) {
+                                        help = plugin.acquireHelp(helpCmd);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (plugin.availableCommands[message.guild.id] != null) {
+                                if (plugin.availableCommands[message.guild.id].modCommands != null) {
+                                    if (plugin.availableCommands[message.guild.id].modCommands.indexOf(helpCmd) != -1) {
+                                        help = plugin.acquireHelp(helpCmd);
+                                        break;
+                                    }
+                                }
+
+                                if (plugin.availableCommands[message.guild.id].commands != null) {
+                                    if (plugin.availableCommands[message.guild.id].commands.indexOf(helpCmd) != -1) {
+                                        help = plugin.acquireHelp(helpCmd);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+
+        if (help.helpText == null) {
+            embed.setColor("#FF0000");
+            embed.setDescription("Couldn't obtain help for that command.");
+        } else {
+            embed.setColor("#3C3C96");
+            if (help.title == null) {
+                embed.setDescription("Command Help");
+            } else {
+                embed.setDescription("for " + help.title)
+            }
+
+            if (help.usageText != null) {
+                embed.addField("Usage", help.usageText);
+            }
+
+            embed.addField("Description", help.helpText);
+
+
+            if (help.options != null) {
+                var options = "```";
+                for (value of help.options) {
+                    options += value + "\n";
+                }
+                options += "```";
+                embed.addField("Options", options);
+            }
+
+            if (help.availableOptions != null) {
+                embed.addField("Available Options", help.availableOptions);
+            }
+
+            if (help.param1 != null) {
+                embed.addField("Parameter 1", help.param1);
+            }
+
+            if (help.param2 != null) {
+                embed.addField("Parameter 2", help.param2);
+            }
+
+            if (help.param3 != null) {
+                embed.addField("Parameter 3", help.param3);
+            }
+
+            if (help.remarks != null) {
+                embed.addField("Remarks", help.remarks);
+            }
+        }
+        embed.setFooter("AstralMod " + amVersion);
+        message.channel.send("", { embed: embed });
+        return true;
+    } else if (command.startsWith("throw ")) {
+        var msg = command.substr(6);
+        throw new Error(msg);
+        return true;
     }
     return false;
 }
@@ -1922,7 +1948,7 @@ function processConfigure(message, guild) {
 
     var guildSetting = settings.guilds[guild.id];
 
-    if (guildSetting.requiresConfig) {
+    if (false /*guildSetting.requiresConfig*/) {
         switch (guildSetting.configuringStage) {
             case 0: { //Mod roles
                 var roles = text.split(" ");
@@ -2617,11 +2643,16 @@ function newGuild(guild) {
 
 
     if (process.argv.indexOf("--nowelcome") == -1) {
-        //if (guild.defaultChannel) {
-        if (guild.channels.size > 0) {
-            if (guild.channels.array()[0].type == "text") {
-                guild.channels.array()[0].send(":wave: Welcome to AstralMod! To get started, " + guild.owner.displayName + " needs to type `" + prefix + "config`.");
-            }
+        let channel = guild.channels.find("name", "general");
+        if (channel == null) {
+            channel = guild.channels.find("name", "lounge");
+        }
+
+        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by tying `" + prefix + "config`. To see the help index, use `" + prefix + "help`.";
+        if (channel == null) {
+            guild.owner.send(message);
+        } else {
+            channel.send(message);
         }
     }
 
@@ -2829,13 +2860,14 @@ function banAdd(guild, user) {
 
     if (channel != null) {
         var embed = new Discord.RichEmbed();
+
         embed.setColor("#FF0000");
         embed.setTitle(":hammer: User Banned");
         embed.setDescription("A user was banned from this server.");
 
         embed.addField("User", user.tag, true);
         embed.addField("User ID", user.id, true);
-
+        
         guild.fetchInvites().then(function(invites) {
             var inviteString = "";
 
@@ -2848,6 +2880,28 @@ function banAdd(guild, user) {
             if (inviteString != "") {
                 embed.addField("Created Invites", inviteString);
             }
+
+            if (banDescriptor[guild.id][user.id] != null) {
+                return banDescriptor[guild.id][user.id];
+            } else {
+                return guild.fetchAuditLogs({
+                    limit: 1,
+                    type: "MEMBER_BAN_ADD"
+                });
+            }
+        }).then(function(auditLogs) {
+            if (auditLogs.author == null) {
+                let log = auditLogs.entries.first();
+                embed.addField("Banned by", log.executor.tag);
+
+                if (log.reason != null) {
+                    embed.addField("Reason", log.reason);
+                }
+            } else {
+                embed.addField("Banned by", auditLogs.author.tag);
+                embed.addField("Reason", auditLogs.reason);
+            }
+            
             channel.send("", {embed: embed});
         }).catch(function() {
             channel.send("", {embed: embed});
@@ -3333,7 +3387,7 @@ if (process.argv.indexOf("--httpserver") != -1) {
 
 log("Checking configuration...", logType.info);
 
-const requireDiscordVersion = "11.3.0";
+const requireDiscordVersion = "11.3.2";
 if (Discord.version != requireDiscordVersion) {
     log("Invalid Discord.JS version", logType.critical);
     log("This version of AstralMod requires Discord.JS version " + requireDiscordVersion, logType.info);
