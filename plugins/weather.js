@@ -167,7 +167,7 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     embed.setDescription("AstralMod couldn't retrieve weather.");
                     embed.setColor("#FF0000");
                     embed.addField("Details", "That city wasn't found");
-                    embed.addField("Try this", "AstralMod has just been updated. If you're trying to retrieve your own weather, try resetting your location with `am#setloc`.");
+                    embed.addField("Try this", "AstralMod has just been updated. If you're trying to retrieve your own weather, try resetting your location with `" + prefix + "setloc`.");
 
                     message.channel.send(embed)
                     message.channel.stopTyping(true);

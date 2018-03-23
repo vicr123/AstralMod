@@ -24,6 +24,12 @@ const Discord = require('discord.js');
 
 function processCommand(message, isMod, command) {
     if (isMod) {
+        let blockId = message.channel.id;
+        if (command.indexOf("--serverwide") != -1) {
+            command = command.replace("--serverwide", "").trim();
+            blockId = "guild";
+        }
+
         if (command.startsWith("rm ")) {
             var num;
             var numString;
@@ -220,11 +226,13 @@ function processCommand(message, isMod, command) {
             message.delete();
             message.channel.send(":abcd: I've changed the nickname of " + getUserString(user) + " to `" + nick.replace("`", "\`") + "`");
         } else if (command == "block") {
-            settings.guilds[message.guild.id].blocked = [
-                "all"
-            ];
+            settings.guilds[message.guild.id].blocked[blockId].push("all");
             
-            message.channel.send("All commands in this channel will now be ignored.");
+            if (blockId == "guild") {
+                message.channel.send("All commands in this server will now be ignored.");
+            } else {
+                message.channel.send("All commands in this channel will now be ignored.");
+            }
         } else if (command.startsWith("block ")) {
             let c = command.substr(6).trim().toLowerCase();
 
@@ -243,27 +251,65 @@ function processCommand(message, isMod, command) {
                 return;
             }
 
-            settings.guilds[message.guild.id].blocked.push(c);
-            message.channel.send("`" + c + "` is now blocked in this channel.");
+            if (blockId == "guild" && c == "spam") {
+                message.channel.send("To disable spam control for the server, use the `" + prefix + "`spamctl command.");
+                return;
+            }
+
+            settings.guilds[message.guild.id].blocked[blockId].push(c);
+
+            if (blockId == "guild") {
+                if (c == "spam") {
+                    message.channel.send("Spam control is now off in this server.");
+                } else {
+                    message.channel.send("`" + c + "` is now blocked in this server.");
+                }
+            } else {
+                if (c == "spam") {
+                    message.channel.send("Spam control is now off in this channel.");
+                } else {
+                    message.channel.send("`" + c + "` is now blocked in this channel.");
+                }
+            }
         } else if (command == "unblock") {
-            settings.guilds[message.guild.id].blocked = [];
-            message.channel.send("All commands in this channel are now unblocked.");
+            settings.guilds[message.guild.id].blocked[blockId] = [];
+            message.channel.send("Every previously blocked feature has now been unblocked.");
         } else if (command.startsWith("unblock ")) {
             let c = command.substr(8).trim().toLowerCase();
 
             if (c.indexOf(" ") != -1) {
-                message.channel.send("Commands are one word. Please specify a valid command.");
+                message.channel.send("Features are one word. Please specify a valid command.");
                 return;
             }
 
-            if (settings.guilds[message.guild.id].blocked.indexOf(c) == -1) {
-                message.channel.send("This command has not been blocked.");
+            if (settings.guilds[message.guild.id].blocked[blockId].indexOf(c) == -1) {
+                message.channel.send("This feature has not been blocked.");
                 return;
             }
 
-            settings.guilds[message.guild.id].blocked.splice(settings.guilds[message.guild.id].blocked.indexOf(c), 1);
-            message.channel.send("`" + c + "` is now unblocked in this channel.");
+            if (blockId == "guild" && c == "spam") {
+                message.channel.send("To enable spam control for the server, use the `" + prefix + "`spamctl command.");
+                return;
+            }
+
+            settings.guilds[message.guild.id].blocked[blockId].splice(settings.guilds[message.guild.id].blocked[blockId].indexOf(c), 1);
+
+            if (blockId == "guild") {
+                message.channel.send("`" + c + "` is now unblocked in this server.");
+            } else {
+                if (c == "spam") {
+                    message.channel.send("Spam control is now on in this channel.");
+                } else {
+                    message.channel.send("`" + c + "` is now unblocked in this channel.");
+                }
+            }
         }
+    }
+
+    if (command == "features") {
+        message.channel.send("Available features: \n\n" +
+                             "`spam` Spam Control\n" +
+                             "You can also block any command, except for the `block` and `unblock` commands by specifying the name as a feature.");
     }
 }
 
@@ -288,7 +334,8 @@ module.exports = {
                 "panic",
                 "chnk",
                 "block",
-                "unblock"
+                "unblock",
+                "features"
             ]
         }
     },
@@ -318,17 +365,26 @@ module.exports = {
                 break;
             case "block":
                 help.title = prefix + "block";
-                help.usageText = prefix + "block [command]";
-                help.helpText = "Blocks users from using a command in the current channel.";
+                help.usageText = prefix + "block [feature]";
+                help.helpText = "Blocks users from using a feature in the current channel.";
                 help.param1 = "*Optional Parameter*\n" +
-                              "The command to block, or `all` for all commands. If no command is specified, all commands will be blocked.";
+                              "The feature to block, or `all` for all commands. If no feature is specified, all *commands* will be blocked.";
+                help.remarks = "To see available features, use `" + prefix + "features`";
+                help.availableOptions = "`--serverwide` Change serverwide blocking settings\n";
                 break;
             case "unblock":
                 help.title = prefix + "unblock";
-                help.usageText = prefix + "unblock [command]";
-                help.helpText = "Unblocks users from using a command in the current channel.";
+                help.usageText = prefix + "unblock [feature]";
+                help.helpText = "Unblocks users from using a feature in the current channel.";
                 help.param1 = "*Optional Parameter*\n" +
-                              "The command to unblock. If no command is specified, all commands will be unblocked.";
+                              "The feature to unblock. If no feature is specified, all features will be unblocked.";
+                help.remarks = "To see available features, use `" + prefix + "features`";
+                help.availableOptions = "`--serverwide` Change serverwide blocking settings\n";
+                break;
+            case "features":
+                help.title = prefix + "features";
+                help.usageText = prefix + "features";
+                help.helpText = "Shows the features that can be used with the `block` command";
                 break;
         }
 

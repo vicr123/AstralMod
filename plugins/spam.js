@@ -56,6 +56,10 @@ function newMessage(message) {
         if (message.content.startsWith("jx:") || message.content.startsWith("jxr:")) {
             checkSpam = false;
         }
+
+        if (settings.guilds[message.guild.id].blocked[message.channel.id].indexOf("spam") != -1 || settings.guilds[message.guild.id].blocked.guild.indexOf("spam") != -1) {
+            checkSpam = false;
+        }
     }
 
     if (checkSpam) {
