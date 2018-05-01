@@ -1631,8 +1631,9 @@ function processAmCommand(message) {
                 }
                 message.edit(e + " I'm here! It took " + parseInt(time) + "ms to respond.");
             }
-        }).catch(function() {
-
+        }).catch(function(error) {
+            log("Uncaught Exception:", logType.critical);
+            log(error.stack, logType.critical);
         });
         return true;
     } else if (command == "nick") {
