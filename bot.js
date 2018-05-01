@@ -1619,7 +1619,7 @@ function processAmCommand(message) {
                 if (time < 100) {
                     e = getEmoji("signal5");
                 } else if (time <= 200) {
-                    e = getemoji("signal4");
+                    e = getEmoji("signal4");
                 } else if (time <= 300) {
                     e = getEmoji("signal3");
                 } else if (time <= 500) {
