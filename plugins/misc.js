@@ -50,7 +50,11 @@ function processCommand(message, isMod, command) {
         }
     } else if (command == "sinfo") {
         let g = message.guild;
-        g.fetchMembers().then(function() {
+        let messageToEdit;
+        sendPreloader("Retrieving server information...", message.channel).then(function(message) {
+            messageToEdit = message;
+            return g.fetchMembers();
+        }).then(function() {
             var embed = new Discord.RichEmbed("uinfo");
             embed.setAuthor(g.name, g.iconURL);
             embed.setColor("#00FF00");
@@ -129,7 +133,7 @@ function processCommand(message, isMod, command) {
                 embed.addField(tr("Alerts"), msg);
             }
     
-            message.channel.send(embed);
+            messageToEdit.edit(embed);
         });
     }
 }

@@ -162,6 +162,10 @@ global.getEmoji = function(emojiName) {
     }
 }
 
+global.sendPreloader = function(text, channel) {
+    return channel.send(getEmoji("loader") + " " + text);
+}
+
 global.logType = {
     debug: 0,
     info: 1,
@@ -1264,7 +1268,7 @@ function shutdown() {
             var contents = JSON.stringify(settings, null, 4);
 
             //Encrypt the contents
-            let iv = new Buffer(crypto.randomBytes(16)).toString("hex").slice(0, 16);
+            let iv = Buffer.from(crypto.randomBytes(16)).toString("hex").slice(0, 16);
 
             var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
             var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8"), cipher.final())]);
@@ -1380,105 +1384,107 @@ function isMod(member) {
 }
 
 global.uinfo = function(user, channel, guild = null, compact = false) {
-    var member = null;
-    if (guild != null) {
-        for ([id, gMember] of guild.members) {
-            if (gMember.user.id == user.id) {
-                member = gMember;
-                break;
+    sendPreloader("Retrieving user information...", channel).then(function(messageToEdit) {
+        var member = null;
+        if (guild != null) {
+            for ([id, gMember] of guild.members) {
+                if (gMember.user.id == user.id) {
+                    member = gMember;
+                    break;
+                }
             }
-        }
 
-        if (member == null) {
+            if (member == null) {
+                member = {
+                    displayName: user.username,
+                    tag: user.tag,
+                    noGuild: true,
+                    noGuildMessage: "This user is not part of this server."
+                }
+            }
+        } else {
             member = {
                 displayName: user.username,
                 tag: user.tag,
                 noGuild: true,
-                noGuildMessage: "This user is not part of this server."
+                noGuildMessage: "You are not allowed to view server specific information in this server."
             }
         }
-    } else {
-        member = {
-            displayName: user.username,
-            tag: user.tag,
-            noGuild: true,
-            noGuildMessage: "You are not allowed to view server specific information in this server."
-        }
-    }
 
-    var embed = new Discord.RichEmbed("uinfo");
-    embed.setAuthor(member.displayName, user.displayAvatarURL);
-    embed.setAuthor(getUserString(member), user.displayAvatarURL);
-    embed.setColor("#00FF00");
-    embed.setFooter(tr("User ID:") + " " + user.id);
+        var embed = new Discord.RichEmbed("uinfo");
+        embed.setAuthor(member.displayName, user.displayAvatarURL);
+        embed.setAuthor(getUserString(member), user.displayAvatarURL);
+        embed.setColor("#00FF00");
+        embed.setFooter(tr("User ID:") + " " + user.id);
 
-    if (compact) {
-        var msg = tr("Discriminator:") + " " + user.discriminator + "\n" +
-                    tr("Created at:") + " " + translator.localDate(user.createdAt, "default", true) + "\n";
-
-        if (member.noGuild != true) {
-            if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
-                msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
-            } else {
-                msg += tr("Joined at:") + " " + translator.localDate(user.joinedTimestamp, "default", true);
-            }
-        }
-        embed.setDescription(msg);
-    } else {
-        if (member.noGuild != true) {
-            embed.setDescription(tr("User Information"));
-        } else {
-            embed.setDescription(member.noGuildMessage);
-        }
-
-        {
-            var msg = "**" + tr("Created") + "** " + translator.localDate(user.createdAt, "default", true) + "\n";
+        if (compact) {
+            var msg = tr("Discriminator:") + " " + user.discriminator + "\n" +
+                        tr("Created at:") + " " + translator.localDate(user.createdAt, "default", true) + "\n";
 
             if (member.noGuild != true) {
-                if (member.joinedAt.getTime() == 0) {
-                    msg += "**" + tr("Joined") + "** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
+                    msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
                 } else {
-                    msg += "**" + tr("Joined") + "** " + translator.localDate(member.joinedAt, "default", true);
+                    msg += tr("Joined at:") + " " + translator.localDate(user.joinedTimestamp, "default", true);
                 }
             }
-
-            embed.addField(tr("Timestamps"), msg);
-        }
-
-        var msg;
-        if (member.noGuild) {
-            msg = "**" + tr("Username") + "** " + user.username + "\n";
-
-            embed.addField(tr("Names"), msg);
+            embed.setDescription(msg);
         } else {
-            msg = "**" + tr("Current Display Name") + "** " + member.displayName + "\n";
-            msg += "**" + tr("Username") + "** " + user.username + "\n";
-            if (member.nickname != null) {
-                msg += "**" + tr("Nickname") + "** " + member.nickname;
+            if (member.noGuild != true) {
+                embed.setDescription(tr("User Information"));
             } else {
-                msg += "**" + tr("Nickname") + "** " + tr("No nickname");
+                embed.setDescription(member.noGuildMessage);
             }
 
-            embed.addField(tr("Names"), msg);
+            {
+                var msg = "**" + tr("Created") + "** " + translator.localDate(user.createdAt, "default", true) + "\n";
+
+                if (member.noGuild != true) {
+                    if (member.joinedAt.getTime() == 0) {
+                        msg += "**" + tr("Joined") + "** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                    } else {
+                        msg += "**" + tr("Joined") + "** " + translator.localDate(member.joinedAt, "default", true);
+                    }
+                }
+
+                embed.addField(tr("Timestamps"), msg);
+            }
+
+            var msg;
+            if (member.noGuild) {
+                msg = "**" + tr("Username") + "** " + user.username + "\n";
+
+                embed.addField(tr("Names"), msg);
+            } else {
+                msg = "**" + tr("Current Display Name") + "** " + member.displayName + "\n";
+                msg += "**" + tr("Username") + "** " + user.username + "\n";
+                if (member.nickname != null) {
+                    msg += "**" + tr("Nickname") + "** " + member.nickname;
+                } else {
+                    msg += "**" + tr("Nickname") + "** " + tr("No nickname");
+                }
+
+                embed.addField(tr("Names"), msg);
+            }
+
+            {
+                var msg = "";
+
+                if (user.bot) {
+                    msg += "- " + tr("This user is a bot account.") + "\n";
+                }
+
+                if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
+                    msg += "- " + tr("This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod.");
+                }
+
+                if (msg != "") {
+                    embed.addField(tr("Alerts"), msg);
+                }
+            }
         }
-
-        {
-            var msg = "";
-
-            if (user.bot) {
-                msg += "- " + tr("This user is a bot account.") + "\n";
-            }
-
-            if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
-                msg += "- " + tr("This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod.");
-            }
-
-            if (msg != "") {
-                embed.addField(tr("Alerts"), msg);
-            }
-        }
-    }
-    channel.send("", {embed: embed});
+        messageToEdit.edit(embed);
+    });
 }
 
 function processModCommand(message) {
@@ -2507,7 +2513,7 @@ function processSingleConfigure(message, guild) {
     settings.guilds[guild.id] = guildSetting;
 }
 
-function processMessage(message) {
+async function processMessage(message) {
     try {
         //Ignore self
         if (message.author.id == client.user.id) return;
@@ -2529,6 +2535,8 @@ function processMessage(message) {
 
         //Determine if this is in a guild
         if (message.guild != null) {
+            await message.guild.fetchMember(message.author);
+
             if (settings.guilds[message.guild.id].blocked == null) {
                 settings.guilds[message.guild.id].blocked = [];
             }
@@ -2610,16 +2618,16 @@ function processMessage(message) {
         embed.addField("Details", err.message);
 
         if (err.name == "UserInputError") {
-            embed.setTitle("<:userexception:348796878709850114> User Input Error");
+            embed.setTitle(getEmoji("userexception") + " User Input Error");
             embed.setDescription("AstralMod didn't understand what you were trying to say.");
         } else if (err.name == "CommandError") {
-            embed.setTitle("<:userexception:348796878709850114> Command Error");
+            embed.setTitle(getEmoji("userexception") + " Command Error");
             embed.setDescription("AstralMod couldn't complete that command.");
         } else {
             log("Uncaught Exception:", logType.critical);
             log(err.stack, logType.critical);
 
-            embed.setTitle("<:exception:346458871893590017> Internal Error");
+            embed.setTitle(getEmoji("userexception") + " Internal Error");
             embed.setFooter("This error has been logged, and we'll look into it.");
             embed.setDescription("AstralMod has run into a problem trying to process that command.");
         }
@@ -2677,7 +2685,7 @@ function saveSettings(showOkMessage = false) {
     var contents = JSON.stringify(settings, null, 4);
 
     //Encrypt the contents
-    let iv = new Buffer(crypto.randomBytes(16));
+    let iv = Buffer.from(crypto.randomBytes(16));
 
     var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
     var settingsJson = Buffer.concat([
