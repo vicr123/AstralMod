@@ -1373,7 +1373,11 @@ function setGame() {
 
 function isMod(member) {
     var modRoles = settings.guilds[member.guild.id].modRoles;
-    if (modRoles != null) {
+    if (modRoles == null) {
+        if (member.permissions.has(Discord.Permissions.FLAGS.BAN_MEMBERS, true)) {
+            return true;
+        }
+    } else {
         for (role of modRoles) {
             if (member.roles.has(role)) {
                 return true;
@@ -2165,7 +2169,11 @@ function getSingleConfigureWelcomeText(guild) {
     var guildSetting = settings.guilds[guild.id];
     var string = "What would you like to configure? Type the number next to the option you want to set:```";
 
-    string += "1 Staff Roles        " + guildSetting.modRoles.length + " roles\n";
+    if (guildSetting.modRoles == null) {
+        string += "1 Staff Roles        Using Discord Permissions\n";
+    } else {
+        string += "1 Staff Roles        " + guildSetting.modRoles.length + " roles\n";
+    }
 
     if (guild.channels.get(guildSetting.memberAlerts) == null) {
         string += "2 Member Alerts      Disabled\n";
@@ -2220,7 +2228,7 @@ function processSingleConfigure(message, guild) {
             if (message.content == "Reset AstralMod") { //Purge all configuration for this server
                 log("Purging all configuration for " + guild.id);
                 guildSetting = {
-                    requiresConfig: true
+                    requiresConfig: false
                 };
                 log("Configuration for " + guild.id + " purged.", logType.good);
                 message.author.send("AstralMod configuration for this server has been reset. To set up AstralMod, just `" + prefix + "config` in the server.");
@@ -2236,7 +2244,7 @@ function processSingleConfigure(message, guild) {
                 case "1": //Staff Roles
                     settings.guilds[guild.id].configuringUser = message.author.id;
                     settings.guilds[guild.id].configuringStage = 0;
-                    message.author.send("Enter the roles of mods on this server, seperated by a space. To cancel, just type \"cancel\"");
+                    message.author.send("Enter the roles of mods on this server, seperated by a space. To cancel, just type `cancel`, and to clear, type `clear`.");
 
                     var roles = "```";
                     for (let [id, role] of guild.roles) {
@@ -2294,7 +2302,7 @@ function processSingleConfigure(message, guild) {
                     guildSetting.configuringStage = -10;
                     break;
                 default:
-                    message.author.send("That's not an option.");
+                    //message.author.send("That's not an option.");
                     message.author.send(getSingleConfigureWelcomeText(guild));
             }
             break;
@@ -2302,6 +2310,9 @@ function processSingleConfigure(message, guild) {
         case 10: { //Staff Roles
             if (text == "cancel") {
                 message.author.send(getSingleConfigureWelcomeText(guild));
+                guildSetting.configuringStage = 0;
+            } else if (text == "clear") {
+                guildSetting.modRoles = null;
                 guildSetting.configuringStage = 0;
             } else {
                 var roles = text.split(" ");
@@ -2647,7 +2658,7 @@ function newGuild(guild) {
     }
 
     settings.guilds[guild.id] = {
-        requiresConfig: true
+        requiresConfig: false
     };
 
 
@@ -3051,6 +3062,10 @@ function vacuumSettings() {
                 changesMade = true;
                 log("Adding guild " + guild.id + " to the database.", logType.info);
                 newGuild(guild);
+            }
+
+            if (settings.guilds[guild.id].requiresConfig == true) {
+                settings.guilds[guild.id].requiresConfig = false;
             }
         }
 
