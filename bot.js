@@ -1356,7 +1356,7 @@ function setGame() {
                                    prefix + "help",
                                    "v." + amVersion,
                                    "v." + amVersion,
-                                   "Android Pay");
+                                   "Google Pay");
     client.user.setPresence(presence);*/
 
     client.user.setActivity(getRandom("with ban buttons",
@@ -1364,7 +1364,7 @@ function setGame() {
                                       prefix + "help",
                                       "v." + amVersion,
                                       "v." + amVersion,
-                                      "Android Pay"),
+                                      "Google Pay"),
                                 {
                                     type: "PLAYING"
                                 }
