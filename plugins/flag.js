@@ -49,20 +49,21 @@ function menu(options) { //direction, fetchOptions
         embedContent = message.content;
     }
     if (message.embeds.length) { //If this pin contains an embed
+        embedContent += "`Embed`\n";
         embedContent = unembed(message.embeds[0]) //Unembed the first embed
     }
 
     if (message.attachments.size > 0) {
         for (let [key, attachment] of message.attachments) {
             if (attachment.height != null) {
-                if (embedContent == "") embedContent = "Image";
+                if (embedContent == "") embedContent += "`Image`\n";
                 embed.setImage(attachment.proxyURL);
                 break;
             }
         }
         
         if (embedContent == "") {
-            embedContent = "Nontextual Content"
+            embedContent = "`Nontextual Content`"
         }
 
         embed.setFooter(message.attachments.size + " attachments");
@@ -98,17 +99,23 @@ function processCommand(message, isMod, command) {
         let flaggingMessage;
         let currentMessage;
 
-        message.delete()
+        message.delete().then(function(message) {
         //after collecting messages
-        message.channel.fetchMessages({ limit: number }).then(function(messages) {
+        return message.channel.fetchMessages({ limit: number })
+        }).then(function(messages) {
         currentMessage = messages.array()[number-1]
         let message = messages.array()[number-1]
         message.channel.send(menu({message, number})).then(function(flaggingMessage) { //reactions
             
-            flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react("📌")).then(flaggingMessage.react("🚫"));
+            flaggingMessage.react("⬆")
+            .then(flaggingMessage.react("⬇"))
+            .then(flaggingMessage.react("📌"))
+            .then(flaggingMessage.react("🚫"));
+
             let goUp = function() {
                 log(currentMessage.id)
                 message.channel.fetchMessages({ limit: 1, before: currentMessage.id }).then(function(messages) {
+                    if (!messages.size) return;
                     let message = messages.first();
                     currentMessage = message;
                     flaggingMessage.edit(menu({direction: "up", message}))
@@ -117,6 +124,7 @@ function processCommand(message, isMod, command) {
 
             let goDown = function() {
                 message.channel.fetchMessages({ limit: 1, after: currentMessage.id }).then(function(messages) {
+                    if (!messages.size) return;
                     let message = messages.first();
                     currentMessage = message;
                     flaggingMessage.edit(menu({direction: "down", message}))
@@ -168,7 +176,6 @@ function processCommand(message, isMod, command) {
                     embed.setTitle("Portably pin a message");
                     embed.setDescription("Message pinning cancelled.");
                     embed.setColor("#00C000");
-
                     flaggingMessage.edit(embed);
                 }
 
@@ -427,7 +434,7 @@ module.exports = {
                 help.usageText = prefix + "pin message";
                 help.helpText = "Portably pin a message for reference";
                 help.param1 = "The message to pin; 1 for the last message sent in this channel, 2 for the second last message, etc.";
-                help.remarks = "AstralMod pins messages by taking the message ID and channel ID. If the message is deleted or if the channel is deleted, the message will nt be retrievable."
+                help.remarks = "AstralMod pins messages by taking the message ID and channel ID. If the message is deleted or if the channel is deleted, the message will not be retrievable."
                 break;
             case "pins":
                 help.title = prefix + "pins";
