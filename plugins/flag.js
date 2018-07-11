@@ -112,23 +112,25 @@ function processCommand(message, isMod, command) {
             .then(flaggingMessage.react("📌"))
             .then(flaggingMessage.react("🚫"));
 
-            let goUp = function() {
-                log(currentMessage.id)
-                message.channel.fetchMessages({ limit: 1, before: currentMessage.id }).then(function(messages) {
+            let move = function(direction) {
+                message.channel.fetchMessages(direction == "down" ? { limit: 1, after: currentMessage.id } : 
+                { limit: 1, before: currentMessage.id }).then(function(messages) {
                     if (!messages.size) return;
                     let message = messages.first();
                     currentMessage = message;
-                    flaggingMessage.edit(menu({direction: "up", message}))
+                    flaggingMessage.edit(menu({direction, message}))
                 });
-            };
+            }
 
-            let goDown = function() {
-                message.channel.fetchMessages({ limit: 1, after: currentMessage.id }).then(function(messages) {
-                    if (!messages.size) return;
-                    let message = messages.first();
-                    currentMessage = message;
-                    flaggingMessage.edit(menu({direction: "down", message}))
-                });
+            const callReactions = function(message) {
+                return message.awaitReactions(function(reaction) {
+                    if (reaction.count > 1 && reaction.users.has(author)) {
+                        return true;
+                    }
+                    return false;
+                }, {
+                    max: 1
+                })
             }
 
             let reactionCollectionFunction = function(reactions) {
@@ -142,14 +144,13 @@ function processCommand(message, isMod, command) {
                     }
                 }
 
-                let continueReactions = false;
+                let continueReactions = true;
                 if (reaction.emoji.name == "⬆") {
-                    continueReactions = true;
-                    goUp();
+                    move("up")
                 } else if (reaction.emoji.name == "⬇") {
-                    continueReactions = true;
-                    goDown();
+                    move("down")
                 } else if (reaction.emoji.name == "📌") {
+                    continueReactions = false;
                     let embed = menu({message: currentMessage})
                 
                     embed.setTitle("Portably pin a message");
@@ -172,6 +173,7 @@ function processCommand(message, isMod, command) {
                     }
                     settings.users[author].flags.push(flagObject);
                 } else if (reaction.emoji.name == "🚫") {
+                    continueReactions = false;
                     let embed = new Discord.RichEmbed();
                     embed.setTitle("Portably pin a message");
                     embed.setDescription("Message pinning cancelled.");
@@ -180,27 +182,13 @@ function processCommand(message, isMod, command) {
                 }
 
                 if (continueReactions) {
-                    flaggingMessage.awaitReactions(function(reaction) {
-                        if (reaction.count > 1 && reaction.users.has(author)) {
-                            return true;
-                        }
-                        return false;
-                    }, {
-                        max: 1
-                    }).then(reactionCollectionFunction);
+                    callReactions(flaggingMessage).then(reactionCollectionFunction);
                 } else {
                     flaggingMessage.clearReactions();
                 }
             }
 
-            return flaggingMessage.awaitReactions(function(reaction) {
-                if (reaction.count > 1 && reaction.users.has(author)) {
-                    return true;
-                }
-                return false;
-            }, {
-                max: 1
-            }).then(reactionCollectionFunction);
+            return callReactions(flaggingMessage).then(reactionCollectionFunction);
         }).catch(function(err) {
             message.channel.send(`${err.message}\n${err.stack}`);
         });
@@ -278,18 +266,13 @@ function processCommand(message, isMod, command) {
 
             return;
         }
-        if (isNaN(number) || number == "") {
-            number = 1;
-        }
-
+        if (isNaN(number) || number == "") number = 1;
         let embed = new Discord.RichEmbed;
         embed.setTitle(":pushpin: Portable Pins");
         embed.setDescription("Here are all the messages you've pinned");
         embed.setColor("#00C000");
 
-        if (number > (flagArray.length / 5) + 1) {
-            throw new UserInputError("Invalid Page.");
-        }
+        if (number > (flagArray.length / 5) + 1) throw new UserInputError("Invalid Page.");
 
         let fullPages = Math.floor((flagArray.length / 5) + 1);
         if (fullPages == 1) {
@@ -328,7 +311,7 @@ function processCommand(message, isMod, command) {
                 if (message.content == "") {
                     for (let [key, attachment] of message.attachments) {
                         if (attachment.height != null) {
-                            if (message.content == "") flagMessage = "Image. Use `" + prefix + "pins --image " + (i + 1) + "` to view.\n";
+                            if (message.content == "") flagMessage = "`Image`\nUse `" + prefix + "pins --image " + (i + 1) + "` to view.\n";
                             break;
                         }
                     }
@@ -347,30 +330,11 @@ function processCommand(message, isMod, command) {
         var unflagging = command.substr(6);
         var index = parseInt(unflagging) - 1;
 
-        if (isNaN(index)) {
-            message.reply("Usage: `" + prefix + "unpin id`. For the `id` parameter, use `" + prefix + "pins`. For more information, `" + prefix + "help unpin`");
-            return;
-        }
-
-        if (settings.users[message.author.id] == null) {
-            message.reply("You have no portable pins.");
-            return;
-        }
-
-        if (settings.users[message.author.id].flags == null) {
-            message.reply("You have no portable pins.");
-            return;
-        }
-
-        if (settings.users[message.author.id].flags.length == 0) {
-            message.reply("You have no portable pins.");
-            return;
-        }
-
-        if (settings.users[message.author.id].flags.length <= index) {
-            message.reply("You don't have that many pinned messages.");
-            return;
-        }
+        if (isNaN(index)) return message.reply("Usage: `" + prefix + "unpin id`. For the `id` parameter, use `" + prefix + "pins`. For more information, `" + prefix + "help unpin`");
+        if (settings.users[message.author.id] == null) return message.reply("You have no portable pins.");
+        if (settings.users[message.author.id].flags == null) return message.reply("You have no portable pins.");
+        if (settings.users[message.author.id].flags.length == 0) return message.reply("You have no portable pins.");
+        if (settings.users[message.author.id].flags.length <= index) return message.reply("You don't have that many pinned messages.");
 
         settings.users[message.author.id].flags.splice(index, 1);
         message.reply("That message has been unpinned.");
