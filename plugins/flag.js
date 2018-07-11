@@ -22,6 +22,67 @@ var client;
 var consts;
 const Discord = require('discord.js');
 
+function unembed(embed) {
+    let embedString = "";
+    if (embed.author) embedString += `**${embed.author.name}**\n`;
+    if (embed.title) embedString += `**${embed.title}**\n`;
+    if (embed.description) embedString += `${embed.description}\n`;
+    for (let i in embed.fields) {
+        embedString += `\n**${embed.fields[i].name}**\n${embed.fields[i].value}\n`
+    }
+    if (embed.footer) embedString += `\n${embed.footer.text}`
+    return embedString; //returns a string
+}
+
+function menu(options) { //direction, fetchOptions
+    const message = options.message;
+
+    let embed = new Discord.RichEmbed();
+    embed.setTitle("Portably pin a message");
+    embed.setDescription("Select a message to pin");
+    embed.setColor("#00C000");
+
+    currentMessage = message;
+
+    let embedContent = "";
+    if (message.content != "") {
+        embedContent = message.content;
+    }
+
+    if (message.attachments.size > 0) {
+        for (let [key, attachment] of message.attachments) {
+            if (attachment.height != null) {
+                if (embedContent == "") embedContent = "Image";
+                embed.setImage(attachment.proxyURL);
+                break;
+            }
+        }
+        
+        if (embedContent == "") {
+            embedContent = "Nontextual Content"
+        }
+
+        embed.setFooter(message.attachments.size + " attachments");
+    }
+
+    if (message.embeds.length) { //If this pin contains an embed
+        log(unembed(message.embeds[0]))
+        embedContent = unembed(message.embeds[0]) //Unembed the first embed
+    }
+
+    if (!embedContent) {
+        if (options.direction) {
+            move(options.direction, options); //attempt to move if a direction was specified
+        } else {
+            //throw an error if no direction was given
+            throw new UserInputError("Cannot pin this message. Please specify another message.");
+        }
+    } else {
+        embed.addField(message.author.tag, embedContent.substr(0, 1000));
+        return embed; //return the final embed to send or edit
+    }
+}
+
 function processCommand(message, isMod, command) {
     if (command.startsWith("pin ")) {
         let author = message.author.id;
@@ -31,147 +92,35 @@ function processCommand(message, isMod, command) {
             throw new UserInputError("Invalid number");
         }
         number = parseInt(number);
-        if (number > 50) {
+        if (number > 100 || number < 1) {
             throw new UserInputError("Specify a number between 1 and 100");
         }
 
         let flaggingMessage;
         let currentMessage;
 
-        message.delete().then(function() {
-            return message.channel.fetchMessages({
-                limit: number
-            })
-        }).then(function(messages) {
-            let embed = new Discord.RichEmbed();
-            embed.setTitle("Portably pin a message");
-            embed.setDescription("Select a message to portably pin");
-            embed.setColor("#00C000");
-
-            let message = messages.array()[number - 1]
-            currentMessage = message;
-
-            let embedContent = "";
-            if (message.content != "") {
-                embedContent = message.content;
-            }
-
-            if (message.attachments.size > 0) {
-                for (let [key, attachment] of message.attachments) {
-                    if (attachment.height != null) {
-                        if (embedContent == "") embedContent = "Image";
-                        embed.setImage(attachment.proxyURL);
-                        break;
-                    }
-                }
-
-                if (embedContent == "") {
-                    embedContent = "Nontextual Content"
-                }
-
-                embed.setFooter(message.attachments.size + " attachments");
-            }
-
-            if (embedContent == "") {
-                //Fail to pin this message
-                throw new UserInputError("Cannot pin this message. Please specify another message.");
-            } else {
-                embed.addField(message.author.tag, embedContent.substr(0, 1000));
-                return message.channel.send(embed)
-            }
-        }).then(function(message) {
-            flaggingMessage = message;
-            message.react("⬆").then(message.react("⬇")).then(message.react("📌")).then(message.react("🚫"));
-
+        message.delete()
+        //after collecting messages
+        message.channel.fetchMessages({ limit: number }).then(function(messages) {
+        currentMessage = messages.array()[number-1]
+        let message = messages.array()[number-1]
+        message.channel.send(menu({message, number})).then(function(flaggingMessage) { //reactions
+            
+            flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react("📌")).then(flaggingMessage.react("🚫"));
             let goUp = function() {
-                message.channel.fetchMessages({
-                    limit: 1,
-                    before: currentMessage.id
-                }).then(function(messages) {
-                    if (messages.size == 0) return;
-
-                    let embed = new Discord.RichEmbed();
-                    embed.setTitle("Portably pin a message");
-                    embed.setDescription("Select a message to pin");
-                    embed.setColor("#00C000");
-
+                log(currentMessage.id)
+                message.channel.fetchMessages({ limit: 1, before: currentMessage.id }).then(function(messages) {
                     let message = messages.first();
                     currentMessage = message;
-
-                    let embedContent = "";
-                    if (message.content != "") {
-                        embedContent = message.content;
-                    }
-
-                    if (message.attachments.size > 0) {
-                        for (let [key, attachment] of message.attachments) {
-                            if (attachment.height != null) {
-                                if (embedContent == "") embedContent = "Image";
-                                embed.setImage(attachment.proxyURL);
-                                break;
-                            }
-                        }
-
-                        if (embedContent == "") {
-                            embedContent = "Nontextual Content"
-                        }
-
-                        embed.setFooter(message.attachments.size + " attachments");
-                    }
-
-                    if (embedContent == "") {
-                        //Attempt to go up again
-                        goUp();
-                    } else {
-                        embed.addField(message.author.tag, embedContent.substr(0, 1000));
-                        flaggingMessage.edit(embed);
-                    }
+                    flaggingMessage.edit(menu({direction: "up", message}))
                 });
             };
 
             let goDown = function() {
-                message.channel.fetchMessages({
-                    limit: 1,
-                    after: currentMessage.id
-                }).then(function(messages) {
-                    if (messages.size == 0) return;
-
-                    let embed = new Discord.RichEmbed();
-                    embed.setTitle("Portably pin a message");
-                    embed.setDescription("Select a message to pin");
-                    embed.setColor("#00C000");
-
+                message.channel.fetchMessages({ limit: 1, after: currentMessage.id }).then(function(messages) {
                     let message = messages.first();
                     currentMessage = message;
-
-                    let embedContent = "";
-                    if (message.content != "") {
-                        embedContent = message.content;
-                    }
-
-                    if (message.attachments.size > 0) {
-                        for (let [key, attachment] of message.attachments) {
-                            if (attachment.height != null) {
-                                if (embedContent == "") embedContent = "Image";
-                                embed.setImage(attachment.proxyURL);
-                                break;
-                            }
-                        }
-                        
-                        if (embedContent == "") {
-                            embedContent = "Nontextual Content"
-                        }
-
-                        embed.setFooter(message.attachments.size + " attachments");
-                    }
-
-                    if (embedContent == "") {
-                        //Attempt to go down again
-                        goDown();
-                    } else {
-                        embed.addField(message.author.tag, embedContent.substr(0, 1000));
-                        flaggingMessage.edit(embed);
-                    }
+                    flaggingMessage.edit(menu({direction: "down", message}))
                 });
             }
 
@@ -194,34 +143,12 @@ function processCommand(message, isMod, command) {
                     continueReactions = true;
                     goDown();
                 } else if (reaction.emoji.name == "📌") {
-                    let embed = new Discord.RichEmbed();
-                    embed.setTitle("Portably pin a message");
-                    embed.setDescription("The message has been portably pinned.");
-                    embed.setColor("#00C000");
-                    
-                    let embedContent = "";
-                    if (currentMessage.content != "") {
-                        embedContent = currentMessage.content;
-                    }
-
-                    if (currentMessage.attachments.size > 0) {
-                        for (let [key, attachment] of currentMessage.attachments) {
-                            if (attachment.height != null) {
-                                if (embedContent == "") embedContent = "Image";
-                                embed.setImage(attachment.proxyURL);
-                                break;
-                            }
-                        }
-
-                        embed.setFooter(currentMessage.attachments.size + " attachments");
-                    }
-
-                    if (embedContent == "") {
-                        embedContent = "Nontextual Content";
-                    }
-
-                    embed.addField(currentMessage.author.tag, embedContent.substr(0, 1000));
-                    flaggingMessage.edit(embed);
+                    let embed = menu({message})
+                
+                    menuEmbed.setTitle("Portably pin a message");
+                    menuEmbed.setDescription("The message has been portably pinned.");
+                    menuEmbed.setColor("#00C000");
+                    flaggingMessage.edit(menuEmbed)
 
                     //Flag the message
                     if (settings.users[author] == null) {
@@ -247,7 +174,7 @@ function processCommand(message, isMod, command) {
                 }
 
                 if (continueReactions) {
-                    message.awaitReactions(function(reaction) {
+                    flaggingMessage.awaitReactions(function(reaction) {
                         if (reaction.count > 1 && reaction.users.has(author)) {
                             return true;
                         }
@@ -256,11 +183,11 @@ function processCommand(message, isMod, command) {
                         max: 1
                     }).then(reactionCollectionFunction);
                 } else {
-                    message.clearReactions();
+                    flaggingMessage.clearReactions();
                 }
             }
 
-            return message.awaitReactions(function(reaction) {
+            return flaggingMessage.awaitReactions(function(reaction) {
                 if (reaction.count > 1 && reaction.users.has(author)) {
                     return true;
                 }
@@ -269,8 +196,9 @@ function processCommand(message, isMod, command) {
                 max: 1
             }).then(reactionCollectionFunction);
         }).catch(function(err) {
-            message.channel.send(err.message);
+            message.channel.send(`${err.message}\n${err.stack}`);
         });
+    });
     } else if (command == "pin") {
         message.reply("To pin a message, you'll need to specify which one to pin. For more information")
     } else if (command.startsWith("pins")) {
