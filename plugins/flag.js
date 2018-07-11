@@ -208,7 +208,6 @@ function processCommand(message, isMod, command) {
     } else if (command == "pin") {
         message.reply("To pin a message, you'll need to specify which one to pin. For more information")
     } else if (command.startsWith("pins")) {
-        //message.channel.startTyping();
         let number = command.substr(5);
         let nsfw = message.channel.nsfw;
 
@@ -231,21 +230,11 @@ function processCommand(message, isMod, command) {
             embed.setColor("#00C000");
             pinNumber = parseInt(pinNumber);
 
-            if (pinNumber > flagArray.length) {
-                throw new UserInputError("Invalid Page.");
-            } else if (pinNumber < 0) {
-                throw new UserInputError("Invalid Page.");
-            }
-
+            if (pinNumber > flagArray.length || pinNumber < 0) throw new UserInputError("Invalid Page.");
             let flagItem = flagArray[pinNumber - 1];
             let channel = client.channels.get(flagItem.channel);
-            if (channel == null) {
-                throw new CommandError("Can't find channel");
-            }
-
-            if (channel.nsfw && !nsfw) {
-                throw new CommandError("Pin in NSFW channel. View pins in NSFW channel to see pin.");
-            }
+            if (!channel) throw new CommandError("Can't find channel");
+            if (channel.nsfw && !nsfw) throw new CommandError("Pin in NSFW channel. View pins in NSFW channel to see pin.");
 
             channel.fetchMessage(flagItem.message).then(function(fMessage) {
                 let flagMessage;
@@ -270,9 +259,7 @@ function processCommand(message, isMod, command) {
                     }
                 }
 
-                if (flagMessage.trim() != "") {
-                    embed.addField(fMessage.author.tag, flagMessage.substr(0, 1000));
-                }
+                if (flagMessage.trim() != "") embed.addField(fMessage.author.tag, flagMessage.substr(0, 1000));
                 
                 if (fMessage.attachments.size > 0) {
                     let attachments = "";
@@ -284,11 +271,9 @@ function processCommand(message, isMod, command) {
                 }
 
                 message.channel.send(embed);
-                message.channel.stopTyping();
             }).catch(function() {
                 embed.addField("Error", "Can't find message");
                 message.channel.send(embed);
-                message.channel.startTyping();
             });
 
             return;
@@ -316,18 +301,8 @@ function processCommand(message, isMod, command) {
         number--;
 
         let getMessageNumber = function(i) {
-            if (i >= (flagArray.length > 5 * number + 5 ? 5 * number + 5 : flagArray.length)) {
-                //End the loop
-                message.channel.send(embed).then(function() {
-                    message.channel.stopTyping();
-                }).catch(function() {
-                    message.channel.stopTyping(true);
-                });
-                return;
-            }
-
+            if (i >= (flagArray.length > 5 * number + 5 ? 5 * number + 5 : flagArray.length)) return message.channel.send(embed);
             let flagItem = flagArray[i];
-
             let channel = client.channels.get(flagItem.channel);
             if (channel == null) {
                 embed.addField("Pin #" + (i + 1), "Can't find channel");
