@@ -251,9 +251,10 @@ function processCommand(message, isMod, command) {
             }
 
             channel.fetchMessage(flagItem.message).then(function(message) {
-                let flagMessage = message.content + "\n";
+                let flagMessage = message.content
 
-                if (settings.guilds[channel.guild.id].echoOffensive) flagMessage = filterOffensive(message.content) + "\n";
+                if (settings.guilds[channel.guild.id].echoOffensive) flagMessage = filterOffensive(message.content)
+                log(message.content)
                 if (message.content == "") {
                     for (let [key, attachment] of message.attachments) {
                         if (attachment.height != null) {
@@ -263,9 +264,11 @@ function processCommand(message, isMod, command) {
                     }
                 }
 
+                if (message.embeds.length) flagMessage = `\`Embed\`\n${unembed(message.embeds[0])}` //Unembed the first embed
+
                 let credit = "     - *" + message.author.tag + "* in " + message.channel;
-                embed.addField("Pin #" + (i + 1), flagMessage.length+credit.length > 1020 ? 
-                `${flagMessage.substr(0, 1021-credit.length)}...` : flagMessage+credit);
+                embed.addField("Pin #" + (i + 1), flagMessage.length+credit.length > 800 ? 
+                `${flagMessage.substr(0, 1021-credit.length-220)}...\n${credit}` : `${flagMessage}\n${credit}`);
                 getMessageNumber(++i);
             }).catch(function() {
                 embed.addField("Pin #" + (i + 1), "Can't find message");
