@@ -71,13 +71,15 @@ function processCommand(message, isMod, command) {
         let flaggingMessage;
         let currentMessage;
         let author = message.author.id;
-        let number = command.substr(4);
-        if (isNaN(number)) throw new UserInputError("Invalid number");
+        let number = command.substr(4) || 2;
+        if (isNaN(number)) throw new UserInputError("Invalid number or message ID.");
         number = parseInt(number);
-        if (number > 50 || number < 1) throw new UserInputError("Specify a number between 1 and 50");
+        let id = 0;
+        if (number < 1) throw new UserInputError("Specify a number between 1 and 50 or specify a message ID.");
+        if (number > 50) { id = number; number = 1; }
 
         message.delete().then(function(message) {
-            return message.channel.fetchMessages({ limit: number })
+            return message.channel.fetchMessages(id ? { limit: number, around: id } : { limit: number })
         }).then(function(messages) { //after collecting messages
             currentMessage = messages.array()[number - 1]
             let message = messages.array()[number - 1]
@@ -85,9 +87,10 @@ function processCommand(message, isMod, command) {
                 flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react("📌")).then(flaggingMessage.react("🚫"));
 
                 const move = function(direction) {
+                    if (currentMessage.id == flaggingMessage.id) return;
                     message.channel.fetchMessages(direction == "down" ? { limit: 1, after: currentMessage.id } :
                      { limit: 1, before: currentMessage.id }).then(function(messages) {
-                        if (!messages.size || currentMessage.id == flaggingMessage.id) return;
+                        if (!messages.size) return;
                         let message = messages.first();
                         currentMessage = message;
                         flaggingMessage.edit(menu({ direction, message }))
@@ -152,9 +155,11 @@ function processCommand(message, isMod, command) {
             }).catch(function(err) {
                 message.channel.send(`${err.message}\n${err.stack}`);
             });
+        }).catch(function(err) {
+            message.reply(`Invalid message ID or number provided.`);
         });
     } else if (command == "pin") {
-        return message.reply("To pin a message, you'll need to specify which one to pin. For more information, type `" + prefix + "help pin`.");
+        return message.reply("To pin a message, you'll need to specify which one to pin. For more information, type `" + prefix + "help pin`");
     } else if (command.startsWith("pins")) {
         let number = command.substr(5);
         let nsfw = message.channel.nsfw;
@@ -198,7 +203,7 @@ function processCommand(message, isMod, command) {
                         embed.setFooter(fMessage.attachments.size + " attachments");
                     }
                 }
-                if (flagMessage.trim() != "") embed.addField(fMessage.author.tag, flagMessage.substr(0, 1000));
+                if (flagMessage.trim() != "") embed.addField(fMessage.author.tag, flagMessage.length > 1020 ? `${flagMessage.substr(0, 1021)}...` : flagMessage);
                 if (fMessage.attachments.size > 0) {
                     let attachments = "";
                     for (let [key, attachment] of fMessage.attachments) {
@@ -214,7 +219,7 @@ function processCommand(message, isMod, command) {
             });
             return;
         }
-        if (isNaN(number) || number == "") number = 1;
+        if (isNaN(number) || !number) number = 1;
         let embed = new Discord.RichEmbed;
         embed.setTitle(":pushpin: Portable Pins");
         embed.setDescription("Here are all the messages you've pinned");
@@ -237,14 +242,12 @@ function processCommand(message, isMod, command) {
             let channel = client.channels.get(flagItem.channel);
             if (!channel) {
                 embed.addField("Pin #" + (i + 1), "Can't find channel");
-                getMessageNumber(++i);
-                return;
+                return getMessageNumber(++i);
             }
 
             if (channel.nsfw && !nsfw) {
                 embed.addField("Pin #" + (i + 1), "Pin in NSFW channel. View pins in NSFW channel to see pin.");
-                getMessageNumber(++i);
-                return;
+                return getMessageNumber(++i);
             }
 
             channel.fetchMessage(flagItem.message).then(function(message) {
@@ -260,8 +263,9 @@ function processCommand(message, isMod, command) {
                     }
                 }
 
-                flagMessage += "     - *" + message.author.tag + "* in " + message.channel;
-                embed.addField("Pin #" + (i + 1), flagMessage.substr(0, 1000));
+                let credit = "     - *" + message.author.tag + "* in " + message.channel;
+                embed.addField("Pin #" + (i + 1), flagMessage.length+credit.length > 1020 ? 
+                `${flagMessage.substr(0, 1021-credit.length)}...` : flagMessage+credit);
                 getMessageNumber(++i);
             }).catch(function() {
                 embed.addField("Pin #" + (i + 1), "Can't find message");
@@ -313,9 +317,9 @@ module.exports = {
         switch (helpCmd) {
             case "pin":
                 help.title = prefix + "pin";
-                help.usageText = prefix + "pin message";
+                help.usageText = prefix + "pin [number | message id]";
                 help.helpText = "Portably pin a message for reference";
-                help.param1 = "The message to pin; 1 for the last message sent in this channel, 2 for the second last message, etc.";
+                help.param1 = "The message to pin; 1 for the last message sent in this channel, 2 for the second last message, etc.\nYou can also provide a message ID to pin.";
                 help.remarks = "AstralMod pins messages by taking the message ID and channel ID. If the message is deleted or if the channel is deleted, the message will not be retrievable."
                 break;
             case "pins":
@@ -327,7 +331,7 @@ module.exports = {
                 break;
             case "unpin":
                 help.title = prefix + "unpin";
-                help.usageText = prefix + "unpin id";
+                help.usageText = prefix + "unpin [pin id]";
                 help.helpText = "Unpins a messge";
                 help.param1 = "The pin # to unpin. To get pin numbers, use `" + prefix + "pins`";
         }
