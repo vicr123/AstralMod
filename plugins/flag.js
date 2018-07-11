@@ -43,10 +43,13 @@ function menu(options) { //direction, fetchOptions
     embed.setColor("#00C000");
 
     currentMessage = message;
-
     let embedContent = "";
-    if (message.content != "") {
+    
+    if (message.content) {
         embedContent = message.content;
+    }
+    if (message.embeds.length) { //If this pin contains an embed
+        embedContent = unembed(message.embeds[0]) //Unembed the first embed
     }
 
     if (message.attachments.size > 0) {
@@ -65,11 +68,6 @@ function menu(options) { //direction, fetchOptions
         embed.setFooter(message.attachments.size + " attachments");
     }
 
-    if (message.embeds.length) { //If this pin contains an embed
-        log(unembed(message.embeds[0]))
-        embedContent = unembed(message.embeds[0]) //Unembed the first embed
-    }
-
     if (!embedContent) {
         if (options.direction) {
             move(options.direction, options); //attempt to move if a direction was specified
@@ -79,6 +77,7 @@ function menu(options) { //direction, fetchOptions
         }
     } else {
         embed.addField(message.author.tag, embedContent.substr(0, 1000));
+        embedContent = "";
         return embed; //return the final embed to send or edit
     }
 }
@@ -143,12 +142,12 @@ function processCommand(message, isMod, command) {
                     continueReactions = true;
                     goDown();
                 } else if (reaction.emoji.name == "📌") {
-                    let embed = menu({message})
+                    let embed = menu({message: currentMessage})
                 
-                    menuEmbed.setTitle("Portably pin a message");
-                    menuEmbed.setDescription("The message has been portably pinned.");
-                    menuEmbed.setColor("#00C000");
-                    flaggingMessage.edit(menuEmbed)
+                    embed.setTitle("Portably pin a message");
+                    embed.setDescription("The message has been portably pinned.");
+                    embed.setColor("#00C000");
+                    flaggingMessage.edit(embed)
 
                     //Flag the message
                     if (settings.users[author] == null) {
