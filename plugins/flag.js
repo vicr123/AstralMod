@@ -17,7 +17,6 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * *************************************/
-
 var client;
 var consts;
 const Discord = require('discord.js');
@@ -31,28 +30,21 @@ function unembed(embed) {
         embedString += `\n**${embed.fields[i].name}**\n${embed.fields[i].value}\n`
     }
     if (embed.footer) embedString += `\n${embed.footer.text}`
-    return embedString; //returns a string
+    return embedString || "Empty embed"; //returns a string
 }
 
 function menu(options) { //direction, fetchOptions
     const message = options.message;
-
-    let embed = new Discord.RichEmbed();
+    const embed = new Discord.RichEmbed();
     embed.setTitle("Portably pin a message");
     embed.setDescription("Select a message to pin");
     embed.setColor("#00C000");
 
     currentMessage = message;
     let embedContent = "";
-    
-    if (message.content) {
-        embedContent = message.content;
-    }
-    if (message.embeds.length) { //If this pin contains an embed
-        embedContent += "`Embed`\n";
-        embedContent = unembed(message.embeds[0]) //Unembed the first embed
-    }
 
+    if (message.content) embedContent = message.content;
+    if (message.embeds.length) embedContent = `\`Embed\`\n${unembed(message.embeds[0])}` //Unembed the first embed
     if (message.attachments.size > 0) {
         for (let [key, attachment] of message.attachments) {
             if (attachment.height != null) {
@@ -61,153 +53,119 @@ function menu(options) { //direction, fetchOptions
                 break;
             }
         }
-        
-        if (embedContent == "") {
-            embedContent = "`Nontextual Content`"
-        }
-
+        if (embedContent == "") embedContent = "`Nontextual Content`"
         embed.setFooter(message.attachments.size + " attachments");
     }
 
     if (!embedContent) {
-        if (options.direction) {
-            move(options.direction, options); //attempt to move if a direction was specified
-        } else {
-            //throw an error if no direction was given
-            throw new UserInputError("Cannot pin this message. Please specify another message.");
-        }
+        if (options.direction) return menu(options.direction, options); //attempt to move if a direction was specified
+        throw new UserInputError("Cannot pin this message. Please specify another message."); //throw an error if no direction was given
     } else {
-        embed.addField(message.author.tag, embedContent.substr(0, 1000));
-        embedContent = "";
+        embed.addField(message.author.tag, embedContent.length > 1020 ? `${embedContent.substr(0, 1021)}...` : embedContent);
         return embed; //return the final embed to send or edit
     }
 }
 
 function processCommand(message, isMod, command) {
     if (command.startsWith("pin ")) {
-        let author = message.author.id;
-
-        let number = command.substr(4);
-        if (isNaN(number)) {
-            throw new UserInputError("Invalid number");
-        }
-        number = parseInt(number);
-        if (number > 100 || number < 1) {
-            throw new UserInputError("Specify a number between 1 and 100");
-        }
-
         let flaggingMessage;
         let currentMessage;
+        let author = message.author.id;
+        let number = command.substr(4);
+        if (isNaN(number)) throw new UserInputError("Invalid number");
+        number = parseInt(number);
+        if (number > 50 || number < 1) throw new UserInputError("Specify a number between 1 and 50");
 
         message.delete().then(function(message) {
-        //after collecting messages
-        return message.channel.fetchMessages({ limit: number })
-        }).then(function(messages) {
-        currentMessage = messages.array()[number-1]
-        let message = messages.array()[number-1]
-        message.channel.send(menu({message, number})).then(function(flaggingMessage) { //reactions
-            
-            flaggingMessage.react("⬆")
-            .then(flaggingMessage.react("⬇"))
-            .then(flaggingMessage.react("📌"))
-            .then(flaggingMessage.react("🚫"));
+            return message.channel.fetchMessages({ limit: number })
+        }).then(function(messages) { //after collecting messages
+            currentMessage = messages.array()[number - 1]
+            let message = messages.array()[number - 1]
+            message.channel.send(menu({ message, number })).then(function(flaggingMessage) { //reactions
+                flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react("📌")).then(flaggingMessage.react("🚫"));
 
-            let move = function(direction) {
-                message.channel.fetchMessages(direction == "down" ? { limit: 1, after: currentMessage.id } : 
-                { limit: 1, before: currentMessage.id }).then(function(messages) {
-                    if (!messages.size) return;
-                    let message = messages.first();
-                    currentMessage = message;
-                    flaggingMessage.edit(menu({direction, message}))
-                });
-            }
+                const move = function(direction) {
+                    message.channel.fetchMessages(direction == "down" ? { limit: 1, after: currentMessage.id } :
+                     { limit: 1, before: currentMessage.id }).then(function(messages) {
+                        if (!messages.size || currentMessage.id == flaggingMessage.id) return;
+                        let message = messages.first();
+                        currentMessage = message;
+                        flaggingMessage.edit(menu({ direction, message }))
+                    });
+                }
 
-            const callReactions = function(message) {
-                return message.awaitReactions(function(reaction) {
-                    if (reaction.count > 1 && reaction.users.has(author)) {
-                        return true;
+                const callReactions = function(message) {
+                    return message.awaitReactions(function(reaction) {
+                        if (reaction.count > 1 && reaction.users.has(author)) return true;
+                        return false;
+                    }, {
+                        max: 1
+                    })
+                }
+
+                const reactionCollectionFunction = function(reactions) {
+                    let reaction = reactions.first();
+                    let currentUser;
+                    for (let [id, user] of reaction.users) {
+                        if (id != client.user.id) {
+                            reaction.remove(user);
+                            currentUser = user;
+                        }
                     }
-                    return false;
-                }, {
-                    max: 1
-                })
-            }
 
-            let reactionCollectionFunction = function(reactions) {
-                let reaction = reactions.first();
+                    let continueReactions = true;
+                    if (reaction.emoji.name == "⬆") {
+                        move("up")
+                    } else if (reaction.emoji.name == "⬇") {
+                        move("down")
+                    } else if (reaction.emoji.name == "📌") {
+                        continueReactions = false;
+                        let embed = menu({ message: currentMessage })
+                        embed.setTitle("Portably pin a message");
+                        embed.setDescription("This message has been portably pinned.");
+                        embed.setColor("#00C000");
+                        flaggingMessage.edit(embed)
 
-                let currentUser;
-                for (let [id, user] of reaction.users) {
-                    if (id != client.user.id) {
-                        reaction.remove(user);
-                        currentUser = user;
+                        //Pin the message
+                        if (!settings.users[author]) settings.users[author] = {};
+                        if (!settings.users[author].flags) settings.users[author].flags = [];
+                        let flagObject = { channel: currentMessage.channel.id, message: currentMessage.id }
+                        settings.users[author].flags.push(flagObject);
+
+                    } else if (reaction.emoji.name == "🚫") {
+                        continueReactions = false;
+                        let embed = new Discord.RichEmbed();
+                        embed.setTitle("Portably pin a message");
+                        embed.setDescription("Message pinning cancelled.");
+                        embed.setColor("#00C000");
+                        flaggingMessage.edit(embed);
+                    }
+
+                    if (continueReactions) {
+                        callReactions(flaggingMessage).then(reactionCollectionFunction);
+                    } else {
+                        flaggingMessage.clearReactions();
                     }
                 }
 
-                let continueReactions = true;
-                if (reaction.emoji.name == "⬆") {
-                    move("up")
-                } else if (reaction.emoji.name == "⬇") {
-                    move("down")
-                } else if (reaction.emoji.name == "📌") {
-                    continueReactions = false;
-                    let embed = menu({message: currentMessage})
-                
-                    embed.setTitle("Portably pin a message");
-                    embed.setDescription("The message has been portably pinned.");
-                    embed.setColor("#00C000");
-                    flaggingMessage.edit(embed)
-
-                    //Flag the message
-                    if (settings.users[author] == null) {
-                        settings.users[author] = {};
-                    }
-
-                    if (settings.users[author].flags == null) {
-                        settings.users[author].flags = [];
-                    }
-
-                    let flagObject = {
-                        channel: currentMessage.channel.id,
-                        message: currentMessage.id
-                    }
-                    settings.users[author].flags.push(flagObject);
-                } else if (reaction.emoji.name == "🚫") {
-                    continueReactions = false;
-                    let embed = new Discord.RichEmbed();
-                    embed.setTitle("Portably pin a message");
-                    embed.setDescription("Message pinning cancelled.");
-                    embed.setColor("#00C000");
-                    flaggingMessage.edit(embed);
-                }
-
-                if (continueReactions) {
-                    callReactions(flaggingMessage).then(reactionCollectionFunction);
-                } else {
-                    flaggingMessage.clearReactions();
-                }
-            }
-
-            return callReactions(flaggingMessage).then(reactionCollectionFunction);
-        }).catch(function(err) {
-            message.channel.send(`${err.message}\n${err.stack}`);
+                return callReactions(flaggingMessage).then(reactionCollectionFunction);
+            }).catch(function(err) {
+                message.channel.send(`${err.message}\n${err.stack}`);
+            });
         });
-    });
     } else if (command == "pin") {
-        message.reply("To pin a message, you'll need to specify which one to pin. For more information")
+        return message.reply("To pin a message, you'll need to specify which one to pin. For more information, type `" + prefix + "help pin`.");
     } else if (command.startsWith("pins")) {
         let number = command.substr(5);
         let nsfw = message.channel.nsfw;
 
         //Get flags
         let flagArray = settings.users[message.author.id].flags;
-
-        if (flagArray == null || flagArray.length == 0) {
+        if (!flagArray) {
             let embed = new Discord.RichEmbed;
             embed.setTitle("No Pins");
             embed.setDescription("You haven't pinned any messages. To pin a message, use `" + prefix + "pin`.");
-            message.channel.send(embed);
-            return;
+            return message.channel.send(embed);
         }
 
         if (number.startsWith("--image")) {
@@ -225,14 +183,9 @@ function processCommand(message, isMod, command) {
             if (channel.nsfw && !nsfw) throw new CommandError("Pin in NSFW channel. View pins in NSFW channel to see pin.");
 
             channel.fetchMessage(flagItem.message).then(function(fMessage) {
-                let flagMessage;
+                let flagMessage = fMessage.content + "\n";
 
-                if (settings.guilds[channel.guild.id].echoOffensive) {
-                    flagMessage = filterOffensive(fMessage.content) + "\n";
-                } else {
-                    flagMessage = fMessage.content + "\n";
-                }
-
+                if (settings.guilds[channel.guild.id].echoOffensive) flagMessage = filterOffensive(fMessage.content) + "\n";
                 if (fMessage.content == "") {
                     if (fMessage.attachments.size > 0) {
                         for (let [key, attachment] of fMessage.attachments) {
@@ -242,19 +195,15 @@ function processCommand(message, isMod, command) {
                                 break;
                             }
                         }
-
                         embed.setFooter(fMessage.attachments.size + " attachments");
                     }
                 }
-
                 if (flagMessage.trim() != "") embed.addField(fMessage.author.tag, flagMessage.substr(0, 1000));
-                
                 if (fMessage.attachments.size > 0) {
                     let attachments = "";
                     for (let [key, attachment] of fMessage.attachments) {
                         attachments += "[" + attachment.filename + "](" + attachment.url + ")\n";
                     }
-
                     embed.addField("Attachments", attachments);
                 }
 
@@ -263,7 +212,6 @@ function processCommand(message, isMod, command) {
                 embed.addField("Error", "Can't find message");
                 message.channel.send(embed);
             });
-
             return;
         }
         if (isNaN(number) || number == "") number = 1;
@@ -287,7 +235,7 @@ function processCommand(message, isMod, command) {
             if (i >= (flagArray.length > 5 * number + 5 ? 5 * number + 5 : flagArray.length)) return message.channel.send(embed);
             let flagItem = flagArray[i];
             let channel = client.channels.get(flagItem.channel);
-            if (channel == null) {
+            if (!channel) {
                 embed.addField("Pin #" + (i + 1), "Can't find channel");
                 getMessageNumber(++i);
                 return;
@@ -300,14 +248,9 @@ function processCommand(message, isMod, command) {
             }
 
             channel.fetchMessage(flagItem.message).then(function(message) {
-                let flagMessage;
+                let flagMessage = message.content + "\n";
 
-                if (settings.guilds[channel.guild.id].echoOffensive) {
-                    flagMessage = filterOffensive(message.content) + "\n";
-                } else {
-                    flagMessage = message.content + "\n";
-                }
-
+                if (settings.guilds[channel.guild.id].echoOffensive) flagMessage = filterOffensive(message.content) + "\n";
                 if (message.content == "") {
                     for (let [key, attachment] of message.attachments) {
                         if (attachment.height != null) {
@@ -330,7 +273,7 @@ function processCommand(message, isMod, command) {
         var unflagging = command.substr(6);
         var index = parseInt(unflagging) - 1;
 
-        if (isNaN(index)) return message.reply("Usage: `" + prefix + "unpin id`. For the `id` parameter, use `" + prefix + "pins`. For more information, `" + prefix + "help unpin`");
+        if (isNaN(index)) return message.reply("Usage: `" + prefix + "unpin id`. For the `id` parameter, use `" + prefix + "pins`. For more information, type `" + prefix + "help unpin`");
         if (settings.users[message.author.id] == null) return message.reply("You have no portable pins.");
         if (settings.users[message.author.id].flags == null) return message.reply("You have no portable pins.");
         if (settings.users[message.author.id].flags.length == 0) return message.reply("You have no portable pins.");
@@ -380,7 +323,7 @@ module.exports = {
                 help.usageText = prefix + "pins [number]";
                 help.helpText = "Show pinned messages";
                 help.param2 = "*Optional Parameter*\n" +
-                              "The page number you wish to view";
+                    "The page number you wish to view";
                 break;
             case "unpin":
                 help.title = prefix + "unpin";
