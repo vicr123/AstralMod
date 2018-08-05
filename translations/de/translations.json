@@ -1,0 +1,32 @@
+{
+	"translations": {
+		"Alright, your locale is now English.": "Ok, deine Sprache ist jetzt Deutsch",
+		"Unfortunately we don't have that locale in AstralMod.": "Leider ist diese Sprache in AstralMod nicht verfügbar.",
+		"User $[1] fetched and cached.": "Benutzer $[1] abgerufen und zwischengespeichert.",
+		"Couldn't fetch user.": "Benutzer konnte nicht abgerufen werden.",
+		"User ID:": "Benutzer-id:",
+		"Discriminator:": "Diskriminator:",
+		"Created at:": "Gemacht am:",
+		"Joined at:": "Beigetreten am:",
+		"User Information": "Benutzerinformationen",
+		"Created": "Gemacht",
+		"Joined": "Beigetreten",
+		"Timestamps": "Zeitstempel",
+		"Username": "Benutzername",
+		"Names": "Namen",
+		"Current Display Name": "Aktueller Anzeigename",
+		"Nickname": "Spitzname",
+		"No nickname": "Kein Spitzname",
+		"This user is a bot account.": "Dieser Benutzer ist ein Bot",
+		"This user has been banned from $[1] servers known to AstralMod.": "Dieser Benutzer wurde von $[1] Servern, die Astralmod bekannt sind, gebannt.",
+		"Alerts": "Warnungen",
+
+		"There is a one day cooldown between use of this command.": "Es gibt eine Ein-Tages-Abklingzeit zwischen der Verwendung dieses Befehls.",
+		"Nicknames need to be less than 32 characters.": "Spitznamen müssen weniger als 32 Zeichen lang sein.",
+		"Ok, give us a bit to make sure the mods are ok with that.": "Ok, geben Sie uns ein bisschen Zeit, um sicherzustellen, dass die Mods damit in Ordnung sind.",
+		"Nickname changes are not accepted on this server via AstralMod.": "Auf diesem Server kannst du über AstralMod deinen Spitznamen nicht ändern.",
+		"User nickname has been accepted.": "Der Spitzname wurde akzeptiert.",
+		"That didn't work.": "Das hat nicht funktioniert."
+	},
+	"language": "German"
+}
