@@ -2855,7 +2855,7 @@ function memberAdd(member) {
             if (inviteCode == "") {
                 channel.send(":arrow_right: <@" + member.user.id + ">");
             } else {
-                channel.send(":arrow_right: <@" + member.user.id + "> + discord.gg/" + inviteCode);
+                channel.send(":arrow_right: <@" + member.user.id + "> + Invite " + inviteCode);
             }
     
             uinfo(member.user, channel, member.guild, true);
@@ -2884,7 +2884,6 @@ function memberAdd(member) {
         }).catch(function() {
           sendWelcome("");
         });
-
     }
 }
 
