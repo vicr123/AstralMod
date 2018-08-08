@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.9.1";
+    amVersion = "2.9.2";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
