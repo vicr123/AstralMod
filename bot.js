@@ -98,6 +98,7 @@ var listening = true;
 var nickChanges = {};
 var lockBox = [];
 var banCounts = {};
+var knownInvites = {};
 var finalStdout = "";
 global.banDescriptor = {};
 
@@ -2850,19 +2851,40 @@ function memberAdd(member) {
     }
 
     if (channel != null) {
-        channel.send(":arrow_right: <@" + member.user.id + ">");
-
-        uinfo(member.user, channel, member.guild, true);
-
-        if (member.guild.id == 287937616685301762) {
-            var now = new Date();
-            var joinDate = member.user.createdAt;
-            if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
-                if (member.guild.id == 287937616685301762) {
-                    channel.send(":calendar: <@&326915978392764426> This member was created today.");
+        let sendWelcome = function(inviteCode) {
+            if (inviteCode == "") {
+                channel.send(":arrow_right: <@" + member.user.id + ">");
+            } else {
+                channel.send(":arrow_right: <@" + member.user.id + "> + discord.gg/" + inviteCode);
+            }
+    
+            uinfo(member.user, channel, member.guild, true);
+    
+            if (member.guild.id == 287937616685301762) {
+                var now = new Date();
+                var joinDate = member.user.createdAt;
+                if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
+                    if (member.guild.id == 287937616685301762) {
+                        channel.send(":calendar: <@&326915978392764426> This member was created today.");
+                    }
                 }
             }
-        }
+        };
+
+        member.guild.fetchInvites().then(function(invites) {
+            let inviteCode = "";
+            for ([id, invite] of invites) {
+                if (knownInvites[invite.code] < invite.uses) {
+                    inviteCode = invite.code;
+                    knownInvites[invite.code] = invite.uses;
+                }
+            }
+
+            sendWelcome(inviteCode);
+        }).catch(function() {
+          sendWelcome("");
+        });
+
     }
 }
 
@@ -3148,6 +3170,19 @@ function countBans() {
     }
 }
 
+function loadInvites() {
+    for (let [id, guild] of client.guilds) {
+        knownInvites[guild.id] = {};
+        guild.fetchInvites().then(function(invites) {
+            for ([id, invite] of invites) {
+                knownInvites[invite.code] = invite.uses;
+            }
+        }).catch(function() {
+          
+        });
+    }
+}
+
 function loadSettingsFile(file) {
     if (file.startsWith("{")) {
         //File unencrypted
@@ -3296,6 +3331,8 @@ function readyOnce() {
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
 
     countBans();
+    loadInvites();
+    setInterval(loadInvites, 300000);
 
     setInterval(function() {
         titleBox.content = "AstralMod " + amVersion + " Console  │  Uptime: " + moment.duration(client.uptime).humanize() +
