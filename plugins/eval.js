@@ -25,10 +25,10 @@ var currentGuild = 0;
 
 var exec = require('child_process').exec;
 
-function exit() {
+function exit(channel) {
     releaseInput(currentGuild);
     currentGuild = 0;
-    return "Exited Arbitrary Code Execution mode.";
+    channel.send("Exited Arbitrary Code Execution mode.")
 }
 
 function serialise(object) {
@@ -61,7 +61,7 @@ function serialise(object) {
     return m;
 }
 
-function processEval(message) {
+async function processEval(message) {
     try {
         let forceOutput = false;
         let command = message.content;
@@ -69,12 +69,18 @@ function processEval(message) {
             command = command.substr(1);
             forceOutput = true;
         }
-        let ret = eval(command);
+
+        let asyncFuncConstructor = Object.getPrototypeOf(async function(){}).constructor;
+        let func = asyncFuncConstructor('message', 'client', 'exit', command);
+        let ret = await func(message, client, () => exit(message.channel));
         let type = typeof(ret);
         let m = serialise(ret);
 
-        if (m == "") {
-            m = "[no return value]";
+        if (currentGuild === 0)
+            return;
+
+        if (m == "undefined") {
+            m = "[generated function had no return value]";
         }
 
         if ((m.length > 500 || m.split("\n").length > 5) && !forceOutput) {
@@ -87,32 +93,12 @@ function processEval(message) {
             splitOptions.prepend = "```js\n";
         }
 
-        m = m.replace(client.token, "[client token redacted]");
-
-        message.channel.send(m, {
+        let mess = await message.channel.send(m, {
             split: splitOptions
-        }).then(function(message) {
-            if (Promise.resolve(ret) == ret) {
-                ret.then(function() {
-                    let edit = "[resolved promise:\n";
-                    for (key in arguments) {
-                        edit += "**" + key + "**:\n" + serialise(arguments[key]) + "\n";
-                    }
-                    edit += "\n]"
+        })
 
-                    if ((edit.length > 500 || edit.split("\n").length > 5) && !forceOutput) {
-                        edit = "[promise output suppressed]";
-                    }
-
-                    edit = edit.replace(client.token, "[client token redacted]");
-                    message.edit(edit);
-                }).catch(function(err) {
-                    message.edit("[promise: :large_orange_diamond: " + err.message.replace(client.token, "[client token redacted]") + "]")  
-                });
-            }
-        });
     } catch (err) {
-        message.channel.send(":large_orange_diamond: " + err.message.replace(client.token, "[client token redacted]"));
+        await message.channel.send(":large_orange_diamond: " + err.message.replace(client.token, "[client token redacted]"));
     }
 }
 
