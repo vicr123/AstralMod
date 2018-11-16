@@ -356,6 +356,7 @@ function processCommand(message, isMod, command) {
             return;
         } else if (query == "my iphone") {
             message.channel.send("https://icloud.com/#find");
+            return;
         } else if (query == "my android" || query == "my android phone") {
             message.channel.send("https://www.google.com/android/find");
             return;
