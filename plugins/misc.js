@@ -20,7 +20,10 @@
 
 var client;
 var consts;
+var keys = require('../keys.js');
 const Discord = require('discord.js');
+let translate = require('yandex-translate')(keys.yandexKey);
+
 
 function processCommand(message, isMod, command) {
     if (command.startsWith("pic ")) {
@@ -135,6 +138,112 @@ function processCommand(message, isMod, command) {
     
             messageToEdit.edit(embed);
         });
+    } else if (command.startsWith("calc ")) {
+        let expr = command.substr(5);
+
+        require('child_process').execFile("/usr/bin/thecalculator", [
+            "-e",
+            expr
+        ], function(err, stdout, stderr) {
+            let out = stdout.split("\n").filter(function(element) {
+                if (element == "") {
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+            if (err) {
+                if (out.length == 1) {
+                    message.reply(":large_orange_diamond: " + stdout);
+                } else {
+                    let embed = new Discord.RichEmbed("calculation");
+                    embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
+                    embed.setColor("#FF0000");
+                    //embed.setFooter(tr("Guild ID:") + " " + g.id);
+                    embed.setDescription(tr("Calculations"));
+                    
+                    for (let key in out) {
+                        let parts = out[key].split(":");
+
+                        if (key == out.length - 1) {
+                            embed.addField(parts[0].trim(), ":large_orange_diamond: " + parts[1].trim(), true);
+                        } else {
+                            embed.addField(parts[0].trim(), parts[1].trim(), true);
+                        }
+                    }
+
+                    message.reply("Here are your results", {embed: embed});
+                }
+            } else {
+                if (out.length == 1) {
+                    message.reply("The answer is " + stdout);
+                } else {
+                    let embed = new Discord.RichEmbed("calculation");
+                    embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
+                    embed.setColor("#00FF00");
+                    //embed.setFooter(tr("Guild ID:") + " " + g.id);
+                    embed.setDescription(tr("Calculations"));
+                    
+                    for (let key in out) {
+                        let parts = out[key].split(":");
+                        embed.addField(parts[0].trim(), parts[1].trim(), true);
+                    }
+
+                    message.reply("Here are your results", {embed: embed});
+                }
+            }
+        });
+    } else if (command.startsWith("tr ")) {
+        sendPreloader("Translating...", message.channel).then(function(message) {
+            let words = command.substr(3);
+            let args = words.split(" ");
+            
+            let toLang = "en";
+            let fromLang = "";
+            for (let i = 0; i < args.length; i++) {
+                let arg = args[i];
+                if (arg.startsWith("--from=")) {
+                    fromLang = arg.substr(7);
+                    args.splice(i, 1);
+                    i--;
+                } else if (arg.startsWith("--to=")) {
+                    toLang = arg.substr(5);
+                    args.splice(i, 1);
+                    i--;
+                }
+            }
+
+            let sourceText = args.join(" ").trim();
+            let doTranslate = function(fromLang, toLang) {
+                let options = {};
+                if (fromLang != "") options.from = fromLang;
+                options.to = toLang;
+
+                translate.translate(sourceText, options, function(err, res) {
+                    let embed = new Discord.RichEmbed("translate");
+                    embed.setAuthor("Translate");
+                    embed.setColor("#00FF00");
+                    //embed.setFooter(tr("Guild ID:") + " " + g.id);
+                    embed.setTitle("Powered by Yandex.Translate");
+                    embed.setURL("http://translate.yandex.com/");
+
+                    embed.addField("Source Text (" + fromLang + ")", sourceText);
+                    embed.addField("Translated Text (" + toLang + ")", res.text);
+
+                    message.edit(embed);
+                });
+            }
+
+            if (fromLang == "") {
+                //Detect the language
+                translate.detect(sourceText, function(err, res) {
+                    doTranslate(res.lang, toLang);
+                });
+            } else {
+                doTranslate(fromLang, toLang);
+            }
+        });
     }
 }
 
@@ -154,7 +263,9 @@ module.exports = {
             commands: [
                 "pic",
                 "setunit",
-                "sinfo"
+                "sinfo",
+                "calc",
+                "tr"
             ],
             modCommands: [
                 
@@ -181,6 +292,20 @@ module.exports = {
                 help.title = prefix + "sinfo";
                 help.usageText = prefix + "sinfo";
                 help.helpText = "Retrieves information about the current server";
+                break;
+            case "calc":
+                help.title = prefix + "calc";
+                help.usageText = prefix + "calc expression";
+                help.helpText = "Invokes theCalculator and calculates an expression.";
+                help.remarks = "Multiple expressions can be evaluated consecutively by seperating them with a colon.";
+                break;
+            case "tr":
+                help.title = prefix + "tr";
+                help.usageText = prefix + "tr [--from=language] [--to=language] phrase";
+                help.helpText = "Translates a phrase between languages.";
+                help.param1 = "The language to translate from. If ommitted, the language is automatically detected";
+                help.param2 = "The language to translate to. If ommitted, defaults to English";
+                help.param3 = "The phrase to translate";
                 break;
         }
 
