@@ -1,5 +1,5 @@
 # AstralMod
-Discord Moderation Bot for AstralPhaser Central, ShiftOS, theShell and other servers
+Discord Moderation Bot for Bits & Bytes, theShell and many other servers
 
 [![Discord Bots](https://discordbots.org/api/widget/status/282048599574052864.svg)](https://discordbots.org/bot/282048599574052864)
 
