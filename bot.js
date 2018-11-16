@@ -1685,7 +1685,7 @@ function processAmCommand(message) {
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
         embed.setColor("#00C000");
-        embed.setAuthor(tr("AstralMod" + amVersion), client.user.avatarURL);
+        embed.setAuthor(tr("AstralMod " + amVersion), client.user.avatarURL);
         embed.setDescription(tr("Discord Bot"));
         embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
         embed.addField("Sources", "Source code for AstralMod is available at the [GitHub Repository](https://github.com/vicr123/AstralMod).");
