@@ -176,16 +176,18 @@ function processCommand(message, isMod, command) {
         if (number.startsWith("--image")) {
             let pinNumber = number.substr(8);
             //Retrieve image
-            let embed = new Discord.RichEmbed;
-            embed.setTitle(":pushpin: Portable Pin #" + pinNumber);
-            embed.setColor("#00C000");
-            pinNumber = parseInt(pinNumber);
 
             if (pinNumber > flagArray.length || pinNumber < 0) throw new UserInputError("Invalid Page.");
             let flagItem = flagArray[pinNumber - 1];
             let channel = client.channels.get(flagItem.channel);
             if (!channel) throw new CommandError("Can't find channel");
             if (channel.nsfw && !nsfw) throw new CommandError("Pin in NSFW channel. View pins in NSFW channel to see pin.");
+
+            let embed = new Discord.RichEmbed;
+            embed.setTitle(":pushpin: Portable Pin #" + pinNumber);
+            embed.setDescription("[Jump](https://discordapp.com/channels/" + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")");
+            embed.setColor("#00C000");
+            pinNumber = parseInt(pinNumber);
 
             channel.fetchMessage(flagItem.message).then(function(fMessage) {
                 let flagMessage = fMessage.content + "\n";
@@ -240,13 +242,15 @@ function processCommand(message, isMod, command) {
             if (i >= (flagArray.length > 5 * number + 5 ? 5 * number + 5 : flagArray.length)) return message.channel.send(embed);
             let flagItem = flagArray[i];
             let channel = client.channels.get(flagItem.channel);
+
+            let fieldName = "Pin #" + (i + 1) + "";
             if (!channel) {
-                embed.addField("Pin #" + (i + 1), "Can't find channel");
+                embed.addField(fieldName, "Can't find channel");
                 return getMessageNumber(++i);
             }
 
             if (channel.nsfw && !nsfw) {
-                embed.addField("Pin #" + (i + 1), "Pin in NSFW channel. View pins in NSFW channel to see pin.");
+                embed.addField(fieldName, "Pin in NSFW channel. View pins in NSFW channel to see pin.");
                 return getMessageNumber(++i);
             }
 
@@ -266,12 +270,12 @@ function processCommand(message, isMod, command) {
 
                 if (message.embeds.length) flagMessage = `\`Embed\`\n${unembed(message.embeds[0])}` //Unembed the first embed
 
-                let credit = "     - *" + message.author.tag + "* in " + message.channel;
-                embed.addField("Pin #" + (i + 1), flagMessage.length+credit.length > 800 ? 
+                let credit = "     - *" + message.author.tag + "* in " + message.channel + " [Jump](https://discordapp.com/channels/" + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")";
+                embed.addField(fieldName, flagMessage.length+credit.length > 800 ? 
                 `${flagMessage.substr(0, 1021-credit.length-220)}...\n${credit}` : `${flagMessage}\n${credit}`);
                 getMessageNumber(++i);
             }).catch(function() {
-                embed.addField("Pin #" + (i + 1), "Can't find message");
+                embed.addField(fieldName, "Can't find message");
                 getMessageNumber(++i);
             });
         };
