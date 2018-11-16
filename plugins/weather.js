@@ -212,14 +212,18 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     } else {
                         ctx.fillText(currentWeatherText, 10, 30, 50);
                     }
+                   //Image goes between 100-200px y
+                   ctx.drawImage(display.image, 100, 60);
 
-                    //Image goes between 100-200px y
-                    ctx.drawImage(display.image, 100, 60);
+                   ctx.font = "bold 20px Contemporary";
+                   ctx.fillStyle = "black";
+                   let cityWidth = ctx.measureText(data.query.results.channel.location.city);
+                   ctx.fillText(data.query.results.channel.location.city, 175 - cityWidth.width / 2, 228);
 
-                    ctx.font = "bold 20px Contemporary";
+                    ctx.font = "12px Contemporary";
                     ctx.fillStyle = "black";
-                    let cityWidth = ctx.measureText(data.query.results.channel.location.city);
-                    ctx.fillText(data.query.results.channel.location.city, 175 - cityWidth.width / 2, 240);
+                    let countryWidth = ctx.measureText(data.query.results.channel.location.region + " - " + data.query.results.channel.location.country);
+                    ctx.fillText(data.query.results.channel.location.region + " - " + data.query.results.channel.location.country, 175 - countryWidth.width / 2, 245);
 
                     ctx.font = "40px Contemporary";
                     let conditionWidth = ctx.measureText(data.query.results.channel.item.condition.text);

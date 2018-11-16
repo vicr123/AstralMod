@@ -20,7 +20,7 @@
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.9.2";
+    amVersion = "2.10";
     global.prefix = "am:";
 } else {
     amVersion = "Blueprint";
@@ -1365,7 +1365,11 @@ function setGame() {
                                       prefix + "help",
                                       "v." + amVersion,
                                       "v." + amVersion,
-                                      "Android Pay"),
+                                      "Google Pay",
+                                      "theShell",
+                                      "Monopoly",
+                                      "Final Fantastic Card",
+                                      "Ski jacket shopping"),
                                 {
                                     type: "PLAYING"
                                 }
@@ -1676,7 +1680,18 @@ function processAmCommand(message) {
         message.reply("Suggestions are coming soon. Stay tuned!");
         return true;
     } else if (command == "version") {
-        message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot");
+        message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later.");
+        return true;
+    } else if (command == "about") {
+        let embed = new Discord.RichEmbed();
+        embed.setColor("#00C000");
+        embed.setAuthor(tr("AstralMod" + amVersion), client.user.avatarURL);
+        embed.setDescription(tr("Discord Bot"));
+        embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
+        embed.addField("Sources", "Source code for AstralMod is available at the [GitHub Repository](https://github.com/vicr123/AstralMod).");
+        embed.addField("Contributors", "AstralMod is possible due to the work of these wonderful people:\n- Blake#0007\n- reflectronic#1288");
+        embed.setFooter(tr("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
+        message.channel.send(embed);
         return true;
     /*} else if (command.startsWith("setlocale ")) {
         let locale = command.substr(10);
@@ -1700,7 +1715,7 @@ function processAmCommand(message) {
         embed.setAuthor("AstralMod Help Contents");
         embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
 
-        embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nsetlocale\nhelp", true);
+        embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nabout\nhelp", true);
 
         for (key in plugins) {
             var plugin = plugins[key];
@@ -1806,6 +1821,11 @@ function processAmCommand(message) {
                 help.param1 = "*Optional Parameter*\n" +
                                 "The command to acquire information about.\n" +
                                 "If this parameter is not present, we'll list the available commands.";
+                break;
+            case "about":
+                help.title = prefix + "about";
+                help.usageText = prefix + "about";
+                help.helpText = "Acquire information about AstralMod";
                 break;
             default:
                 //Look thorough plugins for help
