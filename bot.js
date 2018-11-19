@@ -1689,7 +1689,7 @@ function processAmCommand(message) {
         embed.setDescription(tr("Discord Bot"));
         embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
         embed.addField("Sources", "Source code for AstralMod is available at the [GitHub Repository](https://github.com/vicr123/AstralMod).");
-        embed.addField("Contributors", "AstralMod is possible due to the work of these wonderful people:\n- Blake#0007\n- reflectronic#1288");
+        embed.addField("Contributors", "AstralMod is possible due to the work of these wonderful people:\n- Blake#0007\n- reflectronic#5190");
         embed.setFooter(tr("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
         message.channel.send(embed);
         return true;
