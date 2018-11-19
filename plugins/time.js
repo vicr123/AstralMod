@@ -298,72 +298,46 @@ function pollTimers() {
 }
 
 function processCommand(message, isMod, command) {
-    if (command.startsWith("time ")) {
-        var utcOffset = -3000;
-        var location = command.substr(5);
-        var locationString = location;
 
-        utcOffset = parseFloat(location);
-        if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
-            utcOffset = utcOffsetFromTimezone(location);
-            if (utcOffset == -3000) {
-                var users = parseUser(location, message.guild);
-
-                if (users.length > 0) {
-                    if (settings.users.hasOwnProperty(users[0].id)) {
-                        var userObject = settings.users[users[0].id];
-                        if (userObject != null) {
-                            if (userObject.hasOwnProperty("timezone")) {
-                                locationString = users[0].username;
-                                utcOffset = userObject.timezone;
-                            } else {
-                                throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
-                            }
-                        } else {
-                            throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
-                        }
-                    } else {
-                        throw new UserInputError(users[0].username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
-                    }
-                }
+    if(command.startsWith("time")) {
+        var hourType = settings.users[message.author.id].timeunit === undefined ? "24h" : settings.users[message.author.id].timeunit;
+        let setHour = false;
+        for (const param of command.split(" ")) {
+            if (param === "--12") {
+                setHour = true;
+                hourType = "12h"
+            } else if (param === "--24") {
+                setHour = true;
+                hourType = "24h"
             }
-        } else {
-            locationString = "UTC " + parseFloat(utcOffset);
         }
 
-        if (isNaN(utcOffset) || utcOffset > 14 || utcOffset < -14) {
-            throw new UserInputError("Invalid UTC Offset");
-        } else {
-            var localtime = new Date();
-            var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + utcOffset * 60) * 60000);
-            var dateString = date.toString();
-            if (dateString == "Invalid Date") {
-                throw new UserInputError("Invalid UTC Offset");
+        command = command.replace("--12", "").replace("--24", "").trim();
+
+        let user = command.replace("time", "");
+        let tz = undefined;
+
+        if (utcOffsetFromTimezone(user) !== -3000) {
+            tz = utcOffsetFromTimezone(user);
+        }
+        if (tz === undefined) {
+            if (user == 0) { // if it's nothing, including whitespace or undefined or whatever
+                user = message.author;
             } else {
-                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                message.channel.send(getClockEmoji(date) + " **" + locationString + "**: " + dateString);
+                user = parseUser(user.trim(), message.guild)[0];
             }
-        }
-    } else if (command == "time") {
-        if (settings.users[message.author.id] == null) {
-            settings.users[message.author.id] = {};
         }
 
-        if (settings.users[message.author.id].timezone == null) {
-            throw new CommandError("Unknown timezone. Please set your timezone with `" + prefix + "settz`");
-        } else {
-            var localtime = new Date();
-            var date = new Date(localtime.valueOf() + (localtime.getTimezoneOffset() + settings.users[message.author.id].timezone * 60) * 60000);
-            var dateString = date.toString();
-            if (dateString == "Invalid Date") {
-                throw new CommandError("Corrupted timezone. Please set your timezone with `" + prefix + "settz`");
-            } else {
-                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                dateString = dateString.substring(0, dateString.lastIndexOf(" "));
-                message.channel.send(getClockEmoji(date) + " **" + message.author.username + "**: " + dateString);
-            }
+        if (user == null || settings.users[user.id] == null || !settings.users.hasOwnProperty(user.id) || !settings.users[user.id].hasOwnProperty("timezone") && tz === undefined) {
+            throw new UserInputError(user.username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
         }
+
+        tz = tz === undefined ? settings.users[user.id].timezone : tz;
+
+        let time = moment().utcOffset(tz);
+
+        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user.username === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A"));
+
     } else if (command.startsWith("settz ")) {
         var utcOffset;
         var location = command.substr(6);
