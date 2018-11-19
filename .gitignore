@@ -1,12 +1,10 @@
-
-keys.js
-
+consts.js
 node_modules/
-
 .vs/
 td.js
 settings.json
 iv.txt
+iv
 .settings-beforeEncrypt.json
 gce
 log.log

@@ -20,9 +20,8 @@
 
 var client;
 var consts;
-var keys = require('../keys.js');
 const Discord = require('discord.js');
-let translate = require('yandex-translate')(keys.yandexKey);
+let translate;
 
 
 function processCommand(message, isMod, command) {
@@ -48,8 +47,14 @@ function processCommand(message, isMod, command) {
         } else if (units.toLowerCase() == "imperial") {
             settings.users[message.author.id].units = "imperial";
             message.reply("Ok, we'll use the imperial system for your units from now on");
+        } else if (units.toLowerCase() == "12h") {
+            settings.users[message.author.id].timeunit = "12h";
+            message.reply("Ok, we'll use 12 hours for your time from now on");
+        } else if (units.toLowerCase() == "24h") {
+            settings.users[message.author.id].timeunit = "24h";
+            message.reply("Ok, we'll use 24 hours for your time from now on");
         } else {
-            throw new UserInputError("Units need to be `metric` or `imperial`");
+            throw new UserInputError("Units need to be `metric`, `imperial`, `12h` or `24h`");
         }
     } else if (command == "sinfo") {
         let g = message.guild;
@@ -252,6 +257,7 @@ module.exports = {
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;
+        translate = require('yandex-translate')(consts.keys.yandexKey);
 
         commandEmitter.on('processCommand', processCommand);
     },

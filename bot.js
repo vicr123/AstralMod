@@ -18,15 +18,6 @@
  *
  * *************************************/
 
-var amVersion;
-if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.10";
-    global.prefix = "am:";
-} else {
-    amVersion = "Blueprint";
-    global.prefix = "am#";
-}
-const emojiServer = "426703640082776065"; //Change this if you're forking AM :)
 
 const Discord = require('discord.js');
 const consts = require('./consts.js');
@@ -43,6 +34,17 @@ const client = new Discord.Client({
     disableEveryone: true
 });
 const localize = require('localize');
+
+var amVersion;
+if (process.argv.indexOf("--blueprint") == -1) {
+    amVersion = "2.10";
+    global.prefix = consts.config.prefix;
+} else {
+    amVersion = "Blueprint";
+    global.prefix = consts.config.bprefix;
+}
+
+global.ownerId = undefined;
 
 let doNotDeleteGuilds = [];
 
@@ -83,10 +85,9 @@ global.tr = function() {
     return arguments[0];
 }
 
-const keys = require('./keys.js');
 const cipherAlg = "aes-256-ctr";
 const sha256 = crypto.createHash("sha256");
-const settingsKey = keys.settingsKey.slice(0, 32);
+const settingsKey = consts.keys.settingsKey.slice(0, 32);
 
 const commandEmitter = new events.EventEmitter();
 commandEmitter.setMaxListeners(100);
@@ -155,11 +156,10 @@ global.filterOffensive = function(offensive) {
 }
 
 global.getEmoji = function(emojiName) {
-    let e = client.guilds.get(emojiServer).emojis.find("name", emojiName);
-    if (e == null) {
+    try {
+        return client.guilds.get(consts.config.emojiServer).emojis.find("name", emojiName).toString();
+    } catch {
         return ":arrow_right:";
-    } else {
-        return e.toString();
     }
 }
 
@@ -947,8 +947,8 @@ function processConsoleInput(line) {
     } else if (lLine == "save") {
         saveSettings(true);
     } else if (lLine == "reconnect") {
-        if (keys.key != null) {
-            client.login(keys.key).catch(function() {
+        if (consts.keys.token != null) {
+            client.login(consts.keys.token).catch(function() {
                 log("Couldn't establish a connection to Discord.", logType.critical);
             });
         } else {
@@ -1275,7 +1275,7 @@ function shutdown() {
             var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8"), cipher.final())]);
 
             fs.writeFileSync("settings.json", settingsJson, "utf8");
-            fs.writeFileSync("iv.txt", iv);
+            fs.writeFileSync("iv", iv);
             log("Settings saved!", logType.good);
         } catch (exception) {
             log("Settings couldn't be saved. You may lose some settings.", logType.critical);
@@ -1526,7 +1526,7 @@ function processModCommand(message) {
         }
 
         if (settings.guilds[message.guild.id].requiresConfig) {
-            if (message.author.id == consts.users.vicr123 || message.author.id == message.guild.owner.user.id) {
+            if (message.author.id == global.ownerId || message.author.id == message.guild.owner.user.id) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, seperated by a space.")
@@ -1548,7 +1548,7 @@ function processModCommand(message) {
             //Configuration menu
 
             //Make sure person has neccessary permissions
-            if (message.author.id == consts.users.vicr123 || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
+            if (message.author.id == global.ownerId || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send(getSingleConfigureWelcomeText(message.guild));
@@ -1557,7 +1557,7 @@ function processModCommand(message) {
             }
         }
     } else if (lText == prefix + "poweroff") {
-        if (message.author.id == consts.users.vicr123 || message.author.id == consts.users.nebble) {
+        if (message.author.id == global.ownerId) {
             message.reply("AstralMod is now exiting.").then(function() {
                 shutdown();
             });
@@ -1569,7 +1569,7 @@ function processModCommand(message) {
         command = text.toLowerCase().substr(prefix.length);
 
         if (command == "shoo") {
-            if (message.author.id == consts.users.vicr123 || message.author.id == message.guild.owner.user.id) {
+            if (message.author.id == global.ownerId || message.author.id == message.guild.owner.user.id) {
                 message.reply(":arrow_left: And with that, POW! I'm gone!").then(function() {
                     message.guild.leave();
                     saveSettings();
@@ -2631,7 +2631,7 @@ async function processMessage(message) {
                 if (guildSetting != null) {
                     //First check if user is currently configuring
                     if (guildSetting.configuringUser == message.author.id) {
-                        //Check if this is during first time setup
+                        //Check if this is during first time keys
                         if (guildSetting.requiresConfig) {
                             processConfigure(message, client.guilds.get(key));
                         } else {
@@ -2732,7 +2732,7 @@ function saveSettings(showOkMessage = false) {
             log("Settings couldn't be saved", logType.critical);
             setTimeout(saveSettings, 30000);
         } else {
-            fs.writeFile("iv.txt", iv, "utf8", function(error) {
+            fs.writeFile("iv", iv, "utf8", function(error) {
                 if (error) {
                     log("IV couldn't be saved. Aborting save of normal settings file.", logType.critical);
                 } else {
@@ -3203,6 +3203,11 @@ function loadInvites() {
 }
 
 function loadSettingsFile(file) {
+    if(fs.existsSync("iv.txt") && !fs.existsSync("iv")) {
+        log("Converting legacy file 'iv.txt'...", logType.info);
+        fs.copyFileSync("iv.txt", "iv");
+    }
+
     if (file.startsWith("{")) {
         //File unencrypted
         var intermediarySettings = JSON.parse(file);
@@ -3213,12 +3218,12 @@ function loadSettingsFile(file) {
         log("settings.js file will be encrypted on next save.", logType.warning);
 
         global.settings = intermediarySettings;
-    } else if (!fs.existsSync("iv.txt")) {
+    } else if (!fs.existsSync("iv")) {
         //File encrypted
         log("Decrypting the settings.js file...", logType.info);
 
         var buf = fs.readFileSync("settings.json");
-        var cipher = crypto.createDecipher(cipherAlg, keys.settingsKey);
+        var cipher = crypto.createDecipher(cipherAlg, consts.keys.settingsKey);
         var settingsJson = Buffer.concat([cipher.update(buf), cipher.final()]);
         settingsJson = settingsJson.toString("utf8");
 
@@ -3228,7 +3233,7 @@ function loadSettingsFile(file) {
         //File encrypted with IV
         log("Decrypting the settings.js file...", logType.info);
 
-        let iv = fs.readFileSync("iv.txt");
+        let iv = fs.readFileSync("iv");
 
         var buf = fs.readFileSync("settings.json");
         var cipher = crypto.createDecipheriv(cipherAlg, settingsKey, iv);
@@ -3360,6 +3365,8 @@ function readyOnce() {
     }, 1000);
 
     postDBL();
+
+    client.fetchApplication().then(app => global.ownerId = app.owner);
 }
 
 client.once('ready', readyOnce);
@@ -3401,7 +3408,7 @@ function postDBL() {
             method: "POST",
             headers: {
                 "User-Agent": "AstralMod/" + amVersion,
-                "Authorization": keys.dblKey,
+                "Authorization": consts.keys.dblKey,
                 "Content-Type": "application/json"
             }
         }, function(res) {
@@ -3473,7 +3480,7 @@ if (Discord.version != requireDiscordVersion) {
     log("This version of AstralMod requires Discord.JS version " + requireDiscordVersion, logType.info);
     log("Execution halted.", logType.critical);
 } else {
-    if (keys.settingsKey == null) {
+    if (consts.keys.settingsKey == null) {
         log("Settings Encryption Key not found.", logType.critical);
         log("To inform AstralMod about your settings encryption key,\n" +
             "1. Create a file called keys.js in the same directory as AstralMod\n" +
@@ -3485,8 +3492,8 @@ if (Discord.version != requireDiscordVersion) {
             "TYPING_START"
         ]
         try {
-            if (keys.key != null) {
-                client.login(keys.key).catch(function() {
+            if (consts.keys.token != null) {
+                client.login(consts.keys.token).catch(function() {
                     log("Couldn't establish a connection to Discord.", logType.critical);
                 });
             } else {

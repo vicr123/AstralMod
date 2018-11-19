@@ -69,9 +69,9 @@ function processDeal(message) {
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == consts.aphc.id || message.guild.id == 287937616685301762 || message.guild.id == 305039436490735627)) {
-            if (message.guild.id == consts.aphc.id) {
-                member.addRole(member.guild.roles.get(consts.aphc.interrogationRole));
+        } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == consts.bnb.id || message.guild.id == 287937616685301762 || message.guild.id == 305039436490735627)) {
+            if (message.guild.id == consts.bnb.id) {
+                member.addRole(member.guild.roles.get(consts.bnb.interrogationRole));
             } else if (message.guild.id == 287937616685301762) {
                 member.addRole(member.guild.roles.get("319847521440497666"));
             } else if (message.guild.id == 305039436490735627) {
@@ -82,9 +82,9 @@ function processDeal(message) {
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040 || message.guild.id == 305039436490735627)) {
-            if (message.guild.id == consts.aphc.id) {
-                member.addRole(member.guild.roles.get(consts.aphc.jailRole));
+        } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == consts.bnb.id || message.guild.id == 263368501928919040 || message.guild.id == 305039436490735627)) {
+            if (message.guild.id == consts.bnb.id) {
+                member.addRole(member.guild.roles.get(consts.bnb.jailRole));
             } else if (message.guild.id == 305039436490735627) {
                 member.addRole(member.guild.roles.get("310196007919157250"));
             } else {
@@ -95,10 +95,10 @@ function processDeal(message) {
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && (message.guild.id == consts.aphc.id || message.guild.id == 305039436490735627)) {
+        } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && (message.guild.id == consts.bnb.id || message.guild.id == 305039436490735627)) {
             var roleId;
-            if (message.guild.id == consts.aphc.id) {
-                roleId = consts.aphc.jailRole;
+            if (message.guild.id == consts.bnb.id) {
+                roleId = consts.bnb.jailRole;
             } else if (message.guild.id == 305039436490735627) {
                 roleId = "309883481024888842";
             }
@@ -452,17 +452,17 @@ function processCommand(message, isMod, command) {
                                 reactions.push("🇳");
                             }
                             
-                            if (message.guild.id == 287937616685301762 || message.guild.id == consts.aphc.id) {
+                            if (message.guild.id == 287937616685301762 || message.guild.id == consts.bnb.id) {
                                 msg += "`(i)nterrogate` ";
                                 canDoActions = true;
                             }
                             
-                            if (message.guild.id == consts.aphc.id || message.guild.id == 263368501928919040) {
+                            if (message.guild.id == consts.bnb.id || message.guild.id == 263368501928919040) {
                                 msg += "`(j)ail` ";
                                 canDoActions = true;
                             }
                             
-                            if (message.guild.id == consts.aphc.id) {
+                            if (message.guild.id == consts.bnb.id) {
                                 msg += "`(m)ute` ";
                                 canDoActions = true;
                             }

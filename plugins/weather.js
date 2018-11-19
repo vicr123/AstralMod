@@ -23,7 +23,6 @@ const moment = require('moment');
 const YQL = require('yql');
 const Canvas = require('canvas');
 const fs = require('fs');
-var keys = require('../keys.js');
 var client;
 var consts;
 
@@ -146,7 +145,7 @@ function getDataFromCode(code, ctx, isDay = true) {
     return retval;
 }
 
-function sendCurrentWeather(message, location, type, unit = "c", user = "") {
+function sendCurrentWeather(message, location, type, unit = "c", inputTime = "", user = "") {
     sendPreloader("Preparing the weather...", message.channel).then(function(messageToEdit) {
         let query;
 
@@ -215,11 +214,25 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     //Draw time info
                     ctx.font = "14px Contemporary";
                     let pd = data.query.results.channel.item.pubDate;
-                    let date = moment(pd.substring(0, pd.lastIndexOf(" ")));
+                    let date = moment(new Date(pd.substring(0, pd.lastIndexOf(" "))));
                     let tz = pd.substring(pd.lastIndexOf(" "));
-                    let pubDate = "As of " + date.format("dddd, MMMM GG") + " at " + date.format("h:mm") + tz;
+
+                    if(inputTime !== "")  {
+                        if (inputTime === "12") {
+                            var timeString = "h:mm A";
+                        } else {
+                            var timeString = "H:mm"
+                        }
+                    } else {
+                        if (settings.users[message.author.id].timeunit === "12h") {
+                            var timeString = "h:mm A";
+                        } else {
+                            var timeString = "H:mm"
+                        }
+                    }
+
+                    let pubDate = "As of " + date.format("dddd, MMMM GG") + " at " + date.format(timeString) + tz;
                     let windWidth = ctx.measureText(pubDate);
-                    log(JSON.stringify(windWidth), logType.critical);
                     ctx.fillText(pubDate, (350 / 2) - (windWidth.width / 2), 50);
 
 
@@ -416,13 +429,25 @@ function processCommand(message, isMod, command) {
         unit = "f";
     }
 
+    let time;
+    if (command.indexOf("--24") != -1 && command.indexOf("--12") != -1) {
+        throw new UserInputError("Specify only one of `--24` or `--12`");
+    } else if (command.indexOf("--24") != -1) {
+        command = command.replace("--24", "");
+        time = "24";
+    } else if (command.indexOf("--12") != -1) {
+        command = command.replace("--12", "");
+        time = "12";
+    }
+
+
     command = command.trim();
 
     if (command.startsWith("weather ")) {
         var location = command.substr(8);
 
         if (command.indexOf("--user") == -1) {
-            sendCurrentWeather(message, location, "location", unit);
+            sendCurrentWeather(message, location, "location", unit, time);
         } else {
             location = location.replace("--user", "").trim();
             var users = parseUser(location, message.guild);
@@ -432,7 +457,7 @@ function processCommand(message, isMod, command) {
                     var userObject = settings.users[users[0].id];
                     if (userObject != null) {
                         if (userObject.hasOwnProperty("location")) {
-                            sendCurrentWeather(message, userObject.location, "id", unit, users[0].tag);
+                            sendCurrentWeather(message, userObject.location, "id", unit, time, users[0].tag);
                             return;
                         }
                     }
@@ -450,7 +475,7 @@ function processCommand(message, isMod, command) {
         if (settings.users[message.author.id].location == null) {
             throw new CommandError("Unknown location. Please set your location with `" + prefix + "setloc`");
         } else {
-            sendCurrentWeather(message, settings.users[message.author.id].location, "id", unit, message.author.tag);
+            sendCurrentWeather(message, settings.users[message.author.id].location, "id", unit, time, message.author.tag);
         }
     } else if (command.startsWith("setloc ")) {
         var location = command.substr(7);

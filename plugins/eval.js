@@ -104,7 +104,7 @@ async function processEval(message) {
 
 function processCommand(message, isMod, command) {
     if (command == "exec") {
-        if (message.author.id == "278805875978928128") {
+        if (message.author.id == gloabl.ownerId) {
             captureInput(processEval, message.guild.id, message.author.id);
 
             if (currentGuild != 0) {

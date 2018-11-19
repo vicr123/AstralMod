@@ -23,6 +23,7 @@
     "moment": "^2.21.0",
     "openweathermap-js": "^1.0.1",
     "opusscript": "0.0.3",
+    "yandex-translate": "^2.1.2",
     "yql": "^1.0.2"
   }
 }
