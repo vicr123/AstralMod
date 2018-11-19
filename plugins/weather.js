@@ -155,26 +155,27 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
         } else if (type == "id") {
             query = new YQL("select * from weather.forecast where woeid=" + location + " and u=\"" + unit + "\"");
         }
-        
+
         query.exec(function(err, data) {
             try {
                 if (err) {
                     throw new CommandError(err);
                 } else {
-                    if (data.query.results == null) {
+                    //First case is for a requested city that does not exist. Second case is for when YQL sends back
+                    //incomplete data (only sends back unit information...?) I can't figure out what it means when it
+                    //does that though, but from what I can see maybe it means too many results.
+                    if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
                         var embed = new Discord.RichEmbed;
                         embed.setTitle(":thunder_cloud_rain: Weather Error");
                         embed.setDescription("AstralMod couldn't retrieve weather.");
                         embed.setColor("#FF0000");
-                        embed.addField("Details", "That city wasn't found");
-                        embed.addField("Try this", "AstralMod has just been updated. If you're trying to retrieve your own weather, try resetting your location with `" + prefix + "setloc`.");
+                        embed.addField("Details", "That city was not found");
+                        embed.addField("Try this", "Please be more specific or try a different spelling for the place you are trying to get the weather of. If you're trying to receive your own weather, try resetting your location with `" + prefix + "setloc`.");
 
                         messageToEdit.edit(embed)
                         return;
                     }
 
-                    /*let date = new Date(data.query.results.channel.lastBuildDate);
-                    log(date.toUTCString(), logType.debug);*/
 
                     var canvas = new Canvas(500, 410);
                     var ctx = canvas.getContext('2d');
@@ -183,7 +184,7 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     let tempUnit = "°" + data.query.results.channel.units.temperature;
                     let speedUnit = data.query.results.channel.units.speed;
                     let pressureUnit = data.query.results.channel.units.pressure;
-                    
+
                     ctx.fillStyle = display.gradient;
                     ctx.fillRect(0, 0, 350, 410);
 
@@ -206,13 +207,23 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                         txtCtx.fillStyle = "black";
                         txtCtx.fillText(currentWeatherText, 0, 20);
 
-                        //txtCtx.scale(250 / currentWeatherWidth.width, 0);
-                        //txtCtx.setTransform(0.5, 0, 0, 1, 0, 0);
                         ctx.drawImage(textCanvas, 10, 10, 325, 30);
                     } else {
-                        ctx.fillText(currentWeatherText, 10, 30, 50);
+                        ctx.fillText(currentWeatherText, (350 / 2) - (currentWeatherWidth.width / 2), 30);
                     }
-                   //Image goes between 100-200px y
+
+                    //Draw time info
+                    ctx.font = "14px Contemporary";
+                    let pd = data.query.results.channel.item.pubDate;
+                    let date = moment(pd.substring(0, pd.lastIndexOf(" ")));
+                    let tz = pd.substring(pd.lastIndexOf(" "));
+                    let pubDate = "As of " + date.format("dddd, MMMM GG") + " at " + date.format("h:mm") + tz;
+                    let windWidth = ctx.measureText(pubDate);
+                    log(JSON.stringify(windWidth), logType.critical);
+                    ctx.fillText(pubDate, (350 / 2) - (windWidth.width / 2), 50);
+
+
+                    //Image goes between 100-200px y
                    ctx.drawImage(display.image, 100, 60);
 
                    ctx.font = "bold 20px Contemporary";
@@ -248,7 +259,6 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     ctx.drawImage(windImage, 50, 330, 20, 20);
                     ctx.font = "14px Contemporary";
                     let currentWind = data.query.results.channel.wind.speed + " " + speedUnit;
-                    let windWidth = ctx.measureText(currentWind);
                     ctx.fillText(currentWind, 77, 345);
 
                     //Draw humidity info
@@ -257,8 +267,25 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     ctx.fillText(currentHumid, 77, 370);
 
                     //Draw pressure info
+                    //Yahoo's pressure API returns bad results - we have to manually fix them.
                     ctx.drawImage(pressureImage, 50, 380, 20, 20);
-                    let currentPressure = data.query.results.channel.atmosphere.pressure + " " + pressureUnit;
+                    let pressureResult = data.query.results.channel.atmosphere.pressure;
+                    let sigPlaces = 3;
+
+                    // Millibars were requested - convert milli-feet of head to millibars
+                    if (pressureUnit === "in") {
+                        pressureUnit = "inHg";
+                        let feetOfHead = parseFloat(pressureResult) / 1000; //For whatever reason they don't actually give it in real feet of head
+                        pressureResult = feetOfHead * 29.890669; //Conversion to milliBars
+                    }
+
+                    // Inches of mercury was requested - convert millibars to inches of mercury
+                    else {
+                        pressureResult = parseFloat(pressureResult) / 33.864;
+                        sigPlaces = 0;
+                    }
+
+                    let currentPressure = pressureResult.toFixed(sigPlaces) + " " + pressureUnit;
                     ctx.fillText(currentPressure, 77, 395);
 
                     //Draw wind speed
@@ -297,6 +324,7 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     let sunset = data.query.results.channel.astronomy.sunset;
                     if (sunset.split(":").pop().split(" ")[0].split("").length < 2) sunset = sunset.split(":")[0] + ":0" + sunset.split(":")[1];
                     ctx.fillText(sunset, 227, 395);
+
 
                     ctx.beginPath();
                     ctx.moveTo(350, 0);
@@ -339,12 +367,13 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                         ctx.moveTo(350, current * 82);
                         ctx.lineTo(500, current * 82);
                         ctx.stroke();
+
                     }
 
                     let e = new Discord.RichEmbed();
                     e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
                     e.setImage("attachment://weather.png");
-                    e.setThumbnail("https://poweredby.yahoo.com/white.png");
+                    e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
                     e.setTitle("Weather");
                     e.setURL(data.query.results.channel.link);
                     e.setColor("#00C0FF");
@@ -357,6 +386,10 @@ function sendCurrentWeather(message, location, type, unit = "c", user = "") {
                     });
                 }
             } catch (err) {
+                if (process.argv.indexOf("--debug") !== -1) {
+                    message.channel.send(err.stack);
+                }
+
                 messageToEdit.edit(err.toString() + "\nTry resetting your location with `" + prefix + "setloc`");
             }
         });
