@@ -23,12 +23,13 @@ const moment = require('moment');
 const YQL = require('yql');
 const Canvas = require('canvas');
 const fs = require('fs');
+const timeModule = require("./time.js");
 var client;
 var consts;
 
-let sunnyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage;
+let sunnyImage, moonyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage;
 
-function getDataFromCode(code, ctx, isDay = true) {
+function getDataFromCode(code, ctx, timeOfDay = "transition") {
     log(code.toString(), logType.debug);
     let retval = {}
     
@@ -41,9 +42,22 @@ function getDataFromCode(code, ctx, isDay = true) {
             //Clear
             //retval.gradient.addColorStop(0, "rgba(0, 200, 255, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 255, 0)");
-            retval.gradient = "rgb(120, 200, 255)";
-            retval.secondary = "rgb(50, 180, 255)";
-            retval.image = sunnyImage;
+            if (timeOfDay == "day") {
+                retval.gradient = "rgb(120, 200, 255)";
+                retval.secondary = "rgb(50, 180, 255)";
+                retval.text = "black";
+                retval.image = sunnyImage;
+            } else if (timeOfDay == "night") {
+                retval.gradient = "rgb(0, 50, 100)";
+                retval.secondary = "rgb(0, 25, 50)";
+                retval.text = "white";
+                retval.image = moonyImage;
+            } else { //transition
+                retval.gradient = "rgb(234, 128, 25)";
+                retval.secondary = "rgb(170, 90, 20)";
+                retval.text = "black";
+                retval.image = sunnyImage;
+            }
             break;
         case 1: 
         case 2:
@@ -64,6 +78,7 @@ function getDataFromCode(code, ctx, isDay = true) {
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
             retval.secondary = "rgb(170, 170, 170)";
+            retval.text = "black";
             retval.image = cloudyImage;
             break;
         case 6:
@@ -86,6 +101,7 @@ function getDataFromCode(code, ctx, isDay = true) {
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
             retval.secondary = "rgb(170, 170, 170)";
+            retval.text = "black";
             retval.image = windImage;
             break;
         case 19:
@@ -97,6 +113,7 @@ function getDataFromCode(code, ctx, isDay = true) {
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
             retval.secondary = "rgb(170, 170, 170)";
+            retval.text = "black";
             retval.image = windImage;
             break;
         case 36:
@@ -105,6 +122,7 @@ function getDataFromCode(code, ctx, isDay = true) {
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(255, 100, 0)";
             retval.secondary = "rgb(200, 100, 0)";
+            retval.text = "black";
             retval.image = sunnyImage;
             break;
         case 3:
@@ -120,6 +138,7 @@ function getDataFromCode(code, ctx, isDay = true) {
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
             retval.secondary = "rgb(170, 170, 170)";
+            retval.text = "black";
             retval.image = thunderImage;
             break;
         case 13:
@@ -131,6 +150,7 @@ function getDataFromCode(code, ctx, isDay = true) {
             //Snow
             retval.gradient = "rgb(200, 200, 200)";
             retval.secondary = "rgb(170, 170, 170)";
+            retval.text = "black";
             retval.image = snowImage;
             break;
         case 5:
@@ -139,6 +159,7 @@ function getDataFromCode(code, ctx, isDay = true) {
             //Rain + Snow
             retval.gradient = "rgb(200, 200, 200)";
             retval.secondary = "rgb(170, 170, 170)";
+            retval.text = "black";
             retval.image = rainsnowImage;
             break;
     }
@@ -175,10 +196,32 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                         return;
                     }
 
+                    //Time info
+                    let pd = data.query.results.channel.item.pubDate;
+                    let date = moment(new Date(pd.substring(0, pd.lastIndexOf(" "))));
+                    let tz = pd.substring(pd.lastIndexOf(" "));
+                    let currentDate = moment.utc().add(timeModule.utcOffsetFromTimezone(tz.toLowerCase().trim()) * 3600000, "ms");
+
+                    //Determine the time of day
+                    let timeOfDay = "day";
+                    let sunriseDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunrise, "YYYY-MM-DD HH:mm A");
+                    sunriseDate.dayOfYear(date.dayOfYear());
+                    sunriseDate.year(date.year());
+                    let sunsetDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunset, "YYYY-MM-DD HH:mm A");
+                    sunsetDate.dayOfYear(date.dayOfYear());
+                    sunsetDate.year(date.year());
+
+                    if (currentDate.isBetween(sunriseDate.clone().add(30, "m"), sunsetDate.clone().subtract(30, "m"))) {
+                        timeOfDay = "day";
+                    } else if (currentDate.isBefore(sunriseDate.clone().subtract(30, "m")) || currentDate.isAfter(sunsetDate.clone().add(30, "m"))) {
+                        timeOfDay = "night";
+                    } else {
+                        timeOfDay = "transition";
+                    }
 
                     var canvas = new Canvas(500, 410);
                     var ctx = canvas.getContext('2d');
-                    let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx);
+                    let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx, timeOfDay);
 
                     let tempUnit = "°" + data.query.results.channel.units.temperature;
                     let speedUnit = data.query.results.channel.units.speed;
@@ -191,7 +234,7 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                     ctx.fillRect(350, 0, 150, 410);
 
                     ctx.font = "20px Contemporary";
-                    ctx.fillStyle = "black";
+                    ctx.fillStyle = display.text;
 
                     let currentWeatherText = "Current Weather";
                     if (user != "") {
@@ -203,7 +246,7 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                         let textCanvas = new Canvas(currentWeatherWidth.width, 30);
                         let txtCtx = textCanvas.getContext('2d');
                         txtCtx.font = "20px Contemporary";
-                        txtCtx.fillStyle = "black";
+                        txtCtx.fillStyle = display.text;
                         txtCtx.fillText(currentWeatherText, 0, 20);
 
                         ctx.drawImage(textCanvas, 10, 10, 325, 30);
@@ -213,9 +256,6 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
 
                     //Draw time info
                     ctx.font = "14px Contemporary";
-                    let pd = data.query.results.channel.item.pubDate;
-                    let date = moment(new Date(pd.substring(0, pd.lastIndexOf(" "))));
-                    let tz = pd.substring(pd.lastIndexOf(" "));
 
                     if(inputTime !== "")  {
                         if (inputTime === "12") {
@@ -240,12 +280,12 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                    ctx.drawImage(display.image, 100, 60);
 
                    ctx.font = "bold 20px Contemporary";
-                   ctx.fillStyle = "black";
+                   ctx.fillStyle = display.text;
                    let cityWidth = ctx.measureText(data.query.results.channel.location.city);
                    ctx.fillText(data.query.results.channel.location.city, 175 - cityWidth.width / 2, 228);
 
                     ctx.font = "12px Contemporary";
-                    ctx.fillStyle = "black";
+                    ctx.fillStyle = display.text;
                     let countryWidth = ctx.measureText(data.query.results.channel.location.region + " - " + data.query.results.channel.location.country);
                     ctx.fillText(data.query.results.channel.location.region + " - " + data.query.results.channel.location.country, 175 - countryWidth.width / 2, 245);
 
@@ -255,7 +295,7 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                         let textCanvas = new Canvas(conditionWidth.width, 50);
                         let txtCtx = textCanvas.getContext('2d');
                         txtCtx.font = "light 40px Contemporary";
-                        txtCtx.fillStyle = "black";
+                        txtCtx.fillStyle = display.text;
                         txtCtx.fillText(data.query.results.channel.item.condition.text, 0, 40);
 
                         ctx.drawImage(textCanvas, 13, 240, 325, 50);
@@ -340,6 +380,7 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
 
 
                     ctx.beginPath();
+                    ctx.strokeStyle = display.text;
                     ctx.moveTo(350, 0);
                     ctx.lineTo(350, 410);
                     ctx.stroke();
@@ -527,6 +568,11 @@ module.exports = {
         sunnyImage = new Canvas.Image();
         fs.readFile("./plugins/images/sunny.png", function(err, data) {
             sunnyImage.src = data;
+        });
+
+        moonyImage = new Canvas.Image();
+        fs.readFile("./plugins/images/moony.png", function(err, data) {
+            moonyImage.src = data;
         });
 
         cloudyImage = new Canvas.Image();
