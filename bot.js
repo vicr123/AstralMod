@@ -1527,7 +1527,7 @@ function processModCommand(message) {
         }
 
         if (settings.guilds[message.guild.id].requiresConfig) {
-            if (message.author.id == global.ownerId || message.author.id == message.guild.owner.user.id) {
+            if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, seperated by a space.")
@@ -1549,7 +1549,7 @@ function processModCommand(message) {
             //Configuration menu
 
             //Make sure person has neccessary permissions
-            if (message.author.id == global.ownerId || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
+            if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send(getSingleConfigureWelcomeText(message.guild));
@@ -1558,7 +1558,7 @@ function processModCommand(message) {
             }
         }
     } else if (lText == prefix + "poweroff") {
-        if (message.author.id == global.ownerId) {
+        if (message.author.id == global.ownerId.id) {
             message.reply("AstralMod is now exiting.").then(function() {
                 shutdown();
             });
@@ -1570,7 +1570,7 @@ function processModCommand(message) {
         command = text.toLowerCase().substr(prefix.length);
 
         if (command == "shoo") {
-            if (message.author.id == global.ownerId || message.author.id == message.guild.owner.user.id) {
+            if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id) {
                 message.reply(":arrow_left: And with that, POW! I'm gone!").then(function() {
                     message.guild.leave();
                     saveSettings();

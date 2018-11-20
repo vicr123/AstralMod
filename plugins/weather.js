@@ -272,7 +272,7 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                         }
                     }
 
-                    let pubDate = "As of " + date.format("dddd, MMMM GG") + " at " + date.format(timeString) + tz;
+                    let pubDate = "As of " + date.format("dddd, MMMM D") + " at " + date.format(timeString) + tz;
                     let windWidth = ctx.measureText(pubDate);
                     ctx.fillText(pubDate, (350 / 2) - (windWidth.width / 2), 50);
 
