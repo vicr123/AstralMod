@@ -527,10 +527,7 @@ function processCommand(message, isMod, command) {
         }
 
         tz = tz === undefined ? settings.users[user.id].timezone : tz;
-
         let time = moment(Date.now()).utcOffset(tz);
-
-        message.channel.send(time.toString());
 
         message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm" : "h:mm A"));
 
