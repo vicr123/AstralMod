@@ -314,29 +314,36 @@ function processCommand(message, isMod, command) {
 
         command = command.replace("--12", "").replace("--24", "").trim();
 
-        let user = command.replace("time", "");
+        let user = command.replace("time", "").trim();
         let tz = undefined;
 
         if (utcOffsetFromTimezone(user) !== -3000) {
             tz = utcOffsetFromTimezone(user);
+            user = user.toUpperCase();
         }
+
+
         if (tz === undefined) {
             if (user == 0) { // if it's nothing, including whitespace or undefined or whatever
                 user = message.author;
             } else {
                 user = parseUser(user.trim(), message.guild)[0];
             }
-        }
 
-        if (user == null || settings.users[user.id] == null || !settings.users.hasOwnProperty(user.id) || !settings.users[user.id].hasOwnProperty("timezone") && tz === undefined) {
-            throw new UserInputError(user.username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
+            if (user == null || settings.users[user.id] == null || !settings.users.hasOwnProperty(user.id) || !settings.users[user.id].hasOwnProperty("timezone")) {
+                if(tz !== undefined) {
+                    throw new UserInputError(user.username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
+                } else {
+                    throw new UserInputError("That is not a valid time zone.");
+                }
+            }
         }
 
         tz = tz === undefined ? settings.users[user.id].timezone : tz;
 
         let time = moment().utcOffset(tz);
 
-        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user.username === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A"));
+        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A"));
 
     } else if (command.startsWith("settz ")) {
         var utcOffset;
