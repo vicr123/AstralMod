@@ -571,5 +571,6 @@ module.exports = {
         }
 
         return help;
-    }
+    },
+    utcOffsetFromTimezone: utcOffsetFromTimezone
 }
