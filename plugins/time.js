@@ -276,7 +276,24 @@ function pollTimers() {
                             embed.addField("Reason", timer.reason, false);
                         }
 
-                        embed.addField("Timeout Date", new Date().toUTCString(), false);
+                        let tz;
+                        if (settings.users[timer.author] == null || !settings.users.hasOwnProperty(timer.author) || !settings.users[timer.author].hasOwnProperty("timezone"))  {
+                            tz = 0;
+                        } else {
+                            tz = settings.users[timer.author].timezone;
+                        }
+
+                        let hourType;
+                        if (settings.users[timer.author] == null || !settings.users.hasOwnProperty(timer.author) || !settings.users[timer.author].hasOwnProperty("timezone"))  {
+                            hourType = "24h";
+                        } else {
+                            hourType = settings.users[timer.author];
+                        }
+
+
+                        let time = moment(timer.timeout);
+
+                        embed.addField("Timeout Date", time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm Z" : "h:mm A Z"), false);
                         embed.setFooter("To see all your timers, use " + prefix + "timers.");
 
                         try {
@@ -420,7 +437,7 @@ function processCommand(message, isMod, command) {
             var field = "";
             field += "This timer will elapse in about " + moment.duration(timer.timeout - new Date().getTime()).humanize() + "\n";
             let time = moment(timer.timeout);
-            field += "**Timeout date:** " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "HH:mm" : "h:mm A") + "\n";
+            field += "**Timeout date:** " + time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm Z" : "h:mm A Z") + "\n";
 
             if (timer.reason == "") {
                 field += "**Reason:** No reason was provided\n";
@@ -511,9 +528,11 @@ function processCommand(message, isMod, command) {
 
         tz = tz === undefined ? settings.users[user.id].timezone : tz;
 
-        let time = moment().utcOffset(tz);
+        let time = moment(Date.now()).utcOffset(tz);
 
-        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "HH:mm" : "h:mm A"));
+        message.channel.send(time.toString());
+
+        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm" : "h:mm A"));
 
     }
 }
