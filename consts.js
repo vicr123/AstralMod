@@ -1,13 +1,13 @@
 module.exports = {
     keys: {
-        token: "NDA3MjE3NTA3ODcxNDkwMDQ4.DtOdpA.ToXr9GbdxKascmEU2imK67k4GWs",
-        settingsKey: "do some keyboard mashing do some keyboard mashing do some keyboard mashing do some keyboard mashing do some keyboard mashing do some keyboard mashing do some keyboard mashing",
+        token: "",
+        settingsKey: "",
         dblKey: "",
         yandexKey: ""
     },
     config: {
-        prefix: "am$",
-        bprefix: "am$",
+        prefix: "am:",
+        bprefix: "am#",
         emojiserver: "336487228228370432"
     },
     bnb: {
