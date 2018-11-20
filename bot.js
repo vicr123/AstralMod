@@ -159,7 +159,7 @@ global.getEmoji = function(emojiName) {
     if (consts.config.emojiServer == null) return ":arrow_right:"; //No emoji server configured
     try {
         return client.guilds.get(consts.config.emojiServer).emojis.find("name", emojiName).toString();
-    } catch {
+    } catch (err) {
         return ":arrow_right:";
     }
 }
