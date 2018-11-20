@@ -254,20 +254,20 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                         ctx.fillText(currentWeatherText, (350 / 2) - (currentWeatherWidth.width / 2), 30);
                     }
 
-                    //Draw time info
+                    //Draw 'as of' info
                     ctx.font = "14px Contemporary";
 
                     if(inputTime !== "")  {
                         if (inputTime === "12") {
                             var timeString = "h:mm A";
                         } else {
-                            var timeString = "H:mm"
+                            var timeString = "HH:mm"
                         }
                     } else {
                         if (settings.users[message.author.id].timeunit === "12h") {
                             var timeString = "h:mm A";
                         } else {
-                            var timeString = "H:mm"
+                            var timeString = "HH:mm"
                         }
                     }
 
@@ -368,15 +368,13 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
 
                     //Draw sunrise info
                     ctx.drawImage(sunriseImage, 200, 355, 20, 20);
-                    let sunrise = data.query.results.channel.astronomy.sunrise;
-                    if (sunrise.split(":").pop().split(" ")[0].split("").length < 2) sunrise = sunrise.split(":")[0] + ":0" + sunrise.split(":")[1];
-                    ctx.fillText(sunrise, 227, 370);
+                    let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
+                    ctx.fillText(sunriseTime.format(timeString), 227, 370);
 
                     //Draw sunset info
                     ctx.drawImage(sunsetImage, 200, 380, 20, 20);
-                    let sunset = data.query.results.channel.astronomy.sunset;
-                    if (sunset.split(":").pop().split(" ")[0].split("").length < 2) sunset = sunset.split(":")[0] + ":0" + sunset.split(":")[1];
-                    ctx.fillText(sunset, 227, 395);
+                    let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:m a");
+                    ctx.fillText(sunsetTime.format(timeString), 227, 395);
 
 
                     ctx.beginPath();

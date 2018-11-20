@@ -420,7 +420,7 @@ function processCommand(message, isMod, command) {
             var field = "";
             field += "This timer will elapse in about " + moment.duration(timer.timeout - new Date().getTime()).humanize() + "\n";
             let time = moment(timer.timeout);
-            field += "**Timeout date:** " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A") + "\n";
+            field += "**Timeout date:** " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "HH:mm" : "h:mm A") + "\n";
 
             if (timer.reason == "") {
                 field += "**Reason:** No reason was provided\n";
@@ -513,7 +513,7 @@ function processCommand(message, isMod, command) {
 
         let time = moment().utcOffset(tz);
 
-        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A"));
+        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "HH:mm" : "h:mm A"));
 
     }
 }
