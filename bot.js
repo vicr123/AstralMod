@@ -735,6 +735,12 @@ global.log = function(logMessage, type = logType.debug) {
         return;
     }
 
+    if (logMessage instanceof Error) {
+        logMessage = logMessage.toString() + "\n" + logMessage.stack;
+    } else {
+        logMessage = logMessage.toString();
+    }
+
     //Log a message to the console
     if (type == logType.debug) {
         if (process.argv.indexOf("--debug") == -1) {
@@ -746,6 +752,7 @@ global.log = function(logMessage, type = logType.debug) {
     var logString;
 
     var lines = logMessage.split("\n");
+
 
     for (i = 0; i < lines.length; i++) {
         switch (type) {
@@ -1602,6 +1609,58 @@ function processModCommand(message) {
     return false;
 }
 
+function requestNickname(member, nickname, guild) {
+    if (nickname.length > 32) {
+        return "length";
+    }
+
+    if (settings.guilds[guild.id].pendingNicks == null) {
+        settings.guilds[guild.id].pendingNicks = {};
+    }
+
+    let pendingNicks = settings.guilds[guild.id].pendingNicks; //save us some typing
+
+    if (pendingNicks.cooldowns == null) {
+        pendingNicks.cooldowns = {};
+    }
+
+    if (pendingNicks.cooldowns[member.user.id] == null || moment.utc().isSameOrAfter(moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd'))) {
+        pendingNicks.cooldowns[member.user.id] = moment.utc().toDate();
+
+        if (nickChanges[guild.id] == null) {
+            nickChanges[guild.id] = {};
+        }
+
+        nickChanges[guild.id][member.user.id] = nickname;
+
+        if (nickname == "") {
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "oknick " + member.user.id + "`");
+        } else {
+            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "oknick " + member.user.id + "`");
+        }
+        settings.guilds[guild.id].pendingNicks = pendingNicks;
+        return "ok";
+    } else {
+        settings.guilds[guild.id].pendingNicks = pendingNicks;
+        return moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd');
+    }
+}
+
+function getNickStatus(member, nickname, guild) {
+    if (nickname.length > 32) {
+        return "length";
+    }
+
+    let pendingNicks = settings.guilds[guild.id].pendingNicks; //save us some typing
+
+    if (pendingNicks == null || pendingNicks.cooldowns[member.user.id] == null || moment.utc().isSameOrAfter(moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd'))) {
+        return "ok";
+    } else {
+        return moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd');
+
+    }
+}
+
 function processAmCommand(message) {
     var text = message.content;
     var command;
@@ -1648,27 +1707,64 @@ function processAmCommand(message) {
         return true;
     } else if (command == "nick") {
         if (settings.guilds[message.guild.id].nickModeration) {
-            var nickResult = setNicknameTentative(message.member, "", message.guild);
-            if (nickResult == "cooldown") {
-                message.reply(tr("There is a one day cooldown between use of this command."));
+            let nickResult = getNickStatus(message.member, "", message.guild);
+            if (nickResult instanceof moment) {
+                message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
             } else if (nickResult == "length") {
                 message.reply(tr("Nicknames need to be less than 32 characters."));
             } else {
-                message.reply(tr("Ok, give us a bit to make sure the mods are ok with that."));
+                message.channel.send("Ok, requesting a nickname reset. React with '🚫' within 5 seconds to cancel.").then(m => {
+                    var rename = true;
+                    m.react('🚫').then(() => {
+                        const filter = (reaction, user) => reaction.emoji.name === '🚫' && user.id === message.member.id;
+                        const collector = m.createReactionCollector(filter, {time: 5000});
+                        collector.on('collect', (_ => {
+                            rename = false;
+                            m.edit("Ok, I've cancelled that.");
+                            m.clearReactions();
+                        }));
+                        collector.on('end', (_ => {
+                            if(rename) {
+                                m.edit("Ok, a nickname reset has been requested.");
+                                requestNickname(message.member, text.substr(8), message.guild);
+                            }
+                            m.clearReactions();
+                        }));
+                    }).catch(err => log(err, logType.critical));
+                }).catch(err => log(err, logType.critical));
             }
         } else {
             message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
         }
+
         return true;
     } else if (command.startsWith("nick ")) {
         if (settings.guilds[message.guild.id].nickModeration) {
-            var nickResult = setNicknameTentative(message.member, text.substr(8), message.guild);
-            if (nickResult == "cooldown") {
-                message.reply(tr("There is a one day cooldown between use of this command."));
+            let nickResult = getNickStatus(message.member, text.substr(8), message.guild);
+            if (nickResult instanceof moment) {
+                message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
             } else if (nickResult == "length") {
                 message.reply(tr("Nicknames need to be less than 32 characters."));
             } else {
-                message.reply(tr("Alright, give us a bit to make sure the mods are OK with that."));
+                message.channel.send(`Ok, requesting a nickname change to "${text.substr(8)}". React with '🚫' within 5 seconds to cancel.`).then(m => {
+                    var rename = true;
+                    m.react('🚫').then(() => {
+                        const filter = (reaction, user) => reaction.emoji.name === '🚫' && user.id === message.member.id;
+                        const collector = m.createReactionCollector(filter, {time: 5000});
+                        collector.on('collect', (_ => {
+                            rename = false;
+                            m.edit("Ok, I've cancelled that.");
+                            m.clearReactions();
+                        }));
+                        collector.on('end', (_ => {
+                            if(rename) {
+                                m.edit("Ok, a nickname reset has been requested.");
+                                requestNickname(message.member, text.substr(8), message.guild);
+                            }
+                            m.clearReactions();
+                        }));
+                    }).catch(err => log(err, logType.critical));
+                }).catch(err => log(err, logType.critical));
             }
         } else {
             message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
@@ -1933,47 +2029,6 @@ function processAmCommand(message) {
         return true;
     }
     return false;
-}
-
-function setNicknameTentative(member, nickname, guild) {
-    if (nickname.length >= 32) {
-        settings.guilds[guild.id].pendingNicks = pendingNicks;
-        return "length";
-    }
-
-    var pendingNicks = {};
-    if (settings.guilds[guild.id].pendingNicks != null) {
-        pendingNicks = settings.guilds[guild.id].pendingNicks;
-    }
-
-    if (pendingNicks.cooldowns == null) {
-        pendingNicks.cooldowns = {};
-    }
-
-    if (pendingNicks.cooldowns[member.user.id] == null) {
-        pendingNicks.cooldowns[member.user.id] = new Date().getTime() - 86400000;
-    }
-
-    if (new Date().getTime() > pendingNicks.cooldowns[member.user.id]) {
-        pendingNicks.cooldowns[member.user.id] = new Date().getTime() + 86400000;
-
-        if (nickChanges[guild.id] == null) {
-            nickChanges[guild.id] = {};
-        }
-
-        nickChanges[guild.id][member.user.id] = nickname;
-
-        if (nickname == "") {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "oknick " + member.user.id + "`");
-        } else {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "oknick " + member.user.id + "`");
-        }
-        settings.guilds[guild.id].pendingNicks = pendingNicks;
-        return "ok";
-    } else {
-        settings.guilds[guild.id].pendingNicks = pendingNicks;
-        return "cooldown";
-    }
 }
 
 function processConfigure(message, guild) {
