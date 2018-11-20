@@ -298,54 +298,7 @@ function pollTimers() {
 }
 
 function processCommand(message, isMod, command) {
-
-    if(command.startsWith("time")) {
-        var hourType = settings.users[message.author.id].timeunit === undefined ? "24h" : settings.users[message.author.id].timeunit;
-        let setHour = false;
-        for (const param of command.split(" ")) {
-            if (param === "--12") {
-                setHour = true;
-                hourType = "12h"
-            } else if (param === "--24") {
-                setHour = true;
-                hourType = "24h"
-            }
-        }
-
-        command = command.replace("--12", "").replace("--24", "").trim();
-
-        let user = command.replace("time", "").trim();
-        let tz = undefined;
-
-        if (utcOffsetFromTimezone(user) !== -3000) {
-            tz = utcOffsetFromTimezone(user);
-            user = user.toUpperCase();
-        }
-
-
-        if (tz === undefined) {
-            if (user == 0) { // if it's nothing, including whitespace or undefined or whatever
-                user = message.author;
-            } else {
-                user = parseUser(user.trim(), message.guild)[0];
-            }
-
-            if (user == null || settings.users[user.id] == null || !settings.users.hasOwnProperty(user.id) || !settings.users[user.id].hasOwnProperty("timezone")) {
-                if(tz !== undefined) {
-                    throw new UserInputError(user.username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
-                } else {
-                    throw new UserInputError("That is not a valid time zone.");
-                }
-            }
-        }
-
-        tz = tz === undefined ? settings.users[user.id].timezone : tz;
-
-        let time = moment().utcOffset(tz);
-
-        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A"));
-
-    } else if (command.startsWith("settz ")) {
+    if (command.startsWith("settz ")) {
         var utcOffset;
         var location = command.substr(6);
 
@@ -427,7 +380,19 @@ function processCommand(message, isMod, command) {
 
             settings.users[message.author.id].timers.push(timerObject);
         }
-    } else if (command == "timers") {
+    } else if (command.startsWith("timers")) {
+        var hourType = settings.users[message.author.id].timeunit === undefined ? "24h" : settings.users[message.author.id].timeunit;
+        let setHour = false;
+        for (const param of command.split(" ")) {
+            if (param === "--12") {
+                setHour = true;
+                hourType = "12h"
+            } else if (param === "--24") {
+                setHour = true;
+                hourType = "24h"
+            }
+        }
+
         var userSetting = settings.users[message.author.id];
 
         if (userSetting == null) {
@@ -454,7 +419,8 @@ function processCommand(message, isMod, command) {
 
             var field = "";
             field += "This timer will elapse in about " + moment.duration(timer.timeout - new Date().getTime()).humanize() + "\n";
-            field += "**Timeout date:** " + new Date(timer.timeout).toUTCString() + "\n";
+            let time = moment(timer.timeout);
+            field += "**Timeout date:** " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A") + "\n";
 
             if (timer.reason == "") {
                 field += "**Reason:** No reason was provided\n";
@@ -503,6 +469,52 @@ function processCommand(message, isMod, command) {
 
         settings.users[message.author.id].timers.splice(index, 1);
         message.reply("That timer has been deleted. For new timer indices, use `" + prefix + "timers`.");
+    } else if (command.startsWith("time")) {
+        var hourType = settings.users[message.author.id].timeunit === undefined ? "24h" : settings.users[message.author.id].timeunit;
+        let setHour = false;
+        for (const param of command.split(" ")) {
+            if (param === "--12") {
+                setHour = true;
+                hourType = "12h"
+            } else if (param === "--24") {
+                setHour = true;
+                hourType = "24h"
+            }
+        }
+
+        command = command.replace("--12", "").replace("--24", "").trim();
+
+        let user = command.replace("time", "").trim();
+        let tz = undefined;
+
+        if (utcOffsetFromTimezone(user) !== -3000) {
+            tz = utcOffsetFromTimezone(user);
+            user = user.toUpperCase();
+        }
+
+
+        if (tz === undefined) {
+            if (user == 0) { // if it's nothing, including whitespace or undefined or whatever
+                user = message.author;
+            } else {
+                user = parseUser(user.trim(), message.guild)[0];
+            }
+
+            if (user == null || settings.users[user.id] == null || !settings.users.hasOwnProperty(user.id) || !settings.users[user.id].hasOwnProperty("timezone")) {
+                if(tz !== undefined) {
+                    throw new UserInputError(user.username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
+                } else {
+                    throw new UserInputError("That is not a valid time zone.");
+                }
+            }
+        }
+
+        tz = tz === undefined ? settings.users[user.id].timezone : tz;
+
+        let time = moment().utcOffset(tz);
+
+        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM GG,") + " at " + time.format(hourType === "24h" ? "H:mm" : "h:mm A"));
+
     }
 }
 
