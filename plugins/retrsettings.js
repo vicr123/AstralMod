@@ -23,7 +23,7 @@ var consts;
 
 function processCommand(message, isMod, command) {
     if (command == "retrsettings") {
-        if (message.author.id == global.ownerId) {
+        if (message.author.id == global.ownerId.id) {
             var contents = JSON.stringify(settings, null, 4);
             message.author.send("Here are the settings for AstralMod at the moment.", {
                 files: [
