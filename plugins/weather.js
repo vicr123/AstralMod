@@ -92,6 +92,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
             retval.secondary = "rgb(170, 170, 170)";
+            retval.text = "black";
             retval.image = rainImage;
             break;
         case 0:
@@ -166,7 +167,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
     return retval;
 }
 
-function sendCurrentWeather(message, location, type, unit = "c", inputTime = "", user = "") {
+function sendCurrentWeather(message, location, type, unit = "c", inputTime = "", user = "", skiiness = false) {
     sendPreloader("Preparing the weather...", message.channel).then(function(messageToEdit) {
         let query;
 
@@ -307,6 +308,24 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                     let currentTemp = data.query.results.channel.item.condition.temp + tempUnit;
                     let tempWidth = ctx.measureText(currentTemp);
                     ctx.fillText(currentTemp, 175 - tempWidth.width / 2, 315);
+
+                    if (skiiness) {
+                        let skiiness = "";
+                        let temp = data.query.results.channel.item.condition.temp;
+                        if (data.query.results.channel.units.temperature == "F") {
+                            temp = (temp - 32) * 5/9;
+                        }
+
+                        if (temp < 5) {
+                            skiiness = "∞ ski jacket";
+                        } else if (temp < 40) {
+                            skiiness = "1 ski jacket";
+                        }
+
+                        ctx.font = "20px Contemporary";
+                        ctx.fillText(skiiness, 175 + tempWidth.width / 2, 315);
+                    }
+
 
                     //Draw wind info
                     ctx.drawImage(windImage, 50, 330, 20, 20);
@@ -480,13 +499,15 @@ function processCommand(message, isMod, command) {
     }
 
 
+    let skiiness = (command.indexOf("--skiiness") != -1)
+    command = command.replace("--skiiness", "");
     command = command.trim();
 
     if (command.startsWith("weather ")) {
         var location = command.substr(8);
 
         if (command.indexOf("--user") == -1) {
-            sendCurrentWeather(message, location, "location", unit, time);
+            sendCurrentWeather(message, location, "location", unit, time, "", skiiness);
         } else {
             location = location.replace("--user", "").trim();
             var users = parseUser(location, message.guild);
@@ -496,7 +517,7 @@ function processCommand(message, isMod, command) {
                     var userObject = settings.users[users[0].id];
                     if (userObject != null) {
                         if (userObject.hasOwnProperty("location")) {
-                            sendCurrentWeather(message, userObject.location, "id", unit, time, users[0].tag);
+                            sendCurrentWeather(message, userObject.location, "id", unit, time, users[0].tag, skiiness);
                             return;
                         }
                     }
@@ -514,7 +535,7 @@ function processCommand(message, isMod, command) {
         if (settings.users[message.author.id].location == null) {
             throw new CommandError("Unknown location. Please set your location with `" + prefix + "setloc`");
         } else {
-            sendCurrentWeather(message, settings.users[message.author.id].location, "id", unit, time, message.author.tag);
+            sendCurrentWeather(message, settings.users[message.author.id].location, "id", unit, time, message.author.tag, skiiness);
         }
     } else if (command.startsWith("setloc ")) {
         var location = command.substr(7);
