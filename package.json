@@ -19,6 +19,8 @@
     "blessed": "^0.1.81",
     "canvas": "^1.6.10",
     "discord.js": "^11.3.2",
+    "erlpack": "github:discordapp/erlpack",
+    "libsodium-wrappers": "^0.7.3",
     "localize": "^0.4.7",
     "moment": "^2.21.0",
     "openweathermap-js": "^1.0.1",

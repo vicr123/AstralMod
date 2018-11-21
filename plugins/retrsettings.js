@@ -20,20 +20,30 @@
 
 var client;
 var consts;
+const zlib = require('zlib');
 
 function processCommand(message, isMod, command) {
     if (command == "retrsettings") {
         if (message.author.id == global.ownerId.id) {
-            var contents = JSON.stringify(settings, null, 4);
-            message.author.send("Here are the settings for AstralMod at the moment.", {
-                files: [
-                    {
-                        attachment: Buffer.from(contents, "utf8"),
-                        name: "settings.json"
+            sendPreloader("Preparing the settings file...", message.channel).then(function(messageToEdit) {
+                //Compress the settings with gzip to save space
+                zlib.gzip(JSON.stringify(settings), function(error, result) {
+                    if (error) {
+                        messageToEdit.edit("There was a problem compressing the settings file.");
+                    } else {
+                        message.author.send("Here are the settings for AstralMod at the moment.", {
+                            files: [
+                                {
+                                    attachment: result,
+                                    name: "settings.json.gz"
+                                }
+                            ]
+                        });
+                        messageToEdit.edit(":arrow_left: Check your DMs for the settings file.");
                     }
-                ]
+                });
+
             });
-            message.reply("Ok, I'm sending you my settings in your DMs.");
         } else {
             message.reply("I can't send you my settings file.");
         }
