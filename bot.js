@@ -1616,7 +1616,7 @@ function processModCommand(message) {
         }
     } else if (lText == prefix + "poweroff") {
         if (message.author.id == global.ownerId.id) {
-            message.reply("AstralMod is now exiting.").then(function() {
+            message.reply("AstralMod is now exiting.").then(function () {
                 shutdown();
             });
         }
@@ -1625,18 +1625,7 @@ function processModCommand(message) {
     if (isMod(message.member)) {
         var command;
         command = text.toLowerCase().substr(prefix.length);
-
-        if (command == "shoo") {
-            if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id) {
-                message.reply(":arrow_left: And with that, POW! I'm gone!").then(function() {
-                    message.guild.leave();
-                    saveSettings();
-                });
-            } else {
-                message.reply(":arrow_left: Only the owner of this server (" + message.guild.owner.displayName + ") can use this command. Alternatively, if you have permissions to kick me, just do that.");
-            }
-            return true;
-        } else if (command.startsWith("oknick")) {
+        if (command.startsWith("oknick")) {
             var userId = command.substr(7);
             acceptNicknameChange(message.guild.id, userId, message.channel.id, message.author.tag);
             return true;
@@ -2137,7 +2126,29 @@ function processAmCommand(message) {
         var msg = command.substr(6);
         throw new Error(msg);
         return true;
+    } else if (command == "shoo") {
+        if (message.author.id == global.ownerId.id | message.member.hasPermission(Discord.Permissions.FLAGS.KICK_MEMBERS, false, true, true)) {
+            awaitUserConfirmation({
+                title: "Kicking AstralMod :(",
+                msg: "AstralMod is about to leave :(",
+                msgOnSuccess: ":arrow_left: And with that, POW! I'm gone!",
+                msgOnFail: "Alright, scratch that.",
+                channel: message.channel,
+                author: message.author
+            }).then(() => {
+                // message.guild.leave();
+                saveSettings();
+            }).catch(err => {
+                //log(err, logType.critical);
+                message.reply("I've been a bad bot; I can't actually seem to get myself out of here. Please kick me.");
+            });
+
+        } else {
+            message.reply(":arrow_left: Only the owner of this server (" + message.guild.owner.displayName + ") and people who have kicking powers can use this command.");
+        }
+        return true;
     }
+
     return false;
 }
 
