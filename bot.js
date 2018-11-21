@@ -1588,21 +1588,7 @@ function processModCommand(message) {
             return true;
         } else if (command.startsWith("oknick")) {
             var userId = command.substr(7);
-            if (nickChanges[message.guild.id] != null) {
-                if (nickChanges[message.guild.id][userId] != null) {
-                    client.fetchUser(userId).then(function(user) {
-                        return message.guild.fetchMember(user);
-                    }).then(function(member) {
-                        member.setNickname(nickChanges[message.guild.id][userId]);
-                        nickChanges[message.guild.id][userId] = null;
-                        message.channel.send(':white_check_mark: ' + tr('User nickname has been accepted.'));
-                    }).catch(function() {
-                        message.channel.send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
-                    });
-                } else {
-                    message.channel.send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
-                }
-            }
+            acceptNicknameChange(message.guild.id, userId, message.channel.id, message.author.tag);
             return true;
         }
     }
@@ -1619,9 +1605,13 @@ function requestNickname(member, nickname, guild) {
     }
 
     let pendingNicks = settings.guilds[guild.id].pendingNicks; //save us some typing
-
     if (pendingNicks.cooldowns == null) {
         pendingNicks.cooldowns = {};
+    }
+
+    let botwarningsChannel = client.channels.get(settings.guilds[guild.id].botWarnings);
+    if (botwarningsChannel == null) {
+        return "configuration";
     }
 
     if (pendingNicks.cooldowns[member.user.id] == null || moment.utc().isSameOrAfter(moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd'))) {
@@ -1633,11 +1623,32 @@ function requestNickname(member, nickname, guild) {
 
         nickChanges[guild.id][member.user.id] = nickname;
 
+        let botwarningsChannelMessage;
         if (nickname == "") {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "oknick " + member.user.id + "`");
+            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "oknick " + member.user.id + "`";
         } else {
-            client.channels.get(settings.guilds[guild.id].botWarnings).send(":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "oknick " + member.user.id + "`");
+            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "oknick " + member.user.id + "`";
         }
+        botwarningsChannel.send(botwarningsChannelMessage).then(function(message) {
+            message.react("✅").then(function() {
+                let acceptor;
+                message.awaitReactions(function(reaction) {
+                    if (reaction.count <= 1) return false;
+                    for (let user of reaction.users) {
+                        if (isMod(message.guild.members.get(user[0]))) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }, {
+                    max: 1
+                }).then(function() {
+                    //Accept the nickname
+                    acceptNicknameChange(message.guild.id, member.user.id, message.channel.id);
+                });
+            });
+        });
+
         settings.guilds[guild.id].pendingNicks = pendingNicks;
         return "ok";
     } else {
@@ -1646,19 +1657,42 @@ function requestNickname(member, nickname, guild) {
     }
 }
 
+function acceptNicknameChange(guildId, userId, channelId) {
+    let guild = client.guilds.get(guildId);
+    if (nickChanges[guildId] != null) {
+        if (nickChanges[guildId][userId] != null) {
+            client.fetchUser(userId).then(function(user) {
+                return guild.fetchMember(user);
+            }).then(function(member) {
+                return member.setNickname(nickChanges[guildId][userId]);
+            }).then(function() {
+                nickChanges[guildId][userId] = null;
+                guild.channels.get(channelId).send(':white_check_mark: ' + tr('User nickname has been accepted'));
+            }).catch(function() {
+                guild.channels.get(channelId).send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
+            });
+        } else {
+            guild.channels.get(channelId).send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
+        }
+    }
+}
+
 function getNickStatus(member, nickname, guild) {
     if (nickname.length > 32) {
         return "length";
     }
 
-    let pendingNicks = settings.guilds[guild.id].pendingNicks; //save us some typing
+    let botwarningsChannel = client.channels.get(settings.guilds[guild.id].botWarnings);
+    if (botwarningsChannel == null) {
+        return "configuration";
+    }
 
+    let pendingNicks = settings.guilds[guild.id].pendingNicks; //save us some typing
     if (pendingNicks == null || pendingNicks.cooldowns[member.user.id] == null || moment.utc().isSameOrAfter(moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd'))) {
         return "ok";
-    } else {
-        return moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd');
-
     }
+
+    return moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd');
 }
 
 function processAmCommand(message) {
@@ -1745,6 +1779,8 @@ function processAmCommand(message) {
                 message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
             } else if (nickResult == "length") {
                 message.reply(tr("Nicknames need to be less than 32 characters."));
+            } else if (nickResult == "configuration") {
+                message.reply(tr("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
             } else {
                 message.channel.send(`Ok, requesting a nickname change to "${text.substr(8)}". React with '🚫' within 5 seconds to cancel.`).then(m => {
                     var rename = true;
@@ -1758,7 +1794,7 @@ function processAmCommand(message) {
                         }));
                         collector.on('end', (_ => {
                             if(rename) {
-                                m.edit("Ok, a nickname reset has been requested.");
+                                m.edit("Ok, we've requested your nickname be changed to " + text.substr(8) + ".");
                                 requestNickname(message.member, text.substr(8), message.guild);
                             }
                             m.clearReactions();
