@@ -189,6 +189,56 @@ global.releaseInput = function(guild) {
     capture[guild] = null;
 }
 
+global.awaitUserConfirmation = function(options) {
+    return new Promise(function(resolve, reject) {
+        let embed = new Discord.RichEmbed();
+        embed.setTitle(options.title);
+        embed.setDescription(options.msg);
+        embed.setColor("#3C3C96");
+        embed.setFooter("Use 🚫 within 5 seconds to cancel");
+        if (options.extraFields != null) {
+            for (let field in options.extraFields) {
+                let currentField = options.extraFields[field];
+                embed.addField(currentField[0], currentField[1]);
+            }
+        }
+
+        options.channel.send(embed).then(function(message) {
+            message.react('🚫');
+
+            let timeout = setTimeout(function() {
+                message.clearReactions();
+
+                if (options.msgOnSuccess != "") {
+                    embed.setDescription(options.msgOnSuccess);
+                }
+                embed.setColor("#00C000");
+                embed.setFooter("Fulfilled Request");
+                message.edit(embed);
+                resolve();
+            }, 5000);
+            message.awaitReactions(function(reaction) {
+                if (reaction.count > 1 && reaction.users.has(options.author.id)) return true;
+                return false;
+            }, {
+                max: 1
+            }).then(function() {
+                //Cancel the function
+                clearTimeout(timeout);
+                message.clearReactions();
+
+                if (options.msgOnFail != "") {
+                    embed.setDescription(options.msgOnFail);
+                }
+                embed.setColor("#FF0000");
+                embed.setFooter("Cancelled Request");
+                message.edit(embed);
+                reject();
+            });
+        });
+    });
+}
+
 //Set up screen
 var screen = blessed.screen({
     smartCSR: true,
@@ -1747,6 +1797,7 @@ function processAmCommand(message) {
             } else if (nickResult == "length") {
                 message.reply(tr("Nicknames need to be less than 32 characters."));
             } else {
+                /*
                 message.channel.send("Ok, requesting a nickname reset. React with '🚫' within 5 seconds to cancel.").then(m => {
                     var rename = true;
                     m.react('🚫').then(() => {
@@ -1765,7 +1816,20 @@ function processAmCommand(message) {
                             m.clearReactions();
                         }));
                     }).catch(err => log(err, logType.critical));
-                }).catch(err => log(err, logType.critical));
+                }).catch(err => log(err, logType.critical));*/
+
+                awaitUserConfirmation({
+                    title: "Request to reset nickname", 
+                    msg: "Ready to reset your nickname?", 
+                    msgOnSuccess: "A request has been sent to reset your nickname.", 
+                    msgOnFail: "Alright, scratch that.", 
+                    channel: message.channel,
+                    author: message.author
+                }).then(function() {
+                    requestNickname(message.member, text.substr(8), message.guild);
+                }).catch(function() {
+                    //Don't do anything
+                });
             }
         } else {
             message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
@@ -1782,7 +1846,7 @@ function processAmCommand(message) {
             } else if (nickResult == "configuration") {
                 message.reply(tr("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
             } else {
-                message.channel.send(`Ok, requesting a nickname change to "${text.substr(8)}". React with '🚫' within 5 seconds to cancel.`).then(m => {
+                /*message.channel.send(`Ok, requesting a nickname change to "${text.substr(8)}". React with '🚫' within 5 seconds to cancel.`).then(m => {
                     var rename = true;
                     m.react('🚫').then(() => {
                         const filter = (reaction, user) => reaction.emoji.name === '🚫' && user.id === message.member.id;
@@ -1800,7 +1864,23 @@ function processAmCommand(message) {
                             m.clearReactions();
                         }));
                     }).catch(err => log(err, logType.critical));
-                }).catch(err => log(err, logType.critical));
+                }).catch(err => log(err, logType.critical));*/
+
+                awaitUserConfirmation({
+                    title: "Request to change nickname", 
+                    msg: "Ready to change your nickname?", 
+                    msgOnSuccess: "A request has been sent to reset your nickname.", 
+                    msgOnFail: "Alright, scratch that.", 
+                    channel: message.channel,
+                    author: message.author,
+                    extraFields: [
+                        ["Nickname", text.substr(8)]
+                    ]
+                }).then(function() {
+                    requestNickname(message.member, text.substr(8), message.guild);
+                }).catch(function() {
+                    //Don't do anything
+                });
             }
         } else {
             message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
