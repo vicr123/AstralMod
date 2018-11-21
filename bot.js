@@ -1,7 +1,7 @@
 /****************************************
  *
- *   AstralMod: Moderation bot for AstralPhaser Central and other Discord servers
- *   Copyright (C) 2017 Victor Tran
+ *   AstralMod: Moderation bot for bits & Bytes and other Discord servers
+ *   Copyright (C) 2018 Victor Tran, John Tur
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -1769,12 +1769,6 @@ function processAmCommand(message) {
         } else {
             message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
         }
-        return true;
-    } else if (command == "suggest") {
-        message.reply("Suggestions are coming soon. Stay tuned!");
-        return true;
-    } else if (command.startsWith("suggest ")) {
-        message.reply("Suggestions are coming soon. Stay tuned!");
         return true;
     } else if (command == "version") {
         message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later.");

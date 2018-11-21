@@ -184,8 +184,21 @@ function processCommand(message, isMod, command) {
                     message.reply("Give us a minute to find all the messages from " + getUserString(userMember) + " within the past day");
                 }
             }
+/*
         } else if (command == "panic") {
-            message.channel.send('Panic Mode is coming soon. Stay Tuned!');
+            return;
+            if(settings.guilds[message.guild.id].panicMode) {
+                for(let [id, overwrite] of settings.guilds[message.guild.id].panicMode.permissionOverwrites) {
+                    message.guild.channels[id].overwritePermissions(overwrite)
+                }
+            } else { // enabling panic mode
+                settings.guilds[message.guild.id].panicMode = true;
+                for (let channel of message.guild.channels) {
+                    settings.guilds[message.guild.id].panicMode.states[channel.id] = channel.permissionOverwrites;
+                    channel.permissionOverwrites.map(p => p.id === message.defaultRole.id);
+                }
+            }
+*/
         } else if (command == "chnk") {
             message.channel.send("Usage: mod:chnk user. For more information, `mod:help chnk`.");
         } else if (command.startsWith("chnk ")) {
@@ -331,10 +344,12 @@ module.exports = {
             ],
             modCommands: [
                 "rm",
-                "panic",
                 "chnk",
                 "block",
                 "unblock"
+            ],
+            hiddenCommands: [
+                "panic"
             ]
         }
     },
@@ -353,7 +368,7 @@ module.exports = {
             case "panic":
                 help.title = prefix + "panic";
                 help.usageText = prefix + "panic";
-                help.helpText = "Switches on Panic Mode. In this mode, no one can send messages.";
+                help.helpText = "Switches on Panic Mode. In this mode, only privileged users can send messages.";
                 break;
             case "chnk":
                 help.title = prefix + "chnk";

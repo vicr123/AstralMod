@@ -1,7 +1,7 @@
 /****************************************
  * 
  *   Miscellaneous: Plugin for AstralMod that contains miscellaneous commands
- *   Copyright (C) 2017 Victor Tran
+ *   Copyright (C) 2018 Victor Tran, John Tur
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -292,7 +292,7 @@ module.exports = {
                 help.title = prefix + "setunit";
                 help.usageText = prefix + "setunit units";
                 help.helpText = "Sets units used by AstralMod";
-                help.param1 = "Either `metric` or `imperial`";
+                help.param1 = "Either `metric`, `imperial`, `24h`, or `12h`";
                 break;
             case "sinfo":
                 help.title = prefix + "sinfo";
