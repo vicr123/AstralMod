@@ -32,33 +32,28 @@ function processCommand(message, isMod, command) {
 
     message.reply(":arrow_right: I've sent you a DM with further instructions.");
     message.author.send("Type in your suggestion here and send it to me as a message:").then(_ => {
+
         let collector = message.author.dmChannel.createMessageCollector(f => f.author.id == message.author.id);
         collector.on('collect', coll => {
             collector.stop();
-                message.author.send(`Ok, I've got your suggestion and will send it to ${message.guild.name}. React with '🚫' within 5 seconds to cancel.`).then(m => {
-                var rename = true;
-                m.react('🚫').then(() => {
-                    const filter = (reaction, user) => reaction.emoji.name === '🚫' && user.id === message.member.id;
-                    const collector = m.createReactionCollector(filter, {time: 5000});
-                    collector.on('collect', (_ => {
-                        rename = false;
-                        m.edit("Ok, I've cancelled that.");
-                    }));
-                    collector.on('end', (_ => {
-                        if (rename) {
-                            m.edit("Ok, I sent your suggestion.");
-
-                            let embed = new Discord.RichEmbed();
-                            embed.setTitle("New Suggestion");
-                            embed.setColor("#00C000");
-                            embed.setDescription(coll.content);
-                            embed.setTimestamp();
-                            embed.setFooter("From " + message.author.username, message.author.avatarURL);
-                            message.guild.channels.get(settings.guilds[message.guild.id].suggestions).send(embed);
-                        }
-                    }));
-                }).catch(err => log(err, logType.critical));
-            }).catch(err => log(err, logType.critical));
+            awaitUserConfirmation({
+                title: "Sending suggestion",
+                msg: `I've got your suggestion and will send it to ${message.guild.name}.`,
+                msgOnSuccess: "Ok, I sent your suggestion.",
+                msgOnFail: "Alright, scratch that.",
+                channel: message.channel,
+                author: message.author,
+            }).then(() => {
+                let embed = new Discord.RichEmbed();
+                embed.setTitle("New Suggestion");
+                embed.setColor("#00C000");
+                embed.setDescription(coll.content);
+                embed.setTimestamp();
+                embed.setFooter("From " + message.author.username, message.author.avatarURL);
+                message.guild.channels.get(settings.guilds[message.guild.id].suggestions).send(embed);
+            }).catch(() => {
+                message.reply("🚫 ERROR: That didn't work.");
+            });
         });
     }).catch(err => log(err, logType.critical));
 }
