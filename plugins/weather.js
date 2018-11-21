@@ -1,7 +1,7 @@
 /****************************************
  * 
  *   Weather: Plugin for AstralMod that contains weather functions
- *   Copyright (C) 2018 Victor Tran, zBlake and lempamo
+ *   Copyright (C) 2018 Victor Tran, John Tur, zBlake and lempamo
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -682,7 +682,9 @@ module.exports = {
                 help.param1 = "- A location\n" +
                               "- A user whose location is known to AstralMod\n";
                 help.availableOptions = "`--metric` Return results in metric\n" +
-                               "`--imperial` Return results in imperial";
+                               "`--imperial` Return results in imperial\n" +
+                               "`--24` Return results in 24 hour time\n" +
+                               "`--12` Return hours in 12 hour time";
                 help.remarks = "You can set your preferred units using `" + prefix + "setunit`.";
                 break;
             case "setloc":
