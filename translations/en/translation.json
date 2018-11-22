@@ -8,5 +8,15 @@
     "UINFO_USERNAME": "**Username:** {{username}}",
     "UINFO_NONICKNAME": "No Nickname",
     "UINFO_NICKNAME": "**Nickname:** {{nickname}}",
-    "UINFO_NAMES": "Names"
+    "UINFO_NAMES": "Names",
+    "UINFO_INVALID_JOIN": "-∞... and beyond! Discord seems to be giving incorrect info... :(",
+    "UINFO_NOT_PART_OF_SERVER": "This user is not part of this server.",
+    "SETLOC_TITLE": "AstralMod Localisation",
+    "SETLOC_LANGUAGE": "Alright, your locale is now English.",
+    "SETLOC_DISCLAIMER": "AstralMod Localisation is in the preview stage. Many items will not be translated.",
+    "SETLOC_UNAVAILABLE": "Unfortunately we don't have that locale in AstralMod.",
+    "UINFO_BANNED_FROM": "This user has been banned from {{count}} server known to AstralMod",
+    "UINFO_BANNED_FROM_plural": "This user has been banned from {{count}} servers known to AstralMod",
+    "UINFO_ALERTS": "Alerts",
+    "UINFO_BOT_ACCOUNT_WARNING": "This user is a bot account."
 }

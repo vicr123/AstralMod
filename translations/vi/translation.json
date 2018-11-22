@@ -1,12 +1,18 @@
 {
     "UINFO_USER_ID": "ID người dùng: {{id}}",
     "UINFO_USER_INFORMATION": "Giới thiệu về người dùng",
-    "UINFO_CREATEDAT": "**Ngày tạo ra**: {{createdate}}",
-    "UINFO_JOINEDAT": "UINFO_JOINEDAT",
-    "UINFO_TIMESTAMPS": "UINFO_TIMESTAMPS",
-    "UINFO_DISPLAYNAME": "UINFO_DISPLAYNAME",
-    "UINFO_USERNAME": "UINFO_USERNAME",
-    "UINFO_NONICKNAME": "UINFO_NONICKNAME",
-    "UINFO_NICKNAME": "UINFO_NICKNAME",
-    "UINFO_NAMES": "UINFO_NAMES"
+    "UINFO_CREATEDAT": "**Ngày tạo ra**: {{createdat}}",
+    "UINFO_JOINEDAT": "**Ngày tham gia**: {{joinedat}}",
+    "UINFO_TIMESTAMPS": "Thời gian",
+    "UINFO_DISPLAYNAME": "**Tên hiển**: {{displayname}}",
+    "UINFO_USERNAME": "**Tên dùng**: {{username}}",
+    "UINFO_NONICKNAME": "Không có tên nick",
+    "UINFO_NICKNAME": "**Tên nick**: {{nickname}}",
+    "UINFO_NAMES": "Tên",
+    "SETLOC_TITLE": "Ngôn ngữ AstralMod",
+    "SETLOC_LANGUAGE": "OK, ngôn ngữ của bạn là Tiếng Việt.",
+    "SETLOC_DISCLAIMER": "Bản địa hóa của AstralMod chưa được phát hành. Nhiều chữ sẽ chưa được dịch.",
+    "SETLOC_UNAVAILABLE": "Rất tiếc, ngôn ngữ đó không có sẵn trong AstralMod.",
+    "UINFO_BANNED_FROM_0": "Người dùng này đã bị chặn từ {{count}} máy chủ",
+    "UINFO_ALERTS": "Cảnh báo"
 }
