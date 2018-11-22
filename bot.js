@@ -2725,6 +2725,8 @@ async function processMessage(message) {
         //Ignore bots
         if (message.author.bot) return;
 
+        let options = {};
+
         //Get language
         if (settings.users[message.author.id] == null) {
             settings.users[message.author.id] = {};
@@ -2783,13 +2785,13 @@ async function processMessage(message) {
                     if (!processModCommand(message)) {
                         if (!processAmCommand(message)) {
                             //Pass command onto plugins
-                            commandEmitter.emit('processCommand', message, true, text.substr(prefix.length).toLowerCase());
+                            commandEmitter.emit('processCommand', message, true, text.substr(prefix.length).toLowerCase(), options);
                         }
                     }
                 } else {
                     if (!processAmCommand(message)) {
                         //Pass command onto plugins
-                        commandEmitter.emit('processCommand', message, false, text.substr(prefix.length).toLowerCase());
+                        commandEmitter.emit('processCommand', message, false, text.substr(prefix.length).toLowerCase(), options);
                     }
                 }
             } else {
