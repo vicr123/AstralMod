@@ -33,7 +33,8 @@ const client = new Discord.Client({
     restTimeOffset: 10,
     disableEveryone: true
 });
-const localize = require('localize');
+const i18next = require('i18next');
+let i18nextbackend = require('i18next-node-fs-backend');
 
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
@@ -48,40 +49,26 @@ global.ownerId = undefined;
 
 let doNotDeleteGuilds = [];
 
-//Load translations
-{
-    let translations = {};
-    let dates = {};
-    //let locales = fs.readdirSync("./translations");
-    let locales = ["en"];
-    for (let key in locales) {
-        let locale = locales[key];
-        if (fs.existsSync("./translations/" + locale + "/translations.json")) {
-            let strings = JSON.parse(fs.readFileSync("./translations/" + locale + "/translations.json"));
-            for (let phrase in strings.translations) {
-                if (translations[phrase] == null) translations[phrase] = {};
-                translations[phrase][locale] = strings.translations[phrase];
-            }
-        }
-
-
-        if (fs.existsSync("./translations/" + locale + "/dates.json")) {
-            let d = JSON.parse(fs.readFileSync("./translations/" + locale + "/dates.json"));
-            dates[locale] = d;
-        }
+let availableTranslations = fs.readdirSync("translations");
+i18next.use(i18nextbackend).init({
+    fallbackLng: false,
+    preload: availableTranslations,
+    saveMissing: true,
+    backend: {
+        loadPath: "./translations/{{lng}}/{{ns}}.json",
+        addPath: "./translations/{{lng}}/{{ns}}.json",
+        jsonIndent: 4
     }
-    global.translator = new localize(translations);
-    translator.loadDateFormats(dates);
-    translator.throwOnMissingTranslation(false);
+});
+
+global._ = {};
+for (let index in availableTranslations) {
+    let translationName = availableTranslations[index];
+    _[translationName] = i18next.getFixedT(translationName, "translation");
 }
 
 global.tr = function() {
-    //let translation;
-    //translation = translator.translate.apply(this, arguments);
-    //if (translation == "") {
-        //return arguments[0];
-    //}
-    //return translation;
+    
     return arguments[0];
 }
 
@@ -191,11 +178,13 @@ global.releaseInput = function(guild) {
 
 global.awaitUserConfirmation = function(options) {
     return new Promise(function(resolve, reject) {
+        if (options.time == null || options.time < 1) options.time = 5; //Default to 5 seconds
+
         let embed = new Discord.RichEmbed();
         embed.setTitle(options.title);
         embed.setDescription(options.msg);
         embed.setColor("#3C3C96");
-        embed.setFooter("Use 🚫 within 5 seconds to cancel");
+        embed.setFooter("Use 🚫 within " + options.time + " seconds to cancel");
         if (options.extraFields != null) {
             for (let field in options.extraFields) {
                 let currentField = options.extraFields[field];
@@ -216,7 +205,7 @@ global.awaitUserConfirmation = function(options) {
                 embed.setFooter("Fulfilled Request");
                 message.edit(embed);
                 resolve();
-            }, 5000);
+            }, options.time * 1000);
             message.awaitReactions(function(reaction) {
                 if (reaction.count > 1 && reaction.users.has(options.author.id)) return true;
                 return false;
@@ -1482,71 +1471,67 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
         embed.setAuthor(member.displayName, user.displayAvatarURL);
         embed.setAuthor(getUserString(member), user.displayAvatarURL);
         embed.setColor("#00FF00");
-        embed.setFooter(tr("User ID:") + " " + user.id);
+        embed.setFooter(_["vi"]("UINFO_USER_ID", {id:user.id}));
 
         if (compact) {
-            var msg = tr("Discriminator:") + " " + user.discriminator + "\n" +
-                        tr("Created at:") + " " + translator.localDate(user.createdAt, "default", true) + "\n";
+            var msg = _["vi"]("UINFO_DISCRIMINATOR", {discriminator:user.discriminator}) + "\n" +
+                        _["vi"]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
 
             if (member.noGuild != true) {
                 if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
                     msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
                 } else {
-                    msg += tr("Joined at:") + " " + translator.localDate(user.joinedTimestamp, "default", true);
+                    msg += _["vi"]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
                 }
             }
             embed.setDescription(msg);
         } else {
             if (member.noGuild != true) {
-                embed.setDescription(tr("User Information"));
+                embed.setDescription(_["vi"]("UINFO_USER_INFORMATION"));
             } else {
                 embed.setDescription(member.noGuildMessage);
             }
 
             {
-                var msg = "**" + tr("Created") + "** " + translator.localDate(user.createdAt, "default", true) + "\n";
+                var msg = _["vi"]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
 
                 if (member.noGuild != true) {
                     if (member.joinedAt.getTime() == 0) {
-                        msg += "**" + tr("Joined") + "** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                        msg += _["vi"]("UINFO_JOINEDAT") + "** -∞... and beyond! Discord seems to be giving incorrect info... :(";
                     } else {
-                        msg += "**" + tr("Joined") + "** " + translator.localDate(member.joinedAt, "default", true);
+                        msg += _["vi"]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
                     }
                 }
 
-                embed.addField(tr("Timestamps"), msg);
+                embed.addField(_["vi"]("UINFO_TIMESTAMPS"), msg);
             }
 
             var msg;
             if (member.noGuild) {
-                msg = "**" + tr("Username") + "** " + user.username + "\n";
+                msg = _["vi"]("UINFO_USERNAME", {username:user.username});
 
-                embed.addField(tr("Names"), msg);
+                embed.addField(_["vi"]("UINFO_NAMES"), msg);
             } else {
-                msg = "**" + tr("Current Display Name") + "** " + member.displayName + "\n";
-                msg += "**" + tr("Username") + "** " + user.username + "\n";
-                if (member.nickname != null) {
-                    msg += "**" + tr("Nickname") + "** " + member.nickname;
-                } else {
-                    msg += "**" + tr("Nickname") + "** " + tr("No nickname");
-                }
+                msg = _["vi"]("UINFO_DISPLAYNAME", {displayname:member.displayName}) + "\n";
+                msg +=  _["vi"]("UINFO_USERNAME", {username:user.username}) + "\n";
+                msg += _["vi"]("UINFO_NICKNAME",{nickname: (member.nickname == null ? _["vi"]("UINFO_NONICKNAME") : member.nickname)});
 
-                embed.addField(tr("Names"), msg);
+                embed.addField(_["vi"]("UINFO_NAMES"), msg);
             }
 
             {
                 var msg = "";
 
                 if (user.bot) {
-                    msg += "- " + tr("This user is a bot account.") + "\n";
+                    msg += "- " + _["vi"]("UINFO_BOT_ACCOUNT_WARNING") + "\n";
                 }
 
                 if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
-                    msg += "- " + tr("This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod.");
+                    msg += "- " + _["vi"]("UINFO_BANNED_FROM", {count:parseInt(banCounts[user.id])});//"This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod.");
                 }
 
                 if (msg != "") {
-                    embed.addField(tr("Alerts"), msg);
+                    embed.addField(_["vi"]("UINFO_ALERTS"), msg);
                 }
             }
         }
@@ -1784,7 +1769,7 @@ function processAmCommand(message) {
             if (nickResult instanceof moment) {
                 message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
             } else if (nickResult == "length") {
-                message.reply(tr("Nicknames need to be less than 32 characters."));
+                message.reply(_["vi"]("Nicknames need to be less than 32 characters."));
             } else {
                 /*
                 message.channel.send("Ok, requesting a nickname reset. React with '🚫' within 5 seconds to cancel.").then(m => {
@@ -1821,7 +1806,7 @@ function processAmCommand(message) {
                 });
             }
         } else {
-            message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
+            message.reply(_["vi"]("Nickname changes are not accepted on this server via AstralMod."));
         }
 
         return true;
@@ -1831,9 +1816,9 @@ function processAmCommand(message) {
             if (nickResult instanceof moment) {
                 message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
             } else if (nickResult == "length") {
-                message.reply(tr("Nicknames need to be less than 32 characters."));
+                message.reply(_["vi"]("Nicknames need to be less than 32 characters."));
             } else if (nickResult == "configuration") {
-                message.reply(tr("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
+                message.reply(_["vi"]("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
             } else {
                 /*message.channel.send(`Ok, requesting a nickname change to "${text.substr(8)}". React with '🚫' within 5 seconds to cancel.`).then(m => {
                     var rename = true;
@@ -1872,7 +1857,7 @@ function processAmCommand(message) {
                 });
             }
         } else {
-            message.reply(tr("Nickname changes are not accepted on this server via AstralMod."));
+            message.reply(_["vi"]("Nickname changes are not accepted on this server via AstralMod."));
         }
         return true;
     } else if (command == "version") {
@@ -1881,27 +1866,27 @@ function processAmCommand(message) {
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
         embed.setColor("#00C000");
-        embed.setAuthor(tr("AstralMod " + amVersion), client.user.avatarURL);
-        embed.setDescription(tr("Discord Bot"));
+        embed.setAuthor(_["vi"]("AstralMod " + amVersion), client.user.avatarURL);
+        embed.setDescription(_["vi"]("Discord Bot"));
         embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
         embed.addField("Sources", "Source code for AstralMod is available at the [GitHub Repository](https://github.com/vicr123/AstralMod).");
         embed.addField("Contributors", "AstralMod is possible due to the work of these wonderful people:\n- Blake#0007\n- reflectronic#5190");
-        embed.setFooter(tr("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
+        embed.setFooter(_["vi"]("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
         message.channel.send(embed);
         return true;
     /*} else if (command.startsWith("setlocale ")) {
         let locale = command.substr(10);
         if (!fs.existsSync("./translations/" + locale)) {
-            message.channel.send(tr("Unfortunately we don't have that locale in AstralMod."));
+            message.channel.send(_["vi"]("Unfortunately we don't have that locale in AstralMod."));
         } else {
             settings.users[message.author.id].locale = locale;
             translator.setLocale(locale);
 
             let embed = new Discord.RichEmbed();
             embed.setColor("#003CFF");
-            embed.setAuthor(tr("AstralMod Localisation"));
-            embed.setDescription(tr("Alright, your locale is now English."));
-            embed.setFooter(tr("AstralMod Localisation is in the preview stage. Many items will not be translated."))
+            embed.setAuthor(_["vi"]("AstralMod Localisation"));
+            embed.setDescription(_["vi"]("Alright, your locale is now English."));
+            embed.setFooter(_["vi"]("AstralMod Localisation is in the preview stage. Many items will not be translated."))
             message.channel.send(embed);
         }
         return true;*/
@@ -1958,9 +1943,9 @@ function processAmCommand(message) {
     } else if (command.startsWith("fetchuser ")) {
         var user = command.substr(10);
         client.fetchUser(user).then(function(dUser) {
-            message.channel.send(tr("User " + dUser.tag + " fetched and cached."));
+            message.channel.send(_["vi"]("User " + dUser.tag + " fetched and cached."));
         }).catch(function() {
-            message.channel.send(tr("Couldn't fetch user."));
+            message.channel.send(_["vi"]("Couldn't fetch user."));
         });
         return true;
     } else if (command.startsWith("help ")) { //Contextual help
@@ -2134,13 +2119,15 @@ function processAmCommand(message) {
                 msgOnSuccess: ":arrow_left: And with that, POW! I'm gone!",
                 msgOnFail: "Alright, scratch that.",
                 channel: message.channel,
-                author: message.author
+                author: message.author,
+                time: 10
             }).then(() => {
-                // message.guild.leave();
+                message.guild.leave().catch(function() {
+                    message.reply("I've been a bad bot; I can't actually seem to get myself out of here. Please kick me.");
+                });
                 saveSettings();
             }).catch(err => {
-                //log(err, logType.critical);
-                message.reply("I've been a bad bot; I can't actually seem to get myself out of here. Please kick me.");
+                //Do nothing
             });
 
         } else {

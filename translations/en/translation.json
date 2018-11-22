@@ -1,0 +1,12 @@
+{
+    "UINFO_USER_ID": "User ID: {{id}}",
+    "UINFO_USER_INFORMATION": "User Information",
+    "UINFO_CREATEDAT": "**Created At:** {{createdat}}",
+    "UINFO_JOINEDAT": "**Joined At:** {{joinedat}}",
+    "UINFO_TIMESTAMPS": "Timestamps",
+    "UINFO_DISPLAYNAME": "**Display Name:** {{displayname}}",
+    "UINFO_USERNAME": "**Username:** {{username}}",
+    "UINFO_NONICKNAME": "No Nickname",
+    "UINFO_NICKNAME": "**Nickname:** {{nickname}}",
+    "UINFO_NAMES": "Names"
+}
