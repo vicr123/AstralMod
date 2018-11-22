@@ -1,8 +1,8 @@
 {
     "UINFO_USER_ID": "User ID: {{id}}",
     "UINFO_USER_INFORMATION": "User Information",
-    "UINFO_CREATEDAT": "**Created At:** {{createdat}}",
-    "UINFO_JOINEDAT": "**Joined At:** {{joinedat}}",
+    "UINFO_CREATEDAT": "**Created At:** {{createdat, datetime}}",
+    "UINFO_JOINEDAT": "**Joined At:** {{joinedat, datetime}}",
     "UINFO_TIMESTAMPS": "Timestamps",
     "UINFO_DISPLAYNAME": "**Display Name:** {{displayname}}",
     "UINFO_USERNAME": "**Username:** {{username}}",
@@ -18,5 +18,21 @@
     "UINFO_BANNED_FROM": "This user has been banned from {{count}} server known to AstralMod",
     "UINFO_BANNED_FROM_plural": "This user has been banned from {{count}} servers known to AstralMod",
     "UINFO_ALERTS": "Alerts",
-    "UINFO_BOT_ACCOUNT_WARNING": "This user is a bot account."
+    "UINFO_BOT_ACCOUNT_WARNING": "This user is a bot account.",
+    "SINFO_RETRIEVING_SERVER": "Retrieving server information...",
+    "SINFO_GUILDID": "Guild ID: {{id}}",
+    "SINFO_SERVER_INFORMATION": "Server Information",
+    "SINFO_SERVER_CREATED": "**Created At:** {{createdat, datetime}}",
+    "SINFO_AM_JOINED": "**AstralMod Joined:** {{joinedat, datetime}}",
+    "SINFO_INVALID_JOIN_DATE": "-∞... and beyond! Discord seems to be giving incorrect info... :(",
+    "SINFO_TIMESTAMPS": "Timestamps",
+    "SINFO_MEMBER_COUNT": "**Total Members:** {{count}}",
+    "SINFO_BOT_COUNT": "({{count}} bot)",
+    "SINFO_BOT_COUNT_plural": "({{count}} bots)",
+    "SINFO_SERVER_OWNER": "**Server Owner:** {{owner}}",
+    "SINFO_PEOPLE": "People",
+    "SINFO_SURPlUS_ROLES": "{{count}} more role",
+    "SINFO_SURPLUS_ROLES_plural": "{{count}} more roles",
+    "SINFO_ROLES": "Roles",
+    "SINFO_ALERTS": "Alerts"
 }

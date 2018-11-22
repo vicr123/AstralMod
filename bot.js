@@ -51,16 +51,34 @@ let doNotDeleteGuilds = [];
 
 let availableTranslations = fs.readdirSync("translations");
 i18next.use(i18nextbackend).init({
-    fallbackLng: false,
+    fallbackLng: ["en", false],
     preload: availableTranslations,
-    saveMissing: true,
+    //saveMissing: true,
     backend: {
         loadPath: "./translations/{{lng}}/{{ns}}.json",
         addPath: "./translations/{{lng}}/{{ns}}.json",
         jsonIndent: 4
     },
     interpolation: {
-        format: function(value, format, lng) {
+        format: function fmt(value, format, lng) {
+            if (value.date instanceof Date) {
+                //maybe have different formats here later
+                //also take into account the user's 12/24h settings somehow at some point
+                let m = moment.utc(value.date).locale(lng);
+                if (format == "datetime") {
+                    return fmt(value, "date", lng) + " " + fmt(value, "time", lng);
+                } else if (format == "date") {
+                    return m.format("ddd MMM DD YYYY");
+                } else if (format == "time") {
+                    if (value.h24) {
+                        return m.format("HH:mm:ss");
+                    } else {
+                        return m.format("hh:mm:ss A");
+                    }
+                } else {
+                    return m.format()
+                }
+            }
             if (format == "bold") return "**" + value + "**";
             return value;
         }
@@ -1445,7 +1463,7 @@ function isMod(member) {
     return false;
 }
 
-global.uinfo = function(user, channel, locale, guild = null, compact = false) {
+global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact = false) {
     sendPreloader("Retrieving user information...", channel).then(function(messageToEdit) {
         var member = null;
         if (guild != null) {
@@ -1481,13 +1499,13 @@ global.uinfo = function(user, channel, locale, guild = null, compact = false) {
 
         if (compact) {
             var msg = _[locale]("UINFO_DISCRIMINATOR", {discriminator:user.discriminator}) + "\n" +
-                        _[locale]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
+                        _[locale]("UINFO_CREATEDAT", {createdat:{date: member.user.createdAt, h24: h24}}) + "\n";
 
             if (member.noGuild != true) {
                 if (member.joinedAt.getTime() == 0) {
                     msg += _[locale]("UINFO_JOINEDAT", {joinedat:_[locale]("UINFO_INVALID_JOIN")});
                 } else {
-                    msg += _[locale]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
+                    msg += _[locale]("UINFO_JOINEDAT", {joinedat:{date: member.joinedAt, h24: h24}});
                 }
             }
             embed.setDescription(msg);
@@ -1499,13 +1517,13 @@ global.uinfo = function(user, channel, locale, guild = null, compact = false) {
             }
 
             {
-                var msg = _[locale]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
+                var msg = _[locale]("UINFO_CREATEDAT", {createdat:{date:member.user.createdAt, h24:h24}}) + "\n";
 
                 if (member.noGuild != true) {
                     if (member.joinedAt.getTime() == 0) {
                         msg += _[locale]("UINFO_JOINEDAT", {joinedat:_[locale]("UINFO_INVALID_JOIN")});
                     } else {
-                        msg += _[locale]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
+                        msg += _[locale]("UINFO_JOINEDAT", {joinedat:{date:member.joinedAt, h24:h24}});
                     }
                 }
 
@@ -2732,10 +2750,16 @@ async function processMessage(message) {
             settings.users[message.author.id] = {};
         }
 
-        /*if (settings.users[message.author.id].locale == null) {
-            settings.users[message.author.id].locale = locale;
-        }*/
-        //translator.setLocale(settings.users[message.author.id].locale);
+        if (settings.users[message.author.id].locale == null) {
+            settings.users[message.author.id].locale = "en";
+        }
+        options.locale = settings.users[message.author.id].locale;
+
+        if (settings.users[message.author.id].timeunit == "12h") {
+            options.h24 = false;
+        } else {
+            options.h24 = true;
+        }
 
         var text = message.content;
 
@@ -3051,7 +3075,7 @@ function memberAdd(member) {
                 channel.send(":arrow_right: <@" + member.user.id + "> + Invite " + inviteCode);
             }
     
-            uinfo(member.user, channel, "en", member.guild, true);
+            uinfo(member.user, channel, "en", true, member.guild, true);
     
             if (member.guild.id == 287937616685301762) {
                 var now = new Date();
