@@ -24,7 +24,9 @@ const Discord = require('discord.js');
 let translate;
 
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
+
     if (command.startsWith("pic ")) {
         var user = command.substr(4);
         var users = parseUser(user, message.guild);
@@ -59,26 +61,27 @@ function processCommand(message, isMod, command) {
     } else if (command == "sinfo") {
         let g = message.guild;
         let messageToEdit;
-        sendPreloader("Retrieving server information...", message.channel).then(function(message) {
+        sendPreloader($("SINFO_RETRIEVING_SERVER"), message.channel).then(function(message) {
             messageToEdit = message;
             return g.fetchMembers();
         }).then(function() {
             var embed = new Discord.RichEmbed("uinfo");
             embed.setAuthor(g.name, g.iconURL);
             embed.setColor("#00FF00");
-            embed.setFooter(tr("Guild ID:") + " " + g.id);
-            embed.setDescription(tr("Server Information"));
+            embed.setFooter($("SINFO_GUILDID", {id:g.id}));
+            embed.setDescription($("SINFO_SERVER_INFORMATION"));
     
             {
-                let msg = "**" + tr("Server Created") + "** " + translator.localDate(g.createdAt, "default", true) + "\n";
+                //let msg = "**" + tr("Server Created") + "** " + translator.localDate(g.createdAt, "default", true) + "\n";
+                let msg = $("SINFO_SERVER_CREATED", {createdat:{date:g.createdAt, h24: options.h24}}) + "\n";
     
                 if (g.joinedAt.getTime() == 0) {
-                    msg += "**" + tr("AstralMod Joined") + "** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                    msg += $("SINFO_AM_JOINED", {joinedat: $("SINFO_INVALID_JOIN_DATE")});
                 } else {
-                    msg += "**" + tr("AstralMod Joined") + "** " + translator.localDate(g.joinedAt, "default", true);
+                    msg += $("SINFO_AM_JOINED", {joinedat: {date:g.joinedAt, h24: options.h24}});
                 }
     
-                embed.addField(tr("Timestamps"), msg);
+                embed.addField($("SINFO_TIMESTAMPS"), msg);
             }
     
             {
@@ -86,10 +89,14 @@ function processCommand(message, isMod, command) {
                     return member.user.bot;
                 }).size;
                 let msg;
-                msg = "**" + tr("Total Members") + "** " + g.memberCount + (botCount > 0 ? " (" + parseInt(botCount) + " bots)" : "") + "\n";
-                msg += "**" + tr("Server Owner") + "** " + g.owner.user.tag + "\n";
+                msg = $("SINFO_MEMBER_COUNT", {count: g.memberCount.toString()}); //Don't pluralise this; it'll look weird
+                if (botCount > 0) {
+                    msg += " " + $("SINFO_BOT_COUNT", {count:botCount});
+                }
+                msg += "\n";
+                msg += $("SINFO_SERVER_OWNER", {owner:g.owner.user.tag}) + "\n";
     
-                embed.addField(tr("People"), msg);
+                embed.addField($("SINFO_PEOPLE"), msg);
             }
 
             {
@@ -104,9 +111,9 @@ function processCommand(message, isMod, command) {
                         numCharacters += role.name.length;
                     }
                 }
-                msg += "\n + " + parseInt(numSurplus) + " more";
+                msg += "\n + " + $("SINFO_SURPLUS_ROLES", {count: numSurplus});
     
-                embed.addField(tr("Roles"), msg);
+                embed.addField($("SINFO_ROLES"), msg);
             }
     
             {
@@ -138,7 +145,7 @@ function processCommand(message, isMod, command) {
                     msg += "- AstralMod is lacking the Manage Nicknames permission. AstralMod will not be able to change nicknames in this server.\n";
                 }
     
-                embed.addField(tr("Alerts"), msg);
+                embed.addField($("SINFO_ALERTS"), msg);
             }
     
             messageToEdit.edit(embed);

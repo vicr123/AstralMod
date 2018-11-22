@@ -1,8 +1,8 @@
 {
     "UINFO_USER_ID": "ID người dùng: {{id}}",
     "UINFO_USER_INFORMATION": "Giới thiệu về người dùng",
-    "UINFO_CREATEDAT": "**Ngày tạo ra**: {{createdat}}",
-    "UINFO_JOINEDAT": "**Ngày tham gia**: {{joinedat}}",
+    "UINFO_CREATEDAT": "**Ngày tạo ra**: {{createdat, datetime}}",
+    "UINFO_JOINEDAT": "**Ngày tham gia**: {{joinedat, datetime}}",
     "UINFO_TIMESTAMPS": "Thời gian",
     "UINFO_DISPLAYNAME": "**Tên hiển**: {{displayname}}",
     "UINFO_USERNAME": "**Tên dùng**: {{username}}",
