@@ -58,6 +58,12 @@ i18next.use(i18nextbackend).init({
         loadPath: "./translations/{{lng}}/{{ns}}.json",
         addPath: "./translations/{{lng}}/{{ns}}.json",
         jsonIndent: 4
+    },
+    interpolation: {
+        format: function(value, format, lng) {
+            if (format == "bold") return "**" + value + "**";
+            return value;
+        }
     }
 });
 
@@ -1439,7 +1445,7 @@ function isMod(member) {
     return false;
 }
 
-global.uinfo = function(user, channel, guild = null, compact = false) {
+global.uinfo = function(user, channel, locale, guild = null, compact = false) {
     sendPreloader("Retrieving user information...", channel).then(function(messageToEdit) {
         var member = null;
         if (guild != null) {
@@ -1455,7 +1461,7 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
                     displayName: user.username,
                     tag: user.tag,
                     noGuild: true,
-                    noGuildMessage: "This user is not part of this server."
+                    noGuildMessage: _[locale]("UINFO_NOT_PART_OF_SERVER")
                 }
             }
         } else {
@@ -1471,67 +1477,67 @@ global.uinfo = function(user, channel, guild = null, compact = false) {
         embed.setAuthor(member.displayName, user.displayAvatarURL);
         embed.setAuthor(getUserString(member), user.displayAvatarURL);
         embed.setColor("#00FF00");
-        embed.setFooter(_["vi"]("UINFO_USER_ID", {id:user.id}));
+        embed.setFooter(_[locale]("UINFO_USER_ID", {id:user.id}));
 
         if (compact) {
-            var msg = _["vi"]("UINFO_DISCRIMINATOR", {discriminator:user.discriminator}) + "\n" +
-                        _["vi"]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
+            var msg = _[locale]("UINFO_DISCRIMINATOR", {discriminator:user.discriminator}) + "\n" +
+                        _[locale]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
 
             if (member.noGuild != true) {
-                if (member.joinedAt.toUTCString() == "Thu, 01 Jan 1970 00:00:00 GMT") {
-                    msg += "Joined at: -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                if (member.joinedAt.getTime() == 0) {
+                    msg += _[locale]("UINFO_JOINEDAT", {joinedat:_[locale]("UINFO_INVALID_JOIN")});
                 } else {
-                    msg += _["vi"]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
+                    msg += _[locale]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
                 }
             }
             embed.setDescription(msg);
         } else {
             if (member.noGuild != true) {
-                embed.setDescription(_["vi"]("UINFO_USER_INFORMATION"));
+                embed.setDescription(_[locale]("UINFO_USER_INFORMATION"));
             } else {
                 embed.setDescription(member.noGuildMessage);
             }
 
             {
-                var msg = _["vi"]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
+                var msg = _[locale]("UINFO_CREATEDAT", {createdat:user.createdAt.toString()}) + "\n";
 
                 if (member.noGuild != true) {
                     if (member.joinedAt.getTime() == 0) {
-                        msg += _["vi"]("UINFO_JOINEDAT") + "** -∞... and beyond! Discord seems to be giving incorrect info... :(";
+                        msg += _[locale]("UINFO_JOINEDAT", {joinedat:_[locale]("UINFO_INVALID_JOIN")});
                     } else {
-                        msg += _["vi"]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
+                        msg += _[locale]("UINFO_JOINEDAT", {joinedat:member.joinedTimestamp.toString()});
                     }
                 }
 
-                embed.addField(_["vi"]("UINFO_TIMESTAMPS"), msg);
+                embed.addField(_[locale]("UINFO_TIMESTAMPS"), msg);
             }
 
             var msg;
             if (member.noGuild) {
-                msg = _["vi"]("UINFO_USERNAME", {username:user.username});
+                msg = _[locale]("UINFO_USERNAME", {username:user.username});
 
-                embed.addField(_["vi"]("UINFO_NAMES"), msg);
+                embed.addField(_[locale]("UINFO_NAMES"), msg);
             } else {
-                msg = _["vi"]("UINFO_DISPLAYNAME", {displayname:member.displayName}) + "\n";
-                msg +=  _["vi"]("UINFO_USERNAME", {username:user.username}) + "\n";
-                msg += _["vi"]("UINFO_NICKNAME",{nickname: (member.nickname == null ? _["vi"]("UINFO_NONICKNAME") : member.nickname)});
+                msg = _[locale]("UINFO_DISPLAYNAME", {displayname:member.displayName}) + "\n";
+                msg +=  _[locale]("UINFO_USERNAME", {username:user.username}) + "\n";
+                msg += _[locale]("UINFO_NICKNAME",{nickname: (member.nickname == null ? _[locale]("UINFO_NONICKNAME") : member.nickname)});
 
-                embed.addField(_["vi"]("UINFO_NAMES"), msg);
+                embed.addField(_[locale]("UINFO_NAMES"), msg);
             }
 
             {
                 var msg = "";
 
                 if (user.bot) {
-                    msg += "- " + _["vi"]("UINFO_BOT_ACCOUNT_WARNING") + "\n";
+                    msg += "- " + _[locale]("UINFO_BOT_ACCOUNT_WARNING") + "\n";
                 }
 
                 if (banCounts[user.id] != 0 && banCounts[user.id] != null) {
-                    msg += "- " + _["vi"]("UINFO_BANNED_FROM", {count:parseInt(banCounts[user.id])});//"This user has been banned from " + parseInt(banCounts[user.id]) + " servers known to AstralMod.");
+                    msg += "- " + _[locale]("UINFO_BANNED_FROM", {count:parseInt(banCounts[user.id])});
                 }
 
                 if (msg != "") {
-                    embed.addField(_["vi"]("UINFO_ALERTS"), msg);
+                    embed.addField(_[locale]("UINFO_ALERTS"), msg);
                 }
             }
         }
@@ -1769,7 +1775,7 @@ function processAmCommand(message) {
             if (nickResult instanceof moment) {
                 message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
             } else if (nickResult == "length") {
-                message.reply(_["vi"]("Nicknames need to be less than 32 characters."));
+                message.reply(_[locale]("Nicknames need to be less than 32 characters."));
             } else {
                 /*
                 message.channel.send("Ok, requesting a nickname reset. React with '🚫' within 5 seconds to cancel.").then(m => {
@@ -1806,7 +1812,7 @@ function processAmCommand(message) {
                 });
             }
         } else {
-            message.reply(_["vi"]("Nickname changes are not accepted on this server via AstralMod."));
+            message.reply(_[locale]("Nickname changes are not accepted on this server via AstralMod."));
         }
 
         return true;
@@ -1816,9 +1822,9 @@ function processAmCommand(message) {
             if (nickResult instanceof moment) {
                 message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
             } else if (nickResult == "length") {
-                message.reply(_["vi"]("Nicknames need to be less than 32 characters."));
+                message.reply(_[locale]("Nicknames need to be less than 32 characters."));
             } else if (nickResult == "configuration") {
-                message.reply(_["vi"]("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
+                message.reply(_[locale]("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
             } else {
                 /*message.channel.send(`Ok, requesting a nickname change to "${text.substr(8)}". React with '🚫' within 5 seconds to cancel.`).then(m => {
                     var rename = true;
@@ -1857,7 +1863,7 @@ function processAmCommand(message) {
                 });
             }
         } else {
-            message.reply(_["vi"]("Nickname changes are not accepted on this server via AstralMod."));
+            message.reply(_[locale]("Nickname changes are not accepted on this server via AstralMod."));
         }
         return true;
     } else if (command == "version") {
@@ -1866,30 +1872,31 @@ function processAmCommand(message) {
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
         embed.setColor("#00C000");
-        embed.setAuthor(_["vi"]("AstralMod " + amVersion), client.user.avatarURL);
-        embed.setDescription(_["vi"]("Discord Bot"));
+        embed.setAuthor(_[locale]("AstralMod " + amVersion), client.user.avatarURL);
+        embed.setDescription(_[locale]("Discord Bot"));
         embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
         embed.addField("Sources", "Source code for AstralMod is available at the [GitHub Repository](https://github.com/vicr123/AstralMod).");
         embed.addField("Contributors", "AstralMod is possible due to the work of these wonderful people:\n- Blake#0007\n- reflectronic#5190");
-        embed.setFooter(_["vi"]("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
+        embed.setFooter(_[locale]("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
         message.channel.send(embed);
         return true;
-    /*} else if (command.startsWith("setlocale ")) {
+    } else if (command.startsWith("setlocale ")) {
         let locale = command.substr(10);
-        if (!fs.existsSync("./translations/" + locale)) {
-            message.channel.send(_["vi"]("Unfortunately we don't have that locale in AstralMod."));
-        } else {
+        if (availableTranslations.includes(locale)) {
             settings.users[message.author.id].locale = locale;
-            translator.setLocale(locale);
 
             let embed = new Discord.RichEmbed();
             embed.setColor("#003CFF");
-            embed.setAuthor(_["vi"]("AstralMod Localisation"));
-            embed.setDescription(_["vi"]("Alright, your locale is now English."));
-            embed.setFooter(_["vi"]("AstralMod Localisation is in the preview stage. Many items will not be translated."))
+            embed.setAuthor(_[locale]("SETLOC_TITLE"));
+            embed.setDescription(_[locale]("SETLOC_LANGUAGE"));
+            embed.setFooter(_[locale]("SETLOC_DISCLAIMER"));
             message.channel.send(embed);
+        } else {
+            locale = settings.users[message.author.id].locale;
+            if (locale == null) locale = "en";
+            message.channel.send(_[locale]("SETLOC_UNAVAILABLE"));
         }
-        return true;*/
+        return true;
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
         embed.setColor("#3C3C96");
@@ -1943,9 +1950,9 @@ function processAmCommand(message) {
     } else if (command.startsWith("fetchuser ")) {
         var user = command.substr(10);
         client.fetchUser(user).then(function(dUser) {
-            message.channel.send(_["vi"]("User " + dUser.tag + " fetched and cached."));
+            message.channel.send(_[locale]("User " + dUser.tag + " fetched and cached."));
         }).catch(function() {
-            message.channel.send(_["vi"]("Couldn't fetch user."));
+            message.channel.send(_[locale]("Couldn't fetch user."));
         });
         return true;
     } else if (command.startsWith("help ")) { //Contextual help
@@ -2723,9 +2730,9 @@ async function processMessage(message) {
             settings.users[message.author.id] = {};
         }
 
-        if (settings.users[message.author.id].locale == null) {
-            settings.users[message.author.id].locale = "en";
-        }
+        /*if (settings.users[message.author.id].locale == null) {
+            settings.users[message.author.id].locale = locale;
+        }*/
         //translator.setLocale(settings.users[message.author.id].locale);
 
         var text = message.content;
@@ -3042,7 +3049,7 @@ function memberAdd(member) {
                 channel.send(":arrow_right: <@" + member.user.id + "> + Invite " + inviteCode);
             }
     
-            uinfo(member.user, channel, member.guild, true);
+            uinfo(member.user, channel, "en", member.guild, true);
     
             if (member.guild.id == 287937616685301762) {
                 var now = new Date();

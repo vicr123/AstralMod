@@ -266,6 +266,9 @@ function processDeal(message) {
 }
 
 function processCommand(message, isMod, command) {
+    let locale = settings.users[message.author.id].locale;
+    if (locale == null) locale = "en";
+    
     if (isMod) {
         if (command.startsWith("uinfo ")) {
             var user = command.substr(6);
@@ -296,7 +299,7 @@ function processCommand(message, isMod, command) {
 
             var users = parseUser(user, message.guild);
             if (users.length > 0) {
-                uinfo(users[index], message.channel, message.guild);
+                uinfo(users[index], message.channel, locale, message.guild);
             } else {
                 throw new CommandError("No user found with that name");
             }
@@ -306,7 +309,7 @@ function processCommand(message, isMod, command) {
     }
 
     if (command == "uinfo") {
-        uinfo(message.author, message.channel, message.member.guild);
+        uinfo(message.author, message.channel, locale, message.member.guild);
         return true;
     } else if (command.startsWith("uinfo ")) {
         var user = command.substr(6);
@@ -337,7 +340,7 @@ function processCommand(message, isMod, command) {
 
         var users = parseUser(user, message.guild);
         if (users.length > 0) {
-            uinfo(users[index], message.channel);
+            uinfo(users[index], message.channel, locale);
         } else {
             throw new CommandError("No user found with that name");
         }
