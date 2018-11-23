@@ -188,11 +188,11 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     //have any data for the requested city.
                     if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
                         var embed = new Discord.RichEmbed;
-                        embed.setTitle(":thunder_cloud_rain: Weather Error");
-                        embed.setDescription("AstralMod couldn't retrieve weather.");
+                        embed.setTitle($("WEATHER_ERROR", {emoji: ":thunder_cloud_rain:"}));
+                        embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
                         embed.setColor("#FF0000");
-                        embed.addField("Details", "That city was not found");
-                        embed.addField("Try this", "Please be more specific or try a different spelling for the place you are trying to get the weather of. If you're trying to receive your own weather, try resetting your location with `" + prefix + "setloc`.");
+                        embed.addField($("WEATHER_ERROR_DETAILS"), $("WEATHER_ERROR_CITY_NOT_FOUND"));
+                        embed.addField($("WEATHER_ERROR_TRY_THIS"), $("WEATHER_ERROR_TRY_THIS_DESCRIPTION", {prefix: prefix}));
 
                         messageToEdit.edit(embed);
                         return;
@@ -394,7 +394,13 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     //82px per data pane
 
                     let current = 0;
-                    let ml = moment.localeData(options.locale);
+                    
+                    let ml;
+                    if (options.locale.startsWith("zh")) {
+                        ml = moment.localeData("zh-cn");
+                    } else {
+                        ml = moment.localeData(options.locale);
+                    }
                     for (key in data.query.results.channel.item.forecast) {
                         current++;
                         if (current > 5) {

@@ -20,7 +20,7 @@
 
 const Discord = require('discord.js');
 const moment = require('moment');
-const YQL = require('YQL');
+const YQL = require('yql');
 var client;
 var consts;
 
@@ -511,12 +511,9 @@ async function processCommand(message, isMod, command, options) {
                 return;
             }
 
-            //maybe we should have our own function to check a user
-            //like
-
             let returnUserWeather = function(user) {
                 if (settings.users[user.id] == null || settings.users[user.id].timezone == null) {
-                    reject($("TIME_TIMEZONE_NOT_SET", ));
+                    reject($("TIME_TIMEZONE_NOT_SET"));
                 } else {
                     resolve({
                         offset: settings.users[user.id].timezone,
@@ -548,7 +545,7 @@ async function processCommand(message, isMod, command, options) {
                 let dat = data.query.results.channel
                 resolve({
                     location: dat.location.city + ", " + dat.location.country,
-                    offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ")))
+                    offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ") + 1).toLowerCase())
                 });
             });
         }).then(function(timeDescriptor) {
@@ -556,54 +553,17 @@ async function processCommand(message, isMod, command, options) {
 
             message.channel.send($("TIME_RESPONSE", {
                 clockEmote: getClockEmoji(time.toDate()),
-                request: timeDescriptor.location.hasOwnProperty("username") ? timeDescriptor.location.username : timeDescriptor.location.toLocaleUpperCase(),
+                request: timeDescriptor.location,
                 offset: time.format("Z"),
-                time: time
+                time: {
+                    date: time,
+                    h24: options.h24
+                }
             }));
         }).catch(function(err) {
             //Oops! No available thing!
             message.channel.send("Error error! No user error! Run!!!!!!!! (the specific error was " + err + ")");
         });
-
-        /*
-        if (offset === undefined) { // It wasn't a time zone
-            if (location == 0) { // if it's nothing, including whitespace or undefined or whatever; i.e. "am:time"
-                location = message.author;
-            } else { //find a person
-                location = parseUser(location.trim(), message.guild)[0];
-            }
-
-
-            if (location == null) { // nobody was found
-                // last resort: check yahoo
-                let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
-                try {
-                    await new Promise((resolve, reject) => query.exec((err, data) => {
-                        if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
-                            throw new CommandError();
-                        }
-
-                        location = data.query.results.channel.item.condition.text;
-                        offset = utcOffsetFromTimezone(data.query.results.channel.item.pubDate.substring(data.query.results.channel.item.pubDate.lastIndexOf(" ")));
-
-                        resolve();
-                    }));
-                } catch (err) {
-                    message.channel.send(err.toString());
-                }
-            }
-
-
-            if (!(location instanceof String) && settings.users[location.id] == null || !settings.users.hasOwnProperty(location.id) || !settings.users[location.id].hasOwnProperty("timezone")) { //if the place is not valid
-                if (offset.isUser) {
-                    throw new UserInputError($("TIME_TIMEZONE_NOT_SET", {user: location.username, prefix: prefix}));
-                } else {
-                    throw new UserInputError($("TIME_TIMEZONE_NOT_VALID", {tz: location}));
-                }
-            }
-        }
-
-*/
     }
 }
 
