@@ -37,6 +37,9 @@
     "SINFO_ROLES": "Roles",
     "SINFO_ALERTS": "Alerts",
     "ERROR_DETAILS": "Details",
+    "TIME_TIMEZONE_NOT_SET": "{{user}} has not yet set their timezone. Go and bug 'em to `{{prefix}}settz` quickly!",
+    "TIME_TIMEZONE_NOT_VALID": "{{tz}} is not a valid timezone.",
+    "TIME_RESPONSE": "{{clockEmote}} **{{request}}** ({{offset}}) {{time, dddd[,] MMMM D}}, at {{time, stime}}",
     "WEATHER_CURRENT_WEATHER": "Current Weather",
     "WEATHER_DATE_UPDATED": "As of {{updated, datetime}}",
     "WEATHER_TODAY": "Today"

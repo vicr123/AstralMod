@@ -87,7 +87,7 @@ i18next.use(i18nextbackend).init({
                         return m.format("hh:mm A");
                     }
                 } else {
-                    return m.format()
+                    return m.format(format);
                 }
             }
             if (format == "bold") return "**" + value + "**";
@@ -2444,9 +2444,9 @@ function getSingleConfigureWelcomeText(guild) {
 
 
     if (guildSetting.echoOffensive == null || guildSetting.echoOffensive == false) {
-        string += "b Offensive Words    Disabled\n";
+        string += "b Filter expletives  Disabled\n";
     } else {
-        string += "b Offensive Words    Enabled\n";
+        string += "b Filter expletives  Enabled\n";
     }
 
     string += "\n";
@@ -2529,7 +2529,7 @@ function processSingleConfigure(message, guild) {
                         guildSetting.echoOffensive = true;
                     }
 
-                    message.author.send("Ok, I've toggled offensive words.");
+                    message.author.send("Ok, I'll filter expletive words from now on.");
                     message.author.send(getSingleConfigureWelcomeText(guild));
                     break;
                 case "<": //Reset AstralMod
