@@ -1,5 +1,7 @@
 {
     "SETLOC_LANGUAGE": "ٹھیک ہے، تمہاری زبان اب اردو (پاکستان) ہے.",
     "UINFO_NICKNAME": "**عرفی نام:** {{nickname}}",
-    "UINFO_NAMES": "نام"
+    "UINFO_NAMES": "نام",
+    "UINFO_USER_ID": "",
+    "UINFO_USER_INFORMATION": ""
 }
