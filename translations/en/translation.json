@@ -34,5 +34,6 @@
     "SINFO_SURPlUS_ROLES": "{{count}} more role",
     "SINFO_SURPLUS_ROLES_plural": "{{count}} more roles",
     "SINFO_ROLES": "Roles",
-    "SINFO_ALERTS": "Alerts"
+    "SINFO_ALERTS": "Alerts",
+
 }

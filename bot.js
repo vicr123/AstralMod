@@ -2743,8 +2743,6 @@ async function processMessage(message) {
         //Ignore bots
         if (message.author.bot) return;
 
-        let options = {};
-
         //Get language
         if (settings.users[message.author.id] == null) {
             settings.users[message.author.id] = {};
@@ -2753,19 +2751,34 @@ async function processMessage(message) {
         if (settings.users[message.author.id].locale == null) {
             settings.users[message.author.id].locale = "en";
         }
-        options.locale = settings.users[message.author.id].locale;
 
-        if (settings.users[message.author.id].timeunit == "12h") {
-            options.h24 = false;
-        } else {
-            options.h24 = true;
+        let options = {
+            locale: settings.users[message.author.id].locale,
+            imperial: settings.users[message.author.id].units === "imperial",
+            h24: settings.users[message.author.id].timeunit !== "12h"
+        };
+
+        let text = message.content;
+
+        for (const param of text.split(" ")) {
+            if (param === "--12") {
+                options.h24 = false;
+            } else if (param === "--24") {
+                options.h24 = true;
+            } else if (param === "--metric") {
+                options.h24 = true;
+            } else if (param === "--imperial") {
+                options.h24 = true;
+            } else if (availableTranslations.includes(param.substr(2))) {
+                options.locale = param.substr(2);
+            } else {
+                continue;
+            }
+
+            text = text.replace(param, "");
         }
 
-        options.imperial = (settings.users[message.author.id].units == "imperial");
-
-        var text = message.content;
-
-        //Determine if this is in a guild
+        //Don't respond to direct messages
         if (message.guild != null) {
             await message.guild.fetchMember(message.author);
 
