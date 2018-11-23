@@ -1,4 +1,5 @@
 {
+    "SPECIAL_STIME": "{{time, stime}}",
     "UINFO_USER_ID": "ID người dùng: {{id}}",
     "UINFO_USER_INFORMATION": "Giới thiệu về người dùng",
     "UINFO_CREATEDAT": "**Ngày tạo ra**: {{createdat, datetime}}",
@@ -14,5 +15,8 @@
     "SETLOC_DISCLAIMER": "Bản địa hóa của AstralMod chưa được phát hành. Nhiều chữ sẽ chưa được dịch.",
     "SETLOC_UNAVAILABLE": "Rất tiếc, ngôn ngữ đó không có sẵn trong AstralMod.",
     "UINFO_BANNED_FROM_0": "Người dùng này đã bị chặn từ {{count}} máy chủ",
-    "UINFO_ALERTS": "Cảnh báo"
+    "UINFO_ALERTS": "Cảnh báo",
+    "WEATHER_CURRENT_WEATHER": "Thời tiết hiện tại",
+    "WEATHER_DATE_UPDATED": "Tại {{updated, datetime}}",
+    "WEATHER_TODAY": "Hôm nay"
 }
