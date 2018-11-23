@@ -480,6 +480,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 function processCommand(message, isMod, command, options) {
     let unit = options.imperial ? "f" : "c";
     let time = options.h24 ? "24" : "12";
+    let $ = _[options.locale];
 
     let skiiness = (command.indexOf("--skiiness") != -1)
     command = command.replace("--skiiness", "");
