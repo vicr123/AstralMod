@@ -1,1 +1,17 @@
-{}
+{
+    "SPECIAL_STIME": "{{time, stime}}",
+    "UINFO_USER_INFORMATION": "",
+    "UINFO_CREATEDAT": "**做了在：**{{creatdat, datetime}}",
+    "UINFO_JOINEDAT": "**来了在：** {{joindat, datetime}}",
+    "UINFO_TIMESTAMPS": "时戳",
+    "UINFO_NONICKNAME": "没有混名",
+    "UINFO_NICKNAME": "**混名：**{{nickname}}",
+    "UINFO_NAMES": "名",
+    "SETLOC_LANGUAGE": "好，你的现场是英文。",
+    "SINFO_SERVER_CREATED": "**做了在：**{{creatdat, datetime}}",
+    "SINFO_PEOPLE": "人",
+    "WEATHER_TITLE": "天气",
+    "WEATHER_CURRENT_WEATHER": "现在的天气",
+    "WEATHER_TODAY": "今天",
+    "WEATHER_PLEASE_PRINT": "你可以打印这个"
+}
