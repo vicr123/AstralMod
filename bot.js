@@ -108,7 +108,7 @@ for (let index in availableTranslations) {
 }
 
 global.tr = function() {
-    
+    log("Warning: the tr function is being used", logType.warning);
     return arguments[0];
 }
 
