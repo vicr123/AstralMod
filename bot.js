@@ -212,6 +212,7 @@ global.releaseInput = function(guild) {
 }
 
 global.awaitUserConfirmation = function(options) {
+    let $ = _[options.locale];
     return new Promise(function(resolve, reject) {
         if (options.time == null || options.time < 1) options.time = 5; //Default to 5 seconds
 
@@ -219,7 +220,7 @@ global.awaitUserConfirmation = function(options) {
         embed.setTitle(options.title);
         embed.setDescription(options.msg);
         embed.setColor("#3C3C96");
-        embed.setFooter("Use 🚫 within " + options.time + " seconds to cancel");
+        embed.setFooter($("AWAITUSERCONFIRMATION_CANCEL_PROMPT", {emoji: "🚫", time: options.time}));
         if (options.extraFields != null) {
             for (let field in options.extraFields) {
                 let currentField = options.extraFields[field];
@@ -237,7 +238,7 @@ global.awaitUserConfirmation = function(options) {
                     embed.setDescription(options.msgOnSuccess);
                 }
                 embed.setColor("#00C000");
-                embed.setFooter("Fulfilled Request");
+                embed.setFooter($("AWAITUSERCONFIRMATION_FULFILLED"));
                 message.edit(embed);
                 resolve();
             }, options.time * 1000);
@@ -255,7 +256,7 @@ global.awaitUserConfirmation = function(options) {
                     embed.setDescription(options.msgOnFail);
                 }
                 embed.setColor("#FF0000");
-                embed.setFooter("Cancelled Request");
+                embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
                 message.edit(embed);
                 reject();
             });
@@ -1757,9 +1758,10 @@ function getNickStatus(member, nickname, guild) {
     return moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd');
 }
 
-function processAmCommand(message) {
+function processAmCommand(message, options) {
     var text = message.content;
     var command;
+    let $ = _[options.locale];
 
     command = text.toLowerCase().substr(prefix.length);
 
@@ -1836,7 +1838,8 @@ function processAmCommand(message) {
                     msgOnSuccess: "A request has been sent to reset your nickname.", 
                     msgOnFail: "Alright, scratch that.", 
                     channel: message.channel,
-                    author: message.author
+                    author: message.author,
+                    locale: options.locale
                 }).then(function() {
                     requestNickname(message.member, text.substr(8), message.guild);
                 }).catch(function() {
@@ -1844,7 +1847,7 @@ function processAmCommand(message) {
                 });
             }
         } else {
-            message.reply(_[locale]("Nickname changes are not accepted on this server via AstralMod."));
+            message.reply($("NICK_NOT_ACCEPTED"));
         }
 
         return true;
@@ -1887,7 +1890,8 @@ function processAmCommand(message) {
                     author: message.author,
                     extraFields: [
                         ["Nickname", text.substr(8)]
-                    ]
+                    ],
+                    locale: options.locale
                 }).then(function() {
                     requestNickname(message.member, text.substr(8), message.guild);
                 }).catch(function() {
@@ -1895,7 +1899,7 @@ function processAmCommand(message) {
                 });
             }
         } else {
-            message.reply(_[locale]("Nickname changes are not accepted on this server via AstralMod."));
+            message.reply($("NICK_NOT_ACCEPTED"));
         }
         return true;
     } else if (command == "version") {
@@ -2175,7 +2179,8 @@ function processAmCommand(message) {
                 msgOnFail: "Alright, scratch that.",
                 channel: message.channel,
                 author: message.author,
-                time: 10
+                time: 10,
+                locale: options.locale
             }).then(() => {
                 message.guild.leave().catch(function() {
                     message.reply("I've been a bad bot; I can't actually seem to get myself out of here. Please kick me.");
@@ -2852,13 +2857,13 @@ async function processMessage(message) {
                 //Determine if this is a command
                 if (isMod(message.member) || text == prefix + "config") { //This is a mod command
                     if (!processModCommand(message)) {
-                        if (!processAmCommand(message)) {
+                        if (!processAmCommand(message, options)) {
                             //Pass command onto plugins
                             commandEmitter.emit('processCommand', message, true, text.substr(prefix.length).toLowerCase(), options);
                         }
                     }
                 } else {
-                    if (!processAmCommand(message)) {
+                    if (!processAmCommand(message, options)) {
                         //Pass command onto plugins
                         commandEmitter.emit('processCommand', message, false, text.substr(prefix.length).toLowerCase(), options);
                     }

@@ -50,5 +50,9 @@
     "WEATHER_PLEASE_PRINT": "Feel free to print this",
     "WEATHER_TEAR_PERFORATED_LINE": "Please tear on the perforated line",
     "WEATHER_SO_MANY_DEGREES": "So many degrees...",
-    "WEATHER_LONGER_DAYS": "Are the days getting longer?"
+    "WEATHER_LONGER_DAYS": "Are the days getting longer?",
+    "AWAITUSERCONFIRMATION_CANCEL_PROMPT": "Use {{emoji}} within {{time}} seconds to cancel",
+    "AWAITUSERCONFIRMATION_FULFILLED": "Fulfilled Request",
+    "AWAITUSERCONFIRMATION_CANCELLED": "Cancelled Request",
+    "NICK_NOT_ACCEPTED": "Nickname changes are not accepted on this server via AstralMod."
 }

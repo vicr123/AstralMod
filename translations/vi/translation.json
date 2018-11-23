@@ -29,5 +29,9 @@
     "WEATHER_PLEASE_PRINT": "Mời bạn in trang này",
     "WEATHER_TEAR_PERFORATED_LINE": "Xin xé trên đường đục lỗ",
     "WEATHER_SO_MANY_DEGREES": "Nhiều độ quá...",
-    "WEATHER_LONGER_DAYS": "Những ngày có được lâu hơn?"
+    "WEATHER_LONGER_DAYS": "Những ngày có được lâu hơn?",
+    "AWAITUSERCONFIRMATION_CANCEL_PROMPT": "Dùng {{emoji}} trong khi vòng {{time}} giây để hủy",
+    "AWAITUSERCONFIRMATION_FULFILLED": "Yêu cầu đã hoàn thành",
+    "AWAITUSERCONFIRMATION_CANCELLED": "Yêu cầu đã bị hủy",
+    "NICK_NOT_ACCEPTED": "Việc đổi tên nick không được chấp nhận trên máy chủ này với AstralMod."
 }
