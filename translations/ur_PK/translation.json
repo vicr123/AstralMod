@@ -3,5 +3,8 @@
     "UINFO_NICKNAME": "**عرفی نام:** {{nickname}}",
     "UINFO_NAMES": "نام",
     "UINFO_USER_INFORMATION": "صارف کی معلومات",
-    "UINFO_USER_ID": "صارف کا نمبر: {{id}}"
+    "UINFO_USER_ID": "صارف کا نمبر: {{id}}",
+    "SPECIAL_STIME": "{{time, stime}}",
+    "UINFO_TIMESTAMPS": "تاریخ",
+    "WEATHER_TODAY": "آج"
 }
