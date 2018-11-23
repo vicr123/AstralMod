@@ -1,5 +1,6 @@
 {
     "SPECIAL_STIME": "{{time, stime}}",
+    "UINFO_RETRIEVING": "Retrieving user information...",
     "UINFO_USER_ID": "User ID: {{id}}",
     "UINFO_USER_INFORMATION": "User Information",
     "UINFO_CREATEDAT": "**Created At:** {{createdat, datetime}}",
@@ -12,6 +13,7 @@
     "UINFO_NAMES": "Names",
     "UINFO_INVALID_JOIN": "-∞... and beyond! Discord seems to be giving incorrect info... :(",
     "UINFO_NOT_PART_OF_SERVER": "This user is not part of this server.",
+    "UINFO_NOT_ALLOWED_SERVER_SPECIFIC": "You are not allowed to view server specific information in this server.",
     "SETLOC_TITLE": "AstralMod Localisation",
     "SETLOC_LANGUAGE": "Alright, your locale is now English.",
     "SETLOC_DISCLAIMER": "AstralMod Localisation is in the preview stage. Many items will not be translated.",
@@ -40,7 +42,20 @@
     "TIME_TIMEZONE_NOT_SET": "{{user}} has not yet set their timezone. Go and bug 'em to `{{prefix}}settz` quickly!",
     "TIME_TIMEZONE_NOT_VALID": "{{tz}} is not a valid timezone.",
     "TIME_RESPONSE": "{{clockEmote}} **{{request}}** ({{offset}}) {{time, dddd[,] MMMM D}}, at {{time, stime}}",
+    "ERROR_INTERNAL": "Internal Error",
+    "ERROR_LOGGED": "This error has been logged, and we'll look into it.",
+    "ERROR_INTERNAL_DESCRIPTION": "AstralMod has run into a problem trying to process that command.",
+    "WEATHER_PREPARING": "Preparing the weather...",
+    "WEATHER_TITLE": "Weather",
     "WEATHER_CURRENT_WEATHER": "Current Weather",
     "WEATHER_DATE_UPDATED": "As of {{updated, datetime}}",
-    "WEATHER_TODAY": "Today"
+    "WEATHER_TODAY": "Today",
+    "WEATHER_PLEASE_PRINT": "Feel free to print this",
+    "WEATHER_TEAR_PERFORATED_LINE": "Please tear on the perforated line",
+    "WEATHER_SO_MANY_DEGREES": "So many degrees...",
+    "WEATHER_LONGER_DAYS": "Are the days getting longer?",
+    "AWAITUSERCONFIRMATION_CANCEL_PROMPT": "Use {{emoji}} within {{time}} seconds to cancel",
+    "AWAITUSERCONFIRMATION_FULFILLED": "Fulfilled Request",
+    "AWAITUSERCONFIRMATION_CANCELLED": "Cancelled Request",
+    "NICK_NOT_ACCEPTED": "Nickname changes are not accepted on this server via AstralMod."
 }

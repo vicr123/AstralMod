@@ -169,7 +169,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
 
 function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
     let $ = _[options.locale];
-    sendPreloader("Preparing the weather...", message.channel).then(function(messageToEdit) {
+    sendPreloader($("WEATHER_PREPARING"), message.channel).then(function(messageToEdit) {
         let query;
         let unit = options.imperial ? "f" : "c";
 
@@ -402,23 +402,36 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         }
                         let day = data.query.results.channel.item.forecast[key];
 
+                        let display = getDataFromCode(parseInt(day.code), ctx);
+
                         ctx.font = "20px Contemporary";
 
                         let dayText = day.day.toUpperCase();
                         if (current == 1) {
                             dayText = $("WEATHER_TODAY").toUpperCase();
                         } else {
-                            dayText = ml.weekdaysShort()[["mon", "tue", "wed", "thu", "fri", "sat", "sun"].indexOf(day.day.toLowerCase())].toUpperCase();
+                            dayText = ml.weekdaysShort()[["mon", "tue", "wed", "thu", "fri", "sat", "sun"].indexOf(day.day.toLowerCase())].toUpperCase().trim();
                         }
                         let dayWidth = ctx.measureText(dayText);
                         
-                        let y = (current - 1) * 82 + 41 + (dayWidth.width / 2);
-                        ctx.rotate(-Math.PI / 2);
-                        ctx.fillText(dayText, -y, 372);
-                        ctx.rotate(Math.PI / 2);
+                        if (dayWidth.width > 72) {
+                            let textCanvas = new Canvas(dayWidth.width, dayWidth.emHeightAscent + dayWidth.emHeightDescent);
+                            let txtCtx = textCanvas.getContext('2d');
+                            txtCtx.font = "20px Contemporary";
+                            txtCtx.fillStyle = display.text;
+                            txtCtx.fillText(dayText, 0, 20);
+
+                            ctx.rotate(-Math.PI / 2);
+                            ctx.drawImage(textCanvas, -current * 82 + 5, 372 - dayWidth.emHeightAscent, 72, dayWidth.emHeightAscent + dayWidth.emHeightDescent);
+                            ctx.rotate(Math.PI / 2);
+                        } else {
+                            let y = (current - 1) * 82 + 41 + (dayWidth.width / 2);
+                            ctx.rotate(-Math.PI / 2);
+                            ctx.fillText(dayText, -y, 372);
+                            ctx.rotate(Math.PI / 2);
+                        }
 
                         //Draw image
-                        let display = getDataFromCode(parseInt(day.code), ctx);
                         ctx.drawImage(display.image, 380, (current - 1) * 82 + 9, 64, 64);
 
                         //Draw temperatures
@@ -436,13 +449,13 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
                     e.setImage("attachment://weather.png");
                     e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
-                    e.setTitle("Weather");
+                    e.setTitle($("WEATHER_TITLE"));
                     e.setURL(data.query.results.channel.link);
                     e.setColor("#00C0FF");
-                    e.setFooter(getRandom("Feel free to print this",
-                                        "Please tear on the perforated line",
-                                        "So many degrees...",
-                                        "Are the days getting longer?"));
+                    e.setFooter(getRandom($("WEATHER_PLEASE_PRINT"),
+                                        $("WEATHER_TEAR_PERFORATED_LINE"),
+                                        $("WEATHER_SO_MANY_DEGREES"),
+                                        $("WEATHER_LONGER_DAYS")));
                     message.channel.send(e).then(function() {
                         messageToEdit.delete();
                     });
