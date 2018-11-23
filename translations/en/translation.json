@@ -1,4 +1,5 @@
 {
+    "SPECIAL_STIME": "{{time, stime}}",
     "UINFO_USER_ID": "User ID: {{id}}",
     "UINFO_USER_INFORMATION": "User Information",
     "UINFO_CREATEDAT": "**Created At:** {{createdat, datetime}}",
@@ -35,5 +36,8 @@
     "SINFO_SURPLUS_ROLES_plural": "{{count}} more roles",
     "SINFO_ROLES": "Roles",
     "SINFO_ALERTS": "Alerts",
-
+    "ERROR_DETAILS": "Details",
+    "WEATHER_CURRENT_WEATHER": "Current Weather",
+    "WEATHER_DATE_UPDATED": "As of {{updated, datetime}}",
+    "WEATHER_TODAY": "Today"
 }

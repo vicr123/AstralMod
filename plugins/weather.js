@@ -167,9 +167,11 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
     return retval;
 }
 
-function sendCurrentWeather(message, location, type, unit = "c", inputTime = "", user = "", skiiness = false) {
+function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
+    let $ = _[options.locale];
     sendPreloader("Preparing the weather...", message.channel).then(function(messageToEdit) {
         let query;
+        let unit = options.imperial ? "f" : "c";
 
         if (type == "location") {
             query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\") and u=\"" + unit + "\"");
@@ -237,7 +239,7 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                     ctx.font = "20px Contemporary";
                     ctx.fillStyle = display.text;
 
-                    let currentWeatherText = "Current Weather";
+                    let currentWeatherText = $("WEATHER_CURRENT_WEATHER");
                     if (user != "") {
                         currentWeatherText += " @ " + user;
                     }
@@ -258,21 +260,8 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                     //Draw 'as of' info
                     ctx.font = "14px Contemporary";
 
-                    if(inputTime !== "")  {
-                        if (inputTime === "12") {
-                            var timeString = "h:mm A";
-                        } else {
-                            var timeString = "HH:mm"
-                        }
-                    } else {
-                        if (settings.users[message.author.id].timeunit === "12h") {
-                            var timeString = "h:mm A";
-                        } else {
-                            var timeString = "HH:mm"
-                        }
-                    }
-
-                    let pubDate = "As of " + date.format("dddd, MMMM D") + " at " + date.format(timeString) + tz;
+                    //let pubDate = "As of " + date.format("dddd, MMMM D") + " at " + date.format(timeString) + tz;
+                    let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:date, h24:options.h24}});
                     let windWidth = ctx.measureText(pubDate);
                     ctx.fillText(pubDate, (350 / 2) - (windWidth.width / 2), 50);
 
@@ -388,12 +377,12 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                     //Draw sunrise info
                     ctx.drawImage(sunriseImage, 200, 355, 20, 20);
                     let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
-                    ctx.fillText(sunriseTime.format(timeString), 227, 370);
+                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24}}), 227, 370);
 
                     //Draw sunset info
                     ctx.drawImage(sunsetImage, 200, 380, 20, 20);
                     let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:m a");
-                    ctx.fillText(sunsetTime.format(timeString), 227, 395);
+                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24}}), 227, 395);
 
 
                     ctx.beginPath();
@@ -406,6 +395,7 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
                     //82px per data pane
 
                     let current = 0;
+                    let ml = moment.localeData(options.locale);
                     for (key in data.query.results.channel.item.forecast) {
                         current++;
                         if (current > 5) {
@@ -417,7 +407,9 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
 
                         let dayText = day.day.toUpperCase();
                         if (current == 1) {
-                            dayText = "TODAY";
+                            dayText = $("WEATHER_TODAY").toUpperCase();
+                        } else {
+                            dayText = ml.weekdaysShort()[["mon", "tue", "wed", "thu", "fri", "sat", "sun"].indexOf(day.day.toLowerCase())].toUpperCase();
                         }
                         let dayWidth = ctx.measureText(dayText);
                         
@@ -471,7 +463,6 @@ function processCommand(message, isMod, command, options) {
     let unit = options.imperial ? "f" : "c";
     let time = options.h24 ? "24" : "12";
 
-
     let skiiness = (command.indexOf("--skiiness") != -1)
     command = command.replace("--skiiness", "");
     command = command.trim();
@@ -480,7 +471,7 @@ function processCommand(message, isMod, command, options) {
         var location = command.substr(8);
 
         if (command.indexOf("--user") == -1) {
-            sendCurrentWeather(message, location, "location", unit, time, "", skiiness);
+            sendCurrentWeather(message, location, "location", options, "", skiiness);
         } else {
             location = location.replace("--user", "").trim();
             var users = parseUser(location, message.guild);
@@ -490,7 +481,7 @@ function processCommand(message, isMod, command, options) {
                     var userObject = settings.users[users[0].id];
                     if (userObject != null) {
                         if (userObject.hasOwnProperty("location")) {
-                            sendCurrentWeather(message, userObject.location, "id", unit, time, users[0].tag, skiiness);
+                            sendCurrentWeather(message, userObject.location, "id", options, users[0].tag, skiiness);
                             return;
                         }
                     }
@@ -508,7 +499,7 @@ function processCommand(message, isMod, command, options) {
         if (settings.users[message.author.id].location == null) {
             throw new CommandError("Unknown location. Please set your location with `" + prefix + "setloc`");
         } else {
-            sendCurrentWeather(message, settings.users[message.author.id].location, "id", unit, time, message.author.tag, skiiness);
+            sendCurrentWeather(message, settings.users[message.author.id].location, "id", options, message.author.tag, skiiness);
         }
     } else if (command.startsWith("setloc ")) {
         var location = command.substr(7);

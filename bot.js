@@ -61,10 +61,15 @@ i18next.use(i18nextbackend).init({
     },
     interpolation: {
         format: function fmt(value, format, lng) {
-            if (value.date instanceof Date) {
+            if (value.date instanceof Date || value.date instanceof moment) {
                 //maybe have different formats here later
                 //also take into account the user's 12/24h settings somehow at some point
-                let m = moment.utc(value.date).locale(lng);
+                let m;
+                if (value.date instanceof moment) {
+                    m = value.date.locale(lng);
+                } else {
+                    m = moment.utc(value.date).locale(lng);
+                }
                 if (format == "datetime") {
                     return fmt(value, "date", lng) + " " + fmt(value, "time", lng);
                 } else if (format == "date") {
@@ -74,6 +79,12 @@ i18next.use(i18nextbackend).init({
                         return m.format("HH:mm:ss");
                     } else {
                         return m.format("hh:mm:ss A");
+                    }
+                } else if (format == "stime") {
+                    if (value.h24) {
+                        return m.format("HH:mm");
+                    } else {
+                        return m.format("hh:mm A");
                     }
                 } else {
                     return m.format()
@@ -1900,7 +1911,8 @@ function processAmCommand(message) {
         return true;
     } else if (command.startsWith("setlocale ")) {
         let locale = command.substr(10);
-        if (availableTranslations.includes(locale)) {
+
+        let setLocale = function(locale) {
             settings.users[message.author.id].locale = locale;
 
             let embed = new Discord.RichEmbed();
@@ -1909,11 +1921,26 @@ function processAmCommand(message) {
             embed.setDescription(_[locale]("SETLOC_LANGUAGE"));
             embed.setFooter(_[locale]("SETLOC_DISCLAIMER"));
             message.channel.send(embed);
-        } else {
-            locale = settings.users[message.author.id].locale;
-            if (locale == null) locale = "en";
-            message.channel.send(_[locale]("SETLOC_UNAVAILABLE"));
         }
+
+        for (let i in availableTranslations) {
+            if (availableTranslations[i].toLowerCase() == locale) {
+                setLocale(availableTranslations[i]);
+                return true;
+            }
+        }
+
+        for (let i in availableTranslations) {
+            if (availableTranslations[i].toLowerCase().startsWith(locale)) {
+                setLocale(availableTranslations[i]);
+                return true;
+            }
+        }
+
+        //Locale unavailable
+        locale = settings.users[message.author.id].locale;
+        if (locale == null) locale = "en";
+        message.channel.send(_[locale]("SETLOC_UNAVAILABLE"));
         return true;
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
@@ -2858,9 +2885,15 @@ async function processMessage(message) {
             commandEmitter.emit('newDM', message);
         }
     } catch (err) {
+        //Get locale settings
+        if (settings.users[message.author.id].locale == null) {
+            settings.users[message.author.id].locale = "en";
+        }
+        let $ = _[settings.users[message.author.id].locale];
+
         var embed = new Discord.RichEmbed;
         embed.setColor("#FF0000");
-        embed.addField("Details", err.message);
+        embed.addField($("ERROR_DETAILS"), err.message);
 
         if (err.name == "UserInputError") {
             embed.setTitle(getEmoji("userexception") + " User Input Error");
