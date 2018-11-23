@@ -1,5 +1,6 @@
 {
     "SPECIAL_STIME": "{{time, stime}}",
+    "UINFO_RETRIEVING": "Đang nhận thông tin của người dùng...",
     "UINFO_USER_ID": "ID người dùng: {{id}}",
     "UINFO_USER_INFORMATION": "Giới thiệu về người dùng",
     "UINFO_CREATEDAT": "**Ngày tạo ra**: {{createdat, datetime}}",
@@ -16,7 +17,21 @@
     "SETLOC_UNAVAILABLE": "Rất tiếc, ngôn ngữ đó không có sẵn trong AstralMod.",
     "UINFO_BANNED_FROM_0": "Người dùng này đã bị chặn từ {{count}} máy chủ",
     "UINFO_ALERTS": "Cảnh báo",
+    "ERROR_DETAILS": "Chi tiết",
+    "ERROR_INTERNAL": "Lỗi nội bộ",
+    "ERROR_LOGGED": "Lỗi này đã bị đăng nhập, rồi chúng tôi sẽ kiểm tra lỗi.",
+    "ERROR_INTERNAL_DESCRIPTION": "AstralMod đã xảy ra lỗi trong khi việc xử lý lệnh đó.",
+    "WEATHER_PREPARING": "Đang chuẩn bị thời tiết...",
+    "WEATHER_TITLE": "Thời tiết",
     "WEATHER_CURRENT_WEATHER": "Thời tiết hiện tại",
     "WEATHER_DATE_UPDATED": "Tại {{updated, datetime}}",
-    "WEATHER_TODAY": "Hôm nay"
+    "WEATHER_TODAY": "Hôm nay",
+    "WEATHER_PLEASE_PRINT": "Mời bạn in trang này",
+    "WEATHER_TEAR_PERFORATED_LINE": "Xin xé trên đường đục lỗ",
+    "WEATHER_SO_MANY_DEGREES": "Nhiều độ quá...",
+    "WEATHER_LONGER_DAYS": "Những ngày có được lâu hơn?",
+    "AWAITUSERCONFIRMATION_CANCEL_PROMPT": "Dùng {{emoji}} trong khi vòng {{time}} giây để hủy",
+    "AWAITUSERCONFIRMATION_FULFILLED": "Yêu cầu đã hoàn thành",
+    "AWAITUSERCONFIRMATION_CANCELLED": "Yêu cầu đã bị hủy",
+    "NICK_NOT_ACCEPTED": "Việc đổi tên nick không được chấp nhận trên máy chủ này với AstralMod."
 }
