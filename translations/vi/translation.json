@@ -39,8 +39,12 @@
     "WEATHER_ERROR_CITY_NOT_FOUND": "Thành phố đó không tìm thấy được",
     "WEATHER_ERROR_TRY_THIS": "Hãy thử này",
     "WEATHER_ERROR_TRY_THIS_DESCRIPTION": "Vui lòng cụ thể hơn hoặc thử cách viết khác. Nếu bạn đang muốn xem thời tiết của bạn, hãy thử đặt vị trí lại với `{{prefix}}setloc`.",
+    "WEATHER_ERROR_UNSET_LOCATION": "{{user}} chưa đạt vị trí. Đi làm phiền đến khi họ `{{prefix}}setloc`!",
     "AWAITUSERCONFIRMATION_CANCEL_PROMPT": "Dùng {{emoji}} trong khi vòng {{time}} giây để hủy",
     "AWAITUSERCONFIRMATION_FULFILLED": "Yêu cầu đã hoàn thành",
     "AWAITUSERCONFIRMATION_CANCELLED": "Yêu cầu đã bị hủy",
-    "NICK_NOT_ACCEPTED": "Việc đổi tên nick không được chấp nhận trên máy chủ này với AstralMod."
+    "NICK_NOT_ACCEPTED": "Việc đổi tên nick không được chấp nhận trên máy chủ này với AstralMod.",
+    "PING_PINGING": "{{emoji}} Tôi đây!",
+    "PING_DONE": "{{emoji}} Tôi đây! Chúng tôi chờ cho {{time}}ms trước khi trả lời được.",
+    "PING_DONE_420": "{{emoji}} Tôi đây! Chúng tôi chờ cho 419ms hoặc 421ms trước khi trả lời được."
 }

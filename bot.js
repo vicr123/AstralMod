@@ -61,7 +61,7 @@ i18next.use(i18nextbackend).init({
     },
     interpolation: {
         format: function fmt(value, format, lng) {
-            if (value == null) return "";
+            if (value == null) return "[[[TRANSLATION ERROR]]]";
             if (value.date instanceof Date || value.date instanceof moment) {
                 //maybe have different formats here later
                 //also take into account the user's 12/24h settings somehow at some point
@@ -1772,7 +1772,7 @@ function processAmCommand(message, options) {
 
     if (command == "ping") {
         let pingDate = Date.now();
-        message.channel.send(getEmoji("signal0") + " I'm here!").then(function(message) {
+        message.channel.send($("PING_PINGING", {emoji: getEmoji("signal0"), interpolation: { escapeValue: false }})).then(function(message) {
             let time = Date.now() - pingDate;
 
             /* Times:
@@ -1785,7 +1785,7 @@ function processAmCommand(message, options) {
             */
 
             if (time == 420) {
-                message.edit(getEmoji("signal2") + " I'm here! It took either 419ms or 421ms to respond.");
+                message.edit($("PING_DONE_420", {emoji: getEmoji("signal2"), interpolation: { escapeValue: false }}));
             } else {
                 let e;
                 if (time < 100) {
@@ -1801,7 +1801,7 @@ function processAmCommand(message, options) {
                 } else {
                     e = getEmoji("signal0");
                 }
-                message.edit(e + " I'm here! It took " + parseInt(time) + "ms to respond.");
+                message.edit($("PING_DONE", {emoji: e, time: time.toString(), interpolation: { escapeValue: false }}));
             }
         }).catch(function(error) {
             log("Uncaught Exception:", logType.critical);

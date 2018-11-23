@@ -504,7 +504,7 @@ function processCommand(message, isMod, command, options) {
                         }
                     }
                 }
-                throw new UserInputError(users[0].username + " has not yet set their location. Go and bug 'em to `" + prefix + "setloc` quickly!");
+                throw new UserInputError($("WEATHER_ERROR_UNSET_LOCATION", {user: users[0].username, prefix: prefix}));
             } else {
                 throw new CommandError("No user found with that name");
             }

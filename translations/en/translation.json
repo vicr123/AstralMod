@@ -62,8 +62,12 @@
     "WEATHER_ERROR_CITY_NOT_FOUND": "That city was not found",
     "WEATHER_ERROR_TRY_THIS": "Try this",
     "WEATHER_ERROR_TRY_THIS_DESCRIPTION": "Please be more specific or try a different spelling for the place you are trying to get the weather of. If you're trying to receive your own weather, try resetting your location with `{{prefix}}setloc`.",
+    "WEATHER_ERROR_UNSET_LOCATION": "{{user}} has not yet set their location. Go and bug 'em to `{{prefix}}setloc` quickly!",
     "AWAITUSERCONFIRMATION_CANCEL_PROMPT": "Use {{emoji}} within {{time}} seconds to cancel",
     "AWAITUSERCONFIRMATION_FULFILLED": "Fulfilled Request",
     "AWAITUSERCONFIRMATION_CANCELLED": "Cancelled Request",
-    "NICK_NOT_ACCEPTED": "Nickname changes are not accepted on this server via AstralMod."
+    "NICK_NOT_ACCEPTED": "Nickname changes are not accepted on this server via AstralMod.",
+    "PING_PINGING": "{{emoji}} I'm here!",
+    "PING_DONE": "{{emoji}} I'm here! It took {{time}}ms to respond.",
+    "PING_DONE_420": "{{emoji}} I'm here! It took either 419ms or 421ms to respond."
 }
