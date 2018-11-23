@@ -467,36 +467,9 @@ function sendCurrentWeather(message, location, type, unit = "c", inputTime = "",
     });
 }
 
-function processCommand(message, isMod, command) {
-    let unit;
-    if (settings.users[message.author.id].units == null) {
-        unit = "c";
-    } else if (settings.users[message.author.id].units == "metric") {
-        unit = "c";
-    } else {
-        unit = "f";
-    }
-
-    if (command.indexOf("--metric") != -1 && command.indexOf("--fahrenheit") != -1) {
-        throw new UserInputError("Specify only one of `--metric` or `--imperial`");
-    } else if (command.indexOf("--metric") != -1) {
-        command = command.replace("--metric", "");
-        unit = "c";
-    } else if (command.indexOf("--imperial") != -1) {
-        command = command.replace("--imperial", "");
-        unit = "f";
-    }
-
-    let time;
-    if (command.indexOf("--24") != -1 && command.indexOf("--12") != -1) {
-        throw new UserInputError("Specify only one of `--24` or `--12`");
-    } else if (command.indexOf("--24") != -1) {
-        command = command.replace("--24", "");
-        time = "24";
-    } else if (command.indexOf("--12") != -1) {
-        command = command.replace("--12", "");
-        time = "12";
-    }
+function processCommand(message, isMod, command, options) {
+    let unit = options.imperial ? "f" : "c";
+    let time = options.h24 ? "24" : "12";
 
 
     let skiiness = (command.indexOf("--skiiness") != -1)
