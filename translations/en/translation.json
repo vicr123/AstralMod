@@ -37,7 +37,13 @@
     "SINFO_ROLES": "Roles",
     "SINFO_ALERTS": "Alerts",
     "ERROR_DETAILS": "Details",
+    "WEATHER_PREPARING": "Preparing the weather...",
+    "WEATHER_TITLE": "Weather",
     "WEATHER_CURRENT_WEATHER": "Current Weather",
     "WEATHER_DATE_UPDATED": "As of {{updated, datetime}}",
-    "WEATHER_TODAY": "Today"
+    "WEATHER_TODAY": "Today",
+    "WEATHER_PLEASE_PRINT": "Feel free to print this",
+    "WEATHER_TEAR_PERFORATED_LINE": "Please tear on the perforated line",
+    "WEATHER_SO_MANY_DEGREES": "So many degrees...",
+    "WEATHER_LONGER_DAYS": "Are the days getting longer?"
 }

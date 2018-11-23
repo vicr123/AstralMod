@@ -16,7 +16,13 @@
     "SETLOC_UNAVAILABLE": "Rất tiếc, ngôn ngữ đó không có sẵn trong AstralMod.",
     "UINFO_BANNED_FROM_0": "Người dùng này đã bị chặn từ {{count}} máy chủ",
     "UINFO_ALERTS": "Cảnh báo",
+    "WEATHER_PREPARING": "Đang chuẩn bị thời tiết...",
+    "WEATHER_TITLE": "Thời tiết",
     "WEATHER_CURRENT_WEATHER": "Thời tiết hiện tại",
     "WEATHER_DATE_UPDATED": "Tại {{updated, datetime}}",
-    "WEATHER_TODAY": "Hôm nay"
+    "WEATHER_TODAY": "Hôm nay",
+    "WEATHER_PLEASE_PRINT": "Mời bạn in trang này",
+    "WEATHER_TEAR_PERFORATED_LINE": "Xin xé trên đường đục lỗ",
+    "WEATHER_SO_MANY_DEGREES": "Nhiều độ quá...",
+    "WEATHER_LONGER_DAYS": "Những ngày có được lâu hơn?"
 }

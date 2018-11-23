@@ -169,7 +169,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
 
 function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
     let $ = _[options.locale];
-    sendPreloader("Preparing the weather...", message.channel).then(function(messageToEdit) {
+    sendPreloader($("WEATHER_PREPARING"), message.channel).then(function(messageToEdit) {
         let query;
         let unit = options.imperial ? "f" : "c";
 
@@ -437,13 +437,13 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
                     e.setImage("attachment://weather.png");
                     e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
-                    e.setTitle("Weather");
+                    e.setTitle($("WEATHER_TITLE"));
                     e.setURL(data.query.results.channel.link);
                     e.setColor("#00C0FF");
-                    e.setFooter(getRandom("Feel free to print this",
-                                        "Please tear on the perforated line",
-                                        "So many degrees...",
-                                        "Are the days getting longer?"));
+                    e.setFooter(getRandom($("WEATHER_PLEASE_PRINT"),
+                                        $("WEATHER_TEAR_PERFORATED_LINE"),
+                                        $("WEATHER_SO_MANY_DEGREES"),
+                                        $("WEATHER_LONGER_DAYS")));
                     message.channel.send(e).then(function() {
                         messageToEdit.delete();
                     });
