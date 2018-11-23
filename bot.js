@@ -61,9 +61,14 @@ i18next.use(i18nextbackend).init({
     },
     interpolation: {
         format: function fmt(value, format, lng) {
+            if (value == null) return "";
             if (value.date instanceof Date || value.date instanceof moment) {
                 //maybe have different formats here later
                 //also take into account the user's 12/24h settings somehow at some point
+
+                //Special case for Chinese
+                if (lng.startsWith("zh")) lng = "zh-cn";
+
                 let m;
                 if (value.date instanceof moment) {
                     m = value.date.locale(lng);
@@ -2904,8 +2909,8 @@ async function processMessage(message) {
         embed.addField($("ERROR_DETAILS"), err.message);
 
         if (err.name == "UserInputError") {
-            embed.setTitle(getEmoji("userexception") + " User Input Error");
-            embed.setDescription("AstralMod didn't understand what you were trying to say.");
+            embed.setTitle(getEmoji("userexception") + " " + $("ERROR_USER_INPUT"));
+            embed.setDescription($("ERROR_NOT_UNDERSTAND"));
         } else if (err.name == "CommandError") {
             embed.setTitle(getEmoji("userexception") + " Command Error");
             embed.setDescription("AstralMod couldn't complete that command.");
