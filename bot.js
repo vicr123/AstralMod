@@ -2761,6 +2761,8 @@ async function processMessage(message) {
             options.h24 = true;
         }
 
+        options.imperial = (settings.users[message.author.id].units == "imperial");
+
         var text = message.content;
 
         //Determine if this is in a guild
