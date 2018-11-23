@@ -20,6 +20,7 @@
 
 const Discord = require('discord.js');
 const moment = require('moment');
+const YQL = require('YQL');
 var client;
 var consts;
 
@@ -314,7 +315,8 @@ function pollTimers() {
     }
 }
 
-function processCommand(message, isMod, command) {
+async function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
     if (command.startsWith("settz ")) {
         var utcOffset;
         var location = command.substr(6);
@@ -487,50 +489,121 @@ function processCommand(message, isMod, command) {
         settings.users[message.author.id].timers.splice(index, 1);
         message.reply("That timer has been deleted. For new timer indices, use `" + prefix + "timers`.");
     } else if (command.startsWith("time")) {
-        var hourType = settings.users[message.author.id].timeunit === undefined ? "24h" : settings.users[message.author.id].timeunit;
-        let setHour = false;
-        for (const param of command.split(" ")) {
-            if (param === "--12") {
-                setHour = true;
-                hourType = "12h"
-            } else if (param === "--24") {
-                setHour = true;
-                hourType = "24h"
-            }
-        }
+        let location = command.replace("time", "").trim();
+        let offset;
 
-        command = command.replace("--12", "").replace("--24", "").trim();
+        /*
+         * Okay so
+         * We want to find the time from some sort of input
+         * and these are the following sources:
+         * 
+         * - Current user's set timezone
+         * - Other user's timezone
+         * - A city from Yahoo
+         */
 
-        let user = command.replace("time", "").trim();
-        let tz = undefined;
-
-        if (utcOffsetFromTimezone(user) !== -3000) {
-            tz = utcOffsetFromTimezone(user);
-            user = user.toUpperCase();
-        }
-
-
-        if (tz === undefined) {
-            if (user == 0) { // if it's nothing, including whitespace or undefined or whatever
-                user = message.author;
-            } else {
-                user = parseUser(user.trim(), message.guild)[0];
+        new Promise(function(resolve, reject) {
+            if (utcOffsetFromTimezone(location) !== -3000) { //Check for a UTC offset and a UTC named timezone first
+                resolve({
+                    offset: utcOffsetFromTimezone(location),
+                    location: location.toUpperCase()
+                });
+                return;
             }
 
-            if (user == null || settings.users[user.id] == null || !settings.users.hasOwnProperty(user.id) || !settings.users[user.id].hasOwnProperty("timezone")) {
-                if(tz !== undefined) {
-                    throw new UserInputError(user.username + " has not yet set their timezone. Go and bug 'em to `" + prefix + "settz` quickly!");
+            //maybe we should have our own function to check a user
+            //like
+
+            let returnUserWeather = function(user) {
+                if (settings.users[user.id] == null || settings.users[user.id].timezone == null) {
+                    reject($("TIME_TIMEZONE_NOT_SET", ));
                 } else {
-                    throw new UserInputError("That is not a valid time zone.");
+                    resolve({
+                        offset: settings.users[user.id].timezone,
+                        location: user.username
+                    });
+                }
+            }
+
+            if (location == "") { 
+                returnUserWeather(message.author);
+                return;                        
+            }
+
+            let userParseResult = parseUser(location.trim(), message.guild);
+            if (userParseResult.length > 0) {
+                returnUserWeather(userParseResult[0]);
+                return;                                
+            }
+
+            //Now we check Yahoo
+            let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
+            query.exec(function(err, data) {
+                if (err || data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
+                    reject("Unknown User");
+                    return;
+                }
+                
+                //We have a good location
+                let dat = data.query.results.channel
+                resolve({
+                    location: dat.location.city + ", " + dat.location.country,
+                    offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ")))
+                });
+            });
+        }).then(function(timeDescriptor) {
+            let time = moment(Date.now()).utcOffset(timeDescriptor.offset);
+
+            message.channel.send($("TIME_RESPONSE", {
+                clockEmote: getClockEmoji(time.toDate()),
+                request: timeDescriptor.location.hasOwnProperty("username") ? timeDescriptor.location.username : timeDescriptor.location.toLocaleUpperCase(),
+                offset: time.format("Z"),
+                time: time
+            }));
+        }).catch(function(err) {
+            //Oops! No available thing!
+            message.channel.send("Error error! No user error! Run!!!!!!!! (the specific error was " + err + ")");
+        });
+
+        /*
+        if (offset === undefined) { // It wasn't a time zone
+            if (location == 0) { // if it's nothing, including whitespace or undefined or whatever; i.e. "am:time"
+                location = message.author;
+            } else { //find a person
+                location = parseUser(location.trim(), message.guild)[0];
+            }
+
+
+            if (location == null) { // nobody was found
+                // last resort: check yahoo
+                let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
+                try {
+                    await new Promise((resolve, reject) => query.exec((err, data) => {
+                        if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
+                            throw new CommandError();
+                        }
+
+                        location = data.query.results.channel.item.condition.text;
+                        offset = utcOffsetFromTimezone(data.query.results.channel.item.pubDate.substring(data.query.results.channel.item.pubDate.lastIndexOf(" ")));
+
+                        resolve();
+                    }));
+                } catch (err) {
+                    message.channel.send(err.toString());
+                }
+            }
+
+
+            if (!(location instanceof String) && settings.users[location.id] == null || !settings.users.hasOwnProperty(location.id) || !settings.users[location.id].hasOwnProperty("timezone")) { //if the place is not valid
+                if (offset.isUser) {
+                    throw new UserInputError($("TIME_TIMEZONE_NOT_SET", {user: location.username, prefix: prefix}));
+                } else {
+                    throw new UserInputError($("TIME_TIMEZONE_NOT_VALID", {tz: location}));
                 }
             }
         }
 
-        tz = tz === undefined ? settings.users[user.id].timezone : tz;
-        let time = moment(Date.now()).utcOffset(tz);
-
-        message.channel.send(getClockEmoji(moment().toDate()) + " **" + (user["username"] === undefined ? user : user.username) + "** (" + time.format("Z") + "): " + time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm" : "h:mm A"));
-
+*/
     }
 }
 

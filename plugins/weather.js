@@ -184,9 +184,8 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                 if (err) {
                     throw new CommandError(err);
                 } else {
-                    //First case is for a requested city that does not exist. Second case is for when YQL sends back
-                    //incomplete data (only sends back unit information...?) I can't figure out what it means when it
-                    //does that though, but from what I can see maybe it means too many results.
+                    //First case is for a requested city that does not exist. Second case is for when YQL doesn't
+                    //have any data for the requested city.
                     if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
                         var embed = new Discord.RichEmbed;
                         embed.setTitle(":thunder_cloud_rain: Weather Error");
@@ -195,7 +194,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         embed.addField("Details", "That city was not found");
                         embed.addField("Try this", "Please be more specific or try a different spelling for the place you are trying to get the weather of. If you're trying to receive your own weather, try resetting your location with `" + prefix + "setloc`.");
 
-                        messageToEdit.edit(embed)
+                        messageToEdit.edit(embed);
                         return;
                     }
 
