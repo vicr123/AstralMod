@@ -50,15 +50,16 @@ global.ownerId = undefined;
 let doNotDeleteGuilds = [];
 
 let availableTranslations = fs.readdirSync("translations");
-availableTranslations.isTranslated = function(language) {
-    if(availableTranslations.includes(language)) {
+
+availableTranslations.getTranslation = function(language) {
+    if (availableTranslations.includes(language)) {
         return language;
     }
 
     if (availableTranslations.filter(t => language.substr(0, 2) === t).length > 1) {
-        return false;
+        return null;
     } else {
-        return
+        return availableTranslations.filter(t => language.substr(0, 2) === t)[0];
     }
 };
 
