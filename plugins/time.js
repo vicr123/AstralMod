@@ -30,79 +30,46 @@ function utcOffsetFromTimezone(location) {
     switch (location) {
         case "sst":
             return -11;
-            break;
         case "ckt":
         case "hast":
         case "taht":
             return -10;
-            break;
         case "akst":
         case "hadt":
             return -9;
-            break;
         case "pst":
         case "akdt":
             return -8;
-            break;
         case "mst":
         case "pdt":
             return -7;
-            break;
         case "cst":
         case "mdt":
             return -6;
-            break;
         case "cdt":
         case "est":
             return -5;
-            break;
         case "clt":
         case "cost":
         case "ect":
         case "edt":
             return -4;
-            break;
-        case "brazil":
         case "brt":
         case "clst":
             return -3;
-            break;
         case "uyst":
             return -2;
-            break;
         case "brst":
             return -1;
-            break;
         case "utc":
         case "gmt":
-        case "england":
-        case "london":
-        case "denmark":
-        case "portugal":
-        case "spain":
             return 0;
-            break;
-        case "amsterdam":
-        case "austria":
-        case "belgium":
-        case "berlin":
-        case "france":
-        case "germany":
-        case "italy":
-        case "malta":
-        case "netherlands":
-        case "paris":
-        case "rome":
-        case "sweden":
-        case "switzerland":
-        case "vatican":
         case "bst":
         case "cet":
         case "ist":
         case "met":
         case "wat":
             return 1;
-            break;
         case "cat":
         case "cest":
         case "eet":
@@ -110,7 +77,6 @@ function utcOffsetFromTimezone(location) {
         case "sast":
         case "wast":
             return 2;
-            break;
         case "ast":
         case "eat":
         case "eest":
@@ -120,10 +86,8 @@ function utcOffsetFromTimezone(location) {
         case "msk":
         case "trt":
             return 3;
-            break;
         case "irst":
             return 3.5;
-            break;
         case "amt":
         case "azt":
         case "get":
@@ -134,11 +98,9 @@ function utcOffsetFromTimezone(location) {
         case "sct":
         case "volt":
             return 4;
-            break;
         case "aft":
         case "irdt":
             return 4.5;
-            break;
         case "mawt":
         case "mvt":
         case "orat":
@@ -148,25 +110,20 @@ function utcOffsetFromTimezone(location) {
         case "uzt":
         case "yekt":
             return 5;
-            break;
         case "ist":
         case "slst":
             return 5.5;
-            break;
         case "npt":
             return 5.75;
-            break;
         case "bst":
         case "btt":
         case "kgt":
         case "omst":
         case "vost":
             return 6;
-            break;
         case "cct":
         case "mmt":
             return 6.5;
-            break;
         case "cxt":
         case "davt":
         case "hovt":
@@ -175,7 +132,6 @@ function utcOffsetFromTimezone(location) {
         case "tha":
         case "wit":
             return 7;
-            break;
         case "awst":
         case "bdt":
         case "chot":
@@ -188,28 +144,22 @@ function utcOffsetFromTimezone(location) {
         case "sgt":
         case "wst":
             return 8;
-            break;
         case "eit":
         case "jst":
         case "kst":
         case "yakt":
             return 9;
-            break;
         case "acst":
             return 9.5;
-            break;
-        case "sydney":
         case "aest":
         case "chst":
         case "ddut":
         case "pgt":
         case "vlat":
             return 10;
-            break;
         case "acdt":
         case "lhst":
             return 10.5;
-            break;
         case "aedt":
         case "lhst":
         case "mist":
@@ -217,18 +167,16 @@ function utcOffsetFromTimezone(location) {
         case "sbt":
         case "vut":
             return 11;
-            break;
         case "fjt":
         case "mht":
         case "nzst":
             return 12;
-            break;
         case "nzdt":
         case "tkt":
         case "tot":
             return 13;
         default:
-            return -3000;
+            return undefined;
     }
 }
 
@@ -490,79 +438,85 @@ async function processCommand(message, isMod, command, options) {
         message.reply("That timer has been deleted. For new timer indices, use `" + prefix + "timers`.");
     } else if (command.startsWith("time")) {
         let location = command.replace("time", "").trim();
-        let offset;
+        let messageToEdit;
 
-        /*
-         * Okay so
-         * We want to find the time from some sort of input
-         * and these are the following sources:
-         * 
-         * - Current user's set timezone
-         * - Other user's timezone
-         * - A city from Yahoo
-         */
-
-        new Promise(function(resolve, reject) {
-            if (utcOffsetFromTimezone(location) !== -3000) { //Check for a UTC offset and a UTC named timezone first
-                resolve({
-                    offset: utcOffsetFromTimezone(location),
-                    location: location.toUpperCase()
-                });
-                return;
-            }
-
-            let returnUserWeather = function(user) {
-                if (settings.users[user.id] == null || settings.users[user.id].timezone == null) {
-                    reject($("TIME_TIMEZONE_NOT_SET"));
-                } else {
+        sendPreloader($("WEATHER_PREPARING"), message.channel).then(mte => {
+            let messageToEdit = mte;
+            new Promise(function(resolve, reject) {
+                if (utcOffsetFromTimezone(location) !== undefined) { //Check for a UTC offset and a UTC named timezone first
                     resolve({
-                        offset: settings.users[user.id].timezone,
-                        location: user.username
+                        offset: utcOffsetFromTimezone(location),
+                        location: location.toUpperCase()
                     });
-                }
-            }
-
-            if (location == "") { 
-                returnUserWeather(message.author);
-                return;                        
-            }
-
-            let userParseResult = parseUser(location.trim(), message.guild);
-            if (userParseResult.length > 0) {
-                returnUserWeather(userParseResult[0]);
-                return;                                
-            }
-
-            //Now we check Yahoo
-            let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
-            query.exec(function(err, data) {
-                if (err || data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
-                    reject("Unknown User");
                     return;
                 }
-                
-                //We have a good location
-                let dat = data.query.results.channel
-                resolve({
-                    location: dat.location.city + ", " + dat.location.country,
-                    offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ") + 1).toLowerCase())
-                });
-            });
-        }).then(function(timeDescriptor) {
-            let time = moment(Date.now()).utcOffset(timeDescriptor.offset);
 
-            message.channel.send($("TIME_RESPONSE", {
-                clockEmote: getClockEmoji(time.toDate()),
-                request: timeDescriptor.location,
-                offset: time.format("Z"),
-                time: {
-                    date: time,
-                    h24: options.h24
+                let returnUserWeather = function(user) {
+                    if (settings.users[user.id] == null || settings.users[user.id].timezone == null) {
+                        reject($("TIME_TIMEZONE_NOT_SET", {user: user.username, prefix: prefix}));
+                    } else {
+                        resolve({
+                            offset: settings.users[user.id].timezone,
+                            location: user.username
+                        });
+                    }
+                };
+
+                if (location == "") {
+                    returnUserWeather(message.author);
+                    return;
                 }
-            }));
-        }).catch(function(err) {
-            //Oops! No available thing!
-            message.channel.send("Error error! No user error! Run!!!!!!!! (the specific error was " + err + ")");
+
+                let userParseResult = parseUser(location.trim(), message.guild);
+                if (userParseResult.length > 0) {
+                    returnUserWeather(userParseResult[0]);
+                    return;
+                }
+
+                //Now we check Yahoo
+                let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
+                query.exec(function(err, data) {
+                    if (err || data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
+                        reject($("TIME_LOCATION_NOT_FOUND"));
+                        return;
+                    }
+
+                    //We have a good location
+                    let dat = data.query.results.channel;
+                    resolve({
+                        location: dat.location.city + ", " + dat.location.country,
+                        offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ") + 1).toLowerCase())
+                    });
+                });
+            }).then(function(timeDescriptor) {
+                let time = moment(Date.now()).utcOffset(timeDescriptor.offset);
+
+                messageToEdit.edit($("TIME_RESPONSE", {
+                    clockEmote: getClockEmoji(time.toDate()),
+                    request: timeDescriptor.location,
+                    offset: time.format("Z"),
+                    time: {
+                        date: time,
+                        h24: options.h24
+                    }
+                }));
+            }).catch(err => {
+                let embed = new Discord.RichEmbed;
+                embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
+                embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
+                embed.setColor("#FF0000");
+                embed.addField($("TIME_ERROR_DETAILS"), err);
+
+                messageToEdit.edit(embed);
+            });
+        }).catch(err => {
+            let embed = new Discord.RichEmbed;
+            embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
+            embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
+            embed.setColor("#FF0000");
+            embed.addField($("ERROR_DETAILS"), err);
+
+            messageToEdit.edit(embed);
         });
     }
 }

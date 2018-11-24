@@ -169,7 +169,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
 
 function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
     let $ = _[options.locale];
-    sendPreloader($("WEATHER_PREPARING"), message.channel).then(function(messageToEdit) {
+    sendPreloader($("WEATHER_PREPARING"), message.channel).then(messageToEdit => {
         let query;
         let unit = options.imperial ? "f" : "c";
 
@@ -187,7 +187,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     //First case is for a requested city that does not exist. Second case is for when YQL doesn't
                     //have any data for the requested city.
                     if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
-                        var embed = new Discord.RichEmbed;
+                        let embed = new Discord.RichEmbed;
                         embed.setTitle($("WEATHER_ERROR", {emoji: ":thunder_cloud_rain:"}));
                         embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
                         embed.setColor("#FF0000");

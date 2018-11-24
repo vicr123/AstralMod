@@ -43,16 +43,16 @@ function processCommand(message, isMod, command, options) {
             settings.users[message.author.id] = {};
         }
 
-        if (units.toLowerCase() == "metric") {
+        if (units.toLowerCase() === "metric") {
             settings.users[message.author.id].units = "metric";
             message.reply("Ok, we'll use the metric system for your units from now on");
-        } else if (units.toLowerCase() == "imperial") {
+        } else if (units.toLowerCase() === "imperial") {
             settings.users[message.author.id].units = "imperial";
             message.reply("Ok, we'll use the imperial system for your units from now on");
-        } else if (units.toLowerCase() == "12h") {
+        } else if (units.toLowerCase() === "12" || units.toLowerCase() === "12h" || units.toLowerCase() === "12hr") {
             settings.users[message.author.id].timeunit = "12h";
             message.reply("Ok, we'll use 12 hours for your time from now on");
-        } else if (units.toLowerCase() == "24h") {
+        } else if (units.toLowerCase() === "24" || units.toLowerCase() === "24h" || units.toLowerCase() === "24hr") {
             settings.users[message.author.id].timeunit = "24h";
             message.reply("Ok, we'll use 24 hours for your time from now on");
         } else {
@@ -299,7 +299,7 @@ module.exports = {
                 help.title = prefix + "setunit";
                 help.usageText = prefix + "setunit units";
                 help.helpText = "Sets units used by AstralMod";
-                help.param1 = "Either `metric`, `imperial`, `24h`, or `12h`";
+                help.param1 = "Either `metric`, `imperial`, `24(hr)`, or `12(hr)`";
                 break;
             case "sinfo":
                 help.title = prefix + "sinfo";
