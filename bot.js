@@ -2903,6 +2903,7 @@ async function processMessage(message) {
         //Don't respond to direct messages
         if (message.guild != null) {
             await message.guild.fetchMember(message.author);
+            options.glocale = settings.guilds[message.guild.id].locale;
 
             if (settings.guilds[message.guild.id].blocked == null) {
                 settings.guilds[message.guild.id].blocked = [];
@@ -3199,6 +3200,7 @@ function messageUpdated(oldMessage, newMessage) {
 }
 
 function memberAdd(member) {
+    let glocale = settings.guilds[member.guild.id].locale;
     var channel = null;
     if (member.guild != null) {
         if (settings.guilds[member.guild.id].memberAlerts != null) {
@@ -3218,7 +3220,7 @@ function memberAdd(member) {
                 channel.send(":arrow_right: <@" + member.user.id + "> + Invite " + inviteCode);
             }
     
-            uinfo(member.user, channel, "en", true, member.guild, true);
+            uinfo(member.user, channel, glocale, true, member.guild, true);
     
             if (member.guild.id == 287937616685301762) {
                 var now = new Date();
@@ -3248,6 +3250,9 @@ function memberAdd(member) {
 }
 
 function banAdd(guild, user) {
+    let glocale = settings.guilds[guild.id].locale;
+    let $$ = _[glocale];
+
     var channel = null;
     if (guild != null) {
         if (settings.guilds[guild.id].memberAlerts != null) {
@@ -3263,11 +3268,11 @@ function banAdd(guild, user) {
         var embed = new Discord.RichEmbed();
 
         embed.setColor("#FF0000");
-        embed.setTitle(":hammer: User Banned");
-        embed.setDescription("A user was banned from this server.");
+        embed.setTitle($$("GUILD_BAN_ADD_TITLE", {emoji: ":hammer:"}));
+        embed.setDescription($$("GUILD_BAN_ADD_DESCRIPTION"));
 
-        embed.addField("User", user.tag, true);
-        embed.addField("User ID", user.id, true);
+        embed.addField($$("GUILD_BAN_ADD_USER"), user.tag, true);
+        embed.addField($$("GUILD_BAN_ADD_USER_ID"), user.id, true);
         
         guild.fetchInvites().then(function(invites) {
             var inviteString = "";
@@ -3279,7 +3284,7 @@ function banAdd(guild, user) {
             }
 
             if (inviteString != "") {
-                embed.addField("Created Invites", inviteString);
+                embed.addField($$("GUILD_BAN_ADD_INVITES"), inviteString);
             }
 
             if (banDescriptor[guild.id][user.id] != null) {
@@ -3293,14 +3298,14 @@ function banAdd(guild, user) {
         }).then(function(auditLogs) {
             if (auditLogs.author == null) {
                 let log = auditLogs.entries.first();
-                embed.addField("Banned by", log.executor.tag);
+                embed.addField($$("GUILD_BAN_ADD_BANNED_BY"), log.executor.tag);
 
                 if (log.reason != null) {
-                    embed.addField("Reason", log.reason);
+                    embed.addField($$("GUILD_BAN_ADD_BAN_REASON"), log.reason);
                 }
             } else {
-                embed.addField("Banned by", auditLogs.author.tag);
-                embed.addField("Reason", auditLogs.reason);
+                embed.addField($$("GUILD_BAN_ADD_BANNED_BY"), auditLogs.author.tag);
+                embed.addField($$("GUILD_BAN_ADD_BAN_REASON"), auditLogs.reason);
             }
             
             channel.send("", {embed: embed});
