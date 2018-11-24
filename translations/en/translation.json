@@ -109,7 +109,7 @@
     "PINS_PIN_AUTHOR": "     - *{{pinAuthor}}* in {{channel}} {{jumpToMessage}}",
     "PINS_UNPIN_USAGE": "Usage: `{{prefix}}unpin id`. Use `{{prefix}}pins` to find the pin ID. For more information, type `{{prefix}}help unpin`.",
     "PINS_UNPIN_SUCCESS": "Ok, I've unpinned that message.",
-    "PINS_NOT_THAT_MANY_PINS": "You don't have that many pinned messages."
+    "PINS_NOT_THAT_MANY_PINS": "You don't have that many pinned messages.",
     "GUILD_BAN_ADD_TITLE": "{{emoji}} User Banned",
     "GUILD_BAN_ADD_DESCRIPTION": "A user was banned from this server.",
     "GUILD_BAN_ADD_USER": "User",
