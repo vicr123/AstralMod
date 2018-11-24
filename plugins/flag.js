@@ -33,49 +33,52 @@ function unembed(embed) {
     return embedString || "Empty embed"; //returns a string
 }
 
-function menu(options) { //direction, fetchOptions
+function menu(options, otheroptions) { //direction, fetchOptions
+    let $ = _[otheroptions.locale];
     const message = options.message;
     const embed = new Discord.RichEmbed();
-    embed.setTitle("Portably pin a message");
-    embed.setDescription("Select a message to pin");
+    embed.setTitle($("PINS_TITLE"));
+    embed.setDescription($("PINS_DESCRIPTION"));
     embed.setColor("#00C000");
 
     currentMessage = message;
     let embedContent = "";
 
     if (message.content) embedContent = message.content;
-    if (message.embeds.length) embedContent = `\`Embed\`\n${unembed(message.embeds[0])}` //Unembed the first embed
+    if (message.embeds.length) embedContent = $("PINS_CONTENT_WITH_EMBED", {embedcontent: unembed(message.embeds[0])}); //Unembed the first embed
     if (message.attachments.size > 0) {
         for (let [key, attachment] of message.attachments) {
             if (attachment.height != null) {
-                if (embedContent == "") embedContent += "`Image`\n";
+                if (embedContent == "") embedContent += "`" + $("PINS_IMAGE") + "`" + "\n";
                 embed.setImage(attachment.proxyURL);
                 break;
             }
         }
-        if (embedContent == "") embedContent = "`Nontextual Content`"
-        embed.setFooter(message.attachments.size + " attachments");
+        if (embedContent == "")
+            embedContent = $("PINS_NONTEXTUAL_CONTENT");
+
+        embed.setFooter($("PINS_ATTACHMENT", {count: message.attachments.size}));
     }
 
     if (!embedContent) {
-        if (options.direction) return menu(options.direction, options); //attempt to move if a direction was specified
-        throw new UserInputError("Cannot pin this message. Please specify another message."); //throw an error if no direction was given
+        if (options.direction) return menu(options.direction, otheroptions); //attempt to move if a direction was specified
+        throw new UserInputError($("PINS_MESSAGE_UNPINNABLE")); //throw an error if no direction was given
     } else {
         embed.addField(message.author.tag, embedContent.length > 1020 ? `${embedContent.substr(0, 1021)}...` : embedContent);
         return embed; //return the final embed to send or edit
     }
 }
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
     if (command.startsWith("pin ")) {
-        let flaggingMessage;
         let currentMessage;
         let author = message.author.id;
         let number = command.substr(4) || 2;
-        if (isNaN(number)) throw new UserInputError("Invalid number or message ID.");
+        if (isNaN(number)) throw new UserInputError($("PINS_INVALID_ENTRY"));
         number = parseInt(number);
         let id = 0;
-        if (number < 1) throw new UserInputError("Specify a number between 1 and 50 or specify a message ID.");
+        if (number < 1) throw new UserInputError($("PINS_INVALID_ENTRY_RANGE"));
         if (number > 50) { id = number; number = 1; }
 
         message.delete().then(function(message) {
@@ -83,7 +86,7 @@ function processCommand(message, isMod, command) {
         }).then(function(messages) { //after collecting messages
             currentMessage = messages.array()[number - 1]
             let message = messages.array()[number - 1]
-            message.channel.send(menu({ message, number })).then(function(flaggingMessage) { //reactions
+            message.channel.send(menu({ message, number }, options)).then(function(flaggingMessage) { //reactions
                 flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react("📌")).then(flaggingMessage.react("🚫"));
 
                 const move = function(direction) {
@@ -93,7 +96,7 @@ function processCommand(message, isMod, command) {
                         if (!messages.size) return;
                         let message = messages.first();
                         currentMessage = message;
-                        flaggingMessage.edit(menu({ direction, message }))
+                        flaggingMessage.edit(menu({ direction, message }, options))
                     });
                 }
 
@@ -123,11 +126,11 @@ function processCommand(message, isMod, command) {
                         move("down")
                     } else if (reaction.emoji.name == "📌") {
                         continueReactions = false;
-                        let embed = menu({ message: currentMessage })
-                        embed.setTitle("Portably pin a message");
-                        embed.setDescription("This message has been portably pinned.");
+                        let embed = menu({ message: currentMessage }, options);
+                        embed.setTitle($("PINS_TITLE"));
+                        embed.setDescription($("PINS_PIN_SUCCESS"));
                         embed.setColor("#00C000");
-                        flaggingMessage.edit(embed)
+                        flaggingMessage.edit(embed);
 
                         //Pin the message
                         if (!settings.users[author]) settings.users[author] = {};
@@ -138,8 +141,8 @@ function processCommand(message, isMod, command) {
                     } else if (reaction.emoji.name == "🚫") {
                         continueReactions = false;
                         let embed = new Discord.RichEmbed();
-                        embed.setTitle("Portably pin a message");
-                        embed.setDescription("Message pinning cancelled.");
+                        embed.setTitle($("PINS_TITLE"));
+                        embed.setDescription($("PINS_PIN_CANCEL"));
                         embed.setColor("#00C000");
                         flaggingMessage.edit(embed);
                     }
@@ -156,10 +159,11 @@ function processCommand(message, isMod, command) {
                 message.channel.send(`${err.message}\n${err.stack}`);
             });
         }).catch(function(err) {
-            message.reply(`Invalid message ID or number provided.`);
+            message.reply(err.stack);
+            message.reply($("PINS_COULDNT_PIN"))
         });
     } else if (command == "pin") {
-        return message.reply("To pin a message, you'll need to specify which one to pin. For more information, type `" + prefix + "help pin`");
+        return message.reply($("PINS_INVALID_COMMAND", {prefix: prefix}));
     } else if (command.startsWith("pins")) {
         let number = command.substr(5);
         let nsfw = message.channel.nsfw;
@@ -168,26 +172,24 @@ function processCommand(message, isMod, command) {
         let flagArray = settings.users[message.author.id].flags;
         if (!flagArray) {
             let embed = new Discord.RichEmbed;
-            embed.setTitle("No Pins");
-            embed.setDescription("You haven't pinned any messages. To pin a message, use `" + prefix + "pin`.");
+            embed.setTitle($("PINS_NO_PINS"));
+            embed.setDescription($("PINS_NO_PINS_DESCRIPTION", {prefix: prefix}));
             return message.channel.send(embed);
         }
 
-        if (number.startsWith("--image")) {
-            let pinNumber = number.substr(8);
-            //Retrieve image
+        if (number.startsWith("--view")) {
+            let pinNumber = number.substr(7);
+            if (pinNumber > flagArray.length || pinNumber < 0) throw new UserInputError($("PINS_INVALID_PAGE"));
 
-            if (pinNumber > flagArray.length || pinNumber < 0) throw new UserInputError("Invalid Page.");
             let flagItem = flagArray[pinNumber - 1];
             let channel = client.channels.get(flagItem.channel);
-            if (!channel) throw new CommandError("Can't find channel");
-            if (channel.nsfw && !nsfw) throw new CommandError("Pin in NSFW channel. View pins in NSFW channel to see pin.");
+            if (!channel) throw new CommandError($("PINS_CHANNEL_GONE"));
+            if (channel.nsfw && !nsfw) throw new CommandError($("PINS_CHANNEL_NSFW"));
 
             let embed = new Discord.RichEmbed;
-            embed.setTitle(":pushpin: Portable Pin #" + pinNumber);
-            embed.setDescription("[Jump](https://discordapp.com/channels/" + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")");
+            embed.setTitle($("PINS_PIN_TITLE", {emoji:":pushpin:", pinNumber: pinNumber}));
+            embed.setDescription(`[${$("PINS_JUMP")}](https://discordapp.com/channels/` + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")");
             embed.setColor("#00C000");
-            pinNumber = parseInt(pinNumber);
 
             channel.fetchMessage(flagItem.message).then(function(fMessage) {
                 let flagMessage = fMessage.content + "\n";
@@ -197,7 +199,7 @@ function processCommand(message, isMod, command) {
                     if (fMessage.attachments.size > 0) {
                         for (let [key, attachment] of fMessage.attachments) {
                             if (attachment.height != null) {
-                                if (fMessage.content == "") flagMessage = "Image";
+                                if (fMessage.content == "") flagMessage = $("PINS_IMAGE");
                                 embed.setImage(attachment.proxyURL);
                                 break;
                             }
@@ -208,32 +210,35 @@ function processCommand(message, isMod, command) {
                 if (flagMessage.trim() != "") embed.addField(fMessage.author.tag, flagMessage.length > 1020 ? `${flagMessage.substr(0, 1021)}...` : flagMessage);
                 if (fMessage.attachments.size > 0) {
                     let attachments = "";
+                    let attachmentsCount = 0;
                     for (let [key, attachment] of fMessage.attachments) {
-                        attachments += "[" + attachment.filename + "](" + attachment.url + ")\n";
+                        attachments += `[${attachment.filename}](${attachment.url})`;
+                        attachmentsCount++;
                     }
-                    embed.addField("Attachments", attachments);
+                    embed.addField($("PINS_ATTACHMENT", {count: attachmentsCount}), attachments);
                 }
 
                 message.channel.send(embed);
-            }).catch(function() {
-                embed.addField("Error", "Can't find message");
+            }).catch(err => {
+                log(err, logType.warning);
+                embed.addField($("PINS_ERROR"), $("PINS_MESSAGE_GONE"));
                 message.channel.send(embed);
             });
             return;
         }
         if (isNaN(number) || !number) number = 1;
         let embed = new Discord.RichEmbed;
-        embed.setTitle(":pushpin: Portable Pins");
-        embed.setDescription("Here are all the messages you've pinned");
+        embed.setTitle($("PINS_PINS_TITLE", {emoji:":pushpin:"}));
+        embed.setDescription($("PINS_PINS_DESCRIPTION"));
         embed.setColor("#00C000");
 
-        if (number > (flagArray.length / 5) + 1) throw new UserInputError("Invalid Page.");
+        if (number > (flagArray.length / 5) + 1) throw new UserInputError($("PINS_INVALID_PAGE"));
 
         let fullPages = Math.floor((flagArray.length / 5) + 1);
         if (fullPages == 1) {
-            embed.setFooter("To pin a message, use the " + prefix + "pin command");
+            embed.setFooter($("PINS_HOWTO_PIN", {prefix:prefix}));
         } else {
-            embed.setFooter("Page " + number + "/" + fullPages + ". To see another page, use " + prefix + "pins [number]");
+            embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber:number, numberOfPages: fullPages, prefix:prefix}));
         }
 
         number--;
@@ -245,12 +250,12 @@ function processCommand(message, isMod, command) {
 
             let fieldName = "Pin #" + (i + 1) + "";
             if (!channel) {
-                embed.addField(fieldName, "Can't find channel");
+                embed.addField(fieldName, $("PINS_CHANNEL_GONE"));
                 return getMessageNumber(++i);
             }
 
             if (channel.nsfw && !nsfw) {
-                embed.addField(fieldName, "Pin in NSFW channel. View pins in NSFW channel to see pin.");
+                embed.addField(fieldName, $("PINS_CHANNEL_NSFW"));
                 return getMessageNumber(++i);
             }
 
@@ -262,20 +267,21 @@ function processCommand(message, isMod, command) {
                 if (message.content == "") {
                     for (let [key, attachment] of message.attachments) {
                         if (attachment.height != null) {
-                            if (message.content == "") flagMessage = "`Image`\nUse `" + prefix + "pins --image " + (i + 1) + "` to view.\n";
+                            if (message.content == "") flagMessage = $("PINS_HOWTO_VIEW", {prefix: prefix, pinNumber: i + 1});
                             break;
                         }
                     }
                 }
 
-                if (message.embeds.length) flagMessage = `\`Embed\`\n${unembed(message.embeds[0])}` //Unembed the first embed
+                if (message.embeds.length)
+                    flagMessage = $("PINS_CONTENT_WITH_EMBED", {embedcontent:unembed(message.embeds[0])}) //Unembed the first embed
 
-                let credit = "     - *" + message.author.tag + "* in " + message.channel + " [Jump](https://discordapp.com/channels/" + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")";
+                let credit = $("PINS_PIN_AUTHOR", {pinAuthor: message.author.tag, channel: message.channel, jumpToMessage:"[Jump](https://discordapp.com/channels/" + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")"});
                 embed.addField(fieldName, flagMessage.length+credit.length > 800 ? 
                 `${flagMessage.substr(0, 1021-credit.length-220)}...\n${credit}` : `${flagMessage}\n${credit}`);
                 getMessageNumber(++i);
             }).catch(function() {
-                embed.addField(fieldName, "Can't find message");
+                embed.addField(fieldName, $("PINS_MESSAGE_GONE"));
                 getMessageNumber(++i);
             });
         };
@@ -284,14 +290,14 @@ function processCommand(message, isMod, command) {
         var unflagging = command.substr(6);
         var index = parseInt(unflagging) - 1;
 
-        if (isNaN(index)) return message.reply("Usage: `" + prefix + "unpin id`. For the `id` parameter, use `" + prefix + "pins`. For more information, type `" + prefix + "help unpin`");
-        if (settings.users[message.author.id] == null) return message.reply("You have no portable pins.");
-        if (settings.users[message.author.id].flags == null) return message.reply("You have no portable pins.");
-        if (settings.users[message.author.id].flags.length == 0) return message.reply("You have no portable pins.");
-        if (settings.users[message.author.id].flags.length <= index) return message.reply("You don't have that many pinned messages.");
+        if (isNaN(index)) return message.reply($("PINS_UNPIN_USAGE", {prefix: prefix}));
+        if (settings.users[message.author.id] == null) return message.reply($("PINS_NO_PINS"));
+        if (settings.users[message.author.id].flags == null) return message.reply($("PINS_NO_PINS"));
+        if (settings.users[message.author.id].flags.length == 0) return message.reply($("PINS_NO_PINS"));
+        if (settings.users[message.author.id].flags.length <= index) return message.reply($("PINS_NOT_THAT_MANY_PINS"));
 
         settings.users[message.author.id].flags.splice(index, 1);
-        message.reply("That message has been unpinned.");
+        message.reply($("PINS_UNPIN_SUCCESS"));
     }
 }
 
@@ -327,6 +333,7 @@ module.exports = {
                 help.usageText = prefix + "pin [number | message id]";
                 help.helpText = "Portably pin a message for reference";
                 help.param1 = "The message to pin; 1 for the last message sent in this channel, 2 for the second last message, etc.\nYou can also provide a message ID to pin.";
+                help.availableOptions = "`--view [id]` Lets you view that specific pin. Will also let you view any attachments in the pin"
                 help.remarks = "AstralMod pins messages by taking the message ID and channel ID. If the message is deleted or if the channel is deleted, the message will not be retrievable."
                 break;
             case "pins":
