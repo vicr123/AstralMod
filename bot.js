@@ -50,15 +50,18 @@ global.ownerId = undefined;
 let doNotDeleteGuilds = [];
 
 let availableTranslations = fs.readdirSync("translations");
-availableTranslations.isTranslated = function(language) {
-    if(availableTranslations.includes(language)) {
+
+availableTranslations.getTranslation = function(language) {
+    language = language.toLowerCase()
+    let aT = availableTranslations.map(t => t.toLowerCase());
+    if (aT.includes(language)) {
         return language;
     }
 
-    if (availableTranslations.filter(t => language.substr(0, 2) === t).length > 1) {
-        return false;
+    if (aT.filter(t => language.substr(0, 2) === t).length > 1) {
+        return null;
     } else {
-        return
+        return aT.filter(t => language.substr(0, 2) === t)[0];
     }
 };
 
@@ -114,8 +117,9 @@ i18next.use(i18nextbackend).init({
 });
 
 global._ = {};
-for (let translationName of availableTranslations) {
-    _[translationName] = i18next.getFixedT(translationName, "translation");
+
+for (let tr of availableTranslations) {
+    _[tr] = i18next.getFixedT(tr, "translation");
 }
 
 global.tr = function() {
@@ -1969,22 +1973,15 @@ function processAmCommand(message, options) {
             message.channel.send(embed);
         }
 
-        for (let newLocale of availableTranslations) {
-            if (newLocale.toLowerCase() == locale) {
-                setLocale(newLocale);
-                return true;
-            }
-        }
-
-        for (let newLocale of availableTranslations) {
-            if (newLocale.toLowerCase().startsWith(locale)) {
-                setLocale(newLocale);
-                return true;
-            }
+        if (availableTranslations.getTranslation(locale) !== null) {
+            setLocale(availableTranslations.getTranslation(locale));
+            return true;
         }
 
         //Locale unavailable
-        message.channel.send($("SETLOC_UNAVAILABLE"));
+        locale = settings.users[message.author.id].locale;
+        if (locale == null) locale = "en";
+        message.author.reply(_[locale]("SETLOC_UNAVAILABLE"));
         return true;
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
@@ -2564,7 +2561,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send("What locale do you want to use for this server? The available locales are:");
                     let locales = "";
                     for (let locale of availableTranslations) {
-                        locales += `● ${locale}`;
+                        locales += `● ${locale}+\n`;
                     }
                     message.author.send(locales);
 
