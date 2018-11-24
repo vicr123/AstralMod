@@ -240,7 +240,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                     let currentWeatherText = $("WEATHER_CURRENT_WEATHER");
                     if (user != "") {
-                        currentWeatherText += " @ " + user;
+                        currentWeatherText += " - " + user;
                     }
 
                     let currentWeatherWidth = ctx.measureText(currentWeatherText);
@@ -416,7 +416,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         if (current == 1) {
                             dayText = $("WEATHER_TODAY").toUpperCase();
                         } else {
-                            dayText = ml.weekdaysShort()[["mon", "tue", "wed", "thu", "fri", "sat", "sun"].indexOf(day.day.toLowerCase())].toUpperCase().trim();
+                            dayText = ml.weekdaysShort()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(day.day.toLowerCase())].toUpperCase().trim();
                         }
                         let dayWidth = ctx.measureText(dayText);
                         
@@ -424,7 +424,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                             let textCanvas = new Canvas(dayWidth.width, dayWidth.emHeightAscent + dayWidth.emHeightDescent);
                             let txtCtx = textCanvas.getContext('2d');
                             txtCtx.font = "20px Contemporary";
-                            txtCtx.fillStyle = display.text;
+                            txtCtx.fillStyle = ctx.fillStyle;
                             txtCtx.fillText(dayText, 0, 20);
 
                             ctx.rotate(-Math.PI / 2);

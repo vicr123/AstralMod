@@ -1936,25 +1936,43 @@ function processAmCommand(message, options) {
         embed.setFooter(_[locale]("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
         message.channel.send(embed);
         return true;
+    } else if (command == "setlocale") {
+        let embed = new Discord.RichEmbed();
+        embed.setColor("#003CFF");
+        embed.setAuthor($("SETLOC_TITLE"));
+        
+        let thisLocale = $("THIS_LOCALE");
+        if (options.locale == "en") thisLocale = "English";
+        embed.addField($("SETLOC_YOUR_LOCALE"), "`" + options.locale + "` - " + thisLocale);
+
+        let availableLocales = "";
+        for (let locale of availableTranslations) {
+            let thisLocale = _[locale]("THIS_LOCALE");
+            if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
+            if (locale == "en") thisLocale = "English";
+            availableLocales += "`" + locale + "` - " + thisLocale + "\n";
+        }
+        embed.addField($("SETLOC_AVAILABLE_LOCALES"), availableLocales);
+
+        embed.setFooter($("SETLOC_DISCLAIMER"));
+        message.channel.send(embed);
     } else if (command.startsWith("setlocale ")) {
         let locale = command.substr(10);
 
         let setLocale = function(locale) {
             settings.users[message.author.id].locale = locale;
 
+            let thisLocale = _[locale]("THIS_LOCALE");
+            if (locale == "en") thisLocale = "English";
+
             let embed = new Discord.RichEmbed();
             embed.setColor("#003CFF");
             embed.setAuthor(_[locale]("SETLOC_TITLE"));
-            embed.setDescription(_[locale]("SETLOC_LANGUAGE"));
+            embed.setDescription(_[locale]("SETLOC_LANGUAGE", {locale: thisLocale}));
             embed.setFooter(_[locale]("SETLOC_DISCLAIMER"));
             message.channel.send(embed);
         }
 
-        try {
-            message.channel.send(availableTranslations.getTranslation(locale).toString());
-        } catch(err) {
-            message.channel.send(err.stack);
-        }
         if (availableTranslations.getTranslation(locale) !== null) {
             setLocale(availableTranslations.getTranslation(locale));
             return true;
@@ -1968,10 +1986,10 @@ function processAmCommand(message, options) {
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
         embed.setColor("#3C3C96");
-        embed.setAuthor("AstralMod Help Contents");
-        embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
+        embed.setAuthor($("HELP_CONTENTS"));
+        embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix}));
 
-        embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nabout\nhelp", true);
+        embed.addField($("HELP_CORE_COMMANDS"), "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nabout\nhelp", true);
 
         for (key in plugins) {
             var plugin = plugins[key];
@@ -2012,7 +2030,7 @@ function processAmCommand(message, options) {
             }
         }
 
-        embed.setFooter("AstralMod " + amVersion + ". Moderator commands denoted with bold text.");
+        embed.setFooter($("HELP_FOOTER", {amVersion: amVersion}));
         message.channel.send("", { embed: embed });
         return true;
     } else if (command.startsWith("fetchuser ")) {
@@ -2026,7 +2044,7 @@ function processAmCommand(message, options) {
     } else if (command.startsWith("help ")) { //Contextual help
         //Get help for specific command
         var embed = new Discord.RichEmbed();
-        embed.setAuthor("AstralMod Help Contents");
+        embed.setAuthor($("HELP_CONTENTS"));
 
         var helpCmd = command.substr(5);
 
@@ -2092,7 +2110,7 @@ function processAmCommand(message, options) {
                             if (plugin.availableCommands.general != null) {
                                 if (plugin.availableCommands.general.hiddenCommands != null) {
                                     if (plugin.availableCommands.general.hiddenCommands.indexOf(helpCmd) != -1) {
-                                        help = plugin.acquireHelp(helpCmd);
+                                        help = plugin.acquireHelp(helpCmd, options);
                                         break;
                                     }
                                 }
@@ -2134,20 +2152,20 @@ function processAmCommand(message, options) {
 
         if (help.helpText == null) {
             embed.setColor("#FF0000");
-            embed.setDescription("Couldn't obtain help for that command.");
+            embed.setDescription($("HELP_UNAVAILABLE"));
         } else {
             embed.setColor("#3C3C96");
             if (help.title == null) {
-                embed.setDescription("Command Help");
+                embed.setDescription($("HELP_COMMAND_TITLE"));
             } else {
-                embed.setDescription("for " + help.title)
+                embed.setDescription($("HELP_COMMAND_FOR", {title: help.title}));
             }
 
             if (help.usageText != null) {
-                embed.addField("Usage", help.usageText);
+                embed.addField($("HELP_COMMAND_USAGE"), help.usageText);
             }
 
-            embed.addField("Description", help.helpText);
+            embed.addField($("HELP_COMMAND_DESCRIPTION"), help.helpText);
 
 
             if (help.options != null) {
@@ -2156,27 +2174,27 @@ function processAmCommand(message, options) {
                     options += value + "\n";
                 }
                 options += "```";
-                embed.addField("Options", options);
+                embed.addField($("HELP_COMMAND_OPTIONS"), options);
             }
 
             if (help.availableOptions != null) {
-                embed.addField("Available Options", help.availableOptions);
+                embed.addField($("HELP_COMMAND_AVAILABLE_OPTIONS"), help.availableOptions);
             }
 
             if (help.param1 != null) {
-                embed.addField("Parameter 1", help.param1);
+                embed.addField($("HELP_COMMAND_PARAM", {param: "1"}), help.param1);
             }
 
             if (help.param2 != null) {
-                embed.addField("Parameter 2", help.param2);
+                embed.addField($("HELP_COMMAND_PARAM", {param: "2"}), help.param2);
             }
 
             if (help.param3 != null) {
-                embed.addField("Parameter 3", help.param3);
+                embed.addField($("HELP_COMMAND_PARAM", {param: "3"}), help.param3);
             }
 
             if (help.remarks != null) {
-                embed.addField("Remarks", help.remarks);
+                embed.addField($("HELP_COMMAND_REMARKS"), help.remarks);
             }
         }
         embed.setFooter("AstralMod " + amVersion);
@@ -2882,6 +2900,7 @@ async function processMessage(message) {
         //Don't respond to direct messages
         if (message.guild != null) {
             await message.guild.fetchMember(message.author);
+            options.glocale = settings.guilds[message.guild.id].locale;
 
             if (settings.guilds[message.guild.id].blocked == null) {
                 settings.guilds[message.guild.id].blocked = [];
@@ -2904,7 +2923,7 @@ async function processMessage(message) {
                     if (triedCommand.startsWith(c) || triedCommand == c || 
                         (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
                         //Block this command and treat it like a normal message
-                        commandEmitter.emit('newMessage', message);
+                        commandEmitter.emit('newMessage', message, options);
                         return;
                     }
                 }
@@ -2915,7 +2934,7 @@ async function processMessage(message) {
                     if (triedCommand.startsWith(c) || triedCommand == c || 
                         (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
                         //Block this command and treat it like a normal message
-                        commandEmitter.emit('newMessage', message);
+                        commandEmitter.emit('newMessage', message, options);
                         return;
                     }
                 }
@@ -2935,7 +2954,7 @@ async function processMessage(message) {
                     }
                 }
             } else {
-                commandEmitter.emit('newMessage', message);
+                commandEmitter.emit('newMessage', message, options);
             }
         } else {
             //Determine if this is within a workflow or if this is unsolicited
@@ -3178,6 +3197,7 @@ function messageUpdated(oldMessage, newMessage) {
 }
 
 function memberAdd(member) {
+    let glocale = settings.guilds[member.guild.id].locale;
     var channel = null;
     if (member.guild != null) {
         if (settings.guilds[member.guild.id].memberAlerts != null) {
@@ -3197,7 +3217,7 @@ function memberAdd(member) {
                 channel.send(":arrow_right: <@" + member.user.id + "> + Invite " + inviteCode);
             }
     
-            uinfo(member.user, channel, "en", true, member.guild, true);
+            uinfo(member.user, channel, glocale, true, member.guild, true);
     
             if (member.guild.id == 287937616685301762) {
                 var now = new Date();
@@ -3227,6 +3247,9 @@ function memberAdd(member) {
 }
 
 function banAdd(guild, user) {
+    let glocale = settings.guilds[guild.id].locale;
+    let $$ = _[glocale];
+
     var channel = null;
     if (guild != null) {
         if (settings.guilds[guild.id].memberAlerts != null) {
@@ -3242,11 +3265,11 @@ function banAdd(guild, user) {
         var embed = new Discord.RichEmbed();
 
         embed.setColor("#FF0000");
-        embed.setTitle(":hammer: User Banned");
-        embed.setDescription("A user was banned from this server.");
+        embed.setTitle($$("GUILD_BAN_ADD_TITLE", {emoji: ":hammer:"}));
+        embed.setDescription($$("GUILD_BAN_ADD_DESCRIPTION"));
 
-        embed.addField("User", user.tag, true);
-        embed.addField("User ID", user.id, true);
+        embed.addField($$("GUILD_BAN_ADD_USER"), user.tag, true);
+        embed.addField($$("GUILD_BAN_ADD_USER_ID"), user.id, true);
         
         guild.fetchInvites().then(function(invites) {
             var inviteString = "";
@@ -3258,7 +3281,7 @@ function banAdd(guild, user) {
             }
 
             if (inviteString != "") {
-                embed.addField("Created Invites", inviteString);
+                embed.addField($$("GUILD_BAN_ADD_INVITES"), inviteString);
             }
 
             if (banDescriptor[guild.id][user.id] != null) {
@@ -3272,14 +3295,14 @@ function banAdd(guild, user) {
         }).then(function(auditLogs) {
             if (auditLogs.author == null) {
                 let log = auditLogs.entries.first();
-                embed.addField("Banned by", log.executor.tag);
+                embed.addField($$("GUILD_BAN_ADD_BANNED_BY"), log.executor.tag);
 
                 if (log.reason != null) {
-                    embed.addField("Reason", log.reason);
+                    embed.addField($$("GUILD_BAN_ADD_BAN_REASON"), log.reason);
                 }
             } else {
-                embed.addField("Banned by", auditLogs.author.tag);
-                embed.addField("Reason", auditLogs.reason);
+                embed.addField($$("GUILD_BAN_ADD_BANNED_BY"), auditLogs.author.tag);
+                embed.addField($$("GUILD_BAN_ADD_BAN_REASON"), auditLogs.reason);
             }
             
             channel.send("", {embed: embed});
