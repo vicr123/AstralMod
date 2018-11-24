@@ -15,7 +15,7 @@
     "UINFO_NOT_PART_OF_SERVER": "Esse usuário não faz parte desse servidor.",
     "UINFO_NOT_ALLOWED_SERVER_SPECIFIC": "Você não é permitido ver informações específicas do usuário nesse servidor.",
     "SETLOC_TITLE": "Localização AstralMod",
-    "SETLOC_LANGUAGE": "Tudo bem, sua localidade agora é inglês.",
+    "SETLOC_LANGUAGE": "Tudo bem, sua localidade agora é português (Brasil).",
     "SETLOC_DISCLAIMER": "Localização AstralMod está em desenvolvido. Muitos itens não estão traduzidos.",
     "SETLOC_UNAVAILABLE": "Infelizmente, não temos esta localidade no AstralMod.",
     "UINFO_BANNED_FROM": "Esse usuário foi banido de {{count}} servidor conhecido ao AstralMod",
