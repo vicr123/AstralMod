@@ -1989,10 +1989,10 @@ function processAmCommand(message, options) {
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
         embed.setColor("#3C3C96");
-        embed.setAuthor("AstralMod Help Contents");
-        embed.setDescription("Here are some things you can try. For more information, just `" + prefix + "help [command]`");
+        embed.setAuthor($("HELP_CONTENTS"));
+        embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix}));
 
-        embed.addField("AstralMod Core Commands", "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nabout\nhelp", true);
+        embed.addField($("HELP_CORE_COMMANDS"), "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nabout\nhelp", true);
 
         for (key in plugins) {
             var plugin = plugins[key];
@@ -2033,7 +2033,7 @@ function processAmCommand(message, options) {
             }
         }
 
-        embed.setFooter("AstralMod " + amVersion + ". Moderator commands denoted with bold text.");
+        embed.setFooter($("HELP_FOOTER", {amVersion: amVersion}));
         message.channel.send("", { embed: embed });
         return true;
     } else if (command.startsWith("fetchuser ")) {
@@ -2047,7 +2047,7 @@ function processAmCommand(message, options) {
     } else if (command.startsWith("help ")) { //Contextual help
         //Get help for specific command
         var embed = new Discord.RichEmbed();
-        embed.setAuthor("AstralMod Help Contents");
+        embed.setAuthor($("HELP_CONTENTS"));
 
         var helpCmd = command.substr(5);
 
@@ -2113,7 +2113,7 @@ function processAmCommand(message, options) {
                             if (plugin.availableCommands.general != null) {
                                 if (plugin.availableCommands.general.hiddenCommands != null) {
                                     if (plugin.availableCommands.general.hiddenCommands.indexOf(helpCmd) != -1) {
-                                        help = plugin.acquireHelp(helpCmd);
+                                        help = plugin.acquireHelp(helpCmd, options);
                                         break;
                                     }
                                 }
@@ -2155,20 +2155,20 @@ function processAmCommand(message, options) {
 
         if (help.helpText == null) {
             embed.setColor("#FF0000");
-            embed.setDescription("Couldn't obtain help for that command.");
+            embed.setDescription($("HELP_UNAVAILABLE"));
         } else {
             embed.setColor("#3C3C96");
             if (help.title == null) {
-                embed.setDescription("Command Help");
+                embed.setDescription($("HELP_COMMAND_TITLE"));
             } else {
-                embed.setDescription("for " + help.title)
+                embed.setDescription($("HELP_COMMAND_FOR", {title: help.title}));
             }
 
             if (help.usageText != null) {
-                embed.addField("Usage", help.usageText);
+                embed.addField($("HELP_COMMAND_USAGE"), help.usageText);
             }
 
-            embed.addField("Description", help.helpText);
+            embed.addField($("HELP_COMMAND_DESCRIPTION"), help.helpText);
 
 
             if (help.options != null) {
@@ -2177,27 +2177,27 @@ function processAmCommand(message, options) {
                     options += value + "\n";
                 }
                 options += "```";
-                embed.addField("Options", options);
+                embed.addField($("HELP_COMMAND_OPTIONS"), options);
             }
 
             if (help.availableOptions != null) {
-                embed.addField("Available Options", help.availableOptions);
+                embed.addField($("HELP_COMMAND_AVAILABLE_OPTIONS"), help.availableOptions);
             }
 
             if (help.param1 != null) {
-                embed.addField("Parameter 1", help.param1);
+                embed.addField($("HELP_COMMAND_PARAM", {param: "1"}), help.param1);
             }
 
             if (help.param2 != null) {
-                embed.addField("Parameter 2", help.param2);
+                embed.addField($("HELP_COMMAND_PARAM", {param: "2"}), help.param2);
             }
 
             if (help.param3 != null) {
-                embed.addField("Parameter 3", help.param3);
+                embed.addField($("HELP_COMMAND_PARAM", {param: "3"}), help.param3);
             }
 
             if (help.remarks != null) {
-                embed.addField("Remarks", help.remarks);
+                embed.addField($("HELP_COMMAND_REMARKS"), help.remarks);
             }
         }
         embed.setFooter("AstralMod " + amVersion);

@@ -56,5 +56,18 @@
     "GUILD_BAN_ADD_USER_ID": "ID người dùng",
     "GUILD_BAN_ADD_INVITES": "Lời mời đã tạo",
     "GUILD_BAN_ADD_BANNED_BY": "Chặn bỏi",
-    "GUILD_BAN_ADD_BAN_REASON": "Lý do"
+    "GUILD_BAN_ADD_BAN_REASON": "Lý do",
+    "HELP_CONTENTS": "Trợ giúp với AstralMod",
+    "HELP_CONTENTS_INTRODUCTION": "Bạn có thể thử lệnh này. Để hiểu thêm, dùng `{{prefix}}help [lệnh]`",
+    "HELP_CORE_COMMANDS": "Lệnh cốt lõi của AstralMod",
+    "HELP_FOOTER": "AstralMod {{amversion}}. Lệnh cho người điều tiết hiện bằng chữ in đậm.",
+    "HELP_UNAVAILABLE": "Không nhận trợ giúp cho lệnh đó được.",
+    "HELP_COMMAND_TITLE": "Trợ giúp với lệnh",
+    "HELP_COMMAND_FOR": "cho {{title}}",
+    "HELP_COMMAND_USAGE": "Sử dụng",
+    "HELP_COMMAND_DESCRIPTION": "Sự miêu tả",
+    "HELP_COMMAND_OPTIONS": "Tùy chọn",
+    "HELP_COMMAND_AVAILABLE_OPTIONS": "Tùy chọn đã sẵn",
+    "HELP_COMMAND_PARAM": "Tham số {{param}}",
+    "HELP_COMMAND_REMARKS": "Ghi chú"
 }
