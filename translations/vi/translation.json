@@ -1,5 +1,6 @@
 {
     "SPECIAL_STIME": "{{time, stime}}",
+    "THIS_LOCALE": "Tiếng Việt",
     "UINFO_RETRIEVING": "Đang nhận thông tin của người dùng...",
     "UINFO_USER_ID": "ID người dùng: {{id}}",
     "UINFO_USER_INFORMATION": "Giới thiệu về người dùng",

@@ -114,8 +114,7 @@ i18next.use(i18nextbackend).init({
 });
 
 global._ = {};
-for (let index in availableTranslations) {
-    let translationName = availableTranslations[index];
+for (let translationName of availableTranslations) {
     _[translationName] = i18next.getFixedT(translationName, "translation");
 }
 
@@ -1933,38 +1932,59 @@ function processAmCommand(message, options) {
         embed.setFooter(_[locale]("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
         message.channel.send(embed);
         return true;
+    } else if (command == "setlocale") {
+        let embed = new Discord.RichEmbed();
+        embed.setColor("#003CFF");
+        embed.setAuthor($("SETLOC_TITLE"));
+        
+        let thisLocale = $("THIS_LOCALE");
+        if (options.locale == "en") thisLocale = "English";
+        embed.addField($("SETLOC_YOUR_LOCALE"), "`" + options.locale + "` - " + thisLocale);
+
+        let availableLocales = "";
+        for (let locale of availableTranslations) {
+            let thisLocale = _[locale]("THIS_LOCALE");
+            if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
+            if (locale == "en") thisLocale = "English";
+            availableLocales += "`" + locale + "` - " + thisLocale + "\n";
+        }
+        embed.addField($("SETLOC_AVAILABLE_LOCALES"), availableLocales);
+
+        embed.setFooter($("SETLOC_DISCLAIMER"));
+        message.channel.send(embed);
     } else if (command.startsWith("setlocale ")) {
         let locale = command.substr(10);
 
         let setLocale = function(locale) {
             settings.users[message.author.id].locale = locale;
 
+            let thisLocale = _[locale]("THIS_LOCALE");
+            if (locale == "en") thisLocale = "English";
+
             let embed = new Discord.RichEmbed();
             embed.setColor("#003CFF");
             embed.setAuthor(_[locale]("SETLOC_TITLE"));
-            embed.setDescription(_[locale]("SETLOC_LANGUAGE"));
+            embed.setDescription(_[locale]("SETLOC_LANGUAGE", {locale: thisLocale}));
             embed.setFooter(_[locale]("SETLOC_DISCLAIMER"));
             message.channel.send(embed);
         }
 
-        for (let i in availableTranslations) {
-            if (availableTranslations[i].toLowerCase() == locale) {
-                setLocale(availableTranslations[i]);
+        for (let newLocale of availableTranslations) {
+            if (newLocale.toLowerCase() == locale) {
+                setLocale(newLocale);
                 return true;
             }
         }
 
-        for (let i in availableTranslations) {
-            if (availableTranslations[i].toLowerCase().startsWith(locale)) {
-                setLocale(availableTranslations[i]);
+        for (let newLocale of availableTranslations) {
+            if (newLocale.toLowerCase().startsWith(locale)) {
+                setLocale(newLocale);
                 return true;
             }
         }
 
         //Locale unavailable
-        locale = settings.users[message.author.id].locale;
-        if (locale == null) locale = "en";
-        message.channel.send(_[locale]("SETLOC_UNAVAILABLE"));
+        message.channel.send($("SETLOC_UNAVAILABLE"));
         return true;
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
