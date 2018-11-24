@@ -6,5 +6,7 @@
     "UINFO_USER_ID": "صارف کا نمبر: {{id}}",
     "SPECIAL_STIME": "{{time, stime}}",
     "UINFO_TIMESTAMPS": "تاریخ",
-    "WEATHER_TODAY": "آج"
+    "WEATHER_TODAY": "آج",
+    "THIS_LOCALE": "Urdu (Pakistan)",
+    "TIME_RESPONSE": "{{clockEmote}} **{{request}}** ({{offset}}) {{time, dddd[,] MMMM D}}, at {{time, stime}}"
 }
