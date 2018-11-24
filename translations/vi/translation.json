@@ -16,6 +16,8 @@
     "SETLOC_LANGUAGE": "OK, ngôn ngữ của bạn là Tiếng Việt.",
     "SETLOC_DISCLAIMER": "Bản địa hóa của AstralMod chưa được phát hành. Nhiều chữ sẽ chưa được dịch.",
     "SETLOC_UNAVAILABLE": "Rất tiếc, ngôn ngữ đó không có sẵn trong AstralMod.",
+    "SETLOC_YOUR_LOCALE": "Ngôn ngữ hiện tại",
+    "SETLOC_AVAILABLE_LOCALES": "Ngôn ngữ đã sẵn",
     "UINFO_BANNED_FROM_0": "Người dùng này đã bị chặn từ {{count}} máy chủ",
     "UINFO_ALERTS": "Cảnh báo",
     "TIME_RESPONSE": "{{clockEmote}} **{{request}}** ({{offset}}) {{time, dddd[,] DD MMMM}}, lúc {{time, stime}}",
@@ -47,5 +49,12 @@
     "NICK_NOT_ACCEPTED": "Việc đổi tên nick không được chấp nhận trên máy chủ này với AstralMod.",
     "PING_PINGING": "{{emoji}} Tôi đây!",
     "PING_DONE": "{{emoji}} Tôi đây! Chúng tôi chờ cho {{time}}ms trước khi trả lời được.",
-    "PING_DONE_420": "{{emoji}} Tôi đây! Chúng tôi chờ cho 419ms hoặc 421ms trước khi trả lời được."
+    "PING_DONE_420": "{{emoji}} Tôi đây! Chúng tôi chờ cho 419ms hoặc 421ms trước khi trả lời được.",
+    "GUILD_BAN_ADD_TITLE": "{{emoji}} Người dùng bị chặn",
+    "GUILD_BAN_ADD_DESCRIPTION": "Một người dùng đã bị chặn từ máy chủ này.",
+    "GUILD_BAN_ADD_USER": "Người dùng",
+    "GUILD_BAN_ADD_USER_ID": "ID người dùng",
+    "GUILD_BAN_ADD_INVITES": "Lời mời đã tạo",
+    "GUILD_BAN_ADD_BANNED_BY": "Chặn bỏi",
+    "GUILD_BAN_ADD_BAN_REASON": "Lý do"
 }

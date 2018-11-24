@@ -75,5 +75,12 @@
     "NICK_NOT_ACCEPTED": "Nickname changes are not accepted on this server via AstralMod.",
     "PING_PINGING": "{{emoji}} I'm here!",
     "PING_DONE": "{{emoji}} I'm here! It took {{time}}ms to respond.",
-    "PING_DONE_420": "{{emoji}} I'm here! It took either 419ms or 421ms to respond."
+    "PING_DONE_420": "{{emoji}} I'm here! It took either 419ms or 421ms to respond.",
+    "GUILD_BAN_ADD_TITLE": "{{emoji}} User Banned",
+    "GUILD_BAN_ADD_DESCRIPTION": "A user was banned from this server.",
+    "GUILD_BAN_ADD_USER": "User",
+    "GUILD_BAN_ADD_USER_ID": "User ID",
+    "GUILD_BAN_ADD_INVITES": "Created Invites",
+    "GUILD_BAN_ADD_BANNED_BY": "Banned By",
+    "GUILD_BAN_ADD_BAN_REASON": "Reason"
 }
