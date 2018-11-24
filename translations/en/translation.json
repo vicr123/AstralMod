@@ -1,6 +1,6 @@
 {
     "SPECIAL_STIME": "{{time, stime}}",
-    "THIS_LOCALE": "English (please put the name of your locale here and remove these brackets)",
+    "THIS_LOCALE": "English (please put the name of your locale here in its native language and remove these brackets)",
     "UINFO_RETRIEVING": "Retrieving user information...",
     "UINFO_USER_ID": "User ID: {{id}}",
     "UINFO_USER_INFORMATION": "User Information",
