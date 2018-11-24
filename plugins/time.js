@@ -440,7 +440,7 @@ async function processCommand(message, isMod, command, options) {
         let location = command.replace("time", "").trim();
         let messageToEdit;
 
-        sendPreloader($("WEATHER_PREPARING"), message.channel).then(mte => {
+        sendPreloader($("TIME_PREPARING"), message.channel).then(mte => {
             let messageToEdit = mte;
             new Promise(function(resolve, reject) {
                 if (utcOffsetFromTimezone(location) !== undefined) { //Check for a UTC offset and a UTC named timezone first
