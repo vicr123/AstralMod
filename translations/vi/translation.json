@@ -86,5 +86,5 @@
     "SINFO_BOT_COUNT": "({{count}} rô bốt)",
     "SINFO_SERVER_OWNER": "**Chủ nhân máy chủ:** {{owner}}",
     "SINFO_PEOPLE": "Người dùng",
-    "SINFO_SURPlUS_ROLES": "{{count}} nữa vai trò"
+    "SINFO_SURPLUS_ROLES": "{{count}} nữa vai trò"
 }

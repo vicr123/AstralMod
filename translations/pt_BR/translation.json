@@ -34,7 +34,7 @@
     "SINFO_BOT_COUNT_plural": "({{count}} bots)",
     "SINFO_SERVER_OWNER": "**Dono do Servidor:** {{owner}}",
     "SINFO_PEOPLE": "Pessoas",
-    "SINFO_SURPlUS_ROLES": "{{count}} cargo a mais",
+    "SINFO_SURPLUS_ROLES": "{{count}} cargo a mais",
     "SINFO_SURPLUS_ROLES_plural": "{{count}} cargos a mais",
     "SINFO_ROLES": "Cargos",
     "SINFO_ALERTS": "Alertas",
