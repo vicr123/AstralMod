@@ -50,6 +50,18 @@ global.ownerId = undefined;
 let doNotDeleteGuilds = [];
 
 let availableTranslations = fs.readdirSync("translations");
+availableTranslations.isTranslated = function(language) {
+    if(availableTranslations.includes(language)) {
+        return language;
+    }
+
+    if (availableTranslations.filter(t => language.substr(0, 2) === t).length > 1) {
+        return false;
+    } else {
+        return
+    }
+};
+
 i18next.use(i18nextbackend).init({
     fallbackLng: ["en", false],
     preload: availableTranslations,
@@ -213,7 +225,7 @@ global.captureInput = function(func, guild, author) {
 }
 
 global.releaseInput = function(guild) {
-    capture[guild] = null;
+    delete capture[guild];
 }
 
 global.awaitUserConfirmation = function(options) {
@@ -1616,7 +1628,7 @@ function processModCommand(message) {
             if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
-                message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, seperated by a space.")
+                message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, separated by a space.");
 
                 var roles = "```";
                 for (let [id, role] of message.guild.roles) {
@@ -1634,7 +1646,7 @@ function processModCommand(message) {
         } else {
             //Configuration menu
 
-            //Make sure person has neccessary permissions
+            //Make sure person has necessary permissions
             if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
@@ -1652,10 +1664,10 @@ function processModCommand(message) {
     }
 
     if (isMod(message.member)) {
-        var command;
+        let command;
         command = text.toLowerCase().substr(prefix.length);
         if (command.startsWith("oknick")) {
-            var userId = command.substr(7);
+            let userId = command.substr(7);
             acceptNicknameChange(message.guild.id, userId, message.channel.id, message.author.tag);
             return true;
         }
@@ -2239,7 +2251,7 @@ function processConfigure(message, guild) {
             case 1: { //Mod roles - confirm
                 if (text == "yes" || text == "y") {
                     guildSetting.modRoles = guildSetting.tentativeModRoles;
-                    guildSetting.tentativeModRoles = null;
+                    delete guildSetting.tentativeModRoles;
 
                     message.author.send("Thanks. Next, I'll need the ID of the channel where I can post member alerts. Alternatively, enter \"none\" if you want to disable member alerts. If you don't know how to get the ID, enable developer mode in user settings > Appearance, right click the channel on your server, then click \"Copy ID\".");
                     guildSetting.configuringStage = 2;
@@ -2276,7 +2288,7 @@ function processConfigure(message, guild) {
             case 3: { //Member Alerts Channel - Confirm
                 if (text == "yes" || text == "y") {
                     guildSetting.memberAlerts = guildSetting.tentativeMemberAlerts;
-                    guildSetting.tentativeMemberAlerts = null;
+                    delete guildSetting.tentativeMemberAlerts;
 
                     message.author.send("Thanks. Next, I'll need the ID of the channel where I can post chat logs.");
                     guildSetting.configuringStage = 4;
@@ -2313,7 +2325,7 @@ function processConfigure(message, guild) {
             case 5: { //Chat Logs Channel - Confirm
                 if (text == "yes" || text == "y") {
                     guildSetting.chatLogs = guildSetting.tentativeChatLogs;
-                    guildSetting.tentativeChatLogs = null;
+                    delete guildSetting.tentativeChatLogs ;
 
                     message.author.send("Thanks. Next, I'll need the ID of the channel where I can post general warnings.");
                     guildSetting.configuringStage = 6;
@@ -2350,7 +2362,7 @@ function processConfigure(message, guild) {
             case 7: { //Botwarnings Channel - Confirm
                 if (text == "yes" || text == "y") {
                     guildSetting.botWarnings = guildSetting.tentativeBotWarnings;
-                    guildSetting.tentativeBotWarnings = null;
+                    delete guildSetting.tentativeBotWarnings;
 
                     message.author.send("Thanks. Do you want to enable suggestions?");
                     guildSetting.configuringStage = 8;
@@ -2395,7 +2407,7 @@ function processConfigure(message, guild) {
             case 10: { //Suggestions Channel - Confirm
                 if (text == "yes" || text == "y") {
                     guildSetting.suggestions = guildSetting.tentativeSuggestions;
-                    guildSetting.tentativeSuggestions = null;
+                    delete guildSetting.tentativeSuggestions;
 
                     message.author.send("Thanks. AstralMod is now ready for use! Enjoy using AstralMod!");
                     guildSetting.requiresConfig = false;
@@ -2448,6 +2460,13 @@ function getSingleConfigureWelcomeText(guild) {
     } else {
         string += "5 Suggestions        #" + guild.channels.get(guildSetting.suggestions).name + "\n";
     }
+
+    if (guildSetting.locale == null) {
+        guildSetting.locale = "en"
+    }
+
+    string += "6 Locale             " + guildSetting.locale + "\n";
+
 
     if (guildSetting.nickModeration == null || guildSetting.nickModeration == false) {
         string += "a Nick Moderation    Disabled\n";
@@ -2521,6 +2540,16 @@ function processSingleConfigure(message, guild) {
                     message.author.send("What's the ID of the channel where I can post suggestions? Alternatively, enter \"none\" if you want to disable suggestions, and type \"cancel\" to cancel.");
                     guildSetting.configuringStage = 50;
                     break;
+                case "6": //Suggestions
+                    message.author.send("What locale do you want to use for this server? The available locales are:");
+                    let locales = "";
+                    for (let locale of availableTranslations) {
+                        locales += `● ${locale}`;
+                    }
+                    message.author.send(locales);
+
+                    guildSetting.configuringStage = 60;
+                    break;
                 case "0": //Exit
                     message.author.send("Configuration complete.");
                     guildSetting.configuringUser = null;
@@ -2592,7 +2621,7 @@ function processSingleConfigure(message, guild) {
         case 11: { //Staff Roles Confirm
             if (text == "yes" || text == "y") {
                 guildSetting.modRoles = guildSetting.tentativeModRoles;
-                guildSetting.tentativeModRoles = null;
+                delete guildSetting.tentativeModRoles;
 
                 message.author.send("Thanks, I'll save that.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
@@ -2634,7 +2663,7 @@ function processSingleConfigure(message, guild) {
         case 21: { //Member Alerts Channel - Confirm
             if (text == "yes" || text == "y") {
                 guildSetting.memberAlerts = guildSetting.tentativeMemberAlerts;
-                guildSetting.tentativeMemberAlerts = null;
+                delete guildSetting.tentativeMemberAlerts;
 
                 message.author.send("Thanks, I'll save that.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
@@ -2679,7 +2708,7 @@ function processSingleConfigure(message, guild) {
                 guildSetting.configuringStage = 0;
             } else if (text == "yes" || text == "y") {
                 guildSetting.chatLogs = guildSetting.tentativeChatLogs;
-                guildSetting.tentativeChatLogs = null;
+                delete guildSetting.tentativeChatLogs;
 
                 message.author.send("Thanks, I'll save that.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
@@ -2717,7 +2746,7 @@ function processSingleConfigure(message, guild) {
         case 41: { //Botwarnings Channel - Confirm
             if (text == "yes" || text == "y") {
                 guildSetting.botWarnings = guildSetting.tentativeBotWarnings;
-                guildSetting.tentativeBotWarnings = null;
+                delete guildSetting.tentativeBotWarnings;
 
                 message.author.send("Thanks, I'll save that.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
@@ -2756,11 +2785,11 @@ function processSingleConfigure(message, guild) {
         case 51: { //Suggestions Channel - Confirm
             if (text == "yes" || text == "y") {
                 guildSetting.suggestions = guildSetting.tentativeSuggestions;
-                guildSetting.tentativeSuggestions = null;
+                delete guildSetting.tentativeSuggestions;
 
                 message.author.send("Thanks, I'll save that.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
-                guildSetting.configuringStage = 0;
+                guildSetting.configuringStage = 60;
             } else if (text == "no" || text == "n") {
                 guildSetting.tentativeSuggestions = null;
                 message.author.send("Let's try this again. What's the ID of the channel where I can post suggestions?");
@@ -2770,6 +2799,39 @@ function processSingleConfigure(message, guild) {
             }
             break;
         }
+        case 60: { //Locale
+            if (!availableTranslations.includes(text)) {
+                message.author.send("That locale doesn't exist. The available locales are:");
+                let locales = "";
+                for (let locale of availableTranslations) {
+                    locales += `● ${locale}\n`;
+                }
+                message.author.send(locales);
+            } else {
+                message.author.send("You're setting " + text + " as the server locale. Is that correct?");
+                guildSetting.tentativeLocale = text;
+                guildSetting.configuringStage = 61;
+            }
+            break;
+        }
+        case 61: { //Locale - Confirm
+            if (text == "yes" || text == "y") {
+                guildSetting.locale = guildSetting.tentativeLocale;
+                delete guildSetting.tentativeLocale;
+
+                message.author.send("Thanks, I'll save that.");
+                message.author.send(getSingleConfigureWelcomeText(guild));
+                guildSetting.configuringStage = 0;
+            } else if (text == "no" || text == "n") {
+                guildSetting.locale = "en";
+                message.author.send("Let's try this again. What should the locale of the server be?");
+                guildSetting.configuringStage = 60;
+            } else {
+                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+            }
+            break;
+        }
+
     }
 
     settings.guilds[guild.id] = guildSetting;
@@ -2801,9 +2863,9 @@ async function processMessage(message) {
         let text = message.content;
 
         for (const param of text.split(" ")) {
-            if (param === "--12") {
+            if (param === "--12" || param === "--12h" || param === "--12hr") {
                 options.h24 = false;
-            } else if (param === "--24") {
+            } else if (param === "--24" || param === "--24h" || param === "--24hr") {
                 options.h24 = true;
             } else if (param === "--metric") {
                 options.h24 = true;
@@ -3318,80 +3380,84 @@ function unloadPlugin(file) {
 }
 
 function vacuumSettings() {
-    if (process.argv.indexOf("--novacuum") == -1) {
-        log("Checking the AstralMod Configuration file...", logType.info);
-        fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
-
-        var changesMade = false;
-        var error = false;
-
-        //Check settings file objects
-        if (!settings.hasOwnProperty("guilds")) {
-            log("Settings does not contain guilds.", logType.critical);
-            error = true;
-        }
-
-        if (!settings.hasOwnProperty("users")) {
-            log("Settings does not contain users.", logType.critical);
-            error = true;
-        }
-
-        if (!settings.hasOwnProperty("generalConfiguration")) {
-            log("Settings does not contain general configuration.", logType.critical);
-            error = true;
-        }
-
-        if (error) {
-            //Quit AstralMod
-            log("AstralMod Configuration contains errors.", logType.critical);
-            log("From here, you can either\n- Attempt to fix the AstralMod configuration file, settings.json\n- Delete the AstralMod configuration file and start again.", logType.info);
-            log("AstralMod Configuration is corrupted. AstralMod cannot continue running. Exiting now.", logType.critical);
-            debugger;
-            process.exit(1);
-        }
-
-        //Check that each guild still exists
-        var availableGuilds = [];
-        for (let [id, guild] of client.guilds) {
-            log("Checking Discord guild " + guild.id);
-            availableGuilds.push(guild.id);
-
-            if (!settings.guilds.hasOwnProperty(guild.id)) {
-                //Add guild to database
-                changesMade = true;
-                log("Adding guild " + guild.id + " to the database.", logType.info);
-                newGuild(guild);
-            }
-
-            if (settings.guilds[guild.id].requiresConfig == true) {
-                settings.guilds[guild.id].requiresConfig = false;
-            }
-        }
-
-        //Iterate over all guilds in settings
-        for (key in settings.guilds) {
-            log("Checking internal guild " + key);
-            if (!availableGuilds.includes(key)) {
-                //Delete guild from database
-                changesMade = true;
-                log("Deleting guild " + key + " as this guild is no longer recognised.", logType.info);
-                settings.guilds[key] = null;
-                delete settings.guilds[key];
-            }
-        }
-
-        if (changesMade) {
-            log("AstralMod Configuration was checked and changes were made. No other actions need to be taken.", logType.warning);
-            log("Old settings backed up as .settings-backup.json", logType.info);
-        } else {
-            fs.unlinkSync(".settings-backup.json");
-            log("AstralMod Configuration checked. No changes have been made", logType.good);
-        }
-        return true;
-    } else {
+    if (process.argv.indexOf("--novacuum") != -1) {
         log("--novacuum argument was passed. Vacuuming has been disabled.", logType.info);
         return false;
     }
+
+    log("Checking the AstralMod Configuration file...", logType.info);
+    fs.createReadStream('settings.json').pipe(fs.createWriteStream('.settings-backup.json'));
+
+    var changesMade = false;
+    var error = false;
+
+    //Check settings file objects
+    if (!settings.hasOwnProperty("guilds")) {
+        log("Settings does not contain guilds.", logType.critical);
+        error = true;
+    }
+
+    if (!settings.hasOwnProperty("users")) {
+        log("Settings does not contain users.", logType.critical);
+        error = true;
+    }
+
+    if (!settings.hasOwnProperty("generalConfiguration")) {
+        log("Settings does not contain general configuration.", logType.critical);
+        error = true;
+    }
+
+    if (error) {
+        //Quit AstralMod
+        log("AstralMod Configuration contains errors.", logType.critical);
+        log("From here, you can either\n- Attempt to fix the AstralMod configuration file, settings.json\n- Delete the AstralMod configuration file and start again.", logType.info);
+        log("AstralMod Configuration is corrupted. AstralMod cannot continue running. Exiting now.", logType.critical);
+        debugger;
+        process.exit(1);
+    }
+
+    //Check that each guild still exists
+    var availableGuilds = [];
+    for (let [id, guild] of client.guilds) {
+        log("Checking Discord guild " + guild.id);
+        availableGuilds.push(guild.id);
+
+        if (!settings.guilds.hasOwnProperty(guild.id)) {
+            //Add guild to database
+            changesMade = true;
+            log("Adding guild " + guild.id + " to the database.", logType.info);
+            newGuild(guild);
+        }
+
+        if (settings.guilds[guild.id].requiresConfig == true) {
+            settings.guilds[guild.id].requiresConfig = false;
+        }
+    }
+
+    //Iterate over all guilds in settings
+    for (let key in settings.guilds) {
+        log("Checking internal guild " + key);
+        if (!availableGuilds.includes(key)) {
+            changesMade = true;
+            log("Deleting guild " + key + " as this guild is no longer recognised.", logType.info);
+            delete settings.guilds[key];
+        }
+
+        if (settings.guilds[key].locale == undefined) {
+            changesMade = true;
+            log(`Detected guild ${key} without set locale. Setting locale to en.`, logType.info);
+            settings.guilds[key].locale = "en";
+        }
+    }
+
+    if (changesMade) {
+        log("AstralMod Configuration was checked and changes were made. No other actions need to be taken.", logType.warning);
+        log("Old settings backed up as .settings-backup.json", logType.info);
+    } else {
+        fs.unlinkSync(".settings-backup.json");
+        log("AstralMod Configuration checked. No changes have been made", logType.good);
+    }
+    return true;
 }
 
 function guildUnavailable(guild) {
