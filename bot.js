@@ -2926,7 +2926,7 @@ async function processMessage(message) {
                     if (triedCommand.startsWith(c) || triedCommand == c || 
                         (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
                         //Block this command and treat it like a normal message
-                        commandEmitter.emit('newMessage', message);
+                        commandEmitter.emit('newMessage', message, options);
                         return;
                     }
                 }
@@ -2937,7 +2937,7 @@ async function processMessage(message) {
                     if (triedCommand.startsWith(c) || triedCommand == c || 
                         (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
                         //Block this command and treat it like a normal message
-                        commandEmitter.emit('newMessage', message);
+                        commandEmitter.emit('newMessage', message, options);
                         return;
                     }
                 }
@@ -2957,7 +2957,7 @@ async function processMessage(message) {
                     }
                 }
             } else {
-                commandEmitter.emit('newMessage', message);
+                commandEmitter.emit('newMessage', message, options);
             }
         } else {
             //Determine if this is within a workflow or if this is unsolicited
