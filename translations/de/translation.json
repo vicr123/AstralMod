@@ -13,7 +13,7 @@
     "UINFO_NICKNAME": "**Spitzname:** {{nickname}}",
     "UINFO_NAMES": "Namen",
     "UINFO_INVALID_JOIN": "Bis in die Unendlichkeit, und noch viel weiter! Discord gibt mir inkorrekte Infos... :(",
-    "UINFO_NOT_PART_OF_SERVER": "Dieser Benutzer ist dicht auf diesem Server.",
+    "UINFO_NOT_PART_OF_SERVER": "Dieser Benutzer ist nicht auf diesem Server.",
     "UINFO_NOT_ALLOWED_SERVER_SPECIFIC": "Dir ist es nicht erlaubt, Serverspezifische Informationen auf diesem Server zu sehen.",
     "SETLOC_TITLE": "AstralMod Lokalisierung",
     "SETLOC_LANGUAGE": "OK, deine Sprache ist nun {{locale}}.",
