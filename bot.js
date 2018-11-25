@@ -1605,6 +1605,12 @@ function processModCommand(message) {
     var text = message.content;
     var lText = text.toLowerCase();
 
+    let options = {
+        locale: settings.users[message.author.id].locale,
+        imperial: settings.users[message.author.id].units === "imperial",
+        h24: settings.users[message.author.id].timeunit !== "12h"
+    };
+
     //Special cases
     if (lText == prefix + "config") {
         //Make sure person isn't configuring any other guild
@@ -1674,7 +1680,7 @@ function processModCommand(message) {
         command = text.toLowerCase().substr(prefix.length);
         if (command.startsWith("oknick")) {
             let userId = command.substr(7);
-            acceptNicknameChange(message.guild.id, userId, message.channel.id, message.author.tag);
+            acceptNicknameChange(message.guild.id, userId, message.channel.id, message.author.tag, options);
             return true;
         }
     }
@@ -1743,7 +1749,8 @@ function requestNickname(member, nickname, guild) {
     }
 }
 
-function acceptNicknameChange(guildId, userId, channelId) {
+function acceptNicknameChange(guildId, userId, channelId, options) {
+    let $ = _[options.locale];
     let guild = client.guilds.get(guildId);
     if (nickChanges[guildId] != null) {
         if (nickChanges[guildId][userId] != null) {
@@ -1753,12 +1760,12 @@ function acceptNicknameChange(guildId, userId, channelId) {
                 return member.setNickname(nickChanges[guildId][userId]);
             }).then(function() {
                 nickChanges[guildId][userId] = null;
-                guild.channels.get(channelId).send(':white_check_mark: ' + tr('User nickname has been accepted'));
+                guild.channels.get(channelId).send($("OKNICK_ACCEPTED", {emoji: ":white_check_mark:"}));
             }).catch(function() {
-                guild.channels.get(channelId).send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
+                guild.channels.get(channelId).send($("OKNICK_THAT_DIDNT_WORK", {emoji: ":no_entry_sign:"}));
             });
         } else {
-            guild.channels.get(channelId).send(':no_entry_sign: ERROR: ' + tr('That didn\'t work.'));
+            guild.channels.get(channelId).send($("OKNICK_THAT_DIDNT_WORK", {emoji: ":no_entry_sign:"}));
         }
     }
 }
