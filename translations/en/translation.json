@@ -154,5 +154,7 @@
     "TRANSLATE_TITLE": "Translate",
     "TRANSLATE_POWERED_BY": "Powered by Yandex.Translate",
     "TRANSLATE_SOURCE": "Source Text ({{fromLang}})",
-    "TRANSLATE_TRANSLATED": "Translated Text ({{toLang}})"
+    "TRANSLATE_TRANSLATED": "Translated Text ({{toLang}})",
+    "OKNICK_ACCEPTED": "{{emoji}} User nickname has been accepted.",
+    "OKNICK_THAT_DIDNT_WORK": "{{emoji}} ERROR: That didn't work."
 }
