@@ -1999,7 +1999,7 @@ function processAmCommand(message, options) {
         embed.setAuthor($("HELP_CONTENTS"));
         embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix}));
 
-        embed.addField($("HELP_CORE_COMMANDS"), "**config**\n**shoo**\n**oknick**\nping\nnick\nfetchuser\nversion\nabout\nhelp", true);
+        embed.addField($("HELP_CORE_COMMANDS"), "**config**\n**shoo**\n**oknick**\nping\nnick\nsetlocale\nfetchuser\nversion\nabout\nhelp", true);
 
         for (key in plugins) {
             var plugin = plugins[key];
