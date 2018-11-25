@@ -926,9 +926,18 @@ global.logPromiseRejection = function(object, action) {
     log("Couldn't delete message " + object.id + " in channel " + object.channel.id, logType.warning);
 };
 
-process.on('unhandledRejection', function(err, p) {
-    log(err.stack, logType.critical);
+// HACK HACK HACK HACK
+// THIS SHOULD NOT BE RELIED UPON
+// We should attach .catch() listeners to all promises ASAP
+process.removeAllListeners('unhandledRejection').on('unhandledRejection', function(err, p) {
+    p.catch(function(error) {
+        log(error, logType.critical);
+    });
 });
+
+global.handleUnexpectedRejection = function(error) {
+    log(error, logType.critical);
+}
 
 process.on('uncaughtException', function(err) {
     //Uncaught Exception
@@ -1598,7 +1607,7 @@ global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact
             }
         }
         messageToEdit.edit(embed);
-    });
+    }).catch(handleUnexpectedRejection);
 }
 
 function processModCommand(message, command) {
@@ -1671,6 +1680,8 @@ function processModCommand(message, command) {
         if (message.author.id == global.botOwner.id) {
             message.reply("AstralMod is now exiting.").then(function () {
                 shutdown();
+            }).then(function() {
+                shutdown();
             });
         }
     }
@@ -1737,7 +1748,7 @@ function requestNickname(member, nickname, guild, options) {
                     acceptNicknameChange(message.guild.id, member.user.id, message.channel.id, options);
                 });
             });
-        });
+        }).catch(handleUnexpectedRejection);
 
         settings.guilds[guild.id].pendingNicks = pendingNicks;
         return "ok";
