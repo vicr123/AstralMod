@@ -104,7 +104,7 @@ async function processEval(message) {
 
 function processCommand(message, isMod, command) {
     if (command == "exec") {
-        if (message.author.id == global.ownerId.id) {
+        if (message.author.id == global.botOwner.id) {
             captureInput(processEval, message.guild.id, message.author.id);
 
             if (currentGuild != 0) {

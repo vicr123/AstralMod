@@ -24,7 +24,7 @@ const zlib = require('zlib');
 
 function processCommand(message, isMod, command) {
     if (command == "retrsettings") {
-        if (message.author.id == global.ownerId.id) {
+        if (message.author.id == global.botOwner.id) {
             sendPreloader("Preparing the settings file...", message.channel).then(function(messageToEdit) {
                 //Compress the settings with gzip to save space
                 zlib.gzip(JSON.stringify(settings), function(error, result) {

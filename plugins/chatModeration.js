@@ -242,78 +242,120 @@ function processCommand(message, isMod, command) {
             settings.guilds[message.guild.id].blocked[blockId].push("all");
             
             if (blockId == "guild") {
-                message.channel.send("All commands in this server will now be ignored.");
+                message.channel.send("Ok, all features in this server will now be ignored.");
             } else {
-                message.channel.send("All commands in this channel will now be ignored.");
+                message.channel.send("Ok, all features in this channel will now be ignored.");
             }
         } else if (command.startsWith("block ")) {
             let c = command.substr(6).trim().toLowerCase();
 
             if (c.indexOf(" ") != -1) {
-                message.channel.send("Commands are one word. Please specify a valid command.");
+                message.reply("Features are one word. Please specify a valid feature.");
                 return;
             }
 
             if (c == "block") {
-                message.channel.send("Can't block the `block` command. Please try another command.");
+                message.reply("I can't block the `block` command.");
                 return;
             }
 
             if (c == "unblock") {
-                message.channel.send("Can't block the `unblock` command. Please try another command.");
+                message.reply("I can't block the `unblock` command.");
+                return;
+            }
+
+            if (c == "log" && [settings.guilds[message.guild.id].chatLogs, 
+                               settings.guilds[message.guild.id].botWarnings, 
+                               settings.guilds[message.guild.id].memberAlerts].includes(message.channel.id)) {
+                message.reply("Log channels already have log collection from them disabled.");
                 return;
             }
 
             if (blockId == "guild" && c == "spam") {
-                message.channel.send("To disable spam control for the server, use the `" + prefix + "`spamctl command.");
+                message.reply("To disable spam control for the server, use the `" + prefix + "spamctl` command.");
+                return;
+            }
+
+            if (blockId == "guild" && c == "log") {
+                message.reply("To disable log collection from the server, use the `" + prefix + "config` command to disable message logging.");
+                return;
+            }
+
+            if (settings.guilds[message.guild.id].blocked[blockId].includes(c)) {
+                if (c == "spam") {
+                    message.reply("You've already disabled spam control in this channel.");
+                } else if (c == "log") { 
+                    message.reply("You've already disabled log collection in this channel.");
+                } else {
+                    message.reply("You've already disabled `" + c + "`  in this channel.");
+                }
+
                 return;
             }
 
             settings.guilds[message.guild.id].blocked[blockId].push(c);
 
             if (blockId == "guild") {
-                if (c == "spam") {
-                    message.channel.send("Spam control is now off in this server.");
-                } else {
-                    message.channel.send("`" + c + "` is now blocked in this server.");
-                }
+                message.reply("Ok, I've blocked people from running `" + c + "` in this server.");
             } else {
                 if (c == "spam") {
-                    message.channel.send("Spam control is now off in this channel.");
+                    message.reply("Ok, I've disabled spam control in this channel.");
+                } else if (c == "log") { 
+                    message.reply("Ok, I've disabled log collection from this channel.");
                 } else {
-                    message.channel.send("`" + c + "` is now blocked in this channel.");
+                    message.reply("Ok, I've blocked people from running `" + c + "`  in this channel.");
                 }
             }
         } else if (command == "unblock") {
             settings.guilds[message.guild.id].blocked[blockId] = [];
-            message.channel.send("Every previously blocked feature has now been unblocked.");
+            message.reply("Ok, every previously blocked feature has now been unblocked.");
         } else if (command.startsWith("unblock ")) {
             let c = command.substr(8).trim().toLowerCase();
 
             if (c.indexOf(" ") != -1) {
-                message.channel.send("Features are one word. Please specify a valid command.");
-                return;
-            }
-
-            if (settings.guilds[message.guild.id].blocked[blockId].indexOf(c) == -1) {
-                message.channel.send("This feature has not been blocked.");
+                message.reply("Features are one word. Please specify a valid feature.");
                 return;
             }
 
             if (blockId == "guild" && c == "spam") {
-                message.channel.send("To enable spam control for the server, use the `" + prefix + "`spamctl command.");
+                message.reply("To enable spam control for the server, use the `" + prefix + "spamctl` command.");
                 return;
+            }
+
+            if (c == "log" && [settings.guilds[message.guild.id].chatLogs, 
+                               settings.guilds[message.guild.id].botWarnings, 
+                               settings.guilds[message.guild.id].memberAlerts].includes(message.channel.id)) {
+                message.reply("Log channels cannot have have log collection from them disabled. Please try another channel.");
+                return;
+            }
+
+            if (blockId == "guild" && c == "spam") {
+                message.reply("To disable spam control for the server, use the `" + prefix + "spamctl` command.");
+                return;
+            }
+
+            if (settings.guilds[message.guild.id].blocked[blockId].indexOf(c) == -1) {
+                if (c == "spam") {
+                    message.reply("You haven't disabled spam control in this channel.");
+                } else if (c == "log") { 
+                    message.reply("You haven't disabled log collection in this channel.");
+                } else {
+                    message.reply("You haven't disabled `" + c + "`  in this channel.");
+                }    
+                    return;
             }
 
             settings.guilds[message.guild.id].blocked[blockId].splice(settings.guilds[message.guild.id].blocked[blockId].indexOf(c), 1);
 
             if (blockId == "guild") {
-                message.channel.send("`" + c + "` is now unblocked in this server.");
+                message.reply("Ok, I've allowed people to run `" + c + "` in this server.");
             } else {
                 if (c == "spam") {
-                    message.channel.send("Spam control is now on in this channel.");
+                    message.reply("Ok, I've enabled spam control in this channel.");
+                } else if (c == "log") { 
+                    message.reply("Ok, I've enabled log collection from this channel.");
                 } else {
-                    message.channel.send("`" + c + "` is now unblocked in this channel.");
+                    message.reply("Ok, I've allowed people to runn `" + c + "`  in this channel.");
                 }
             }
         }
