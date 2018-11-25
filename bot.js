@@ -1687,7 +1687,7 @@ function processModCommand(message) {
     return false;
 }
 
-function requestNickname(member, nickname, guild) {
+function requestNickname(member, nickname, guild, options) {
     if (nickname.length > 32) {
         return "length";
     }
@@ -1736,7 +1736,7 @@ function requestNickname(member, nickname, guild) {
                     max: 1
                 }).then(function() {
                     //Accept the nickname
-                    acceptNicknameChange(message.guild.id, member.user.id, message.channel.id);
+                    acceptNicknameChange(message.guild.id, member.user.id, message.channel.id, options);
                 });
             });
         });
@@ -1871,7 +1871,7 @@ function processAmCommand(message, options) {
                     author: message.author,
                     locale: options.locale
                 }).then(function() {
-                    requestNickname(message.member, text.substr(8), message.guild);
+                    requestNickname(message.member, text.substr(8), message.guild, options);
                 }).catch(function() {
                     //Don't do anything
                 });
@@ -1923,7 +1923,7 @@ function processAmCommand(message, options) {
                     ],
                     locale: options.locale
                 }).then(function() {
-                    requestNickname(message.member, text.substr(8), message.guild);
+                    requestNickname(message.member, text.substr(8), message.guild, options);
                 }).catch(function() {
                     //Don't do anything
                 });
