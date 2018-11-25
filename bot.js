@@ -1601,7 +1601,7 @@ global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact
     });
 }
 
-function processModCommand(message) {
+function processModCommand(message, command) {
     var text = message.content;
     var lText = text.toLowerCase();
 
@@ -1676,8 +1676,6 @@ function processModCommand(message) {
     }
 
     if (isMod(message.member)) {
-        let command;
-        command = text.toLowerCase().substr(prefix.length);
         if (command.startsWith("oknick")) {
             let userId = command.substr(7);
             acceptNicknameChange(message.guild.id, userId, message.channel.id, message.author.tag, options);
@@ -1788,12 +1786,10 @@ function getNickStatus(member, nickname, guild) {
     return moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd');
 }
 
-function processAmCommand(message, options) {
+function processAmCommand(message, options, command) {
     var text = message.content;
     var command;
     let $ = _[options.locale];
-
-    command = text.toLowerCase().substr(prefix.length);
 
     if (command == "ping") {
         let pingDate = Date.now();
@@ -2933,17 +2929,19 @@ async function processMessage(message) {
             } else if (param === "--24" || param === "--24h" || param === "--24hr") {
                 options.h24 = true;
             } else if (param === "--metric") {
-                options.h24 = true;
+                options.imperial = false;
             } else if (param === "--imperial") {
-                options.h24 = true;
-            } else if (availableTranslations.includes(param.substr(2))) {
-                options.locale = param.substr(2);
+                options.imperial = true;
+            } else if (availableTranslations.getTranslation(param.substr(2)) != null) {
+                options.locale = availableTranslations.getTranslation(param.substr(2));
             } else {
                 continue;
             }
 
             text = text.replace(param, "");
         }
+
+        text = text.trim();
 
         //Don't respond to direct messages
         if (message.guild != null) {
@@ -2963,11 +2961,19 @@ async function processMessage(message) {
 
             if (capture[message.guild.id] != null && capture[message.guild.id].author == message.author.id) {
                 capture[message.guild.id].function(message);
-            } else if (text.toLowerCase().startsWith(prefix)) {
+            } else if (text.toLowerCase().startsWith(prefix) || text.startsWith(message.guild.me.toString())) {
                 //Check if the command has been blocked
+                let prefixLength = prefix.length;
+                if(text.startsWith(message.guild.me.toString())) {
+                    prefixLength = message.guild.me.toString().length
+                    if (message.content[prefixLength] == " ") {
+                        prefixLength += 1;
+                    }
+                }
+
                 for (let key in settings.guilds[message.guild.id].blocked[message.channel.id]) {
                     let c = settings.guilds[message.guild.id].blocked[message.channel.id][key];
-                    let triedCommand = text.toLowerCase().substr(prefix.length);
+                    let triedCommand = text.toLowerCase().substr(prefixLength);
                     if (triedCommand.startsWith(c) || triedCommand == c || 
                         (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
                         //Block this command and treat it like a normal message
@@ -2978,7 +2984,7 @@ async function processMessage(message) {
 
                 for (let key in settings.guilds[message.guild.id].blocked.guild) {
                     let c = settings.guilds[message.guild.id].blocked.guild[key];
-                    let triedCommand = text.toLowerCase().substr(prefix.length);
+                    let triedCommand = text.toLowerCase().substr(prefixLength);
                     if (triedCommand.startsWith(c) || triedCommand == c || 
                         (c == "all" && !triedCommand.startsWith("block") && !triedCommand.startsWith("unblock"))) {
                         //Block this command and treat it like a normal message
@@ -2989,16 +2995,16 @@ async function processMessage(message) {
 
                 //Determine if this is a command
                 if (isMod(message.member) || text == prefix + "config") { //This is a mod command
-                    if (!processModCommand(message)) {
-                        if (!processAmCommand(message, options)) {
+                    if (!processModCommand(message, text.substr(prefixLength).toLowerCase())) {
+                        if (!processAmCommand(message, options, text.substr(prefixLength).toLowerCase())) {
                             //Pass command onto plugins
-                            commandEmitter.emit('processCommand', message, true, text.substr(prefix.length).toLowerCase(), options);
+                            commandEmitter.emit('processCommand', message, true, text.substr(prefixLength).toLowerCase(), options);
                         }
                     }
                 } else {
-                    if (!processAmCommand(message, options)) {
+                    if (!processAmCommand(message, options, text.substr(prefixLength).toLowerCase())) {
                         //Pass command onto plugins
-                        commandEmitter.emit('processCommand', message, false, text.substr(prefix.length).toLowerCase(), options);
+                        commandEmitter.emit('processCommand', message, false, text.substr(prefixLength).toLowerCase(), options);
                     }
                 }
             } else {
