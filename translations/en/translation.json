@@ -162,5 +162,8 @@
     "CHNK_MISSING_USER_PERMISSION": "You're not allowed to manage this user.",
     "CHNK_MISSING_BOT_PERMISSION": "I couldn't change the nickname of {{user}}. (Am I missing permissions?)",
     "CHNK_USER_NOT_FOUND": "I couldn't find that user.",
-    "SETTINGSSIZE": "The settings file is {{bytes}} bytes long."
+    "SETTINGSSIZE": "The settings file is {{bytes}} bytes long.",
+    "SETTZ_ABOUT": "Usage: `{{prefix}}settz [your timezone]`. For more information, `{{prefix}}help settz`",
+    "SETTZ_INVALID_TIMEZONE": "That's not a valid timezone.",
+    "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}."
 }

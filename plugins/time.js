@@ -275,7 +275,7 @@ async function processCommand(message, isMod, command, options) {
         }
 
         if (isNaN(utcOffset) || utcOffset < -14 || utcOffset > 14) {
-            message.reply("Usage: `" + prefix + "settz [your timezone]`. For more information, `" + prefix + "help settz`");
+            message.reply($("SETTZ_ABOUT", {prefix}));
         } else {
             var userSettings = settings.users[message.author.id];
 
@@ -287,13 +287,13 @@ async function processCommand(message, isMod, command, options) {
             settings.users[message.author.id] = userSettings;
 
             if (isNaN(parseFloat(utcOffset))) {
-                throw new UserInputError("Invalid Timezone");
+                throw new UserInputError($("SETTZ_INVALID_TIMEZONE"));
             } else {
-                message.reply("Your timezone is now UTC " + parseFloat(utcOffset));
+                message.reply($("SETTZ_TIMEZONE_SET", {offset: parseFloat(utcOffset)}));
             }
         }
     } else if (command == "settz") {
-        message.reply("Usage: `" + prefix + "settz [UTC offset]`. For more information, `" + prefix + "help settz`");
+        message.reply($("SETTZ_ABOUT", {prefix}));
     } else if (command.startsWith("timer ")) {
         var time;
         var indexOfFirstSplit = command.indexOf(" ", 6);
