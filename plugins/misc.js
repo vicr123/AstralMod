@@ -32,7 +32,7 @@ function processCommand(message, isMod, command, options) {
         var users = parseUser(user, message.guild);
 
         if (users.length == 0) {
-            message.reply("No results");
+            message.reply($("PIC_NO_RESULTS"));
         } else {
             message.reply(users[0].displayAvatarURL);
         }
@@ -45,18 +45,18 @@ function processCommand(message, isMod, command, options) {
 
         if (units.toLowerCase() === "metric") {
             settings.users[message.author.id].units = "metric";
-            message.reply("Ok, we'll use the metric system for your units from now on");
+            message.reply($("SETUNIT_METRIC"));
         } else if (units.toLowerCase() === "imperial") {
             settings.users[message.author.id].units = "imperial";
-            message.reply("Ok, we'll use the imperial system for your units from now on");
+            message.reply($("SETUNIT_IMPERIAL"));
         } else if (units.toLowerCase() === "12" || units.toLowerCase() === "12h" || units.toLowerCase() === "12hr") {
             settings.users[message.author.id].timeunit = "12h";
-            message.reply("Ok, we'll use 12 hours for your time from now on");
+            message.reply($("SETUNIT_12"));
         } else if (units.toLowerCase() === "24" || units.toLowerCase() === "24h" || units.toLowerCase() === "24hr") {
             settings.users[message.author.id].timeunit = "24h";
-            message.reply("Ok, we'll use 24 hours for your time from now on");
+            message.reply($("SETUNIT_24"));
         } else {
-            throw new UserInputError("Units need to be `metric`, `imperial`, `12h` or `24h`");
+            throw new UserInputError($("SETUNIT_INVALID_UNIT"));
         }
     } else if (command == "sinfo") {
         let g = message.guild;
@@ -120,29 +120,29 @@ function processCommand(message, isMod, command, options) {
                 let msg;
                 switch (g.explicitContentFilter) {
                     case 0:
-                        msg = "- This server does not filter explicit content.\n";
+                        msg = $("SINFO_NSFW_ALLOWED");
                         break;
                     case 1:
-                        msg = "- This server prohibits explicit content, except in NSFW channels, unless you have a role.\n";
+                        msg = $("SINFO_NSFW_ROLE_CHANNEL");
                         break;
                     case 2:
-                        msg = "- This server prohibits explicit content, except in NSFW channels\n";
+                        msg = $("SINFO_NSFW_CHANNEL");
                 }
 
                 if (!g.me.hasPermission("ADMINISTRATOR")) {
-                    msg += "- AstralMod is lacking the Administrator permission. Features and future functionality may be limited.\n";
+                    msg += $("SINFO_LACKPERM_ADMINISTRATOR");
                 }
                 if (!g.me.hasPermission("MANAGE_MESSAGES")) {
-                    msg += "- AstralMod is lacking the Manage Messages permission. AstralMod will not be able to delete messages or control spam in this server.\n";
+                    msg += $("SINFO_LACKPERM_MANAGE_MESSAGES");
                 }
                 if (!g.me.hasPermission("KICK_MEMBERS")) {
-                    msg += "- AstralMod is lacking the Kick permission. AstralMod will not be able to kick users in this server.\n";
+                    msg += $("SINFO_LACKPERM_KICK");
                 }
                 if (!g.me.hasPermission("BAN_MEMBERS")) {
-                    msg += "- AstralMod is lacking the Kick permission. AstralMod will not be able to ban users in this server.\n";
+                    msg += $("SINFO_LACKPERM_BAN");
                 }
                 if (!g.me.hasPermission("MANAGE_NICKNAMES")) {
-                    msg += "- AstralMod is lacking the Manage Nicknames permission. AstralMod will not be able to change nicknames in this server.\n";
+                    msg += $("SINFO_LACKPERM_MANAGE_NICKNAME");
                 }
     
                 embed.addField($("SINFO_ALERTS"), msg);
@@ -173,7 +173,7 @@ function processCommand(message, isMod, command, options) {
                     embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
                     embed.setColor("#FF0000");
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
-                    embed.setDescription(tr("Calculations"));
+                    embed.setDescription($("CALC_DESC"));
                     
                     for (let key in out) {
                         let parts = out[key].split(":");
@@ -185,29 +185,29 @@ function processCommand(message, isMod, command, options) {
                         }
                     }
 
-                    message.reply("Here are your results", {embed: embed});
+                    message.reply($("CALC_RESULTS"), {embed: embed});
                 }
             } else {
                 if (out.length == 1) {
-                    message.reply("The answer is " + stdout);
+                    message.reply($("CALC_ANSWER_IS") + stdout);
                 } else {
                     let embed = new Discord.RichEmbed("calculation");
                     embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
                     embed.setColor("#00FF00");
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
-                    embed.setDescription(tr("Calculations"));
+                    embed.setDescription($("CALC_DESC"));
                     
                     for (let key in out) {
                         let parts = out[key].split(":");
                         embed.addField(parts[0].trim(), parts[1].trim(), true);
                     }
 
-                    message.reply("Here are your results", {embed: embed});
+                    message.reply($("CALC_RESULTS"), {embed: embed});
                 }
             }
         });
     } else if (command.startsWith("tr ")) {
-        sendPreloader("Translating...", message.channel).then(function(message) {
+        sendPreloader($("TRANSLATE_TRANSLATING"), message.channel).then(function(message) {
             let words = command.substr(3);
             let args = words.split(" ");
             
@@ -234,14 +234,14 @@ function processCommand(message, isMod, command, options) {
 
                 translate.translate(sourceText, options, function(err, res) {
                     let embed = new Discord.RichEmbed("translate");
-                    embed.setAuthor("Translate");
+                    embed.setAuthor($("TRANSLATE_TITLE"));
                     embed.setColor("#00FF00");
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
-                    embed.setTitle("Powered by Yandex.Translate");
+                    embed.setTitle($("TRANSLATE_POWERED_BY"));
                     embed.setURL("http://translate.yandex.com/");
 
-                    embed.addField("Source Text (" + fromLang + ")", sourceText);
-                    embed.addField("Translated Text (" + toLang + ")", res.text);
+                    embed.addField($("TRANSLATE_SOURCE", {fromLang: fromLang}));
+                    embed.addField($("TRANSLATE_TRANSLATED", {toLang: toLang}));
 
                     message.edit(embed);
                 });
