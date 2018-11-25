@@ -45,7 +45,7 @@ if (process.argv.indexOf("--blueprint") == -1) {
     global.prefix = consts.config.bprefix;
 }
 
-global.ownerId = undefined;
+global.botOwner = undefined;
 
 let doNotDeleteGuilds = [];
 
@@ -1480,6 +1480,9 @@ function setGame() {
 }
 
 function isMod(member) {
+    if(member.id == global.botOwner.id)
+        return true;
+
     var modRoles = settings.guilds[member.guild.id].modRoles;
     if (modRoles == null) {
         if (member.permissions.has(Discord.Permissions.FLAGS.BAN_MEMBERS, true)) {
@@ -1628,7 +1631,7 @@ function processModCommand(message) {
         }
 
         if (settings.guilds[message.guild.id].requiresConfig) {
-            if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id) {
+            if (message.author.id == global.botOwner.id || message.author.id == message.guild.owner.user.id) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, separated by a space.");
@@ -1650,7 +1653,7 @@ function processModCommand(message) {
             //Configuration menu
 
             //Make sure person has necessary permissions
-            if (message.author.id == global.ownerId.id || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
+            if (message.author.id == global.botOwner.id || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
                 message.author.send(getSingleConfigureWelcomeText(message.guild));
@@ -1659,7 +1662,7 @@ function processModCommand(message) {
             }
         }
     } else if (lText == prefix + "poweroff") {
-        if (message.author.id == global.ownerId.id) {
+        if (message.author.id == global.botOwner.id) {
             message.reply("AstralMod is now exiting.").then(function () {
                 shutdown();
             });
@@ -2205,7 +2208,7 @@ function processAmCommand(message, options) {
         throw new Error(msg);
         return true;
     } else if (command == "shoo") {
-        if (message.author.id == global.ownerId.id | message.member.hasPermission(Discord.Permissions.FLAGS.KICK_MEMBERS, false, true, true)) {
+        if (message.author.id == global.botOwner.id | message.member.hasPermission(Discord.Permissions.FLAGS.KICK_MEMBERS, false, true, true)) {
             awaitUserConfirmation({
                 title: "Kicking AstralMod :(",
                 msg: "AstralMod is about to leave :(",
@@ -2561,10 +2564,13 @@ function processSingleConfigure(message, guild) {
                     message.author.send("What locale do you want to use for this server? The available locales are:");
                     let locales = "";
                     for (let locale of availableTranslations) {
-                        locales += `● ${locale}+\n`;
+                        let thisLocale = _[locale]("THIS_LOCALE");
+                        if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
+                        if (locale == "en") thisLocale = "English";
+                        locales += "`" + locale + "` - " + thisLocale + "\n";
                     }
+                    
                     message.author.send(locales);
-
                     guildSetting.configuringStage = 60;
                     break;
                 case "0": //Exit
@@ -2588,7 +2594,7 @@ function processSingleConfigure(message, guild) {
                         guildSetting.echoOffensive = true;
                     }
 
-                    message.author.send("Ok, I'll filter expletive words from now on.");
+                    message.author.send("Ok, I'll filter expletive words in my messages from now on.");
                     message.author.send(getSingleConfigureWelcomeText(guild));
                     break;
                 case "<": //Reset AstralMod
@@ -2679,7 +2685,17 @@ function processSingleConfigure(message, guild) {
         }
         case 21: { //Member Alerts Channel - Confirm
             if (text == "yes" || text == "y") {
+                try {
+                    guildSetting.blocked[guildSetting.memberAlerts].splice(guildSetting.blocked[guildSetting.memberAlerts].indexOf("log"), 1);
+                } catch { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
+
                 guildSetting.memberAlerts = guildSetting.tentativeMemberAlerts;
+
+                if (guildSetting.memberAlerts) {
+                    guildSetting.blocked[guildSetting.memberAlerts] = guildSetting.blocked[guildSetting.memberAlerts] == null ? [] : guildSetting.blocked[guildSetting.memberAlerts]
+                    guildSetting.blocked[guildSetting.memberAlerts].push("log");
+                }
+                
                 delete guildSetting.tentativeMemberAlerts;
 
                 message.author.send("Thanks, I'll save that.");
@@ -2724,7 +2740,17 @@ function processSingleConfigure(message, guild) {
                 message.author.send(getSingleConfigureWelcomeText(guild));
                 guildSetting.configuringStage = 0;
             } else if (text == "yes" || text == "y") {
+                try {
+                    guildSetting.blocked[guildSetting.chatLogs].splice(guildSetting.blocked[guildSetting.chatLogs].indexOf("log"), 1);
+                } catch { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
+
                 guildSetting.chatLogs = guildSetting.tentativeChatLogs;
+
+                if (guildSetting.chatLogs) {
+                    guildSetting.blocked[guildSetting.chatLogs] = guildSetting.blocked[guildSetting.chatLogs] == null ? [] : guildSetting.blocked[guildSetting.chatLogs]
+                    guildSetting.blocked[guildSetting.chatLogs].push("log");
+                }
+
                 delete guildSetting.tentativeChatLogs;
 
                 message.author.send("Thanks, I'll save that.");
@@ -2762,7 +2788,17 @@ function processSingleConfigure(message, guild) {
         }
         case 41: { //Botwarnings Channel - Confirm
             if (text == "yes" || text == "y") {
+                try {
+                    guildSetting.blocked[guildSetting.botWarnings].splice(guildSetting.blocked[guildSetting.botWarnings].indexOf("log"), 1);
+                } catch { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
+
                 guildSetting.botWarnings = guildSetting.tentativeBotWarnings;
+
+                if (guildSetting.botWarnings) {
+                    guildSetting.blocked[guildSetting.botWarnings] = guildSetting.blocked[guildSetting.botWarnings] == null ? [] : guildSetting.blocked[guildSetting.botWarnings]
+                    guildSetting.blocked[guildSetting.botWarnings].push("log");
+                }
+
                 delete guildSetting.tentativeBotWarnings;
 
                 message.author.send("Thanks, I'll save that.");
@@ -2819,10 +2855,15 @@ function processSingleConfigure(message, guild) {
         case 60: { //Locale
             if (!availableTranslations.includes(text)) {
                 message.author.send("That locale doesn't exist. The available locales are:");
+                
                 let locales = "";
                 for (let locale of availableTranslations) {
-                    locales += `● ${locale}\n`;
+                    let thisLocale = _[locale]("THIS_LOCALE");
+                    if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
+                    if (locale == "en") thisLocale = "English";
+                    locales += "`" + locale + "` - " + thisLocale + "\n";
                 }
+                
                 message.author.send(locales);
             } else {
                 message.author.send("You're setting " + text + " as the server locale. Is that correct?");
@@ -3121,12 +3162,17 @@ function messageDeleted(message) {
             if (client.channels.has(settings.guilds[message.guild.id].chatLogs)) {
                 channel = client.channels.get(settings.guilds[message.guild.id].chatLogs);
             } else {
-                log("Chat Logs channel " + settings.guilds[message.guild.id].chatLogs + " not found", logType.critical);
+                log("Chat Logs channel " + settings.guilds[message.guild.id].chatLogs + " not found", logType.warning);
+                return;
             }
         }
     }
 
-    if (channel != null && message.channel != channel) {
+    if (channel != null) {
+        if (settings.guilds[message.guild.id].blocked[message.channel.id].includes("log")) { //If the channel the message was in has logs blocked (or the message was in a log channel, which shouldn't get logged either)
+            return;
+        }
+
         var msg = ":wastebasket: **" + getUserString(message.author) + "** <#" + message.channel.id + "> `" + message.createdAt.toUTCString() + "`.";
 
         if (message.cleanContent.length) {
@@ -3159,12 +3205,17 @@ function messageUpdated(oldMessage, newMessage) {
             if (client.channels.has(settings.guilds[oldMessage.guild.id].chatLogs)) {
                 channel = client.channels.get(settings.guilds[oldMessage.guild.id].chatLogs);
             } else {
-                log("Chat Logs channel " + settings.guilds[oldMessage.guild.id].chatLogs + " not found", logType.critical);
+                log("Chat Logs channel " + settings.guilds[oldMessage.guild.id].chatLogs + " not found", logType.warning);
+                return;
             }
         }
     }
 
     if (channel != null && oldMessage.channel != channel) {
+        if (settings.guilds[newMessage.guild.id].blocked[newMessage.channel.id].includes("log")) { //If the channel the message was in has logs blocked (or the message was in a log channel, which shouldn't get logged either)
+            return;
+        }   
+
         var msg = ":pencil2: **" + getUserString(oldMessage.author) + "** <#" + oldMessage.channel.id + "> `" + oldMessage.createdAt.toUTCString() + "`.\n";
 
 
@@ -3465,6 +3516,22 @@ function vacuumSettings() {
             delete settings.guilds[key];
         }
 
+        for (let logChannel in ["chatLogs, botWarnings, memberAlerts"]) {
+            if(settings.guilds[key][logChannel] != undefined) {
+                if (settings.guilds[key].blocked[logChannel] == undefined) {
+                    log(`Detected logging channel ${settings.guilds[key].chatLogs} without blocked feature list. Creating array.`, logType.info);
+                    settings.guilds[key].blocked[logChannel] = [];
+                    changesMade = true;
+                }
+
+                if (!settings.guilds[key].blocked[logChannel].includes("log")) {
+                    log(`Detected logging channel ${settings.guilds[key].chatLogs} without blocked logging. Blocking logs.`, logType.info);
+                    settings.guilds[key].blocked[settings.guilds[key][logChannel]].push("log");
+                    changesMade = true;
+                }
+            }
+        }
+
         if (settings.guilds[key].locale == undefined) {
             changesMade = true;
             log(`Detected guild ${key} without set locale. Setting locale to en.`, logType.info);
@@ -3712,7 +3779,7 @@ function readyOnce() {
 
     postDBL();
 
-    client.fetchApplication().then(app => global.ownerId = app.owner);
+    client.fetchApplication().then(app => global.botOwner = app.owner);
 }
 
 client.once('ready', readyOnce);
