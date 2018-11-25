@@ -24,7 +24,8 @@ var consts;
 var pingMessage = null;
 var pingDate = null;
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
     if (command == "uptime") {
         var uptime = parseInt(client.uptime); // Get uptime in ms
         uptime = Math.floor(uptime / 1000); // Convert from ms to s
@@ -55,7 +56,7 @@ function processCommand(message, isMod, command) {
 
         message.reply(":clock1: AstralMod has been up for " + timeString + " days.");
     } else if (command == "settingssize") {
-        message.reply("The settings file is " + JSON.stringify(settings).length + " bytes long.");
+        message.reply($("SETTINGSSIZE", {bytes: JSON.stringify(settings).length}));
     }
 }
 
