@@ -22,7 +22,8 @@ var client;
 var consts;
 const Discord = require('discord.js');
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
     if (isMod) {
         let blockId = message.channel.id;
         if (command.indexOf("--serverwide") != -1) {
@@ -200,14 +201,14 @@ function processCommand(message, isMod, command) {
             }
 */
         } else if (command == "chnk") {
-            message.channel.send("Usage: mod:chnk user. For more information, `mod:help chnk`.");
+            message.channel.send($("CHNK_ABOUT", {prefix}));
         } else if (command.startsWith("chnk ")) {
             //message.reply("This command is not ready yet.");
             let userStr = command.substr(5);
             let users = parseUser(userStr);
 
             if (users.length == 0) {
-                throw new UserInputError("Unknown User");
+                throw new UserInputError($("CHNK_USER_NOT_FOUND"));
             }
 
             //Filter out members
@@ -220,11 +221,11 @@ function processCommand(message, isMod, command) {
             }
 
             if (user == null) {
-                throw new UserInputError("Unknown User");
+                throw new UserInputError($("CHNK_USER_NOT_FOUND"));
             }
 
             if (user.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                throw new CommandError("You're not allowed to manage this user.");
+                throw new CommandError($("CHNK_MISSING_PERMISSION"));
             }
 
             let nick = "";
@@ -234,10 +235,11 @@ function processCommand(message, isMod, command) {
                 nick += possible.charAt(Math.floor(Math.random() * possible.length));
             }
 
-            user.setNickname(nick);
+            user.setNickname(nick).then(() => { 
+                message.delete();
+                message.channel.send($("CHNK_SUCCESS", {emoji: ":abcd:", user: getUserString(user), name: nick.replace("`", "\`")}));    
+            }).catch(() => message.reply($("CHNK_MISSING_BOT_PERMISSION", {user: getUserString(user)})));
 
-            message.delete();
-            message.channel.send(":abcd: I've changed the nickname of " + getUserString(user) + " to `" + nick.replace("`", "\`") + "`");
         } else if (command == "block") {
             settings.guilds[message.guild.id].blocked[blockId].push("all");
             
