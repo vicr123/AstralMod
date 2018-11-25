@@ -161,5 +161,6 @@
     "CHNK_SUCCESS": "{{emoji}} I've changed the nickname of {{user}} to `{{name}}`.",
     "CHNK_MISSING_USER_PERMISSION": "You're not allowed to manage this user.",
     "CHNK_MISSING_BOT_PERMISSION": "I couldn't change the nickname of {{user}}. (Am I missing permissions?)",
-    "CHNK_USER_NOT_FOUND": "I couldn't find that user."
+    "CHNK_USER_NOT_FOUND": "I couldn't find that user.",
+    "SETTINGSSIZE": "The settings file is {{bytes}} bytes long."
 }
