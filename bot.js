@@ -53,15 +53,15 @@ let availableTranslations = fs.readdirSync("translations");
 
 availableTranslations.getTranslation = function(language) {
     language = language.toLowerCase()
-    let aT = availableTranslations.map(t => t.toLowerCase());
+    let aT = availableTranslations; //.map(t => t.toLowerCase());
     if (aT.includes(language)) {
         return language;
     }
 
-    if (aT.filter(t => language.substr(0, 2) === t).length > 1) {
+    if (aT.filter(t => t.toLowerCase().startsWith(language.substr(0, 2))).length > 1) {
         return null;
     } else {
-        return aT.filter(t => language.substr(0, 2) === t)[0];
+        return aT.filter(t => t.toLowerCase().startsWith(language.substr(0, 2)))[0];
     }
 };
 
