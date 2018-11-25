@@ -362,12 +362,6 @@ function processCommand(message, isMod, command, options) {
             }
         }
     }
-
-    if (command == "features") {
-        message.channel.send("Available features: \n\n" +
-                             "`spam` Spam Control\n" +
-                             "You can also block any command, except for the `block` and `unblock` commands by specifying the name as a feature.");
-    }
 }
 
 module.exports = {
@@ -383,9 +377,6 @@ module.exports = {
     },
     availableCommands: {
         general: {
-            commands: [
-                "features"
-            ],
             modCommands: [
                 "rm",
                 "chnk",
@@ -427,7 +418,8 @@ module.exports = {
                 help.helpText = "Blocks users from using a feature in the current channel.";
                 help.param1 = "*Optional Parameter*\n" +
                               "The feature to block, or `all` for all commands. If no feature is specified, all *commands* will be blocked.";
-                help.remarks = "To see available features, use `" + prefix + "features`";
+                help.remarks = "A valid feature is any command other than `block` or `unblock`, `spam`, and `log`.\n" +
+                               "`spam` will disable spam control in the channel, and `log` will disable log collection from the channel. Neither can be applied server-wide, and `log` cannot be blocked or unblocked in channels configured for storing logs.";
                 help.availableOptions = "`--serverwide` Change serverwide blocking settings\n";
                 break;
             case "unblock":
@@ -438,11 +430,6 @@ module.exports = {
                               "The feature to unblock. If no feature is specified, all features will be unblocked.";
                 help.remarks = "To see available features, use `" + prefix + "features`";
                 help.availableOptions = "`--serverwide` Change serverwide blocking settings\n";
-                break;
-            case "features":
-                help.title = prefix + "features";
-                help.usageText = prefix + "features";
-                help.helpText = "Shows the features that can be used with the `block` command";
                 break;
         }
 
