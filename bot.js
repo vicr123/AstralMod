@@ -3911,7 +3911,7 @@ if (process.argv.indexOf("--httpserver") != -1) {
 
 log("Checking configuration...", logType.info);
 
-const requireDiscordVersion = "11.3.2";
+const requireDiscordVersion = "11.4.2";
 if (Discord.version != requireDiscordVersion) {
     log("Invalid Discord.JS version", logType.critical);
     log("This version of AstralMod requires Discord.JS version " + requireDiscordVersion, logType.info);
