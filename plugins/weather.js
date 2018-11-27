@@ -169,7 +169,6 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
 
 function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
     let $ = _[options.locale];
-    sendPreloader(options.imperial, message.channel);
     sendPreloader($("WEATHER_PREPARING"), message.channel).then(messageToEdit => {
         let query;
         let unit = options.imperial ? "f" : "c";
