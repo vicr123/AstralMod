@@ -21,18 +21,6 @@ var client;
 var consts;
 const Discord = require('discord.js');
 
-function unembed(embed) {
-    let embedString = "";
-    if (embed.author) embedString += `**${embed.author.name}**\n`;
-    if (embed.title) embedString += `**${embed.title}**\n`;
-    if (embed.description) embedString += `${embed.description}\n`;
-    for (let i in embed.fields) {
-        embedString += `\n**${embed.fields[i].name}**\n${embed.fields[i].value}\n`
-    }
-    if (embed.footer) embedString += `\n${embed.footer.text}`
-    return embedString || "Empty embed"; //returns a string
-}
-
 function menu(options, otheroptions) { //direction, fetchOptions
     let $ = _[otheroptions.locale];
     const message = options.message;
@@ -135,7 +123,7 @@ function processCommand(message, isMod, command, options) {
                         //Pin the message
                         if (!settings.users[author]) settings.users[author] = {};
                         if (!settings.users[author].flags) settings.users[author].flags = [];
-                        let flagObject = { channel: currentMessage.channel.id, message: currentMessage.id }
+                        let flagObject = { channel: currentMessage.channel.id, message: currentMessage.id, pinConfirmationMessage: flaggingMessage.id }
                         settings.users[author].flags.push(flagObject);
 
                     } else if (reaction.emoji.name == "🚫") {
@@ -170,7 +158,7 @@ function processCommand(message, isMod, command, options) {
 
         //Get flags
         let flagArray = settings.users[message.author.id].flags;
-        if (!flagArray) {
+        if (!flagArray || flagArray.length < 1) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("PINS_NO_PINS"));
             embed.setDescription($("PINS_NO_PINS_DESCRIPTION", {prefix: prefix}));
@@ -295,6 +283,14 @@ function processCommand(message, isMod, command, options) {
         if (settings.users[message.author.id].flags == null) return message.reply($("PINS_NO_PINS"));
         if (settings.users[message.author.id].flags.length == 0) return message.reply($("PINS_NO_PINS"));
         if (settings.users[message.author.id].flags.length <= index) return message.reply($("PINS_NOT_THAT_MANY_PINS"));
+
+        client.channels.get(settings.users[message.author.id].flags[index].channel).fetchMessage(settings.users[message.author.id].flags[index].message).then(pinned => {
+            pinned.reactions.find(r => r.users.some(u => u.id == message.author.id)).remove();
+        });
+
+        client.channels.get(settings.users[message.author.id].flags[index].channel).fetchMessage(settings.users[message.author.id].flags[index].pinConfirmationMessage).then(confirmation => {
+            confirmation.delete();
+        })
 
         settings.users[message.author.id].flags.splice(index, 1);
         message.reply($("PINS_UNPIN_SUCCESS"));
