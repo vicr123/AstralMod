@@ -3628,61 +3628,14 @@ function guildMemberUpdate(oldUser, newUser) {
 
 function messageReactionAdd(messageReaction, user) {
     if (user.bot) return;
-    if (messageReaction.message.guild == undefined) return;
-    if (!settings.guilds[messageReaction.message.guild.id].pinToPin) return;
-    if (messageReaction.emoji.name !== "📌") return;
 
-    let $ = _[settings.users[user.id].locale];
-
-
-    if (!settings.users[user.id]) settings.users[user.id] = {};
-    if (!settings.users[user.id].flags) settings.users[user.id].flags = [];
-    let embedContent;
-    let showAttachments;
-
-    if (messageReaction.message.content) embedContent = messageReaction.message.content;
-    if (messageReaction.message.embeds.length) embedContent = $("PINS_CONTENT_WITH_EMBED", {embedcontent: unembed(messageReaction.message.embeds[0])});
-    if (messageReaction.message.attachments.size > 0) {
-        showAttachments = true;
-        for (let [, attachment] of messageReaction.message.attachments) {
-            if (attachment.height != null) {
-                if (embedContent == "") embedContent += "`" + $("PINS_IMAGE") + "`" + "\n";
-                embed.setImage(attachment.proxyURL);
-                break;
-            }
-        }
-        if (embedContent == "")
-            embedContent = $("PINS_NONTEXTUAL_CONTENT");
-    }
-
-     messageReaction.message.channel.send(new Discord.RichEmbed()
-        .setColor("#00FF00")
-        .setTitle($("PINS_TITLE"))
-        .setDescription($("PINS_PIN_SUCCESS"))
-        .setFooter($(showAttachments ? "PINS_SHORTCUT_FOOTER_ATTACHMENTS" : "PINS_SHORTCUT_FOOTER", {user: user.username, count: parseInt(messageReaction.message.attachments.count)}), user.avatarURL)
-        .addField(messageReaction.message.author.tag, embedContent)).then(confirm => {
-            let flagObject = { channel: messageReaction.message.channel.id, message: messageReaction.message.id, pinConfirmationMessage: confirm.id }
-            settings.users[user.id].flags.push(flagObject);        
-        });
-
-
+    commandEmitter.emit("messageReactionAdd", messageReaction, user);
 }
 
 function messageReactionRemove(messageReaction, user) {
-    let $ = _[settings.users[user.id].locale];
-    if (messageReaction.message.guild == undefined) return;
-    if (!settings.guilds[messageReaction.message.guild.id].pinToPin) return;
-    if (messageReaction.emoji.name !== "📌") return;
+    if (user.bot) return;
 
-    if (!settings.users[user.id]) settings.users[user.id] = {};
-    if (!settings.users[user.id].flags) settings.users[user.id].flags = [];
-
-    try {
-        let message = settings.users[user.id].flags.splice(settings.users[user.id].flags.findIndex(f => f.message == messageReaction.message.id), 1)[0];
-        client.channels.get(message.channel).fetchMessage(message.pinConfirmationMessage).then(m => m.delete());
-    } catch (err) {
-        log(err, logType.debug) //Something went wrong but frankly we don't care that much
-    }
+    commandEmitter.emit("messageReactionRemove", messageReaction, user);
 }
 
 function readyAgain() {
