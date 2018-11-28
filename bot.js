@@ -243,8 +243,6 @@ global.unembed = function(embed) {
     return embedString || "Empty embed"; //returns a string
 }
 
-
-
 global.awaitUserConfirmation = function(options) {
     let $ = _[options.locale];
     return new Promise(function(resolve, reject) {
