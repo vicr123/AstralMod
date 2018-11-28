@@ -2962,21 +2962,24 @@ async function processMessage(message) {
         let text = message.content;
 
         for (const param of text.split(" ")) {
-            if (param === "--12" || param === "--12h" || param === "--12hr") {
-                options.h24 = false;
-            } else if (param === "--24" || param === "--24h" || param === "--24hr") {
-                options.h24 = true;
-            } else if (param === "--metric") {
-                options.imperial = false;
-            } else if (param === "--imperial") {
-                options.imperial = true;
-            } else if (availableTranslations.getTranslation(param.substr(2)) != null) {
-                options.locale = availableTranslations.getTranslation(param.substr(2));
-            } else {
-                continue;
-            }
+            if (param == "--") break; //End of options
+            if (param.startsWith("--")) {
+                if (param === "--12" || param === "--12h" || param === "--12hr") {
+                    options.h24 = false;
+                } else if (param === "--24" || param === "--24h" || param === "--24hr") {
+                    options.h24 = true;
+                } else if (param === "--metric") {
+                    options.imperial = false;
+                } else if (param === "--imperial") {
+                    options.imperial = true;
+                } else if (availableTranslations.getTranslation(param.substr(2)) != null) {
+                    options.locale = availableTranslations.getTranslation(param.substr(2));
+                } else {
+                    continue;
+                }
 
-            text = text.replace(param, "");
+                text = text.replace(param, "");
+            }
         }
 
         text = text.trim();

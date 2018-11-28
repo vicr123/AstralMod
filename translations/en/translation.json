@@ -170,5 +170,6 @@
     "SETTINGSSIZE": "The settings file is {{bytes}} bytes long.",
     "SETTZ_ABOUT": "Usage: `{{prefix}}settz [your timezone]`. For more information, `{{prefix}}help settz`",
     "SETTZ_INVALID_TIMEZONE": "That's not a valid timezone.",
-    "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}."
+    "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}.",
+    "PIC_PROFILE_PICTURE": "Profile Picture"
 }
