@@ -23,18 +23,28 @@ var consts;
 const Discord = require('discord.js');
 let translate;
 
+function obtainPic(user, channel, $) {
+    let embed = new Discord.RichEmbed();
+    embed.setAuthor(user.tag, user.displayAvatarURL);
+    embed.setTitle($("PIC_PROFILE_PICTURE"));
+    embed.setImage(user.displayAvatarURL);
+    embed.setColor("#00C000");
+    channel.send(embed);
+}
 
 function processCommand(message, isMod, command, options) {
     let $ = _[options.locale];
 
-    if (command.startsWith("pic ")) {
+    if (command == "pic") {
+        obtainPic(message.author, message.channel, $);
+    } else if (command.startsWith("pic ")) {
         var user = command.substr(4);
         var users = parseUser(user, message.guild);
 
         if (users.length == 0) {
             message.reply($("PIC_NO_RESULTS"));
         } else {
-            message.reply(users[0].displayAvatarURL);
+            obtainPic(users[0], message.channel, $);
         }
     } else if (command.startsWith("setunit ")) {
         let units = command.substr(8);
