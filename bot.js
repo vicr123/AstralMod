@@ -2635,7 +2635,7 @@ function processSingleConfigure(message, guild) {
                 case "c": //Pin to pin
                     guildSetting.pinToPin = !guildSetting.pinToPin;
                     
-                    message.author.send("Ok, I've toggled people from using the :pushpin: emoji to pin messages.");
+                    message.author.send(`Ok, I've toggled people from using the ${consts.config.pinToPinEmoji} emoji to pin messages.`);
                     message.author.send(getSingleConfigureWelcomeText(guild));
                     break;
                 case "<": //Reset AstralMod
