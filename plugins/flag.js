@@ -21,8 +21,7 @@ var client;
 var consts;
 const Discord = require('discord.js');
 
-function menu(options, otheroptions) { //direction, fetchOptions
-    let $ = _[otheroptions.locale];
+function menu(options, $) { //direction, fetchOptions
     const message = options.message;
     const embed = new Discord.RichEmbed();
     embed.setTitle($("PINS_TITLE"));
@@ -49,7 +48,7 @@ function menu(options, otheroptions) { //direction, fetchOptions
     }
 
     if (!embedContent) {
-        if (options.direction) return menu(options.direction, otheroptions); //attempt to move if a direction was specified
+        if (options.direction) return menu(options.direction, $); //attempt to move if a direction was specified
         throw new UserInputError($("PINS_MESSAGE_UNPINNABLE")); //throw an error if no direction was given
     } else {
         embed.addField(message.author.tag, embedContent.length > 1020 ? `${embedContent.substr(0, 1021)}...` : embedContent);
@@ -74,7 +73,7 @@ function processCommand(message, isMod, command, options) {
         }).then(function(messages) { //after collecting messages
             currentMessage = messages.array()[number - 1]
             let message = messages.array()[number - 1]
-            message.channel.send(menu({ message, number }, options)).then(function(flaggingMessage) { //reactions
+            message.channel.send(menu({ message, number }, $)).then(function(flaggingMessage) { //reactions
                 flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react("📌")).then(flaggingMessage.react("🚫"));
 
                 const move = function(direction) {
@@ -84,7 +83,7 @@ function processCommand(message, isMod, command, options) {
                         if (!messages.size) return;
                         let message = messages.first();
                         currentMessage = message;
-                        flaggingMessage.edit(menu({ direction, message }, options))
+                        flaggingMessage.edit(menu({ direction, message }, $))
                     });
                 }
 
@@ -114,7 +113,7 @@ function processCommand(message, isMod, command, options) {
                         move("down")
                     } else if (reaction.emoji.name == "📌") {
                         continueReactions = false;
-                        let embed = menu({ message: currentMessage }, options);
+                        let embed = menu({ message: currentMessage }, $);
                         embed.setTitle($("PINS_TITLE"));
                         embed.setDescription($("PINS_PIN_SUCCESS"));
                         embed.setColor("#00C000");
@@ -309,30 +308,19 @@ function messageReactionAdd(messageReaction, user) {
     let embedContent;
     let showAttachments;
 
-    if (messageReaction.message.content) embedContent = messageReaction.message.content;
-    if (messageReaction.message.embeds.length) embedContent = $("PINS_CONTENT_WITH_EMBED", {embedcontent: unembed(messageReaction.message.embeds[0])});
-    if (messageReaction.message.attachments.size > 0) {
-        showAttachments = true;
-        for (let [, attachment] of messageReaction.message.attachments) {
-            if (attachment.height != null) {
-                if (embedContent == "") embedContent += "`" + $("PINS_IMAGE") + "`" + "\n";
-                embed.setImage(attachment.proxyURL);
-                break;
-            }
-        }
-        if (embedContent == "")
-            embedContent = $("PINS_NONTEXTUAL_CONTENT");
-    }
+    try {
+        let embed = menu({ message: messageReaction.message }, $);
+        embed.setTitle($("PINS_TITLE"));
+        embed.setDescription($("PINS_PIN_SUCCESS"));
+        embed.setFooter($(showAttachments ? "PINS_SHORTCUT_FOOTER_ATTACHMENTS" : "PINS_SHORTCUT_FOOTER", {user: user.username, count: parseInt(messageReaction.message.attachments.count)}), user.avatarURL)
 
-     messageReaction.message.channel.send(new Discord.RichEmbed()
-        .setColor("#00FF00")
-        .setTitle($("PINS_TITLE"))
-        .setDescription($("PINS_PIN_SUCCESS"))
-        .setFooter($(showAttachments ? "PINS_SHORTCUT_FOOTER_ATTACHMENTS" : "PINS_SHORTCUT_FOOTER", {user: user.username, count: parseInt(messageReaction.message.attachments.count)}), user.avatarURL)
-        .addField(messageReaction.message.author.tag, embedContent)).then(confirm => {
+        messageReaction.message.channel.send(embed).then(confirm => {
             let flagObject = { channel: messageReaction.message.channel.id, message: messageReaction.message.id, pinConfirmationMessage: confirm.id }
             settings.users[user.id].flags.push(flagObject);        
         });
+    } catch (err) {
+        log(err, logType.debug) //Something went wrong but frankly we don't care that much
+    }
 }
 
 function messageReactionRemove(messageReaction, user) {
