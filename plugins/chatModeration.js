@@ -185,21 +185,6 @@ function processCommand(message, isMod, command, options) {
                     message.reply("Give us a minute to find all the messages from " + getUserString(userMember) + " within the past day");
                 }
             }
-/*
-        } else if (command == "panic") {
-            return;
-            if(settings.guilds[message.guild.id].panicMode) {
-                for(let [id, overwrite] of settings.guilds[message.guild.id].panicMode.permissionOverwrites) {
-                    message.guild.channels[id].overwritePermissions(overwrite)
-                }
-            } else { // enabling panic mode
-                settings.guilds[message.guild.id].panicMode = true;
-                for (let channel of message.guild.channels) {
-                    settings.guilds[message.guild.id].panicMode.states[channel.id] = channel.permissionOverwrites;
-                    channel.permissionOverwrites.map(p => p.id === message.defaultRole.id);
-                }
-            }
-*/
         } else if (command == "chnk") {
             message.channel.send($("CHNK_ABOUT", {prefix}));
         } else if (command.startsWith("chnk ")) {
@@ -383,9 +368,6 @@ module.exports = {
                 "block",
                 "unblock"
             ],
-            hiddenCommands: [
-                "panic"
-            ]
         }
     },
     acquireHelp: function(helpCmd) {
@@ -399,11 +381,6 @@ module.exports = {
                 help.param1 = "The number of messages to remove, or `all` to remove up to 100 messages within the past day";
                 help.param2 = "*Optional Parameter*\n" +
                               "The user to delete messages from";
-                break;
-            case "panic":
-                help.title = prefix + "panic";
-                help.usageText = prefix + "panic";
-                help.helpText = "Switches on Panic Mode. In this mode, only privileged users can send messages.";
                 break;
             case "chnk":
                 help.title = prefix + "chnk";
