@@ -3838,7 +3838,7 @@ function readyOnce() {
     setInterval(loadInvites, 300000);
 
     setInterval(function() {
-        titleBox.content = "AstralMod " + amVersion + " Console  │  Uptime: " + moment.duration(client.uptime).humanize() +
+        titleBox.content = " " + moment().format("HH:mm:ss") + "  |  AstralMod " + amVersion + " Console  │  Uptime: " + moment.duration(client.uptime).humanize() +
         "  │  Guilds: " + parseInt(client.guilds.size);
         renderScreen();
     }, 1000);
