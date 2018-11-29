@@ -199,7 +199,7 @@ function processCommand(message, isMod, command, options) {
                 }
             } else {
                 if (out.length == 1) {
-                    message.reply($("CALC_ANSWER_IS") + stdout);
+                    message.reply($("CALC_ANSWER_IS") + " " + stdout);
                 } else {
                     let embed = new Discord.RichEmbed("calculation");
                     embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
