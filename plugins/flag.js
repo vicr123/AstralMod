@@ -1,7 +1,7 @@
 /****************************************
  *
  *   Flags: Plugin for AstralMod that contains flagging commands
- *   Copyright (C) 2017 Victor Tran
+ *   Copyright (C) 2018 Victor Tran, John Tur
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ function processCommand(message, isMod, command, options) {
             currentMessage = messages.array()[number - 1]
             let message = messages.array()[number - 1]
             message.channel.send(menu({ message, number }, $)).then(function(flaggingMessage) { //reactions
-                flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react("📌")).then(flaggingMessage.react("🚫"));
+                flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react(consts.config.pinToPinEmoji)).then(flaggingMessage.react("🚫"));
 
                 const move = function(direction) {
                     if (currentMessage.id == flaggingMessage.id) return;
@@ -111,7 +111,7 @@ function processCommand(message, isMod, command, options) {
                         move("up")
                     } else if (reaction.emoji.name == "⬇") {
                         move("down")
-                    } else if (reaction.emoji.name == "📌") {
+                    } else if (reaction.emoji.name == consts.config.pinToPinEmoji) {
                         continueReactions = false;
                         let embed = menu({ message: currentMessage }, $);
                         embed.setTitle($("PINS_TITLE"));
@@ -174,7 +174,7 @@ function processCommand(message, isMod, command, options) {
             if (channel.nsfw && !nsfw) throw new CommandError($("PINS_CHANNEL_NSFW"));
 
             let embed = new Discord.RichEmbed;
-            embed.setTitle($("PINS_PIN_TITLE", {emoji:":pushpin:", pinNumber: pinNumber}));
+            embed.setTitle($("PINS_PIN_TITLE", {emoji: consts.config.pinToPinEmoji, pinNumber: pinNumber}));
             embed.setDescription(`[${$("PINS_JUMP")}](https://discordapp.com/channels/` + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")");
             embed.setColor("#00C000");
 
@@ -205,7 +205,7 @@ function processCommand(message, isMod, command, options) {
                     embed.addField($("PINS_ATTACHMENT", {count: attachmentsCount}), attachments);
                 }
 
-                message.channel.send(embed);
+                message.channel.send(embed);                
             }).catch(err => {
                 log(err, logType.warning);
                 embed.addField($("PINS_ERROR"), $("PINS_MESSAGE_GONE"));
@@ -213,66 +213,114 @@ function processCommand(message, isMod, command, options) {
             });
             return;
         }
+
         if (isNaN(number) || !number) number = 1;
         let embed = new Discord.RichEmbed;
-        embed.setTitle($("PINS_PINS_TITLE", {emoji:":pushpin:"}));
+        embed.setTitle($("PINS_PINS_TITLE", {emoji: consts.config.pinToPinEmoji}));
         embed.setDescription($("PINS_PINS_DESCRIPTION"));
         embed.setColor("#00C000");
 
-        if (number > (flagArray.length / 5) + 1) throw new UserInputError($("PINS_INVALID_PAGE"));
+        if (number > (flagArray.length / 4) + 1) throw new UserInputError($("PINS_INVALID_PAGE"));
 
-        let fullPages = Math.floor((flagArray.length / 5) + 1);
+        let fullPages = Math.floor((flagArray.length / 4) + 1);
         if (fullPages == 1) {
             embed.setFooter($("PINS_HOWTO_PIN", {prefix:prefix}));
         } else {
             embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber:number, numberOfPages: fullPages, prefix:prefix}));
         }
 
-        number--;
+        log("still there 1", logType.info);
 
-        let getMessageNumber = function(i) {
-            if (i >= (flagArray.length > 5 * number + 5 ? 5 * number + 5 : flagArray.length)) return message.channel.send(embed);
-            let flagItem = flagArray[i];
-            let channel = client.channels.get(flagItem.channel);
 
-            let fieldName = "Pin #" + (i + 1) + "";
-            if (!channel) {
-                embed.addField(fieldName, $("PINS_CHANNEL_GONE"));
-                return getMessageNumber(++i);
+
+        let get4Messages = function(page) {
+            if ((page - 1) * 4 > flagArray.length) {
+                return [];
             }
 
-            if (channel.nsfw && !nsfw) {
-                embed.addField(fieldName, $("PINS_CHANNEL_NSFW"));
-                return getMessageNumber(++i);
+            let ms = [];
+
+            for (let i = (page - 1) * 4; i < flagArray.length; i++) {
+                ms.push(flagArray[i]);
+                if (ms.length == 4) break;
             }
 
-            channel.fetchMessage(flagItem.message).then(function(message) {
-                let flagMessage = message.content
+            return ms;
+        }
 
-                if (settings.guilds[channel.guild.id].echoOffensive) flagMessage = filterOffensive(message.content)
-                log(message.content)
-                if (message.content == "") {
-                    for (let [key, attachment] of message.attachments) {
-                        if (attachment.height != null) {
-                            if (message.content == "") flagMessage = $("PINS_HOWTO_VIEW", {prefix: prefix, pinNumber: i + 1});
-                            break;
+        log("still there 2", logType.warning);
+
+        let getEmbed = async () => {
+            embed.fields.length = 0;
+            for (let flagItem of get4Messages(number)) {
+                embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber: number, numberOfPages: fullPages, prefix}));
+                
+                let channel = client.channels.get(flagItem.channel);
+                let pinNumber = flagArray.findIndex(e => e === flagItem) + 1;
+    
+                let fieldName =  $("PINS_PIN_TITLE_COMPACT", {pinNumber})
+                if (!channel) {
+                    embed.addField(fieldName, $("PINS_CHANNEL_GONE"));
+                }
+    
+                if (channel.nsfw && !nsfw) {
+                    embed.addField(fieldName, $("PINS_CHANNEL_NSFW"));
+                }
+    
+                try {
+                    let message = await channel.fetchMessage(flagItem.message);
+                    let flagMessage = message.content;
+        
+                    if (settings.guilds[channel.guild.id].echoOffensive) flagMessage = filterOffensive(message.content)
+                    log(message.content)
+                    if (message.content == "") {
+                        for (let [key, attachment] of message.attachments) {
+                            if (attachment.height != null) {
+                                if (message.content == "") flagMessage = $("PINS_HOWTO_VIEW", {prefix, pinNumber});
+                                break;  
+                            }
                         }
                     }
+        
+                    if (message.embeds.length)
+                        flagMessage = $("PINS_CONTENT_WITH_EMBED", {embedcontent:unembed(message.embeds[0])}) //Unembed the first embed
+        
+                        let credit = $("PINS_PIN_AUTHOR", {pinAuthor: message.author, channel: message.channel, jumpToMessage:`[${$("PINS_JUMP")}](https://discordapp.com/channels/${channel.guild.id}/${channel.id}/${flagItem.message})`, interpolation: { escapeValue: false }});
+                        embed.addField(fieldName, flagMessage.length+credit.length > 800 ? 
+                        `${flagMessage.substr(0, 1021-credit.length-220)}...\n${credit}` : `${flagMessage}\n${credit}`);
+    
+                } catch {
+                    embed.addField(fieldName, $("PINS_MESSAGE_GONE"));
                 }
+            }
+        }
 
-                if (message.embeds.length)
-                    flagMessage = $("PINS_CONTENT_WITH_EMBED", {embedcontent:unembed(message.embeds[0])}) //Unembed the first embed
+        log("still there 3", logType.critical);
 
-                let credit = $("PINS_PIN_AUTHOR", {pinAuthor: message.author.tag, channel: message.channel, jumpToMessage:"[Jump](https://discordapp.com/channels/" + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")"});
-                embed.addField(fieldName, flagMessage.length+credit.length > 800 ? 
-                `${flagMessage.substr(0, 1021-credit.length-220)}...\n${credit}` : `${flagMessage}\n${credit}`);
-                getMessageNumber(++i);
-            }).catch(function() {
-                embed.addField(fieldName, $("PINS_MESSAGE_GONE"));
-                getMessageNumber(++i);
-            });
-        };
-        getMessageNumber(5 * number);
+        getEmbed().then(() => {
+            message.channel.send(embed).then(m => {
+                m.react("◀").then(() => {
+                    m.createReactionCollector((r, u) => r.emoji.name == "◀" && u.id == message.author.id).on('collect', rr => { 
+                        rr.remove(message.author.id);
+
+                        if (!((number - 1) < 1)) {
+                            --number;
+                            getEmbed().then(() => m.edit(embed))
+                        }
+                    });
+                })
+                m.react("▶").then(() => {
+                    m.createReactionCollector((r, u) => r.emoji.name == "▶" && u.id == message.author.id).on('collect', rr => {     
+                        rr.remove(message.author.id);
+
+                        if (!((number + 1) > fullPages)) {
+                            ++number;
+                            getEmbed().then(() => m.edit(embed))
+                        }
+                    });
+                })            
+            })
+        });
     } else if (command.startsWith("unpin ")) {
         var unflagging = command.substr(6);
         var index = parseInt(unflagging) - 1;
@@ -299,7 +347,7 @@ function processCommand(message, isMod, command, options) {
 function messageReactionAdd(messageReaction, user) {
     if (messageReaction.message.guild == undefined) return;
     if (!settings.guilds[messageReaction.message.guild.id].pinToPin) return;
-    if (messageReaction.emoji.name !== "📌") return;
+    if (messageReaction.emoji.name !== consts.config.pinToPinEmoji) return;
 
     let $ = _[settings.users[user.id].locale];
 
@@ -327,7 +375,7 @@ function messageReactionRemove(messageReaction, user) {
     let $ = _[settings.users[user.id].locale];
     if (messageReaction.message.guild == undefined) return;
     if (!settings.guilds[messageReaction.message.guild.id].pinToPin) return;
-    if (messageReaction.emoji.name !== "📌") return;
+    if (messageReaction.emoji.name !== consts.config.pinToPinEmoji) return;
 
     if (!settings.users[user.id]) settings.users[user.id] = {};
     if (!settings.users[user.id].flags) settings.users[user.id].flags = [];
