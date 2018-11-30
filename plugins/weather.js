@@ -190,7 +190,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         let embed = new Discord.RichEmbed;
                         embed.setTitle($("WEATHER_ERROR", {emoji: ":thunder_cloud_rain:"}));
                         embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
-                        embed.setColor("#FF0000");
+                        embed.setColor("#E5182C");
                         embed.addField($("WEATHER_ERROR_DETAILS"), $("WEATHER_ERROR_CITY_NOT_FOUND"));
                         embed.addField($("WEATHER_ERROR_TRY_THIS"), $("WEATHER_ERROR_TRY_THIS_DESCRIPTION", {prefix: prefix}));
 
@@ -457,7 +457,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
                     e.setTitle($("WEATHER_TITLE"));
                     e.setURL(data.query.results.channel.link);
-                    e.setColor("#00C0FF");
+                    e.setColor("#79BAEC");
                     e.setFooter(getRandom($("WEATHER_PLEASE_PRINT"),
                                         $("WEATHER_TEAR_PERFORATED_LINE"),
                                         $("WEATHER_SO_MANY_DEGREES"),

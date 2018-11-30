@@ -47,6 +47,8 @@ if (process.argv.indexOf("--blueprint") == -1) {
 
 global.botOwner = undefined;
 
+global.tempMods = [];
+
 let doNotDeleteGuilds = [];
 
 let availableTranslations = fs.readdirSync("translations");
@@ -251,7 +253,7 @@ global.awaitUserConfirmation = function(options) {
         let embed = new Discord.RichEmbed();
         embed.setTitle(options.title);
         embed.setDescription(options.msg);
-        embed.setColor("#3C3C96");
+        embed.setColor("#FED266");
         embed.setFooter($("AWAITUSERCONFIRMATION_CANCEL_PROMPT", {emoji: "🚫", time: options.time}));
         if (options.extraFields != null) {
             for (let field in options.extraFields) {
@@ -269,7 +271,7 @@ global.awaitUserConfirmation = function(options) {
                 if (options.msgOnSuccess != "") {
                     embed.setDescription(options.msgOnSuccess);
                 }
-                embed.setColor("#00C000");
+                embed.setColor("#79BAEC");
                 embed.setFooter($("AWAITUSERCONFIRMATION_FULFILLED"));
                 message.edit(embed);
                 resolve();
@@ -287,7 +289,7 @@ global.awaitUserConfirmation = function(options) {
                 if (options.msgOnFail != "") {
                     embed.setDescription(options.msgOnFail);
                 }
-                embed.setColor("#FF0000");
+                embed.setColor("#E5182C");
                 embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
                 message.edit(embed);
                 reject();
@@ -1501,8 +1503,12 @@ function setGame() {
 }
 
 function isMod(member) {
-    if(member.id == global.botOwner.id)
+    if (member.id == global.botOwner.id)
         return true;
+
+    if (tempMods.includes(member.id)) {
+        return true;
+    }
 
     var modRoles = settings.guilds[member.guild.id].modRoles;
     if (modRoles == null) {
@@ -1553,7 +1559,7 @@ global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact
         var embed = new Discord.RichEmbed("uinfo");
         embed.setAuthor(member.displayName, user.displayAvatarURL);
         embed.setAuthor(getUserString(member), user.displayAvatarURL);
-        embed.setColor("#00FF00");
+        embed.setColor("#79BAEC");
         embed.setFooter($("UINFO_USER_ID", {id:user.id}));
 
         if (compact) {
@@ -1910,26 +1916,6 @@ function processAmCommand(message, options, command) {
             } else if (nickResult == "configuration") {
                 message.reply(_[locale]("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
             } else {
-                /*message.channel.send(`Ok, requesting a nickname change to "${text.substr(8)}". React with '🚫' within 5 seconds to cancel.`).then(m => {
-                    var rename = true;
-                    m.react('🚫').then(() => {
-                        const filter = (reaction, user) => reaction.emoji.name === '🚫' && user.id === message.member.id;
-                        const collector = m.createReactionCollector(filter, {time: 5000});
-                        collector.on('collect', (_ => {
-                            rename = false;
-                            m.edit("Ok, I've cancelled that.");
-                            m.clearReactions();
-                        }));
-                        collector.on('end', (_ => {
-                            if(rename) {
-                                m.edit("Ok, we've requested your nickname be changed to " + text.substr(8) + ".");
-                                requestNickname(message.member, text.substr(8), message.guild);
-                            }
-                            m.clearReactions();
-                        }));
-                    }).catch(err => log(err, logType.critical));
-                }).catch(err => log(err, logType.critical));*/
-
                 awaitUserConfirmation({
                     title: "Request to change nickname", 
                     msg: "Ready to change your nickname?", 
@@ -1956,7 +1942,7 @@ function processAmCommand(message, options, command) {
         return true;
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
-        embed.setColor("#00C000");
+        embed.setColor("#79BAEC");
         embed.setAuthor(_[locale]("AstralMod " + amVersion), client.user.avatarURL);
         embed.setDescription(_[locale]("Discord Bot"));
         embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
@@ -1967,7 +1953,7 @@ function processAmCommand(message, options, command) {
         return true;
     } else if (command == "setlocale") {
         let embed = new Discord.RichEmbed();
-        embed.setColor("#003CFF");
+        embed.setColor("#79BAEC");
         embed.setAuthor($("SETLOC_TITLE"));
         
         let thisLocale = $("THIS_LOCALE");
@@ -1995,7 +1981,7 @@ function processAmCommand(message, options, command) {
             if (locale == "en") thisLocale = "English";
 
             let embed = new Discord.RichEmbed();
-            embed.setColor("#003CFF");
+            embed.setColor("#79BAEC");
             embed.setAuthor(_[locale]("SETLOC_TITLE"));
             embed.setDescription(_[locale]("SETLOC_LANGUAGE", {locale: thisLocale}));
             embed.setFooter(_[locale]("SETLOC_DISCLAIMER"));
@@ -2014,7 +2000,7 @@ function processAmCommand(message, options, command) {
         return true;
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
-        embed.setColor("#3C3C96");
+        embed.setColor("#79BAEC");
         embed.setAuthor($("HELP_CONTENTS"));
         embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix}));
 
@@ -2070,6 +2056,41 @@ function processAmCommand(message, options, command) {
             message.channel.send(_[locale]("Couldn't fetch user."));
         });
         return true;
+    } else if (command.startsWith("sudo")) {
+        let embed = new Discord.RichEmbed;
+        embed.setTitle(getEmoji("userexception") + " Do you want this user to make changes to this server?");
+        embed.setDescription(`**User:** ${message.author.tag}\n**Verified Role:** ${message.member.highestRole.name}\n**User Origin:** ${message.member.guild.name}`);
+        embed.setFooter($("SUDO_FOOTER", {emoji1: "✅", emoji2: "🚫", time: "5"}));
+        embed.setColor("#FED266");
+
+
+        message.channel.send(embed).then(m => {
+            m.react("✅");
+            m.react("🚫");
+            const filter = (reaction, user) => (reaction.emoji.name === "✅" || reaction.emoji.name === "🚫") && isMod(m.guild.members.get(user.id))
+            let collector = m.createReactionCollector(filter, {time: 300000});
+            collector.on('collect', r => {
+                if(r.emoji.name == "✅") {
+                    global.tempMods.push(message.author.id);
+                    setTimeout(() => global.tempMods.splice(global.tempMods.indexOf(message.author.id), 1), 300000)
+                    embed.setDescription("Ok, I've given sudo privileges to this user.")
+                    embed.setFooter($("AWAITUSERCONFIRMATION_FULFILLED"));
+                    embed.setColor("#79BAEC")
+                    m.edit(embed);    
+                    m.clearReactions();
+                } else {
+                    collector.stop();
+                }
+            });
+            collector.on('end', r => {                
+                embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
+                embed.setDescription("Ok, I've denied sudo privileges to this user.")
+                embed.setColor("#E5182C")
+                m.edit(embed);
+                m.clearReactions();
+            })
+
+        })
     } else if (command.startsWith("help ")) { //Contextual help
         //Get help for specific command
         var embed = new Discord.RichEmbed();
@@ -2130,6 +2151,11 @@ function processAmCommand(message, options, command) {
                 help.usageText = prefix + "about";
                 help.helpText = "Acquire information about AstralMod";
                 break;
+            case "sudo":
+                help.title = prefix + "sudo";
+                help.usageText = prefix + "sudo";
+                help.helpText = "Requests permission to use moderator commands for 5 minutes";
+                break;
             default:
                 //Look thorough plugins for help
                 for (key in plugins) {
@@ -2180,10 +2206,10 @@ function processAmCommand(message, options, command) {
         }
 
         if (help.helpText == null) {
-            embed.setColor("#FF0000");
+            embed.setColor("#E5182C");
             embed.setDescription($("HELP_UNAVAILABLE"));
         } else {
-            embed.setColor("#3C3C96");
+            embed.setColor("#79BAEC");
             if (help.title == null) {
                 embed.setDescription($("HELP_COMMAND_TITLE"));
             } else {
@@ -3078,7 +3104,7 @@ async function processMessage(message) {
         let $ = _[settings.users[message.author.id].locale];
 
         var embed = new Discord.RichEmbed;
-        embed.setColor("#FF0000");
+        embed.setColor("#E5182C");
         embed.addField($("ERROR_DETAILS"), err.message);
 
         if (err.name == "UserInputError") {
@@ -3367,7 +3393,7 @@ function banAdd(guild, user) {
     if (channel != null) {
         var embed = new Discord.RichEmbed();
 
-        embed.setColor("#FF0000");
+        embed.setColor("#E5182C");
         embed.setTitle($$("GUILD_BAN_ADD_TITLE", {emoji: ":hammer:"}));
         embed.setDescription($$("GUILD_BAN_ADD_DESCRIPTION"));
 

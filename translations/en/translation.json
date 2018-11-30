@@ -153,6 +153,7 @@
     "SINFO_LACKPERM_KICK": "- AstralMod is lacking the Kick permission. AstralMod will not be able to kick users in this server.\n",
     "SINFO_LACKPERM_BAN": "- AstralMod is lacking the Ban permission. AstralMod will not be able to ban users in this server.\n",
     "SINFO_LACKPERM_MANAGE_NICKNAME": "- AstralMod is lacking the Manage Nicknames permission. AstralMod will not be able to change nicknames in this server.\n",
+    "SUDO_FOOTER": "React with {{emoji1}} to confirm and {{emoji2}} to deny. The request will time out in {{time}} minutes.",
     "CALC_DESC": "Calculations",
     "CALC_RESULTS": "Here are your results",
     "CALC_ANSWER_IS": "The answer is",
