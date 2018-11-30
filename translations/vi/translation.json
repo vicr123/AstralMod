@@ -154,5 +154,7 @@
     "PINS_PIN_TITLE_COMPACT": "Ghim #{{pinNumber}}",
     "PINS_FOOTER": "Ghim bởi {{user}}",
     "SUDO_FOOTER": "Phản ứng với {{emoji1}} để xác nhận, và {{emoji2}} để từ chối. Yêu cầu này sẽ hết hạn sau {{time}} phút.",
-    "PIC_PROFILE_PICTURE": "Ảnh đại diện"
+    "PIC_PROFILE_PICTURE": "Ảnh đại diện",
+    "PINS_SHORTCUT_FOOTER": "Ghim bởi {{user}} | Để gỡ ghim, bạn sẽ bỏ phản ứng.",
+    "PINS_SHORTCUT_FOOTER_ATTACHMENTS": "Ghim bởi {{user}} | {{count}} tập tin đã đính kèm | Để gỡ ghim, bạn sẽ bỏ phản ứng."
 }
