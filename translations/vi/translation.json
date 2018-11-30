@@ -109,7 +109,7 @@
     "PINS_INVALID_PAGE": "Trang không hợp lệ.",
     "PINS_CHANNEL_GONE": "Không tìm khên tin nhắn này đã viết vào.",
     "PINS_CHANNEL_NSFW": "Ghim trong kênh NSFW. Xem ghim trong kênh NSFW để thấy.",
-    "PINS_PIN_TITLE": "{{emoji}} Ghim di động # {{pinNumber}",
+    "PINS_PIN_TITLE": "{{emoji}} Ghim di động #{{pinNumber}",
     "PINS_JUMP": "Nhảy",
     "PINS_ERROR": "Lỗi",
     "PINS_MESSAGE_GONE": "Không tìm thấy tin nhắn đó được.",
@@ -150,5 +150,9 @@
     "SETTINGSSIZE": "Tệp cài đặt là {{bytes}} byte dài.",
     "SETTZ_ABOUT": "Sử dụng: `{{prefix}}settz [múi giờ]`. Để hiểu thêm, `{{prefix}}help settz`",
     "SETTZ_INVALID_TIMEZONE": "Đó không phải múi giờ hợp lệ.",
-    "SETTZ_TIMEZONE_SET": "Múi giờ của bạn đã đạt thành UTC {{offset}}."
+    "SETTZ_TIMEZONE_SET": "Múi giờ của bạn đã đạt thành UTC {{offset}}.",
+    "PINS_PIN_TITLE_COMPACT": "Ghim #{{pinNumber}}",
+    "PINS_FOOTER": "Ghim bởi {{user}}",
+    "SUDO_FOOTER": "Phản ứng với {{emoji1}} để xác nhận, và {{emoji2}} để từ chối. Yêu cầu này sẽ hết hạn sau {{time}} phút.",
+    "PIC_PROFILE_PICTURE": "Ảnh đại diện"
 }
