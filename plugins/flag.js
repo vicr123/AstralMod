@@ -21,6 +21,13 @@ var client;
 var consts;
 const Discord = require('discord.js');
 
+let ignoredMessages = [];
+
+setInterval(() => { 
+    ignoredMessages.length = 0;
+    log("Cleared ignored messages list", logType.debug);
+}, 300000)
+
 function menu(options, $) { //direction, fetchOptions
     const message = options.message;
     const embed = new Discord.RichEmbed();
@@ -44,10 +51,13 @@ function menu(options, $) { //direction, fetchOptions
         if (embedContent == "")
             embedContent = $("PINS_NONTEXTUAL_CONTENT");
 
+        if (ignoredMessages.includes(message.id))
+            embedContent = "*" + $("PINS_MESSAGE_UNPINNABLE") + "*";
+
         embed.setFooter($("PINS_ATTACHMENT", {count: message.attachments.size}));
     }
 
-    if (!embedContent) {
+    if (!embedContent || ignoredMessages.includes(message.id)) {
         if (options.direction) return menu(options.direction, $); //attempt to move if a direction was specified
         throw new UserInputError($("PINS_MESSAGE_UNPINNABLE")); //throw an error if no direction was given
     } else {
@@ -73,7 +83,8 @@ function processCommand(message, isMod, command, options) {
         }).then(function(messages) { //after collecting messages
             currentMessage = messages.array()[number - 1]
             let message = messages.array()[number - 1]
-            message.channel.send(menu({ message, number }, $)).then(function(flaggingMessage) { //reactions
+            message.channel.send(menu({ message, number }, $)).then(function(flaggingMessage) {
+                ignoredMessages.push(flaggingMessage.id); //reactions
                 flaggingMessage.react("⬆").then(flaggingMessage.react("⬇")).then(flaggingMessage.react(consts.config.pinToPinEmoji)).then(flaggingMessage.react("🚫"));
 
                 const move = function(direction) {
@@ -140,7 +151,7 @@ function processCommand(message, isMod, command, options) {
                         flaggingMessage.clearReactions();
                     }
                 }
-
+                
                 return callReactions(flaggingMessage).then(reactionCollectionFunction);
             }).catch(function(err) {
                 message.channel.send(`${err.message}\n${err.stack}`);
@@ -222,16 +233,12 @@ function processCommand(message, isMod, command, options) {
 
         if (number > (flagArray.length / 4) + 1) throw new UserInputError($("PINS_INVALID_PAGE"));
 
-        let fullPages = Math.floor((flagArray.length / 4) + 1);
+        let fullPages = Math.ceil(flagArray.length / 4);
         if (fullPages == 1) {
             embed.setFooter($("PINS_HOWTO_PIN", {prefix:prefix}));
         } else {
             embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber:number, numberOfPages: fullPages, prefix:prefix}));
         }
-
-        log("still there 1", logType.info);
-
-
 
         let get4Messages = function(page) {
             if ((page - 1) * 4 > flagArray.length) {
@@ -247,8 +254,6 @@ function processCommand(message, isMod, command, options) {
 
             return ms;
         }
-
-        log("still there 2", logType.warning);
 
         let getEmbed = async () => {
             embed.fields.length = 0;
@@ -295,10 +300,9 @@ function processCommand(message, isMod, command, options) {
             }
         }
 
-        log("still there 3", logType.critical);
-
         getEmbed().then(() => {
             message.channel.send(embed).then(m => {
+                if (fullPages == 1) return;
                 m.react("◀").then(() => {
                     m.createReactionCollector((r, u) => r.emoji.name == "◀" && u.id == message.author.id).on('collect', rr => { 
                         rr.remove(message.author.id);
@@ -345,6 +349,8 @@ function processCommand(message, isMod, command, options) {
 }
 
 function messageReactionAdd(messageReaction, user) {
+    if (user.bot) return;
+    if (ignoredMessages.includes(messageReaction.message.id)) return;
     if (messageReaction.message.guild == undefined) return;
     if (!settings.guilds[messageReaction.message.guild.id].pinToPin) return;
     if (messageReaction.emoji.name !== consts.config.pinToPinEmoji) return;
@@ -372,11 +378,13 @@ function messageReactionAdd(messageReaction, user) {
 }
 
 function messageReactionRemove(messageReaction, user) {
-    let $ = _[settings.users[user.id].locale];
+    if (user.bot) return;
+    if (ignoredMessages.includes(messageReaction.message.id)) return;
     if (messageReaction.message.guild == undefined) return;
     if (!settings.guilds[messageReaction.message.guild.id].pinToPin) return;
     if (messageReaction.emoji.name !== consts.config.pinToPinEmoji) return;
 
+    let $ = _[settings.users[user.id].locale];
     if (!settings.users[user.id]) settings.users[user.id] = {};
     if (!settings.users[user.id].flags) settings.users[user.id].flags = [];
 

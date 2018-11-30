@@ -66,7 +66,7 @@ function processCommand(message, isMod, command, options) {
                         ],
                         title: "<:userexception:348796878709850114> User Input Error",
                         description: "AstralMod didn't understand what you were trying to say.",
-                    }).setColor("#FF0000"));
+                    }).setColor("#E5182C"));
                 } else {
                     message.channel.send("", new Discord.RichEmbed({
                         fields: [
@@ -77,7 +77,7 @@ function processCommand(message, isMod, command, options) {
                         ],
                         title: "<:userexception:348796878709850114> Command Error",
                         description: "AstralMod couldn't complete that command.",
-                    }).setColor("#FF0000"));
+                    }).setColor("#E5182C"));
                 }
             }
 
