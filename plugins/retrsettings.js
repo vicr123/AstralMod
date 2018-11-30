@@ -23,9 +23,9 @@ var consts;
 const zlib = require('zlib');
 
 function processCommand(message, isMod, command) {
-    if (command == "retrsettings") {
-        if (message.author.id == global.botOwner.id) {
-            sendPreloader("Preparing the settings file...", message.channel).then(function(messageToEdit) {
+    if (command.startsWith("retrsettings")) {
+        if (message.author.id === global.botOwner.id && command.indexOf("--user") == -1) {
+            sendPreloader("Getting the settings file...", message.channel).then(function(messageToEdit) {
                 //Compress the settings with gzip to save space
                 zlib.gzip(JSON.stringify(settings), function(error, result) {
                     if (error) {
@@ -42,10 +42,24 @@ function processCommand(message, isMod, command) {
                         messageToEdit.edit(":arrow_left: Check your DMs for the settings file.");
                     }
                 });
-
             });
         } else {
-            message.reply("I can't send you my settings file.");
+            if (settings.users[message.author.id] == undefined) { 
+                message.reply("You don't have any settings stored in AstralMod.");
+                return;
+            }
+
+            sendPreloader("Getting your settings file...", message.channel).then(function(messageToEdit) {
+                message.author.send("I've retrieved your settings file.", {
+                    files: [
+                        {
+                            attachment: Buffer.from(JSON.stringify(settings.users[message.author.id], null, 4), "utf8"),
+                            name: "settings.json"
+                        }
+                    ]
+                });
+                messageToEdit.edit(":arrow_left: Check your DMs for the settings file.");
+            });
         }
     }
 }
@@ -64,13 +78,12 @@ module.exports = {
     availableCommands: {
         general: {
             commands: [
-
+                "retrsettings"
             ],
             modCommands: [
                 
             ],
             hiddenCommands: [
-                "retrsettings"
             ]
         }
     },
@@ -81,8 +94,7 @@ module.exports = {
             case "retrsettings":
                 help.title = "am:retrsettings";
                 help.usageText = "am:retrsettings";
-                help.helpText = "Retrieves AstralMod settings in a DM";
-                help.remarks = "Only vicr123#5096 can use this command.";
+                help.helpText = "Sends you your settings file in AstralMod's format";
                 break;
         }
 
