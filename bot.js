@@ -60,10 +60,10 @@ availableTranslations.getTranslation = function(language) {
         return language;
     }
 
-    if (aT.filter(t => t.toLowerCase().startsWith(language.substr(0, 2))).length > 1) {
+    if (aT.filter(t => t.toLowerCase().startsWith(language)).length > 1) {
         return null;
     } else {
-        return aT.filter(t => t.toLowerCase().startsWith(language.substr(0, 2)))[0];
+        return aT.filter(t => t.toLowerCase().startsWith(language))[0];
     }
 };
 
