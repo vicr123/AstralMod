@@ -216,7 +216,7 @@ function pollTimers() {
                         var embed = new Discord.RichEmbed();
 
                         embed.setTitle(":alarm_clock: Timer Elapsed");
-                        embed.setColor("#FFC000");
+                        embed.setColor("#FED266");
 
                         if (timer.reason == "") {
                             embed.setDescription("<@" + timer.author + "> I've been told to ping you.");
@@ -314,7 +314,7 @@ async function processCommand(message, isMod, command, options) {
             var embed = new Discord.RichEmbed();
 
             embed.setTitle(":alarm_clock: Timer Set");
-            embed.setColor("#FFC000");
+            embed.setColor("#FED266");
             embed.setDescription("Ok, I'll set that timer now.");
             embed.addField("Duration", seconds + " seconds.", false);
 
@@ -378,7 +378,7 @@ async function processCommand(message, isMod, command, options) {
         }
 
         var embed = new Discord.RichEmbed();
-        embed.setColor("#FFC000");
+        embed.setColor("#FED266");
         embed.setTitle(":alarm_clock: Running Timers");
         embed.setDescription("Timers that AstralMod is currently keeping track of for you")
         for (index in userSetting.timers) {
@@ -504,7 +504,7 @@ async function processCommand(message, isMod, command, options) {
                 let embed = new Discord.RichEmbed;
                 embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
                 embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
-                embed.setColor("#FF0000");
+                embed.setColor("#E5182C");
                 embed.addField($("TIME_ERROR_DETAILS"), err);
 
                 messageToEdit.edit(embed);
@@ -513,7 +513,7 @@ async function processCommand(message, isMod, command, options) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
             embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
-            embed.setColor("#FF0000");
+            embed.setColor("#E5182C");
             embed.addField($("ERROR_DETAILS"), err);
 
             messageToEdit.edit(embed);

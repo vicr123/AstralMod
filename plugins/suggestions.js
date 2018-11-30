@@ -46,7 +46,7 @@ function processCommand(message, isMod, command) {
             }).then(() => {
                 let embed = new Discord.RichEmbed();
                 embed.setTitle("New Suggestion");
-                embed.setColor("#00C000");
+                embed.setColor("#79BAEC");
                 embed.setDescription(coll.content);
                 embed.setTimestamp();
                 embed.setFooter("From " + message.author.username, message.author.avatarURL);
