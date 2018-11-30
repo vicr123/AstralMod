@@ -83,7 +83,7 @@
     "PINS_EMPTY_EMBED": "Empty embed",
     "PINS_CONTENT_WITH_EMBED": "`Embed`\n{{embedcontent}}",
     "PINS_IMAGE": "Image",
-    "PINS_NONTEXTUAL_CONTENT": " `Non-textual content`",
+    "PINS_NONTEXTUAL_CONTENT": "`Non-textual content`",
     "PINS_ATTACHMENT": "{{count}} attachment",
     "PINS_ATTACHMENT_plural": "{{count}} attachments",
     "PINS_MESSAGE_UNPINNABLE": "Cannot pin this message. Please specify another message.",
