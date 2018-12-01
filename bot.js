@@ -275,7 +275,7 @@ global.awaitUserConfirmation = function(options) {
             message.react('🚫');
 
             let timeout = setTimeout(function() {
-                if (options.doNotClear) {
+                if (!options.doNotClear) {
                     message.clearReactions();
                 }
 
