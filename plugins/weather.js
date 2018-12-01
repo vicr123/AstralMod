@@ -524,35 +524,34 @@ function processCommand(message, isMod, command, options) {
         var location = command.substr(7);
 
         if (location == "") {
-            message.reply("Usage: `" + prefix(message.guild.id) + "setloc [your location]`. For more information, `" + prefix(message.guild.id) + "help setloc`");
+            message.reply($("SETLOC_ABOUT"));
         } else {
             var query = new YQL("select * from geo.places where text=\""+ location +"\"");
             
             query.exec(function(err, data) {
-                try {
-                    if (err) {
-                        throw new CommandError("Unknown City");
-                    } else {
-                        var userSettings = settings.users[message.author.id];
-                        
-                        if (userSettings == null) {
-                            userSettings = {};
-                        }
-                        var place;
-                        if (data.query.results.place[0] != null) place = data.query.results.place[0];
-                        else place = data.query.results.place;
-                        
-                        userSettings.location = place.woeid;
-            
-                        settings.users[message.author.id] = userSettings;
-                        
-                        //log(place);
-                        
-                        //message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
-                        message.reply("Your location is now " + place.name + ", " + place.country.code + " (" + place.centroid.latitude + ", " + place.centroid.longitude + ")");
+                if (err) {
+                    throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
+                } else {
+                    var userSettings = settings.users[message.author.id];
+                
+                    if (userSettings == null) {
+                        userSettings = {};
                     }
-                } catch (err) {
-                    message.channel.send(err.toString());
+                    var place;
+                    if (data.query.results.place[0] != null) place = data.query.results.place[0];
+                    else place = data.query.results.place;
+                        
+                    userSettings.location = place.woeid;
+            
+                    settings.users[message.author.id] = userSettings;
+                        
+                    log(place);
+                        
+                    //Translation through the ages
+                    
+                    //message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
+                    //message.reply("Your location is now " + place.name + ", " + place.country.code + " (" + place.centroid.latitude + ", " + place.centroid.longitude + ")");
+                    message.reply($("SETLOC_CITY_SET", {place: place.name, countryCode: place.country.code, lat: place.centroid.latitude, long: place.centroid.longitude}))
                 }
             });
         }
