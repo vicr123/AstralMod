@@ -230,5 +230,6 @@
     "SETTZ_ABOUT": "Usage: `{{prefix}}settz [your timezone]`. For more information, type `{{prefix}}help settz`",
     "SETTZ_INVALID_TIMEZONE": "That's not a valid timezone.",
     "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}.",
-    "PIC_PROFILE_PICTURE": "Profile Picture"
+    "PIC_PROFILE_PICTURE": "Profile Picture",
+    "VERSION": "**AstralMod {{version}}**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later."
 }
