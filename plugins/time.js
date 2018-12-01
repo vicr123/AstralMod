@@ -243,7 +243,7 @@ function pollTimers() {
                         let time = moment(timer.timeout);
 
                         embed.addField("Timeout Date", time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm Z" : "h:mm A Z"), false);
-                        embed.setFooter("To see all your timers, use " + prefix + "timers.");
+                        embed.setFooter("To see all your timers, use " + prefix(message.guild.id) + "timers.");
 
                         try {
                             if (timer.isChannelUser) {
@@ -275,7 +275,7 @@ async function processCommand(message, isMod, command, options) {
         }
 
         if (isNaN(utcOffset) || utcOffset < -14 || utcOffset > 14) {
-            message.reply($("SETTZ_ABOUT", {prefix}));
+            message.reply($("SETTZ_ABOUT", {prefix: prefix(message.guild.id)}));
         } else {
             var userSettings = settings.users[message.author.id];
 
@@ -293,7 +293,7 @@ async function processCommand(message, isMod, command, options) {
             }
         }
     } else if (command == "settz") {
-        message.reply($("SETTZ_ABOUT", {prefix}));
+        message.reply($("SETTZ_ABOUT", {prefix: prefix(message.guild.id)}));
     } else if (command.startsWith("timer ")) {
         var time;
         var indexOfFirstSplit = command.indexOf(" ", 6);
@@ -303,7 +303,7 @@ async function processCommand(message, isMod, command, options) {
             time = command.substr(6);
         } else {
             time = command.substr(6, indexOfFirstSplit - 6);
-            reason = message.content.substr(indexOfFirstSplit + prefix.length).trim();
+            reason = message.content.substr(indexOfFirstSplit + prefix(message.guild.id).length).trim();
         }
 
         var seconds = parseTime(time);
@@ -410,7 +410,7 @@ async function processCommand(message, isMod, command, options) {
         var index = parseInt(timerToRemove);
 
         if (isNaN(index)) {
-            message.reply("Usage: `" + prefix + "rmtimer index`. For the `index` parameter, use `" + prefix + "timers`. For more information, `" + prefix + "help rmtimer`");
+            message.reply("Usage: `" + prefix(message.guild.id) + "rmtimer index`. For the `index` parameter, use `" + prefix(message.guild.id) + "timers`. For more information, `" + prefix(message.guild.id) + "help rmtimer`");
             return;
         }
 
@@ -435,7 +435,7 @@ async function processCommand(message, isMod, command, options) {
         }
 
         settings.users[message.author.id].timers.splice(index, 1);
-        message.reply("That timer has been deleted. For new timer indices, use `" + prefix + "timers`.");
+        message.reply("That timer has been deleted. For new timer indices, use `" + prefix(message.guild.id) + "timers`.");
     } else if (command.startsWith("time")) {
         let location = command.replace("time", "").trim();
         let messageToEdit;
@@ -453,7 +453,7 @@ async function processCommand(message, isMod, command, options) {
 
                 let returnUserWeather = function(user) {
                     if (settings.users[user.id] == null || settings.users[user.id].timezone == null) {
-                        reject($("TIME_TIMEZONE_NOT_SET", {user: user.username, prefix: prefix}));
+                        reject($("TIME_TIMEZONE_NOT_SET", {user: user.username, prefix: prefix(message.guild.id)}));
                     } else {
                         resolve({
                             offset: settings.users[user.id].timezone,
@@ -551,29 +551,29 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "time":
-                help.title = prefix + "time";
-                help.usageText = prefix + "time tz";
+                help.title = prefix(message.guild.id) + "time";
+                help.usageText = prefix(message.guild.id) + "time tz";
                 help.helpText = "Returns the time at tz";
                 help.param1 = "- A UTC Offset\n" +
                               "- A timezone code known to AstralMod\n" +
                               "- A user known to AstralMod";
                 break;
             case "settz":
-                help.title = prefix + "settz";
-                help.usageText = prefix + "settz timezone";
+                help.title = prefix(message.guild.id) + "settz";
+                help.usageText = prefix(message.guild.id) + "settz timezone";
                 help.helpText = "Sets your timezone to timezone";
                 help.param1 = "- A UTC Offset detailing your timezone\n"
                               "- A timezone code known to AstralMod representing your timezone\n";
                 help.remarks = "By using this command, your timezone will be available to anyone who asks AstralMod.";
                 break;
             case "timer":
-                help.title = prefix + "timer";
-                help.usageText = prefix + "timer time [rem]";
+                help.title = prefix(message.guild.id) + "timer";
+                help.usageText = prefix(message.guild.id) + "timer time [rem]";
                 help.helpText = "Sets a timer for the amount of time specified in time";
                 help.param1 = "- A number, in minutes\n"
                               "- A number followed by either `s`, `m`, `h`.\n";
@@ -581,14 +581,14 @@ module.exports = {
                               "Text to be sent when timer expires";
                 break;
             case "timers":
-                help.title = prefix + "timer";
+                help.title = prefix(message.guild.id) + "timer";
                 help.helpText = "Lists your current timers";
                 break;
             case "rmtimer":
-                help.title = prefix + "rmtimer";
-                help.usageText = prefix + "rmtimer index";
+                help.title = prefix(message.guild.id) + "rmtimer";
+                help.usageText = prefix(message.guild.id) + "rmtimer index";
                 help.helpText = "Removes the timer at index";
-                help.param1 = "Index of the timer you wish to remove. This can be obtained with `" + prefix + "timers`";
+                help.param1 = "Index of the timer you wish to remove. This can be obtained with `" + prefix(message.guild.id) + "timers`";
                 break;
         }
 

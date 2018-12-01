@@ -161,7 +161,7 @@ function processCommand(message, isMod, command, options) {
             message.reply($("PINS_COULDNT_PIN"))
         });
     } else if (command == "pin") {
-        return message.reply($("PINS_INVALID_COMMAND", {prefix: prefix}));
+        return message.reply($("PINS_INVALID_COMMAND", {prefix: prefix(message.guild.id)}));
     } else if (command.startsWith("pins")) {
         let number = command.substr(5);
         let nsfw = message.channel.nsfw;
@@ -171,7 +171,7 @@ function processCommand(message, isMod, command, options) {
         if (!flagArray || flagArray.length < 1) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("PINS_NO_PINS"));
-            embed.setDescription($("PINS_NO_PINS_DESCRIPTION", {prefix: prefix}));
+            embed.setDescription($("PINS_NO_PINS_DESCRIPTION", {prefix: prefix(message.guild.id)}));
             return message.channel.send(embed);
         }
 
@@ -235,9 +235,9 @@ function processCommand(message, isMod, command, options) {
 
         let fullPages = Math.ceil(flagArray.length / 4);
         if (fullPages == 1) {
-            embed.setFooter($("PINS_HOWTO_PIN", {prefix:prefix}));
+            embed.setFooter($("PINS_HOWTO_PIN", {prefix:prefix(message.guild.id)}));
         } else {
-            embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber:number, numberOfPages: fullPages, prefix:prefix}));
+            embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber:number, numberOfPages: fullPages, prefix:prefix(message.guild.id)}));
         }
 
         let get4Messages = function(page) {
@@ -258,7 +258,7 @@ function processCommand(message, isMod, command, options) {
         let getEmbed = async () => {
             embed.fields.length = 0;
             for (let flagItem of get4Messages(number)) {
-                embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber: number, numberOfPages: fullPages, prefix}));
+                embed.setFooter($("PINS_HOWTO_PAGINATE", {pageNumber: number, numberOfPages: fullPages, prefix: prefix(message.guild.id)}));
                 
                 let channel = client.channels.get(flagItem.channel);
                 let pinNumber = flagArray.findIndex(e => e === flagItem) + 1;
@@ -281,7 +281,7 @@ function processCommand(message, isMod, command, options) {
                     if (message.content == "") {
                         for (let [key, attachment] of message.attachments) {
                             if (attachment.height != null) {
-                                if (message.content == "") flagMessage = $("PINS_HOWTO_VIEW", {prefix, pinNumber});
+                                if (message.content == "") flagMessage = $("PINS_HOWTO_VIEW", {prefix: prefix(message.guild.id), pinNumber});
                                 break;  
                             }
                         }
@@ -329,7 +329,7 @@ function processCommand(message, isMod, command, options) {
         var unflagging = command.substr(6);
         var index = parseInt(unflagging) - 1;
 
-        if (isNaN(index)) return message.reply($("PINS_UNPIN_USAGE", {prefix: prefix}));
+        if (isNaN(index)) return message.reply($("PINS_UNPIN_USAGE", {prefix: prefix(message.guild.id)}));
         if (settings.users[message.author.id] == null) return message.reply($("PINS_NO_PINS"));
         if (settings.users[message.author.id].flags == null) return message.reply($("PINS_NO_PINS"));
         if (settings.users[message.author.id].flags.length == 0) return message.reply($("PINS_NO_PINS"));
@@ -423,30 +423,30 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "pin":
-                help.title = prefix + "pin";
-                help.usageText = prefix + "pin [number | message id]";
+                help.title = prefix(message.guild.id) + "pin";
+                help.usageText = prefix(message.guild.id) + "pin [number | message id]";
                 help.helpText = "Portably pin a message for reference";
                 help.param1 = "The message to pin; 1 for the last message sent in this channel, 2 for the second last message, etc.\nYou can also provide a message ID to pin.";
                 help.availableOptions = "`--view [id]` Lets you view that specific pin. Will also let you view any attachments in the pin"
                 help.remarks = "AstralMod pins messages by taking the message ID and channel ID. If the message is deleted or if the channel is deleted, the message will not be retrievable."
                 break;
             case "pins":
-                help.title = prefix + "pins";
-                help.usageText = prefix + "pins [number]";
+                help.title = prefix(message.guild.id) + "pins";
+                help.usageText = prefix(message.guild.id) + "pins [number]";
                 help.helpText = "Show pinned messages";
                 help.param2 = "*Optional Parameter*\n" +
                     "The page number you wish to view";
                 break;
             case "unpin":
-                help.title = prefix + "unpin";
-                help.usageText = prefix + "unpin [pin id]";
+                help.title = prefix(message.guild.id) + "unpin";
+                help.usageText = prefix(message.guild.id) + "unpin [pin id]";
                 help.helpText = "Unpins a messge";
-                help.param1 = "The pin # to unpin. To get pin numbers, use `" + prefix + "pins`";
+                help.param1 = "The pin # to unpin. To get pin numbers, use `" + prefix(message.guild.id) + "pins`";
         }
 
         return help;

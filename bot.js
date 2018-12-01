@@ -36,13 +36,22 @@ const client = new Discord.Client({
 const i18next = require('i18next');
 let i18nextbackend = require('i18next-node-fs-backend');
 
+
+global.prefix = (id) => {
+    if (id && settings && settings.guilds && settings.guilds[id] && settings.guilds[id].serverPrefix) {
+        return settings.guilds[id].serverPrefix;
+    }
+    
+    return defaultPrefix;
+}
+    
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
     amVersion = "2.10";
-    global.prefix = consts.config.prefix;
+    global.defaultPrefix = consts.config.prefix(message.guild.id);
 } else {
     amVersion = "Blueprint";
-    global.prefix = consts.config.bprefix;
+    global.defaultPrefix = consts.config.bprefix;
 }
 
 global.botOwner = undefined;
@@ -1470,25 +1479,9 @@ global.parseUser = function(query, guild = null) {
 }
 
 function setGame() {
-    /*var presence = {
-        game: {
-            type: 0
-        },
-        status: "online",
-        afk: false
-    };
-
-    presence.game.name = getRandom("with ban buttons",
-                                   "Annoying Victor",
-                                   prefix + "help",
-                                   "v." + amVersion,
-                                   "v." + amVersion,
-                                   "Android Pay");
-    client.user.setPresence(presence);*/
-
     client.user.setActivity(getRandom("with ban buttons",
                                       "Annoying Victor",
-                                      prefix + "help",
+                                      prefix() + "help",
                                       "v." + amVersion,
                                       "v." + amVersion,
                                       "Google Pay",
@@ -1639,7 +1632,7 @@ function processModCommand(message, command) {
     };
 
     //Special cases
-    if (lText == prefix + "config") {
+    if (lText == prefix(message.guild.id) + "config") {
         //Make sure person isn't configuring any other guild
         for (key in settings.guilds) {
             var guildSetting = settings.guilds[key];
@@ -1694,7 +1687,7 @@ function processModCommand(message, command) {
                 message.reply(":arrow_left: Continue in DMs.");
             }
         }
-    } else if (lText == prefix + "poweroff") {
+    } else if (lText == prefix(message.guild.id) + "poweroff") {
         if (message.author.id == global.botOwner.id) {
             message.reply("AstralMod is now exiting.").then(function () {
                 shutdown();
@@ -1744,9 +1737,9 @@ function requestNickname(member, nickname, guild, options) {
 
         let botwarningsChannelMessage;
         if (nickname == "") {
-            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix + "oknick " + member.user.id + "`";
+            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix(message.guild.id) + "oknick " + member.user.id + "`";
         } else {
-            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix + "oknick " + member.user.id + "`";
+            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix(message.guild.id) + "oknick " + member.user.id + "`";
         }
         botwarningsChannel.send(botwarningsChannelMessage).then(function(message) {
             message.react("✅").then(function() {
@@ -1914,7 +1907,7 @@ function processAmCommand(message, options, command) {
             } else if (nickResult == "length") {
                 message.reply(_[locale]("Nicknames need to be less than 32 characters."));
             } else if (nickResult == "configuration") {
-                message.reply(_[locale]("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix + "config` and set a Bot Warnings channel."));
+                message.reply(_[locale]("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix(message.guild.id) + "config` and set a Bot Warnings channel."));
             } else {
                 awaitUserConfirmation({
                     title: "Request to change nickname", 
@@ -2002,7 +1995,7 @@ function processAmCommand(message, options, command) {
         var embed = new Discord.RichEmbed();
         embed.setColor("#79BAEC");
         embed.setAuthor($("HELP_CONTENTS"));
-        embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix}));
+        embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix(message.guild.id)}));
 
         embed.addField($("HELP_CORE_COMMANDS"), "**config**\n**shoo**\n**oknick**\nping\nnick\nsetlocale\nsudo\nfetchuser\nversion\nabout\nhelp", true);
 
@@ -2101,59 +2094,59 @@ function processAmCommand(message, options, command) {
         var help = {};
         switch (helpCmd) {
             case "config":
-                help.title = prefix + "config";
+                help.title = prefix(message.guild.id) + "config";
                 help.helpText = "Configures AstralMod for this server";
                 break;
             case "shoo":
-                help.title = prefix + "shoo";
+                help.title = prefix(message.guild.id) + "shoo";
                 help.helpText = "Leave the server, purging all configuration";
                 break;
             case "oknick":
-                help.title = prefix + "oknick";
+                help.title = prefix(message.guild.id) + "oknick";
                 help.helpText = "Accepts a nickname";
                 break;
             case "ping":
-                help.title = prefix + "ping";
+                help.title = prefix(message.guild.id) + "ping";
                 help.helpText = "Asks AstralMod to reply with a message";
                 break;
             case "version":
-                help.title = prefix + "version";
+                help.title = prefix(message.guild.id) + "version";
                 help.helpText = "Queries the current AstralMod version";
                 break;
             case "nick":
-                help.title = prefix + "nick";
-                help.usageText = prefix + "nick nickname";
+                help.title = prefix(message.guild.id) + "nick";
+                help.usageText = prefix(message.guild.id) + "nick nickname";
                 help.helpText = "Sets your nickname after staff have a chance to review it";
                 help.param1 = "The nickname you wish to be known as";
                 break;
             case "fetchuser":
-                help.title = prefix + "fetchuser";
-                help.usageText = prefix + "fetchuser [ID]";
+                help.title = prefix(message.guild.id) + "fetchuser";
+                help.usageText = prefix(message.guild.id) + "fetchuser [ID]";
                 help.helpText = "Tells AstralMod about the existance of a user";
                 help.param1 = "The user ID you want to tell AstralMod about.";
                 help.remarks = "AstralMod will search for users from all of Discord."
                 break;
             case "setlocale":
-                help.title = prefix + "setlocale";
-                help.usageText = prefix + "setlocale [locale]";
+                help.title = prefix(message.guild.id) + "setlocale";
+                help.usageText = prefix(message.guild.id) + "setlocale [locale]";
                 help.helpText = "Sets the language AstralMod will use when processing your commands";
                 break;
             case "help":
-                help.title = prefix + "help";
-                help.usageText = prefix + "help [command]";
+                help.title = prefix(message.guild.id) + "help";
+                help.usageText = prefix(message.guild.id) + "help [command]";
                 help.helpText = "Acquire information about how to use AstralMod and any available commands";
                 help.param1 = "*Optional Parameter*\n" +
                                 "The command to acquire information about.\n" +
                                 "If this parameter is not present, we'll list the available commands.";
                 break;
             case "about":
-                help.title = prefix + "about";
-                help.usageText = prefix + "about";
+                help.title = prefix(message.guild.id) + "about";
+                help.usageText = prefix(message.guild.id) + "about";
                 help.helpText = "Acquire information about AstralMod";
                 break;
             case "sudo":
-                help.title = prefix + "sudo";
-                help.usageText = prefix + "sudo";
+                help.title = prefix(message.guild.id) + "sudo";
+                help.usageText = prefix(message.guild.id) + "sudo";
                 help.helpText = "Requests permission to use moderator commands for 5 minutes";
                 break;
             default:
@@ -2165,21 +2158,21 @@ function processAmCommand(message, options, command) {
                             if (plugin.availableCommands.general != null) {
                                 if (plugin.availableCommands.general.hiddenCommands != null) {
                                     if (plugin.availableCommands.general.hiddenCommands.indexOf(helpCmd) != -1) {
-                                        help = plugin.acquireHelp(helpCmd, options);
+                                        help = plugin.acquireHelp(helpCmd, message);
                                         break;
                                     }
                                 }
 
                                 if (plugin.availableCommands.general.modCommands != null) {
                                     if (plugin.availableCommands.general.modCommands.indexOf(helpCmd) != -1) {
-                                        help = plugin.acquireHelp(helpCmd);
+                                        help = plugin.acquireHelp(helpCmd, message);
                                         break;
                                     }
                                 }
 
                                 if (plugin.availableCommands.general.commands != null) {
                                     if (plugin.availableCommands.general.commands.indexOf(helpCmd) != -1) {
-                                        help = plugin.acquireHelp(helpCmd);
+                                        help = plugin.acquireHelp(helpCmd, message);
                                         break;
                                     }
                                 }
@@ -2188,14 +2181,14 @@ function processAmCommand(message, options, command) {
                             if (plugin.availableCommands[message.guild.id] != null) {
                                 if (plugin.availableCommands[message.guild.id].modCommands != null) {
                                     if (plugin.availableCommands[message.guild.id].modCommands.indexOf(helpCmd) != -1) {
-                                        help = plugin.acquireHelp(helpCmd);
+                                        help = plugin.acquireHelp(helpCmd, message);
                                         break;
                                     }
                                 }
 
                                 if (plugin.availableCommands[message.guild.id].commands != null) {
                                     if (plugin.availableCommands[message.guild.id].commands.indexOf(helpCmd) != -1) {
-                                        help = plugin.acquireHelp(helpCmd);
+                                        help = plugin.acquireHelp(helpCmd, message);
                                         break;
                                     }
                                 }
@@ -2288,217 +2281,6 @@ function processAmCommand(message, options, command) {
     return false;
 }
 
-function processConfigure(message, guild) {
-    var text = message.content.toLowerCase();
-
-    var guildSetting = settings.guilds[guild.id];
-
-    if (false /*guildSetting.requiresConfig*/) {
-        switch (guildSetting.configuringStage) {
-            case 0: { //Mod roles
-                var roles = text.split(" ");
-                var isValid = true;
-
-                for (role of roles) {
-                    if (guild.roles.has(role)) {
-                        message.author.send(role + " = " + guild.roles.get(role).name);
-                    } else {
-                        message.author.send(role + " = ???");
-                        isValid = false;
-                    }
-                }
-
-                if (!isValid) {
-                    message.author.send("Let's try this again. Enter the roles of mods on this server, seperated by a space.");
-                    return;
-                } else {
-                    guildSetting.tentativeModRoles = roles;
-
-                    message.author.send("Is this correct?");
-                    guildSetting.configuringStage = 1;
-                }
-
-                break;
-            }
-            case 1: { //Mod roles - confirm
-                if (text == "yes" || text == "y") {
-                    guildSetting.modRoles = guildSetting.tentativeModRoles;
-                    delete guildSetting.tentativeModRoles;
-
-                    message.author.send("Thanks. Next, I'll need the ID of the channel where I can post member alerts. Alternatively, enter \"none\" if you want to disable member alerts. If you don't know how to get the ID, enable developer mode in user settings > Appearance, right click the channel on your server, then click \"Copy ID\".");
-                    guildSetting.configuringStage = 2;
-                } else if (text == "no" || text == "n") {
-                    guildSetting.tentativeModRoles = null;
-                    message.author.send("Let's try this again. Enter the roles of mods on this server, seperated by a space.");
-                    guildSetting.configuringStage = 0;
-                } else {
-                    message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
-                }
-                break;
-            }
-            case 2: { //Member Alerts Channel
-                if (text == "none") {
-                    message.author.send("You're disabling member alerts. Is that correct?");
-                    guildSetting.tentativeMemberAlerts = null;
-                    guildSetting.configuringStage = 3;
-                } else {
-                    if (!guild.channels.has(text)) {
-                        message.author.send("That channel doesn't exist. Try again.");
-                    } else {
-                        var channel = guild.channels.get(text);
-                        if (channel.type != "text") {
-                            message.author.send("That's not a text channel. Try again.");
-                        } else {
-                            message.author.send("You're setting #" + channel.name + " as the member alerts channel. Is that correct?");
-                            guildSetting.tentativeMemberAlerts = channel.id;
-                            guildSetting.configuringStage = 3;
-                        }
-                    }
-                }
-                break;
-            }
-            case 3: { //Member Alerts Channel - Confirm
-                if (text == "yes" || text == "y") {
-                    guildSetting.memberAlerts = guildSetting.tentativeMemberAlerts;
-                    delete guildSetting.tentativeMemberAlerts;
-
-                    message.author.send("Thanks. Next, I'll need the ID of the channel where I can post chat logs.");
-                    guildSetting.configuringStage = 4;
-                } else if (text == "no" || text == "n") {
-                    guildSetting.tentativeMemberAlerts = null;
-                    message.author.send("Let's try this again. What's the ID of the channel where I can post member alerts?");
-                    guildSetting.configuringStage = 2;
-                } else {
-                    message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
-                }
-                break;
-            }
-            case 4: { //Chat Logs Channel
-                if (text == "none") {
-                    message.author.send("You're disabling chat logs. Is that correct?");
-                    guildSetting.tentativeChatLogs = null;
-                    guildSetting.configuringStage = 5;
-                } else {
-                    if (!guild.channels.has(text)) {
-                        message.author.send("That channel doesn't exist. Try again.");
-                    } else {
-                        var channel = guild.channels.get(text);
-                        if (channel.type != "text") {
-                            message.author.send("That's not a text channel. Try again.");
-                        } else {
-                            message.author.send("You're setting #" + channel.name + " as the Chat logs channel. Is that correct?");
-                            guildSetting.tentativeChatLogs = channel.id;
-                            guildSetting.configuringStage = 5;
-                        }
-                    }
-                }
-                break;
-            }
-            case 5: { //Chat Logs Channel - Confirm
-                if (text == "yes" || text == "y") {
-                    guildSetting.chatLogs = guildSetting.tentativeChatLogs;
-                    delete guildSetting.tentativeChatLogs ;
-
-                    message.author.send("Thanks. Next, I'll need the ID of the channel where I can post general warnings.");
-                    guildSetting.configuringStage = 6;
-                } else if (text == "no" || text == "n") {
-                    guildSetting.tentativeChatLogs = null;
-                    message.author.send("Let's try this again. What's the ID of the channel where I can post chat logs?");
-                    guildSetting.configuringStage = 4;
-                } else {
-                    message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
-                }
-                break;
-            }
-            case 6: { //Botwarnings Channel
-                if (text == "none") {
-                    message.author.send("You're disabling general warnings. Is that correct?");
-                    guildSetting.tentativeBotWarnings = null;
-                    guildSetting.configuringStage = 7;
-                } else {
-                    if (!guild.channels.has(text)) {
-                        message.author.send("That channel doesn't exist. Try again.");
-                    } else {
-                        var channel = guild.channels.get(text);
-                        if (channel.type != "text") {
-                            message.author.send("That's not a text channel. Try again.");
-                        } else {
-                            message.author.send("You're setting #" + channel.name + " as the general warnings channel. Is that correct?");
-                            guildSetting.tentativeBotWarnings = channel.id;
-                            guildSetting.configuringStage = 7;
-                        }
-                    }
-                }
-                break;
-            }
-            case 7: { //Botwarnings Channel - Confirm
-                if (text == "yes" || text == "y") {
-                    guildSetting.botWarnings = guildSetting.tentativeBotWarnings;
-                    delete guildSetting.tentativeBotWarnings;
-
-                    message.author.send("Thanks. Do you want to enable suggestions?");
-                    guildSetting.configuringStage = 8;
-                } else if (text == "no" || text == "n") {
-                    guildSetting.tentativeBotWarnings = null;
-                    message.author.send("Let's try this again. What's the ID of the channel where I can post general warnings?");
-                    guildSetting.configuringStage = 6;
-                } else {
-                    message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
-                }
-                break;
-            }
-            case 8: { //Suggestions - Ask
-                if (text == "yes" || text == "y") {
-                    message.author.send("Ok, what's the ID of the channel?");
-                    guildSetting.configuringStage = 9;
-                } else if (text == "no" || text == "n") {
-                    guildSetting.suggestions = null;
-                    message.author.send("Thanks. AstralMod is now ready for use! Enjoy using AstralMod!");
-                    guildSetting.requiresConfig = false;
-                    guildSetting.configuringUser = null;
-                } else {
-                    message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
-                }
-                break;
-            }
-            case 9: { //Suggestions Channel
-                if (!guild.channels.has(text)) {
-                    message.author.send("That channel doesn't exist. Try again.");
-                } else {
-                    var channel = guild.channels.get(text);
-                    if (channel.type != "text") {
-                        message.author.send("That's not a text channel. Try again.");
-                    } else {
-                        message.author.send("You're setting #" + channel.name + " as the suggestions channel. Is that correct?");
-                        guildSetting.tentativeSuggestions = channel.id;
-                        guildSetting.configuringStage = 10;
-                    }
-                }
-                break;
-            }
-            case 10: { //Suggestions Channel - Confirm
-                if (text == "yes" || text == "y") {
-                    guildSetting.suggestions = guildSetting.tentativeSuggestions;
-                    delete guildSetting.tentativeSuggestions;
-
-                    message.author.send("Thanks. AstralMod is now ready for use! Enjoy using AstralMod!");
-                    guildSetting.requiresConfig = false;
-                    guildSetting.configuringUser = null;
-                } else if (text == "no" || text == "n") {
-                    guildSetting.tentativeSuggestions = null;
-                    message.author.send("Let's try this again. What's the ID of the channel where I can post suggestions?");
-                    guildSetting.configuringStage = 9;
-                } else {
-                    message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
-                }
-                break;
-            }
-        }
-    }
-
-    settings.guilds[guild.id] = guildSetting;
-}
-
 function getSingleConfigureWelcomeText(guild) {
     var guildSetting = settings.guilds[guild.id];
     var string = "What would you like to configure? Type the number next to the option you want to set:```";
@@ -2538,6 +2320,8 @@ function getSingleConfigureWelcomeText(guild) {
     }
 
     string += "6 Locale             " + guildSetting.locale + "\n";
+
+    string += "7 Server prefix      " + (guildSetting.serverPrefix === undefined ? "Default" : guildSetting.serverPrefix) + "\n";
 
 
     if (guildSetting.nickModeration == null || guildSetting.nickModeration == false) {
@@ -2579,7 +2363,7 @@ function processSingleConfigure(message, guild) {
                     requiresConfig: false
                 };
                 log("Configuration for " + guild.id + " purged.", logType.good);
-                message.author.send("AstralMod configuration for this server has been reset. To set up AstralMod, just `" + prefix + "config` in the server.");
+                message.author.send("AstralMod configuration for this server has been reset. To set up AstralMod, just `" + prefix(message.guild.id) + "config` in the server.");
             } else { //Cancel
                 message.author.send("Returning to Main Menu.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
@@ -2631,6 +2415,10 @@ function processSingleConfigure(message, guild) {
                     
                     message.author.send(locales);
                     guildSetting.configuringStage = 60;
+                    break;
+                case "7": //Suggestions
+                    message.author.send("What do you want AstralMod's prefix to be? Alternatively, enter \"default\" to just use AstralMod's default prefix.");
+                    guildSetting.configuringStage = 70;
                     break;
                 case "0": //Exit
                     message.author.send("Configuration complete.");
@@ -2907,7 +2695,7 @@ function processSingleConfigure(message, guild) {
 
                 message.author.send("Thanks, I'll save that.");
                 message.author.send(getSingleConfigureWelcomeText(guild));
-                guildSetting.configuringStage = 60;
+                guildSetting.configuringStage = 0;
             } else if (text == "no" || text == "n") {
                 guildSetting.tentativeSuggestions = null;
                 message.author.send("Let's try this again. What's the ID of the channel where I can post suggestions?");
@@ -2949,6 +2737,37 @@ function processSingleConfigure(message, guild) {
                 guildSetting.locale = "en";
                 message.author.send("Let's try this again. What should the locale of the server be?");
                 guildSetting.configuringStage = 60;
+            } else {
+                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+            }
+            break;
+        }
+        case 70: { //Server prefix
+            if (text.trim() == "") {
+                message.author.send("You can't set your prefix to that. Try something else");
+            } else if (text == "default") {
+                message.author.send("You're setting AstralMod's prefix to the default one. Is that correct?");
+                guildSetting.tentativePrefix = undefined;
+                guildSetting.configuringStage = 71;
+            } else {
+                message.author.send("You're AstralMod's prefix as `" + text + "`. Is that correct?");
+                guildSetting.tentativePrefix = text;
+                guildSetting.configuringStage = 71;
+            }
+            break;
+        }
+        case 71: { //Locale - Confirm
+            if (text == "yes" || text == "y") {
+                guildSetting.serverPrefix = guildSetting.tentativePrefix;
+                delete guildSetting.tentativePrefix;
+
+                message.author.send("Thanks, I'll save that.");
+                message.author.send(getSingleConfigureWelcomeText(guild));
+                guildSetting.configuringStage = 0;
+            } else if (text == "no" || text == "n") {
+                guildSetting.serverPrefix = undefined;
+                message.author.send("Let's try this again. What should the prefix for commands be?");
+                guildSetting.configuringStage = 70;
             } else {
                 message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
             }
@@ -3026,9 +2845,9 @@ async function processMessage(message) {
 
             if (capture[message.guild.id] != null && capture[message.guild.id].author == message.author.id) {
                 capture[message.guild.id].function(message);
-            } else if (text.toLowerCase().startsWith(prefix) || text.startsWith(message.guild.me.toString())) {
+            } else if (text.toLowerCase().startsWith(prefix(message.guild.id)) || text.startsWith(message.guild.me.toString())) {
                 //Check if the command has been blocked
-                let prefixLength = prefix.length;
+                let prefixLength = prefix(message.guild.id).length;
                 if(text.startsWith(message.guild.me.toString())) {
                     prefixLength = message.guild.me.toString().length
                     if (message.content[prefixLength] == " ") {
@@ -3059,7 +2878,7 @@ async function processMessage(message) {
                 }
 
                 //Determine if this is a command
-                if (isMod(message.member) || text == prefix + "config") { //This is a mod command
+                if (isMod(message.member) || text == prefix(message.guild.id) + "config") { //This is a mod command
                     if (!processModCommand(message, text.substr(prefixLength).toLowerCase())) {
                         if (!processAmCommand(message, options, text.substr(prefixLength).toLowerCase())) {
                             //Pass command onto plugins
@@ -3084,7 +2903,7 @@ async function processMessage(message) {
                     if (guildSetting.configuringUser == message.author.id) {
                         //Check if this is during first time keys
                         if (guildSetting.requiresConfig) {
-                            processConfigure(message, client.guilds.get(key));
+                            // processConfigure(message, client.guilds.get(key));
                         } else {
                             processSingleConfigure(message, client.guilds.get(key));
                         }
@@ -3136,7 +2955,7 @@ function newGuild(guild) {
     }
 
     settings.guilds[guild.id] = {
-        requiresConfig: false
+        requiresConfig: false,
     };
 
 
@@ -3144,9 +2963,12 @@ function newGuild(guild) {
         let channel = guild.channels.find("name", "general");
         if (channel == null) {
             channel = guild.channels.find("name", "lounge");
+        } if (channel == null) {
+            channel = guild.channels.find("name", "main");
         }
 
-        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by tying `" + prefix + "config`. To see the help index, use `" + prefix + "help`.";
+
+        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by tying `" + prefix(message.guild.id) + "config`. To see the help index, use `" + prefix(message.guild.id) + "help`.";
         if (channel == null) {
             guild.owner.send(message);
         } else {
@@ -4017,5 +3839,3 @@ if (Discord.version != requireDiscordVersion) {
         }
     }
 }
-
-

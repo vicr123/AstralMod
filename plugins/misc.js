@@ -295,36 +295,36 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "pic":
-                help.title = prefix + "pic";
-                help.usageText = prefix + "pic user";
+                help.title = prefix(message.guild.id) + "pic";
+                help.usageText = prefix(message.guild.id) + "pic user";
                 help.helpText = "Returns the user's profile picture";
                 help.param1 = "A user to retrieve the profile picture";
                 break;
             case "setunit":
-                help.title = prefix + "setunit";
-                help.usageText = prefix + "setunit units";
+                help.title = prefix(message.guild.id) + "setunit";
+                help.usageText = prefix(message.guild.id) + "setunit units";
                 help.helpText = "Sets units used by AstralMod";
                 help.param1 = "Either `metric`, `imperial`, `24(hr)`, or `12(hr)`";
                 break;
             case "sinfo":
-                help.title = prefix + "sinfo";
-                help.usageText = prefix + "sinfo";
+                help.title = prefix(message.guild.id) + "sinfo";
+                help.usageText = prefix(message.guild.id) + "sinfo";
                 help.helpText = "Retrieves information about the current server";
                 break;
             case "calc":
-                help.title = prefix + "calc";
-                help.usageText = prefix + "calc expression";
+                help.title = prefix(message.guild.id) + "calc";
+                help.usageText = prefix(message.guild.id) + "calc expression";
                 help.helpText = "Invokes theCalculator and calculates an expression.";
                 help.remarks = "Multiple expressions can be evaluated consecutively by seperating them with a colon.";
                 break;
             case "tr":
-                help.title = prefix + "tr";
-                help.usageText = prefix + "tr [--from=language] [--to=language] phrase";
+                help.title = prefix(message.guild.id) + "tr";
+                help.usageText = prefix(message.guild.id) + "tr [--from=language] [--to=language] phrase";
                 help.helpText = "Translates a phrase between languages.";
                 help.param1 = "The language to translate from. If ommitted, the language is automatically detected";
                 help.param2 = "The language to translate to. If ommitted, defaults to English";
