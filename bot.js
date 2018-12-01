@@ -275,7 +275,9 @@ global.awaitUserConfirmation = function(options) {
             message.react('🚫');
 
             let timeout = setTimeout(function() {
-                message.clearReactions();
+                if (options.doNotClear) {
+                    message.clearReactions();
+                }
 
                 if (options.msgOnSuccess != "") {
                     embed.setDescription(options.msgOnSuccess);

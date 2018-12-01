@@ -1,6 +1,6 @@
 /****************************************
  * 
- *   Suggestions: Plugin for AstralMod that lets users make suggestions
+ *   Suggestions: Plugin for AstralMod that lets users make server suggestions
  *   Copyright (C) 2018 John Tur
  *
  *   This program is free software: you can redistribute it and/or modify
@@ -22,37 +22,41 @@ var client;
 var consts;
 const Discord = require('discord.js');
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
+    let $$ = _[options.glocale];
     if(!command.startsWith("suggest")) return;
 
     if (settings.guilds[message.guild.id].suggestions == null) {
-        message.reply("Suggestions are not enabled on this server.");
+        message.reply($("SUGGEST_NOT_ENABLED"));
         return;
     }
 
-    message.reply(":arrow_right: I've sent you a DM with further instructions.");
-    message.author.send("Type in your suggestion here and send it to me as a message:").then(_ => {
-
+    message.reply($("SUGGEST_FURTHER_INSTRUCTIONS", {emoji: ":arrow_right:"}));
+    message.author.send($("SUGGEST_INSTRUCTIONS")).then(_ => {
         let collector = message.author.dmChannel.createMessageCollector(f => f.author.id == message.author.id);
         collector.on('collect', coll => {
             collector.stop();
             awaitUserConfirmation({
-                title: "Sending suggestion",
-                msg: `I've got your suggestion and will send it to ${message.guild.name}.`,
-                msgOnSuccess: "Ok, I sent your suggestion.",
-                msgOnFail: "Alright, scratch that.",
-                channel: message.channel,
+                title: $("SUGGEST_CONFIRMATION_TITLE"),
+                msg: $("SUGGEST_CONFIRMATION_MESSAGE",  {guild: message.guild.name}),
+                msgOnSuccess: $("SUGGEST_CONFIRMATION_SUCCESS"),
+                msgOnFail: $("SUGGEST_CONFIRMATION_CANCEL"),
+                channel: message.author.dmChannel,
                 author: message.author,
+                time: 10,
+                locale: options.locale,
+                doNotClear: true
             }).then(() => {
                 let embed = new Discord.RichEmbed();
-                embed.setTitle("New Suggestion");
+                embed.setAuthor($$("SUGGEST_SUGGESTION_TITLE", {user: message.author.username}), message.author.avatarURL);
                 embed.setColor("#79BAEC");
                 embed.setDescription(coll.content);
                 embed.setTimestamp();
-                embed.setFooter("From " + message.author.username, message.author.avatarURL);
                 message.guild.channels.get(settings.guilds[message.guild.id].suggestions).send(embed);
-            }).catch(() => {
-                message.reply("🚫 ERROR: That didn't work.");
+            }).catch((err) => {
+                log(err, logType.warning);
+                message.author.dmChannel.send($("SUGGEST_SUGGESTION_ERROR", {emoji: ":no_entry_sign:"}));
             });
         });
     }).catch(err => log(err, logType.critical));
@@ -88,9 +92,7 @@ module.exports = {
         switch (helpCmd) {
             case "suggest":
                 help.title = "am:suggest";
-                help.usageText = "am:suggest";
-                help.helpText = "Sends a suggestino to the server.";
-                help.remarks = "";
+                help.helpText = "Sends a suggestion to the server.";
                 break;
         }
 
