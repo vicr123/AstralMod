@@ -282,7 +282,7 @@ global.awaitUserConfirmation = function(options) {
                 if (options.msgOnSuccess != "") {
                     embed.setDescription(options.msgOnSuccess);
                 }
-                embed.setColor("#79BAEC");
+                embed.setColor("#81EC79");
                 embed.setFooter($("AWAITUSERCONFIRMATION_FULFILLED"));
                 message.edit(embed);
                 resolve();
@@ -300,7 +300,7 @@ global.awaitUserConfirmation = function(options) {
                 if (options.msgOnFail != "") {
                     embed.setDescription(options.msgOnFail);
                 }
-                embed.setColor("#E5182C");
+                embed.setColor("#EC7979");
                 embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
                 message.edit(embed);
                 reject();
@@ -1554,7 +1554,7 @@ global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact
         var embed = new Discord.RichEmbed("uinfo");
         embed.setAuthor(member.displayName, user.displayAvatarURL);
         embed.setAuthor(getUserString(member), user.displayAvatarURL);
-        embed.setColor("#79BAEC");
+        embed.setColor("#81EC79");
         embed.setFooter($("UINFO_USER_ID", {id:user.id}));
 
         if (compact) {
@@ -1937,7 +1937,7 @@ function processAmCommand(message, options, command) {
         return true;
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
-        embed.setColor("#79BAEC");
+        embed.setColor("#81EC79");
         embed.setAuthor(_[locale]("AstralMod " + amVersion), client.user.avatarURL);
         embed.setDescription(_[locale]("Discord Bot"));
         embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
@@ -1948,7 +1948,7 @@ function processAmCommand(message, options, command) {
         return true;
     } else if (command == "setlocale") {
         let embed = new Discord.RichEmbed();
-        embed.setColor("#79BAEC");
+        embed.setColor("#81EC79");
         embed.setAuthor($("SETLOC_TITLE"));
         
         let thisLocale = $("THIS_LOCALE");
@@ -1976,7 +1976,7 @@ function processAmCommand(message, options, command) {
             if (locale == "en") thisLocale = "English";
 
             let embed = new Discord.RichEmbed();
-            embed.setColor("#79BAEC");
+            embed.setColor("#81EC79");
             embed.setAuthor(_[locale]("SETLOC_TITLE"));
             embed.setDescription(_[locale]("SETLOC_LANGUAGE", {locale: thisLocale}));
             embed.setFooter(_[locale]("SETLOC_DISCLAIMER"));
@@ -1995,7 +1995,7 @@ function processAmCommand(message, options, command) {
         return true;
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
-        embed.setColor("#79BAEC");
+        embed.setColor("#81EC79");
         embed.setAuthor($("HELP_CONTENTS"));
         embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix(message.guild.id)}));
 
@@ -2062,7 +2062,7 @@ function processAmCommand(message, options, command) {
                     setTimeout(() => global.tempMods.splice(global.tempMods.indexOf(message.author.id), 1), 300000)
                     embed.setDescription("Ok, I've given sudo privileges to this user.")
                     embed.setFooter($("AWAITUSERCONFIRMATION_FULFILLED"));
-                    embed.setColor("#79BAEC")
+                    embed.setColor("#81EC79")
                     m.edit(embed);    
                     m.clearReactions();
                 } else {
@@ -2072,7 +2072,7 @@ function processAmCommand(message, options, command) {
             collector.on('end', r => {                
                 embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
                 embed.setDescription("Ok, I've denied sudo privileges to this user.")
-                embed.setColor("#E5182C")
+                embed.setColor("#EC7979")
                 m.edit(embed);
                 m.clearReactions();
             })
@@ -2186,10 +2186,10 @@ function processAmCommand(message, options, command) {
         }
 
         if (help.helpText == null) {
-            embed.setColor("#E5182C");
+            embed.setColor("#EC7979");
             embed.setDescription($("HELP_UNAVAILABLE"));
         } else {
-            embed.setColor("#79BAEC");
+            embed.setColor("#81EC79");
             if (help.title == null) {
                 embed.setDescription($("HELP_COMMAND_TITLE"));
             } else {
@@ -2910,7 +2910,7 @@ async function processMessage(message) {
         let $ = _[settings.users[message.author.id].locale];
 
         var embed = new Discord.RichEmbed;
-        embed.setColor("#E5182C");
+        embed.setColor("#EC7979");
         embed.addField($("ERROR_DETAILS"), err.message);
 
         if (err.name == "UserInputError") {
@@ -3202,7 +3202,7 @@ function banAdd(guild, user) {
     if (channel != null) {
         var embed = new Discord.RichEmbed();
 
-        embed.setColor("#E5182C");
+        embed.setColor("#EC7979");
         embed.setTitle($$("GUILD_BAN_ADD_TITLE", {emoji: ":hammer:"}));
         embed.setDescription($$("GUILD_BAN_ADD_DESCRIPTION"));
 
