@@ -368,9 +368,9 @@ function processCommand(message, isMod, command, options) {
         } else if (query == "my keys") {
             message.channel.send(getRandom($("FIND_IN_BETWEEN_COUCH_CUSIONS", {emoji: ":couch:"}),
                                            $("FIND_ON_A_KEYRING", {emoji: ":key:"}),
-                                           $("FIND_UNDER_COUCH_CUSHION", {emoji: ":key:"}),
-                                           $("FIND_UNDER_FRONT_DOOR_MAT", {emoji: ":key:"}),
-                                           $("FIND_IN_A_KEYHOLE", {emoji: ":key:"})));
+                                           $("FIND_UNDER_THE_MATTRESS", {emoji: ":bed:"}),
+                                           $("FIND_UNDER_FRONT_DOOR_MAT", {emoji: ":door:"}),
+                                           $("FIND_IN_A_KEYHOLE", {emoji: ":door:"})));
             return;
         } else if (query == "victor something to do" || query == "me something to do" || query == "a cure for boredom") {
             message.channel.send(getRandom($("FIND_BOATING", {emoji: ":sailboat:"}),
