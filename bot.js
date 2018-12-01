@@ -1933,7 +1933,7 @@ function processAmCommand(message, options, command) {
         }
         return true;
     } else if (command == "version") {
-        message.channel.send("**AstralMod " + amVersion + "**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later.");
+        message.channel.send($("VERSION", {version: amVersion}));
         return true;
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
