@@ -1,7 +1,7 @@
 /****************************************
  * 
  *   Retrieve Settings: Plugin for AstralMod that sends the settings
- *   Copyright (C) 2017 Victor Tran
+ *   Copyright (C) 2018 Victor Tran, John Tur
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,16 +22,17 @@ var client;
 var consts;
 const zlib = require('zlib');
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
     if (command.startsWith("retrsettings")) {
         if (message.author.id === global.botOwner.id && command.indexOf("--user") == -1) {
-            sendPreloader("Getting the settings file...", message.channel).then(function(messageToEdit) {
+            sendPreloader($("RETRSETTINGS_COMPRESSING_SETTINGS"), message.channel).then(function(messageToEdit) {
                 //Compress the settings with gzip to save space
                 zlib.gzip(JSON.stringify(settings), function(error, result) {
                     if (error) {
-                        messageToEdit.edit("There was a problem compressing the settings file.");
+                        messageToEdit.edit($("RETRSETTINGS_PROBLEM_COMPRESSING"));
                     } else {
-                        message.author.send("Here are the settings for AstralMod at the moment.", {
+                        message.author.send($("RETRSETTINGS_COMPRESSING_SUCCESS"), {
                             files: [
                                 {
                                     attachment: result,
@@ -39,18 +40,18 @@ function processCommand(message, isMod, command) {
                                 }
                             ]
                         });
-                        messageToEdit.edit(":arrow_left: Check your DMs for the settings file.");
+                        messageToEdit.edit($("RETRSETTINGS_CHECK_FOR_COMPRESSIONS", {emoji: ":arrow_left:"}));
                     }
                 });
             });
         } else {
             if (settings.users[message.author.id] == undefined) { 
-                message.reply("You don't have any settings stored in AstralMod.");
+                message.reply($("RETRSETTINGS_NO_SETTINGS"));
                 return;
             }
 
-            sendPreloader("Getting your settings file...", message.channel).then(function(messageToEdit) {
-                message.author.send("I've retrieved your settings file.", {
+            sendPreloader($("RETRSETTINGS_PREPARING_SETTINGS"), message.channel).then(function(messageToEdit) {
+                message.author.send($("RETRSETTINGS_SETTINGS_RETRIEVED"), {
                     files: [
                         {
                             attachment: Buffer.from(JSON.stringify(settings.users[message.author.id], null, 4), "utf8"),
@@ -58,7 +59,7 @@ function processCommand(message, isMod, command) {
                         }
                     ]
                 });
-                messageToEdit.edit(":arrow_left: Check your DMs for the settings file.");
+                messageToEdit.edit($("RETRSETTINGS_CHECK_FOR_SETTINGS", {emoji: ":arrow_left:"}));
             });
         }
     }
