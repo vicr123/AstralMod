@@ -267,7 +267,8 @@ function processDeal(message) {
 
 function processCommand(message, isMod, command, options) {
     let locale = options.locale;
-    
+    let $ = _[options.locale];
+
     if (isMod) {
         if (command.startsWith("uinfo ")) {
             var user = command.substr(6);
@@ -346,15 +347,17 @@ function processCommand(message, isMod, command, options) {
 
         return true;
     } else if (command == "find") {
-        message.reply("Usage: `" + prefix(message.guild.id) + "find user`. For more information, `" + prefix(message.guild.id) + "help find`");
+        message.reply($("FIND_USAGE"));
     } else if (command.startsWith("find ")) {
         var query = command.substr(5);
 
         if (query == "my phone") {
-            message.channel.send(getRandom("In your pocket",
-                                           "On your table",
-                                           "Run over by a car",
-                                           "Accidentally fell off the table"));
+            message.channel.send(getRandom($("FIND_IN_YOUR_POCKET"),
+                                           $("FIND_ON_THE_TABLE"),
+                                           $("FIND_AT_WORK"),
+                                           $("FIND_RUN_OVER"),
+                                           $("FIND_IN_BAG"),
+                                           $("FIND_IN_BETWEEN_COUCH_CUSIONS")));
             return;
         } else if (query == "my iphone") {
             message.channel.send("https://icloud.com/#find");
@@ -363,34 +366,37 @@ function processCommand(message, isMod, command, options) {
             message.channel.send("https://www.google.com/android/find");
             return;
         } else if (query == "my keys") {
-            message.channel.send(getRandom("On a keyring",
-                                           "In the keyhole on the door"));
+            message.channel.send(getRandom($("FIND_IN_BETWEEN_COUCH_CUSIONS", {emoji: ":couch:"}),
+                                           $("FIND_ON_A_KEYRING", {emoji: ":key:"}),
+                                           $("FIND_UNDER_COUCH_CUSHION", {emoji: ":key:"}),
+                                           $("FIND_UNDER_FRONT_DOOR_MAT", {emoji: ":key:"}),
+                                           $("FIND_IN_A_KEYHOLE", {emoji: ":key:"})));
             return;
         } else if (query == "victor something to do" || query == "me something to do" || query == "a cure for boredom") {
-            message.channel.send(getRandom("Boating :sailboat:",
-                                           "Skiing :skier:",
-                                           "\"Codding\" :computer:",
-                                           "Walking :walking:",
-                                           "Singing :microphone:",
-                                           "Eating Sushi :sushi:",
-                                           "Insulting Tatsumaki :snake:",
-                                           "Plucking flowers :sunflower:"));
+            message.channel.send(getRandom($("FIND_BOATING", {emoji: ":sailboat:"}),
+                                           $("FIND_SKIING", {emoji: ":skier:"}),
+                                           $("FIND_CODDING", {emoji: ":computer:"}),
+                                           $("FIND_WALKING", {emoji: ":walking:"}),
+                                           $("FIND_SINGING", {emoji: ":singer:"}),
+                                           $("FIND_EATING_SUSHI", {emoji: ":sushi:"}),
+                                           $("FIND_INSULTING_TATSUMAKI", {emoji: ":snake:"}),
+                                           $("FIND_PLUCKING_FLOWERS", {emoji: ":sunflower:"})));
             return;
         }
 
         var searchResults = parseUser(query, message.guild);
 
         if (searchResults.length == 0) {
-            throw new CommandError("No users found");
+            throw new CommandError($("FIND_NO_USERS_FOUND"));
         } else {
-            var reply = "Here's who I found.```";
+            var reply = $("FIND_FOUND_PEOPLE") + "```";
 
-            var currentNumber = 0;
+            var currentNumber = 1;
             for (user of searchResults) {
-                reply += parseInt(currentNumber) + ": " + user.tag + ": " + user.id + (user.bot ? " [BOT]" : "") + "\n";
-                if (currentNumber == 9) {
-                    reply += "\n----- " + parseInt(searchResults.length - currentNumber) + " more. -----\n";
-                    reply += "Please narrow your query.";
+                reply += parseInt(currentNumber) + ": " + user.tag + ": " + user.id + (user.bot ? ` [${$("FIND_BOT_TAG")}]` : "") + "\n";
+                if (currentNumber == 10) {
+                    reply += "\n" + $("FIND_FOUND_MORE", {amount: parseInt(searchResults.length - currentNumber) }) + "\n";
+                    reply += $("FIND_NARROW_QUERY");
                     break;
                 }
                 currentNumber++;
