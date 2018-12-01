@@ -2242,17 +2242,17 @@ function processAmCommand(message, options, command) {
     } else if (command == "shoo") {
         if (message.author.id == global.botOwner.id | message.member.hasPermission(Discord.Permissions.FLAGS.KICK_MEMBERS, false, true, true)) {
             awaitUserConfirmation({
-                title: "Kicking AstralMod :(",
-                msg: "AstralMod is about to leave :(",
-                msgOnSuccess: ":arrow_left: And with that, POW! I'm gone!",
-                msgOnFail: "Alright, scratch that.",
+                title: $("SHOO_TITLE"),
+                msg: $("SHOO_MESSAGE"),
+                msgOnSuccess: $("SHOO_SUCCESS", {emoji: ":arrow_left:"}),
+                msgOnFail: $("SHOO_CANCEL"),
                 channel: message.channel,
                 author: message.author,
                 time: 10,
                 locale: options.locale
             }).then(() => {
                 message.guild.leave().catch(function() {
-                    message.reply("I've been a bad bot; I can't actually seem to get myself out of here. Please kick me.");
+                    message.reply($("SHOO_FAILURE"));
                 });
                 saveSettings();
             }).catch(err => {
@@ -2260,7 +2260,7 @@ function processAmCommand(message, options, command) {
             });
 
         } else {
-            message.reply(":arrow_left: Only the owner of this server (" + message.guild.owner.displayName + ") and people who have kicking powers can use this command.");
+            message.reply($("SHOO_NO_PERMS"));
         }
         return true;
     }
