@@ -62,11 +62,35 @@ function processCommand(message, isMod, command, options) {
                 messageToEdit.edit($("RETRSETTINGS_CHECK_FOR_SETTINGS", {emoji: ":arrow_left:"}));
             });
         }
+    } else if (command.startsWith("resetsettings")) {
+        awaitUserConfirmation({
+            title: $("RESETSETTINGS_CONFIRMATION_TITLE"),
+            msg: $("RESETSETTINGS_CONFIRMATION_MESSAGE"),
+            msgOnSuccess: $("RESETSETTINGS_CONFIRMATION_SUCCESS"),
+            msgOnFail: $("RESETSETTINGS_CONFIRMATION_CANCELLED", {prefix: prefix(message.guild.id)}),
+            channel: message.channel,
+            author: message.author,
+            time: 15,
+            locale: options.locale
+        }).then(() => {
+            message.author.send($("RETRSETTINGS_SETTINGS_RETRIEVED"), {
+                files: [
+                    {
+                        attachment: Buffer.from(JSON.stringify(settings.users[message.author.id], null, 4), "utf8"),
+                        name: "settings.json"
+                    }
+                ]
+            }).then(() => {
+                delete settings.users[message.author.id];
+            });
+        }).catch(err => {
+            //Do nothing
+        });
     }
 }
 
 module.exports = {
-    name: "Settings Retrieval",
+    name: "AstralMod Settings",
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;
@@ -79,7 +103,8 @@ module.exports = {
     availableCommands: {
         general: {
             commands: [
-                "retrsettings"
+                "retrsettings",
+                "resetsettings"
             ],
             modCommands: [
                 
@@ -94,8 +119,11 @@ module.exports = {
         switch (helpCmd) {
             case "retrsettings":
                 help.title = "am:retrsettings";
-                help.usageText = "am:retrsettings";
                 help.helpText = "Sends you your settings file in AstralMod's format";
+                break;
+            case "resetsettings":
+                help.title = "am:resetsettings";
+                help.helpText = "Deletes all of your AstralMod settings.";
                 break;
         }
 

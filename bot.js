@@ -1749,7 +1749,7 @@ function requestNickname(member, nickname, guild, options) {
                 message.awaitReactions(function(reaction) {
                     if (reaction.count <= 1) return false;
                     for (let user of reaction.users) {
-                        if (isMod(message.guild.members.get(user[0]))) {
+                        if (isMod(message.member)) {
                             return true;
                         }
                     }
@@ -1999,7 +1999,7 @@ function processAmCommand(message, options, command) {
         embed.setAuthor($("HELP_CONTENTS"));
         embed.setDescription($("HELP_CONTENTS_INTRODUCTION", {prefix: prefix(message.guild.id)}));
 
-        embed.addField($("HELP_CORE_COMMANDS"), "**config**\n**shoo**\n**oknick**\nping\nnick\nsetlocale\nsudo\nfetchuser\nversion\nabout\nhelp", true);
+        embed.addField($("HELP_CORE_COMMANDS"), "**config**\n**shoo**\n**oknick**\nping\nnick\nsetlocale\nsudo\nversion\nabout\nhelp", true);
 
         for (key in plugins) {
             var plugin = plugins[key];
@@ -2043,14 +2043,6 @@ function processAmCommand(message, options, command) {
         embed.setFooter($("HELP_FOOTER", {amVersion: amVersion}));
         message.channel.send("", { embed: embed });
         return true;
-    } else if (command.startsWith("fetchuser ")) {
-        var user = command.substr(10);
-        client.fetchUser(user).then(function(dUser) {
-            message.channel.send(_[locale]("User " + dUser.tag + " fetched and cached."));
-        }).catch(function() {
-            message.channel.send(_[locale]("Couldn't fetch user."));
-        });
-        return true;
     } else if (command.startsWith("sudo")) {
         let embed = new Discord.RichEmbed;
         embed.setTitle(getEmoji("userexception") + " Do you want this user to make changes to this server?");
@@ -2062,7 +2054,7 @@ function processAmCommand(message, options, command) {
         message.channel.send(embed).then(m => {
             m.react("✅");
             m.react("🚫");
-            const filter = (reaction, user) => (reaction.emoji.name === "✅" || reaction.emoji.name === "🚫") && isMod(m.guild.members.get(user.id))
+            const filter = (reaction, user) => (reaction.emoji.name === "✅" || reaction.emoji.name === "🚫") && isMod(message.guild.member(user))
             let collector = m.createReactionCollector(filter, {time: 300000});
             collector.on('collect', r => {
                 if(r.emoji.name == "✅") {
@@ -2120,13 +2112,6 @@ function processAmCommand(message, options, command) {
                 help.usageText = prefix(message.guild.id) + "nick nickname";
                 help.helpText = "Sets your nickname after staff have a chance to review it";
                 help.param1 = "The nickname you wish to be known as";
-                break;
-            case "fetchuser":
-                help.title = prefix(message.guild.id) + "fetchuser";
-                help.usageText = prefix(message.guild.id) + "fetchuser [ID]";
-                help.helpText = "Tells AstralMod about the existance of a user";
-                help.param1 = "The user ID you want to tell AstralMod about.";
-                help.remarks = "AstralMod will search for users from all of Discord."
                 break;
             case "setlocale":
                 help.title = prefix(message.guild.id) + "setlocale";

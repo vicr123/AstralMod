@@ -405,6 +405,14 @@ function processCommand(message, isMod, command, options) {
             message.channel.send(reply);
         }
         return true;
+    } else if (command.startsWith("fetchuser ")) {
+        var user = command.substr(10);
+        client.fetchUser(user).then(function(dUser) {
+            message.reply($("FETCHUSER_SUCCESS", {user: dUser.tag}));
+        }).catch(function() {
+            message.reply($("FETCHUSER_FAILURE"));
+        });
+        return true;
     } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
         if (actions[message.guild.id] != null) {
             message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actions[message.guild.id].actioningMember) + " is already managing another user.");
@@ -559,7 +567,8 @@ module.exports = {
         general: {
             commands: [
                 "uinfo",
-                "find"
+                "find",
+                "fetchuser"
             ],
             modCommands: [
                 "deal"
@@ -578,6 +587,13 @@ module.exports = {
                     "--index [num] Zero based index of user to query"
                 ]
                 help.param1 = "- The user of which to acquire information";
+                break;
+            case "fetchuser":
+                help.title = prefix(message.guild.id) + "fetchuser";
+                help.usageText = prefix(message.guild.id) + "fetchuser [ID]";
+                help.helpText = "Tells AstralMod about the existance of a user";
+                help.param1 = "The user ID you want to tell AstralMod about.";
+                help.remarks = "AstralMod will search for users from all of Discord."
                 break;
             case "find":
                 help.title = prefix(message.guild.id) + "find";
