@@ -192,7 +192,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
                         embed.setColor("#E5182C");
                         embed.addField($("WEATHER_ERROR_DETAILS"), $("WEATHER_ERROR_CITY_NOT_FOUND"));
-                        embed.addField($("WEATHER_ERROR_TRY_THIS"), $("WEATHER_ERROR_TRY_THIS_DESCRIPTION", {prefix: prefix}));
+                        embed.addField($("WEATHER_ERROR_TRY_THIS"), $("WEATHER_ERROR_TRY_THIS_DESCRIPTION", {prefix: prefix(message.guild.id)}));
 
                         messageToEdit.edit(embed);
                         return;
@@ -471,7 +471,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     message.channel.send(err.stack);
                 }
 
-                messageToEdit.edit(err.toString() + "\nTry resetting your location with `" + prefix + "setloc`");
+                messageToEdit.edit(err.toString() + "\nTry resetting your location with `" + prefix(message.guild.id) + "setloc`");
             }
         });
     });
@@ -505,7 +505,7 @@ function processCommand(message, isMod, command, options) {
                         }
                     }
                 }
-                throw new UserInputError($("WEATHER_ERROR_UNSET_LOCATION", {user: users[0].username, prefix: prefix}));
+                throw new UserInputError($("WEATHER_ERROR_UNSET_LOCATION", {user: users[0].username, prefix: prefix(message.guild.id)}));
             } else {
                 throw new CommandError("No user found with that name");
             }
@@ -516,7 +516,7 @@ function processCommand(message, isMod, command, options) {
         }
 
         if (settings.users[message.author.id].location == null) {
-            throw new CommandError("Unknown location. Please set your location with `" + prefix + "setloc`");
+            throw new CommandError("Unknown location. Please set your location with `" + prefix(message.guild.id) + "setloc`");
         } else {
             sendCurrentWeather(message, settings.users[message.author.id].location, "id", options, message.author.tag, skiiness);
         }
@@ -524,7 +524,7 @@ function processCommand(message, isMod, command, options) {
         var location = command.substr(7);
 
         if (location == "") {
-            message.reply("Usage: `" + prefix + "setloc [your location]`. For more information, `" + prefix + "help setloc`");
+            message.reply("Usage: `" + prefix(message.guild.id) + "setloc [your location]`. For more information, `" + prefix(message.guild.id) + "help setloc`");
         } else {
             var query = new YQL("select * from geo.places where text=\""+ location +"\"");
             
@@ -557,7 +557,7 @@ function processCommand(message, isMod, command, options) {
             });
         }
     } else if (command == "setloc") {
-        message.reply("Usage: `" + prefix + "setloc [your location]`. For more information, `" + prefix + "help setloc`");
+        message.reply("Usage: `" + prefix(message.guild.id) + "setloc [your location]`. For more information, `" + prefix(message.guild.id) + "help setloc`");
     }
 }
 
@@ -654,13 +654,13 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "weather":
-                help.title = prefix + "weather";
-                help.usageText = prefix + "weather [options] [location]";
+                help.title = prefix(message.guild.id) + "weather";
+                help.usageText = prefix(message.guild.id) + "weather [options] [location]";
                 help.helpText = "Returns the weather at [location]";
                 help.param1 = "- A location\n" +
                               "- A user whose location is known to AstralMod\n";
@@ -668,11 +668,11 @@ module.exports = {
                                "`--imperial` Return results in imperial\n" +
                                "`--24` Return results in 24 hour time\n" +
                                "`--12` Return hours in 12 hour time";
-                help.remarks = "You can set your preferred units using `" + prefix + "setunit`.";
+                help.remarks = "You can set your preferred units using `" + prefix(message.guild.id) + "setunit`.";
                 break;
             case "setloc":
-                help.title = prefix + "setloc";
-                help.usageText = prefix + "setloc [location]";
+                help.title = prefix(message.guild.id) + "setloc";
+                help.usageText = prefix(message.guild.id) + "setloc [location]";
                 help.helpText = "Sets your location to [location]";
                 help.param1 = "- A location";
                 help.remarks = "By using this command, your location will be available to anyone who asks AstralMod. To reduce privacy concerns, it's a good idea to enter the name of a large city near you or a city slightly offset from your actual location.";

@@ -199,7 +199,7 @@ function processCommand(message, isMod, command) {
                     }
 
                     userWarnings.splice(id, 1);
-                    message.reply(":gear: That warning has been removed. For new warning indices, use `" + prefix + "lswarn`.");
+                    message.reply(":gear: That warning has been removed. For new warning indices, use `" + prefix(message.guild.id) + "lswarn`.");
 
                     warnings[user] = userWarnings;
                     settings.guilds[message.guild.id].warnings = warnings;
@@ -273,24 +273,24 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "warn":
-                help.title = prefix + "warn";
-                help.usageText = prefix + "warn [user]";
+                help.title = prefix(message.guild.id) + "warn";
+                help.usageText = prefix(message.guild.id) + "warn [user]";
                 help.helpText = "Warns a user.";
                 help.param1 = "The user to warn";
                 break;
             case "lswarn":
-                help.title = prefix + "lswarn";
-                help.usageText = prefix + "lswarn [user]";
+                help.title = prefix(message.guild.id) + "lswarn";
+                help.usageText = prefix(message.guild.id) + "lswarn [user]";
                 help.helpText = "Lists all warnings for a user.";
                 break;
             case "rmwarn":
-                help.title = prefix + "rmwarn";
-                help.usageText = prefix + "rmwarn [#id] [user]";
+                help.title = prefix(message.guild.id) + "rmwarn";
+                help.usageText = prefix(message.guild.id) + "rmwarn [#id] [user]";
                 help.helpText = "Removes a warning from a user.";
                 help.param1 = "The ID of the warning you want to remove";
                 help.param2 = "The user that you want to remove the warning from";

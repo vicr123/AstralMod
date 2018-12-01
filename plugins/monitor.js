@@ -81,16 +81,16 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "uptime":
-                help.title = prefix + "uptime";
+                help.title = prefix(message.guild.id) + "uptime";
                 help.helpText = "Queries AstralMod for the amount of time since it started.";
                 break;
             case "settingssize":
-                help.title = prefix + "settingssize";
+                help.title = prefix(message.guild.id) + "settingssize";
                 help.helpText = "Returns the approximate file size of the settings file";
                 break;
         }

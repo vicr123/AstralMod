@@ -346,7 +346,7 @@ function processCommand(message, isMod, command, options) {
 
         return true;
     } else if (command == "find") {
-        message.reply("Usage: `" + prefix + "find user`. For more information, `" + prefix + "help find`");
+        message.reply("Usage: `" + prefix(message.guild.id) + "find user`. For more information, `" + prefix(message.guild.id) + "help find`");
     } else if (command.startsWith("find ")) {
         var query = command.substr(5);
 
@@ -560,13 +560,13 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "uinfo":
-                help.title = prefix + "uinfo";
-                help.usageText = prefix + "uinfo user";
+                help.title = prefix(message.guild.id) + "uinfo";
+                help.usageText = prefix(message.guild.id) + "uinfo user";
                 help.helpText = "Acquire information about a user";
                 help.options = [
                     "--index [num] Zero based index of user to query"
@@ -574,15 +574,15 @@ module.exports = {
                 help.param1 = "- The user of which to acquire information";
                 break;
             case "find":
-                help.title = prefix + "find";
-                help.usageText = prefix + "find user";
+                help.title = prefix(message.guild.id) + "find";
+                help.usageText = prefix(message.guild.id) + "find user";
                 help.helpText = "Finds a user and returns their ID";
                 help.param1 = "The user you want to find.";
                 help.remarks = "AstralMod will search for users from all connected servers."
                 break;
             case "deal":
-                help.title = prefix + "deal";
-                help.usageText = prefix + "deal user";
+                help.title = prefix(message.guild.id) + "deal";
+                help.usageText = prefix(message.guild.id) + "deal user";
                 help.helpText = "Manages a user";
                 help.param1 = "- The user to manage";
                 break;

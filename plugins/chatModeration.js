@@ -186,7 +186,7 @@ function processCommand(message, isMod, command, options) {
                 }
             }
         } else if (command == "chnk") {
-            message.channel.send($("CHNK_ABOUT", {prefix}));
+            message.channel.send($("CHNK_ABOUT", {prefix: prefix(message.guild.id)}));
         } else if (command.startsWith("chnk ")) {
             //message.reply("This command is not ready yet.");
             let userStr = command.substr(5);
@@ -259,12 +259,12 @@ function processCommand(message, isMod, command, options) {
             }
 
             if (blockId == "guild" && c == "spam") {
-                message.reply("To disable spam control for the server, use the `" + prefix + "spamctl` command.");
+                message.reply("To disable spam control for the server, use the `" + prefix(message.guild.id) + "spamctl` command.");
                 return;
             }
 
             if (blockId == "guild" && c == "log") {
-                message.reply("To disable log collection from the server, use the `" + prefix + "config` command to disable message logging.");
+                message.reply("To disable log collection from the server, use the `" + prefix(message.guild.id) + "config` command to disable message logging.");
                 return;
             }
 
@@ -305,7 +305,7 @@ function processCommand(message, isMod, command, options) {
             }
 
             if (blockId == "guild" && c == "spam") {
-                message.reply("To enable spam control for the server, use the `" + prefix + "spamctl` command.");
+                message.reply("To enable spam control for the server, use the `" + prefix(message.guild.id) + "spamctl` command.");
                 return;
             }
 
@@ -317,7 +317,7 @@ function processCommand(message, isMod, command, options) {
             }
 
             if (blockId == "guild" && c == "spam") {
-                message.reply("To disable spam control for the server, use the `" + prefix + "spamctl` command.");
+                message.reply("To disable spam control for the server, use the `" + prefix(message.guild.id) + "spamctl` command.");
                 return;
             }
 
@@ -370,28 +370,28 @@ module.exports = {
             ],
         }
     },
-    acquireHelp: function(helpCmd) {
+    acquireHelp: function(helpCmd, message) {
         var help = {};
 
         switch (helpCmd) {
             case "rm":
-                help.title = prefix + "rm";
-                help.usageText = prefix + "rm number [user]";
+                help.title = prefix(message.guild.id) + "rm";
+                help.usageText = prefix(message.guild.id) + "rm number [user]";
                 help.helpText = "Removes a number of messages";
                 help.param1 = "The number of messages to remove, or `all` to remove up to 100 messages within the past day";
                 help.param2 = "*Optional Parameter*\n" +
                               "The user to delete messages from";
                 break;
             case "chnk":
-                help.title = prefix + "chnk";
-                help.usageText = prefix + "chnk user";
+                help.title = prefix(message.guild.id) + "chnk";
+                help.usageText = prefix(message.guild.id) + "chnk user";
                 help.helpText = "Sets a random nickname to user.";
                 help.param1 = "- The User ID of the user to apply a new nickname to\n" +
                               "- Mention of the user to apply a new nickname to";
                 break;
             case "block":
-                help.title = prefix + "block";
-                help.usageText = prefix + "block [feature]";
+                help.title = prefix(message.guild.id) + "block";
+                help.usageText = prefix(message.guild.id) + "block [feature]";
                 help.helpText = "Blocks users from using a feature in the current channel.";
                 help.param1 = "*Optional Parameter*\n" +
                               "The feature to block, or `all` for all commands. If no feature is specified, all *commands* will be blocked.";
@@ -400,12 +400,12 @@ module.exports = {
                 help.availableOptions = "`--serverwide` Change serverwide blocking settings\n";
                 break;
             case "unblock":
-                help.title = prefix + "unblock";
-                help.usageText = prefix + "unblock [feature]";
+                help.title = prefix(message.guild.id) + "unblock";
+                help.usageText = prefix(message.guild.id) + "unblock [feature]";
                 help.helpText = "Unblocks users from using a feature in the current channel.";
                 help.param1 = "*Optional Parameter*\n" +
                               "The feature to unblock. If no feature is specified, all features will be unblocked.";
-                help.remarks = "To see available features, use `" + prefix + "features`";
+                help.remarks = "To see available features, use `" + prefix(message.guild.id) + "features`";
                 help.availableOptions = "`--serverwide` Change serverwide blocking settings\n";
                 break;
         }
