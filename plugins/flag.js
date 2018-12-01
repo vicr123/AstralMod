@@ -33,7 +33,7 @@ function menu(options, $) { //direction, fetchOptions
     const embed = new Discord.RichEmbed();
     embed.setTitle($("PINS_TITLE"));
     embed.setDescription($("PINS_DESCRIPTION"));
-    embed.setColor("#79BAEC");
+    embed.setColor("#81EC79");
 
     currentMessage = message;
     let embedContent = "";
@@ -127,7 +127,7 @@ function processCommand(message, isMod, command, options) {
                         let embed = menu({ message: currentMessage }, $);
                         embed.setTitle($("PINS_TITLE"));
                         embed.setDescription($("PINS_PIN_SUCCESS"));
-                        embed.setColor("#79BAEC");
+                        embed.setColor("#81EC79");
                         flaggingMessage.edit(embed);
 
                         //Pin the message
@@ -141,7 +141,7 @@ function processCommand(message, isMod, command, options) {
                         let embed = new Discord.RichEmbed();
                         embed.setTitle($("PINS_TITLE"));
                         embed.setDescription($("PINS_PIN_CANCEL"));
-                        embed.setColor("#79BAEC");
+                        embed.setColor("#81EC79");
                         flaggingMessage.edit(embed);
                     }
 
@@ -187,7 +187,7 @@ function processCommand(message, isMod, command, options) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("PINS_PIN_TITLE", {emoji: consts.config.pinToPinEmoji, pinNumber: pinNumber}));
             embed.setDescription(`[${$("PINS_JUMP")}](https://discordapp.com/channels/` + channel.guild.id + "/" + channel.id + "/" + flagItem.message + ")");
-            embed.setColor("#79BAEC");
+            embed.setColor("#81EC79");
 
             channel.fetchMessage(flagItem.message).then(function(fMessage) {
                 let flagMessage = fMessage.content + "\n";
@@ -229,7 +229,7 @@ function processCommand(message, isMod, command, options) {
         let embed = new Discord.RichEmbed;
         embed.setTitle($("PINS_PINS_TITLE", {emoji: consts.config.pinToPinEmoji}));
         embed.setDescription($("PINS_PINS_DESCRIPTION"));
-        embed.setColor("#79BAEC");
+        embed.setColor("#81EC79");
 
         if (number > (flagArray.length / 4) + 1) throw new UserInputError($("PINS_INVALID_PAGE"));
 

@@ -1,6 +1,6 @@
 /****************************************
  * 
- *   Retrieve Settings: Plugin for AstralMod that sends the settings
+ *   Settings: Plugin for AstralMod that does things with AstralMod settings
  *   Copyright (C) 2018 Victor Tran, John Tur
  *
  *   This program is free software: you can redistribute it and/or modify

@@ -28,7 +28,7 @@ function obtainPic(user, channel, $) {
     embed.setAuthor(user.tag, user.displayAvatarURL);
     embed.setTitle($("PIC_PROFILE_PICTURE"));
     embed.setImage(user.displayAvatarURL);
-    embed.setColor("#79BAEC");
+    embed.setColor("#81EC79");
     channel.send(embed);
 }
 
@@ -77,7 +77,7 @@ function processCommand(message, isMod, command, options) {
         }).then(function() {
             var embed = new Discord.RichEmbed("uinfo");
             embed.setAuthor(g.name, g.iconURL);
-            embed.setColor("#79BAEC");
+            embed.setColor("#81EC79");
             embed.setFooter($("SINFO_GUILDID", {id:g.id}));
             embed.setDescription($("SINFO_SERVER_INFORMATION"));
     
@@ -181,7 +181,7 @@ function processCommand(message, isMod, command, options) {
                 } else {
                     let embed = new Discord.RichEmbed("calculation");
                     embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
-                    embed.setColor("#E5182C");
+                    embed.setColor("#EC7979");
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
                     embed.setDescription($("CALC_DESC"));
                     
@@ -203,7 +203,7 @@ function processCommand(message, isMod, command, options) {
                 } else {
                     let embed = new Discord.RichEmbed("calculation");
                     embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
-                    embed.setColor("#79BAEC");
+                    embed.setColor("#81EC79");
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
                     embed.setDescription($("CALC_DESC"));
                     
@@ -245,7 +245,7 @@ function processCommand(message, isMod, command, options) {
                 translate.translate(sourceText, options, function(err, res) {
                     let embed = new Discord.RichEmbed("translate");
                     embed.setAuthor($("TRANSLATE_TITLE"));
-                    embed.setColor("#79BAEC");
+                    embed.setColor("#81EC79");
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
                     embed.setTitle($("TRANSLATE_POWERED_BY"));
                     embed.setURL("http://translate.yandex.com/");

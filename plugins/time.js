@@ -504,7 +504,7 @@ async function processCommand(message, isMod, command, options) {
                 let embed = new Discord.RichEmbed;
                 embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
                 embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
-                embed.setColor("#E5182C");
+                embed.setColor("#EC7979");
                 embed.addField($("TIME_ERROR_DETAILS"), err);
 
                 messageToEdit.edit(embed);
@@ -513,7 +513,7 @@ async function processCommand(message, isMod, command, options) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
             embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
-            embed.setColor("#E5182C");
+            embed.setColor("#EC7979");
             embed.addField($("ERROR_DETAILS"), err);
 
             messageToEdit.edit(embed);

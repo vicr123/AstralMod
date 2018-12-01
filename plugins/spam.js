@@ -136,27 +136,26 @@ function newMessage(message, options) {
     }
 }
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
     if (isMod) {
         if (command.startsWith("spamctl ")) {
             var isOn = command.substr(8);
             if (isOn == "on") {
                 settings.guilds[message.guild.id].spamCtl = true;
-                message.reply("Spam filtering is now on for this server.");
+                message.reply($("SPAMCTL_ON"));
             } else if (isOn == "off") {
                 settings.guilds[message.guild.id].spamCtl = false;
-                message.reply("Spam filtering is now off for this server.");
+                message.reply($("SPAMCTL_OFF"));
             } else {
-                message.reply("Usage: `am:spamctl on|off`\nFor more information, `am:help spamctl`");
+                message.reply($("SPAMCTL_ABOUT"));
             }
         } else if (command == "spamctl") {
-                message.reply("Usage: `am:spamctl on|off`\nFor more information, `am:help spamctl`");
+                message.reply($("SPAMCTL_ABOUT"));
         }
     }
 
     if (command == "spamdata") {
-        message.channel.startTyping();
-
         /** @type{Array} */
         var lastMessagesOfUser = spamObject.lastMessages[message.author.id];
         if (lastMessagesOfUser == null) {
@@ -175,16 +174,12 @@ function processCommand(message, isMod, command) {
             nonSpamCountingUser = 0;
         }
 
-        var embed = new Discord.RichEmbed();
+        var embed = new Discord.RichEmbed;
         embed.setAuthor(message.member.displayName, message.author.displayAvatarURL);
+        embed.addField($("SPAMDATA_DATA_TITLE"), `${$("SPAMDATA_DETECTED")} ${spamCountingUser}\n${$("SPAMDATA_FORGIVENESS")} ${nonSpamCountingUser}`, true);
+        embed.setColor("#81EC79");
 
-        embed.addField("Anger Levels", "Spam Detected: " + spamCountingUser + "\nSpam Forgiveness: " + nonSpamCountingUser, true);
-
-        message.reply("Here's how close I am to getting annoyed at you:", { embed: embed }).then(function() {
-            message.channel.stopTyping();
-        }).catch(function() {
-            message.channel.stopTyping(true);
-        });
+        message.reply($("SPAMDATA_TITLE"), { embed: embed });
     }
 }
 
