@@ -56,7 +56,7 @@ if (process.argv.indexOf("--blueprint") == -1) {
 
 global.botOwner = undefined;
 
-global.tempMods = [];
+global.tempMods = {};
 
 let doNotDeleteGuilds = [];
 
@@ -1503,7 +1503,7 @@ function isMod(member) {
     if (member.id == global.botOwner.id)
         return true;
 
-    if (tempMods.includes(member.id)) {
+    if (tempMods[member.guild.id] != null && tempMods[member.guild.id].includes(member.id)) {
         return true;
     }
 
@@ -2047,8 +2047,10 @@ function processAmCommand(message, options, command) {
         return true;
     } else if (command.startsWith("sudo")) {
         let embed = new Discord.RichEmbed;
-        embed.setTitle(getEmoji("userexception") + " Do you want this user to make changes to this server?");
-        embed.setDescription(`**User:** ${message.author.tag}\n**Verified Role:** ${message.member.highestRole.name}\n**User Origin:** ${message.member.guild.name}`);
+        embed.setTitle($("SUDO_TITLE", {emoji: ":shield:"}));
+        embed.setDescription($("SUDO_USER", {user: message.author.tag}) + "\n" +
+                             $("SUDO_ROLE", {role: message.member.highestRole.name}) + "\n" +
+                             $("SUDO_SERVER", {server: message.guild.name}));
         embed.setFooter($("SUDO_FOOTER", {emoji1: "✅", emoji2: "🚫", time: "5"}));
         embed.setColor("#FED266");
 
@@ -2056,29 +2058,50 @@ function processAmCommand(message, options, command) {
         message.channel.send(embed).then(m => {
             m.react("✅");
             m.react("🚫");
-            const filter = (reaction, user) => (reaction.emoji.name === "✅" || reaction.emoji.name === "🚫") && isMod(message.guild.member(user))
-            let collector = m.createReactionCollector(filter, {time: 300000});
+
+            let okay = false;
+            if (global.tempMods[message.guild.id] == null) global.tempMods[message.guild.id] = [];
+            let collector = m.createReactionCollector(function(reaction) {
+                if (reaction.count <= 1) return false;
+                if (reaction.emoji.name == "✅" || reaction.emoji.name == "🚫") {
+                    for (let user of reaction.users) {
+                        if (isMod(message.guild.members.get(user[0]))) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }, {time: 300000});
             collector.on('collect', r => {
-                if(r.emoji.name == "✅") {
-                    global.tempMods.push(message.author.id);
-                    setTimeout(() => global.tempMods.splice(global.tempMods.indexOf(message.author.id), 1), 300000)
-                    embed.setDescription("Ok, I've given sudo privileges to this user.")
+                if (r.emoji.name == "✅") {
+                    global.tempMods[message.guild.id].push(message.author.id);
+                    setTimeout(() => global.tempMods[message.guild.id].splice(global.tempMods[message.guild.id].indexOf(message.author.id), 1), 300000)
+                    embed.setDescription($("SUDO_FULFILLED_DESCRIPTION"))
                     embed.setFooter($("AWAITUSERCONFIRMATION_FULFILLED"));
                     embed.setColor("#81EC79")
                     m.edit(embed);    
                     m.clearReactions();
-                } else {
+                    okay = true;
+                    collector.stop();
+                } else if (r.emoji.name == "🚫") {
+                    embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
+                    embed.setDescription($("SUDO_CANCELLED_DESCRIPTION"))
+                    embed.setColor("#EC7979")
+                    m.edit(embed);
+                    m.clearReactions();
+                    okay = true;
                     collector.stop();
                 }
             });
-            collector.on('end', r => {                
-                embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
-                embed.setDescription("Ok, I've denied sudo privileges to this user.")
-                embed.setColor("#EC7979")
-                m.edit(embed);
-                m.clearReactions();
-            })
-
+            collector.on('end', () => {
+                if (!okay) {
+                    embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
+                    embed.setDescription($("SUDO_TIMED_OUT"))
+                    embed.setColor("#EC7979")
+                    m.edit(embed);
+                    m.clearReactions();
+                }
+            });
         })
     } else if (command.startsWith("help ")) { //Contextual help
         //Get help for specific command
