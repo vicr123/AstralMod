@@ -66,11 +66,16 @@ function processCommand(message, isMod, command, options) {
         awaitUserConfirmation({
             title: $("RESETSETTINGS_CONFIRMATION_TITLE"),
             msg: $("RESETSETTINGS_CONFIRMATION_MESSAGE"),
+            extraFields: [
+                [$("RESETSETTINGS_REMOVED_SETTINGS_TITLE"), $("RESETSETTINGS_REMOVED_SETTINGS")],
+                [$("RESETSETTINGS_NOT_REMOVED_SETTINGS_TITLE"), $("RESETSETTINGS_NOT_REMOVED_SETTINGS")],
+                [$("RESETSETTINGS_NOT_UNDONE_TITLE"), $("RESETSETTINGS_NOT_UNDONE")]
+            ],
             msgOnSuccess: $("RESETSETTINGS_CONFIRMATION_SUCCESS"),
             msgOnFail: $("RESETSETTINGS_CONFIRMATION_CANCELLED", {prefix: prefix(message.guild.id)}),
             channel: message.channel,
             author: message.author,
-            time: 15,
+            time: 60,
             locale: options.locale
         }).then(() => {
             message.author.send($("RETRSETTINGS_SETTINGS_RETRIEVED"), {
