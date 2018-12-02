@@ -282,6 +282,7 @@ global.awaitUserConfirmation = function(options) {
                 if (options.msgOnSuccess != "") {
                     embed.setDescription(options.msgOnSuccess);
                 }
+                embed.fields = [];
                 embed.setColor("#81EC79");
                 embed.setFooter($("AWAITUSERCONFIRMATION_FULFILLED"));
                 message.edit(embed);
@@ -300,6 +301,7 @@ global.awaitUserConfirmation = function(options) {
                 if (options.msgOnFail != "") {
                     embed.setDescription(options.msgOnFail);
                 }
+                embed.fields = [];
                 embed.setColor("#EC7979");
                 embed.setFooter($("AWAITUSERCONFIRMATION_CANCELLED"));
                 message.edit(embed);
