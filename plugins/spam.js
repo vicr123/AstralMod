@@ -97,7 +97,7 @@ function newMessage(message, options) {
                 if (spamCountingUser >= 4) {
                     if (spamCountingUser == 10) {
                         if (client.channels.has(settings.guilds[message.guild.id].botWarnings)) {
-                            client.channels.get(settings.guilds[message.guild.id].botWarnings).send($$("SPAM_GUILD_WARNING", {emoji: ":red_circle:", author: "<@" + message.author.id + ">", channel: message.channel.name, interpolation: { escapeValue: false }}));
+                            client.channels.get(settings.guilds[message.guild.id].botWarnings).send($$("SPAM_GUILD_WARNING", {emoji: ":red_circle:", author: "<@" + message.author.id + ">", channel: message.channel.name, interpolation: {escapeValue: false}}));
                         } else {
                             log("Bot Warnings channel " + settings.guilds[message.guild.id].botWarnings + " not found", logType.critical);
                         }
@@ -179,7 +179,7 @@ function processCommand(message, isMod, command, options) {
         embed.addField($("SPAMDATA_DATA_TITLE"), `${$("SPAMDATA_DETECTED")} ${spamCountingUser}\n${$("SPAMDATA_FORGIVENESS")} ${nonSpamCountingUser}`, true);
         embed.setColor("#81EC79");
 
-        message.reply($("SPAMDATA_TITLE"), { embed: embed });
+        message.reply($("SPAMDATA_TITLE"), {embed: embed});
     }
 }
 

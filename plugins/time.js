@@ -489,15 +489,15 @@ async function processCommand(message, isMod, command, options) {
                     });
                 });
             }).then(function(timeDescriptor) {
-                let time = moment(Date.now()).utcOffset(timeDescriptor.offset);
+                let time = moment.utc();
 
                 messageToEdit.edit($("TIME_RESPONSE", {
                     clockEmote: getClockEmoji(time.toDate()),
                     request: timeDescriptor.location,
-                    offset: time.format("Z"),
                     time: {
                         date: time,
-                        h24: options.h24
+                        h24: options.h24,
+                        offset: timeDescriptor.offset
                     }
                 }));
             }).catch(err => {
