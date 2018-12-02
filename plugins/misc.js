@@ -80,15 +80,14 @@ function processCommand(message, isMod, command, options) {
             embed.setColor("#81EC79");
             embed.setFooter($("SINFO_GUILDID", {id:g.id}));
             embed.setDescription($("SINFO_SERVER_INFORMATION"));
-    
             {
                 //let msg = "**" + tr("Server Created") + "** " + translator.localDate(g.createdAt, "default", true) + "\n";
-                let msg = $("SINFO_SERVER_CREATED", {createdat:{date:g.createdAt, h24: options.h24}}) + "\n";
+                let msg = $("SINFO_SERVER_CREATED", {createdat:{date:g.createdAt, h24: options.h24, offset: options.offset }}) + "\n";
     
                 if (g.joinedAt.getTime() == 0) {
                     msg += $("SINFO_AM_JOINED", {joinedat: $("SINFO_INVALID_JOIN_DATE")});
                 } else {
-                    msg += $("SINFO_AM_JOINED", {joinedat: {date:g.joinedAt, h24: options.h24}});
+                    msg += $("SINFO_AM_JOINED", {joinedat: {date:g.joinedAt, h24: options.h24, offset: options.offset}});
                 }
     
                 embed.addField($("SINFO_TIMESTAMPS"), msg);
