@@ -19,6 +19,7 @@
  * *************************************/
 
 const Discord = require('discord.js');
+const moment = require('moment');
 var client;
 var consts;
 
@@ -45,7 +46,7 @@ function processResponse(message) {
         var warningObject = {
             reason: message.content,
             warner: tracker.warner.id,
-            timestamp: new Date().toUTCString()
+            timestamp: moment.utc()
         }
         userWarnings.push(warningObject);
 
@@ -56,7 +57,8 @@ function processResponse(message) {
     message.delete();
 }
 
-function processCommand(message, isMod, command) {
+function processCommand(message, isMod, command, options) {
+    let $ = _[options.locale];
     if (isMod) {
         if (command.startsWith("warn ")) {
             var user = command.substr(5);
@@ -223,14 +225,14 @@ function processCommand(message, isMod, command) {
         }
 
         if (userWarnings.length == 0) {
-            message.reply(getUserString(message.guild.member(user)) + " has no warnings.");
+            message.reply($("LSWARN_NO_WARNINGS", {user: getUserString(message.guild.member(user))}));
             return;
         }
 
         var embed = new Discord.RichEmbed();
         embed.setColor("#3C3C96");
-        embed.setTitle("Warnings");
-        embed.setDescription("Warnings that have been recorded by moderators on this server")
+        embed.setTitle($("LSWARN_TITLE"));
+        embed.setDescription($("LSWARN_DESCRIPTION"));
         for (index in userWarnings) {
             var warning = userWarnings[index];
 
@@ -239,12 +241,7 @@ function processCommand(message, isMod, command) {
                 warner = message.guild.member(warning.warner);
             }
 
-            var field = "";
-            field += warning.reason + "\n\n";
-            field += "**Timestamp:** " + warning.timestamp + "\n";
-            field += "**Warned by:** " + warner;
-
-            embed.addField("Warning #" + (parseInt(index) + 1), field);
+            embed.addField("Warning #" + (parseInt(index) + 1), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: warning.timestamp, h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}), true);
         }
 
         message.channel.send("", {embed: embed});

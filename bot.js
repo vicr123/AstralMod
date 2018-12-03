@@ -101,8 +101,11 @@ i18next.use(i18nextbackend).init({
                 } else {
                     m = moment.utc(value.date).locale(lng);
                 }
+
+                m = m.utcOffset(value.offset == undefined ? m.zone : value.offset);
+
                 if (format == "datetime") {
-                    return fmt(value, "date", lng) + " " + fmt(value, "time", lng);
+                    return arguments.callee(_[lng]("SPECIAL_DATETIME", { time: {date: m, h24: value.h24, offset: value.offset} }));
                 } else if (format == "date") {
                     return m.format("ddd MMM DD YYYY");
                 } else if (format == "time") {
@@ -1522,7 +1525,7 @@ function isMod(member) {
     return false;
 }
 
-global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact = false) {
+global.uinfo = function(user, channel, locale, offset, h24 = true, guild = null, compact = false) {
     let $ = _[locale];
     sendPreloader($("UINFO_RETRIEVING"), channel).then(function(messageToEdit) {
         var member = null;
@@ -1561,13 +1564,13 @@ global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact
 
         if (compact) {
             var msg = $("UINFO_DISCRIMINATOR", {discriminator:user.discriminator}) + "\n" +
-                        $("UINFO_CREATEDAT", {createdat:{date: member.user.createdAt, h24: h24}}) + "\n";
+                        $("UINFO_CREATEDAT", {createdat:{date: member.user.createdAt, h24: h24, offset: offset}}) + "\n";
 
             if (member.noGuild != true) {
                 if (member.joinedAt.getTime() == 0) {
                     msg += $("UINFO_JOINEDAT", {joinedat:$("UINFO_INVALID_JOIN")});
                 } else {
-                    msg += $("UINFO_JOINEDAT", {joinedat:{date: member.joinedAt, h24: h24}});
+                    msg += $("UINFO_JOINEDAT", {joinedat:{date: member.joinedAt, h24: h24, offset: offset}});
                 }
             }
             embed.setDescription(msg);
@@ -1579,13 +1582,13 @@ global.uinfo = function(user, channel, locale, h24 = true, guild = null, compact
             }
 
             {
-                var msg = $("UINFO_CREATEDAT", {createdat:{date:member.user.createdAt, h24:h24}}) + "\n";
+                var msg = $("UINFO_CREATEDAT", {createdat:{date:member.user.createdAt, h24:h24, offset: offset}}) + "\n";
 
                 if (member.noGuild != true) {
                     if (member.joinedAt.getTime() == 0) {
                         msg += $("UINFO_JOINEDAT", {joinedat:$("UINFO_INVALID_JOIN")});
                     } else {
-                        msg += $("UINFO_JOINEDAT", {joinedat:{date:member.joinedAt, h24:h24}});
+                        msg += $("UINFO_JOINEDAT", {joinedat:{date:member.joinedAt, h24:h24, offset: offset}});
                     }
                 }
 
@@ -1632,7 +1635,8 @@ function processModCommand(message, command) {
     let options = {
         locale: settings.users[message.author.id].locale,
         imperial: settings.users[message.author.id].units === "imperial",
-        h24: settings.users[message.author.id].timeunit !== "12h"
+        h24: settings.users[message.author.id].timeunit !== "12h",
+        offset: settings.users[message.author.id].timezone
     };
 
     //Special cases
@@ -1848,7 +1852,7 @@ function processAmCommand(message, options, command) {
                 } else {
                     e = getEmoji("signal0");
                 }
-                message.edit($("PING_DONE", {emoji: e, time: time.toString(), interpolation: { escapeValue: false }}));
+                message.edit($("PING_DONE", {emoji: e, time: time.toString(), interpolation: {escapeValue: false}}));
             }
         }).catch(function(error) {
             log("Uncaught Exception:", logType.critical);
@@ -2811,7 +2815,8 @@ async function processMessage(message) {
         let options = {
             locale: settings.users[message.author.id].locale,
             imperial: settings.users[message.author.id].units === "imperial",
-            h24: settings.users[message.author.id].timeunit !== "12h"
+            h24: settings.users[message.author.id].timeunit !== "12h",
+            offset: settings.users[message.author.id].timezone
         };
 
         let text = message.content;
@@ -3180,7 +3185,7 @@ function memberAdd(member) {
                 channel.send(":arrow_right: <@" + member.user.id + "> + Invite " + inviteCode);
             }
     
-            uinfo(member.user, channel, glocale, true, member.guild, true);
+            uinfo(member.user, channel, glocale, 0, true, member.guild, true);
     
             if (member.guild.id == 287937616685301762) {
                 var now = new Date();
@@ -3439,6 +3444,16 @@ function vacuumSettings() {
                 if (!settings.guilds[key].blocked[logChannel].includes("log")) {
                     log(`Detected logging channel ${settings.guilds[key].chatLogs} without blocked logging. Blocking logs.`, logType.info);
                     settings.guilds[key].blocked[settings.guilds[key][logChannel]].push("log");
+                    changesMade = true;
+                }
+            }
+        }
+
+        for (let warnArray in settings.guilds[key].warnings) {
+            for (let warn of settings.guilds[key].warnings[warnArray]) {
+                if (typeof warn.timestamp === 'string' || warn.timestamp instanceof String) {
+                    log("Detected warning with String timestamp. Converting to moment.", logType.info);
+                    warn.timestamp = moment(warn.timestamp);
                     changesMade = true;
                 }
             }

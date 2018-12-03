@@ -260,7 +260,8 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     ctx.font = "14px Contemporary";
 
                     //let pubDate = "As of " + date.format("dddd, MMMM D") + " at " + date.format(timeString) + tz;
-                    let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:date, h24:options.h24}});
+
+                    let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:date.utcOffset(timeModule.utcOffsetFromTimezone(tz.trim().toLowerCase()), true), h24:options.h24}});
                     let windWidth = ctx.measureText(pubDate);
                     ctx.fillText(pubDate, (350 / 2) - (windWidth.width / 2), 50);
 
@@ -376,12 +377,12 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     //Draw sunrise info
                     ctx.drawImage(sunriseImage, 200, 355, 20, 20);
                     let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
-                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24}}), 227, 370);
+                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24, offset: options.offset}}), 227, 370);
 
                     //Draw sunset info
                     ctx.drawImage(sunsetImage, 200, 380, 20, 20);
                     let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:m a");
-                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24}}), 227, 395);
+                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24, offset: options.offset}}), 227, 395);
 
 
                     ctx.beginPath();

@@ -309,7 +309,7 @@ function processCommand(message, isMod, command, options) {
     }
 
     if (command == "uinfo") {
-        uinfo(message.author, message.channel, locale, options.h24, message.member.guild);
+        uinfo(message.author, message.channel, locale, options.offset, options.h24, message.member.guild);
         return true;
     } else if (command.startsWith("uinfo ")) {
         var user = command.substr(6);
@@ -340,7 +340,7 @@ function processCommand(message, isMod, command, options) {
 
         var users = parseUser(user, message.guild);
         if (users.length > 0) {
-            uinfo(users[index], message.channel, locale, options.h24);
+            uinfo(users[index], message.channel, locale, options.offset, options.h24);
         } else {
             throw new CommandError("No user found with that name");
         }
