@@ -410,32 +410,32 @@ async function processCommand(message, isMod, command, options) {
         var index = parseInt(timerToRemove);
 
         if (isNaN(index)) {
-            message.reply("Usage: `" + prefix(message.guild.id) + "rmtimer index`. For the `index` parameter, use `" + prefix(message.guild.id) + "timers`. For more information, `" + prefix(message.guild.id) + "help rmtimer`");
+            message.reply($("RMTIMER_ABOUT", {prefix: prefix(message.guild.id)}));
             return;
         }
 
         if (settings.users[message.author.id] == null) {
-            message.reply("You have no timers.");
+            message.reply($("RMTIMER_NO_TIMERS"));
             return;
         }
 
         if (settings.users[message.author.id].timers == null) {
-            message.reply("You have no timers.");
+            message.reply($("RMTIMER_NO_TIMERS"));
             return;
         }
 
         if (settings.users[message.author.id].timers.length == 0) {
-            message.reply("You have no timers.");
+            message.reply($("RMTIMER_NO_TIMERS"));
             return;
         }
 
         if (settings.users[message.author.id].timers.length <= index) {
-            message.reply("You don't have that many timers.");
+            message.reply($("RMTIMER_INVALID_INDEX"));
             return;
         }
 
         settings.users[message.author.id].timers.splice(index, 1);
-        message.reply("That timer has been deleted. For new timer indices, use `" + prefix(message.guild.id) + "timers`.");
+        message.reply($("RMTIMER_SUCCESS", {prefix: prefix(message.guild.id)}));
     } else if (command.startsWith("time")) {
         let location = command.replace("time", "").trim();
         let messageToEdit;
@@ -489,15 +489,15 @@ async function processCommand(message, isMod, command, options) {
                     });
                 });
             }).then(function(timeDescriptor) {
-                let time = moment(Date.now()).utcOffset(timeDescriptor.offset);
+                let time = moment.utc();
 
                 messageToEdit.edit($("TIME_RESPONSE", {
                     clockEmote: getClockEmoji(time.toDate()),
                     request: timeDescriptor.location,
-                    offset: time.format("Z"),
                     time: {
                         date: time,
-                        h24: options.h24
+                        h24: options.h24,
+                        offset: timeDescriptor.offset
                     }
                 }));
             }).catch(err => {
