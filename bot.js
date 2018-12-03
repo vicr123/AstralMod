@@ -2065,7 +2065,7 @@ function processAmCommand(message, options, command) {
                 if (reaction.count <= 1) return false;
                 if (reaction.emoji.name == "✅" || reaction.emoji.name == "🚫") {
                     for (let user of reaction.users) {
-                        if (isMod(message.guild.members.get(user[0]))) {
+                        if (isMod(message.guild.members.get(user[0])) && user[1].id != client.user.id) {
                             return true;
                         }
                     }
