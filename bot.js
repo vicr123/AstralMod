@@ -48,7 +48,7 @@ global.prefix = (id) => {
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
     amVersion = "2.10";
-    global.defaultPrefix = consts.config.prefix(message.guild.id);
+    global.defaultPrefix = consts.config.prefix;
 } else {
     amVersion = "Blueprint";
     global.defaultPrefix = consts.config.bprefix;
@@ -2986,7 +2986,7 @@ function newGuild(guild) {
         }
 
 
-        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by tying `" + prefix(message.guild.id) + "config`. To see the help index, use `" + prefix(message.guild.id) + "help`.";
+        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by tying `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
         if (channel == null) {
             guild.owner.send(message);
         } else {
