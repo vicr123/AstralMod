@@ -126,7 +126,8 @@ i18next.use(i18nextbackend).init({
             }
             if (format == "bold") return "**" + value + "**";
             return value;
-        }
+        },
+        escapeValue: false
     }
 });
 
@@ -1542,7 +1543,7 @@ global.uinfo = function(user, channel, locale, offset, h24 = true, guild = null,
                     displayName: user.username,
                     tag: user.tag,
                     noGuild: true,
-                    noGuildMessage: $("UINFO_NOT_PART_OF_SERVER"),
+                    noGuildMessage: $("UINFO_NOT_ALLOWED_SERVER_SPECIFIC"),
                     user: user
                 }
             }
@@ -1551,7 +1552,7 @@ global.uinfo = function(user, channel, locale, offset, h24 = true, guild = null,
                 displayName: user.username,
                 tag: user.tag,
                 noGuild: true,
-                noGuildMessage: $("UINFO_NOT_ALLOWED_SERVER_SPECIFIC"),
+                noGuildMessage: $("UINFO_NOT_PART_OF_SERVER"),
                 user: user
             }
         }

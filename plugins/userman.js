@@ -299,7 +299,7 @@ function processCommand(message, isMod, command, options) {
 
             var users = parseUser(user, message.guild);
             if (users.length > 0) {
-                uinfo(users[index], message.channel, locale, options.h24, message.guild);
+                uinfo(users[index], message.channel, locale, options.offset, options.h24, message.guild);
             } else {
                 throw new CommandError("No user found with that name");
             }
