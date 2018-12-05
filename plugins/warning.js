@@ -250,6 +250,7 @@ function processCommand(message, isMod, command, options) {
 
 module.exports = {
     name: "Warning",
+    translatableName: "TITLE_WARN",
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;

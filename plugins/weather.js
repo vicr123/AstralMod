@@ -563,6 +563,7 @@ function processCommand(message, isMod, command, options) {
 
 module.exports = {
     name: "Weather",
+    translatableName: "TITLE_WEATHER",
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;

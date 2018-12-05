@@ -64,6 +64,7 @@ function processCommand(message, isMod, command, options) {
 
 module.exports = {
     name: "Suggestions",
+    translatableName: "TITLE_SUGGESTIONS",
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;
