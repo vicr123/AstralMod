@@ -123,11 +123,11 @@ module.exports = {
 
         switch (helpCmd) {
             case "retrsettings":
-                help.title = "am:retrsettings";
+                help.title = prefix(message.guild.id) + "retrsettings";
                 help.helpText = "Sends you your settings file in AstralMod's format";
                 break;
             case "resetsettings":
-                help.title = "am:resetsettings";
+                help.title = prefix(message.guild.id) + "resetsettings";
                 help.helpText = "Deletes all of your AstralMod settings.";
                 break;
         }
