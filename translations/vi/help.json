@@ -18,7 +18,7 @@
     "CHNK_PARAM1": "- ID người dùng để đặt tên nick\n- Đề cập người dùng để đặt tên nick",
     "BLOCK_HELPTEXT": "Chặn người dùng sử dụng tính năng trong kênh hiện tại.",
     "BLOCK_PARAM1": "*Tham số không bắt buộc*\nTính năng để chặn, hoặc `all` cho tất cả lệnh. Nếu tham số này mất, tất cả *lệnh* sẽ bị chặn.",
-    "BLOCK_REMARKS": "Tính năng có hiệu lực là `spam`, `log` và lệnh nào, trừ `block`và `unblock`.\n`spam`sẽ tắt kiểm soát tin nhắn rác trong kênh, và `log` sẽ tắt thu thập đăng nhập trong kênh. Cũng không thể đặt trên toàn máy chủ, và `log` không thể chặn trong kênh cấu hình lưu trú đăng nhập",
+    "BLOCK_REMARKS": "Tính năng có hiệu lực là `spam`, `log` và lệnh nào, trừ `block`và `unblock`.\n`spam`sẽ tắt kiểm soát tin nhắn rác trong kênh, và `log` sẽ tắt thu thập đăng nhập trong kênh. Cũng không thể đặt trên toàn máy chủ, và `log` không thể chặn trong kênh cấu hình lưu trú đăng nhập.",
     "BLOCK_AVAILABLEOPTIONS": "`--serverwide` Thay đổi cài đặt chặn cho toàn máy chủ",
     "UNBLOCK_HELPTEXT": "Gỡ chặn cho người dùng sử dụng tính năng trong kênh hiện tại.",
     "UNBLOCK_PARAM1": "*Tham số không bắt buộc*\nTính năng để gỡ chặn, Nếu tính năng mất, tất cả tính năng sẽ gỡ chặn.",
