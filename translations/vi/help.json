@@ -1,4 +1,27 @@
 {
     "CONFIG_HELPTEXT": "Cấu hình AstralMod cho máy chủ này",
-    "SHOO_HELPTEXT": "Thoát khỏi máy chủ, thanh trừng tất cả cấu hình"
+    "SHOO_HELPTEXT": "Thoát khỏi máy chủ, thanh trừng tất cả cấu hình",
+    "OKNICK_HELPTEXT": "Chấp nhận tên nick",
+    "PING_HELPTEXT": "Xin AstralMod trả lời bằng tin nhắn",
+    "VERSION_HELPTEXT": "Truy vấn phiên bản AstralMod",
+    "NICK_HELPTEXT": "Đặt tên nick sau khi người quản lý chấp nhận",
+    "NICK_PARAM1": "Tên nick bạn muốn được gọi",
+    "SETLOCALE_HELPTEXT": "Đạt ngôn ngữ AstralMod sử dụng khi xử lý lệnh của bạn",
+    "HELP_HELPTEXT": "Thu trợ giúp với AstralMod và lệnh nào có sẵn",
+    "HELP_PARAM1": "*Tham số không bắt buộc*\nLệnh để thu trợ giúp\nNếu tham số này mất, chúng tôi sẽ danh sách lệnh đã sẵn.",
+    "ABOUT_HELPTEXT": "Thu thông tin với AstralMod",
+    "SUDO_HELPTEXT": "Yêu cầu phép quản lý cho 5 phút",
+    "RM_HELPTEXT": "Xóa một số tin nhắn",
+    "RM_PARAM1": "Số tin nhắn để xóa, hoặc `all` để xóa tới 100 tin nhắn trong ngày hôm qua",
+    "RM_PARAM2": "*Tham số không bắt buộc*\nTin nhắn của người dùng để xóa",
+    "CHNK_HELPTEXT": "Đặt tên nick ngẫu nhiên cho người dùng.",
+    "CHNK_PARAM1": "- ID người dùng để đặt tên nick\n- Đề cập người dùng để đặt tên nick",
+    "BLOCK_HELPTEXT": "Chặn người dùng sử dụng tính năng trong kênh hiện tại.",
+    "BLOCK_PARAM1": "*Tham số không bắt buộc*\nTính năng để chặn, hoặc `all` cho tất cả lệnh. Nếu tham số này mất, tất cả *lệnh* sẽ bị chặn.",
+    "BLOCK_REMARKS": "Tính năng có hiệu lực là `spam`, `log` và lệnh nào, trừ `block`và `unblock`.\n`spam`sẽ tắt kiểm soát tin nhắn rác trong kênh, và `log` sẽ tắt thu thập đăng nhập trong kênh. Cũng không thể đặt trên toàn máy chủ, và `log` không thể chặn trong kênh cấu hình lưu trú đăng nhập",
+    "BLOCK_AVAILABLEOPTIONS": "`--serverwide` Thay đổi cài đặt chặn cho toàn máy chủ",
+    "UNBLOCK_HELPTEXT": "Gỡ chặn cho người dùng sử dụng tính năng trong kênh hiện tại.",
+    "UNBLOCK_PARAM1": "*Tham số không bắt buộc*\nTính năng để gỡ chặn, Nếu tính năng mất, tất cả tính năng sẽ gỡ chặn.",
+    "UNBLOCK_REMARKS": "Để xem tính năng đã sẵn, dùng `{{prefix}}features`",
+    "UNBLOCK_AVAILABLEOPTIONS": "`--serverwide` Thay đổi cài đặt chặn cho toàn máy chủ"
 }
