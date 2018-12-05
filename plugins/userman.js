@@ -550,6 +550,7 @@ function processCommand(message, isMod, command, options) {
 var pollBan;
 module.exports = {
     name: "Users",
+    translatableName: "TITLE_USER",
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;

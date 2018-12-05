@@ -524,6 +524,7 @@ async function processCommand(message, isMod, command, options) {
 var pollTimer;
 module.exports = {
     name: "Time",
+    translatableName: "TITLE_TIME",
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;

@@ -185,6 +185,7 @@ function processCommand(message, isMod, command, options) {
 
 module.exports = {
     name: "Spam",
+    translatableName: "TITLE_SPAM",
     constructor: function(discordClient, commandEmitter, constants) {
         client = discordClient;
         consts = constants;
