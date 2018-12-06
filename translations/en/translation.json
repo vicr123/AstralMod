@@ -163,7 +163,7 @@
     "HELP_CONTENTS": "AstralMod Help Contents",
     "HELP_CONTENTS_INTRODUCTION": "Here are some things you can try. For more information, type `{{prefix}}help [command]`",
     "HELP_CORE_COMMANDS": "AstralMod Core Commands",
-    "HELP_FOOTER": "AstralMod {{amversion}}. Moderator commands denoted with bold text.",
+    "HELP_FOOTER": "AstralMod {{amVersion}}. Moderator commands denoted with bold text.",
     "HELP_UNAVAILABLE": "Couldn't obtain help for that command.",
     "HELP_COMMAND_TITLE": "Command Help",
     "HELP_COMMAND_FOR": "for {{title}}",
