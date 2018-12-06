@@ -260,5 +260,6 @@
     "SETTZ_INVALID_TIMEZONE": "That's not a valid timezone.",
     "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}.",
     "PIC_PROFILE_PICTURE": "Profile Picture",
+    "UPTIME": "{{emoji}} AstralMod has been up for about {{time, humanize}} ({{time, d[d] HH:mm:ss}})",
     "VERSION": "**AstralMod {{version}}**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later."
 }
