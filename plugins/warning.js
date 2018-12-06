@@ -30,8 +30,10 @@ function processResponse(message) {
 
     var tracker = currentWarnings[message.guild.id];
     currentWarnings[message.guild.id] = null;
+    let $ = _[settings.users[tracker.warner.id].locale]
+
     if (message.content.toLowerCase() == "cancel") {
-        message.channel.send(':gear: Cancelled. Exiting warn menu.');
+        message.channel.send($("WARN_CANCEL", {emoji: ":gear:"}));
     } else {
         var warnings = settings.guilds[message.guild.id].warnings;
         if (warnings == null) {
@@ -52,7 +54,7 @@ function processResponse(message) {
 
         warnings[tracker.user.id] = userWarnings;
         settings.guilds[message.guild.id].warnings = warnings;
-        message.channel.send(":gear: Hey <@" + tracker.user.id + ">! " + getUserString(tracker.warner) + " has warned you for `" + message.content + "`. You currently have " + parseInt(userWarnings.length) + " warnings.");
+        message.channel.send(_[settings.users[tracker.user.id].locale]("WARN_WARNED", {warnee: `<@${tracker.user.id}>`, warner: getUserString(tracker.warner), warning: message.content, count: userWarnings.length}))
     }
     message.delete();
 }
@@ -77,7 +79,7 @@ function processCommand(message, isMod, command, options) {
                     }
 
                     if (user == null) {
-                        throw new CommandError("No user found with that name on this server");
+                        throw new CommandError($("WARN_NO_USER_FOUND"));
                     } else {
                         var member = message.guild.member(user);
                         captureInput(processResponse, message.guild.id, message.author.id);
@@ -88,13 +90,14 @@ function processCommand(message, isMod, command, options) {
                         }
                         currentWarnings[message.guild.id] = tracker;
 
-                        message.channel.send(":gear: Enter reason for warning " + getUserString(member) + " or `cancel`.");
+                        message.channel.send($("WARN_ENTER_REASON", {user: getUserString(user), emoji: ":gear:"}));
                     }
                 } else {
-                    throw new CommandError("No user found with that name");
+                    throw new CommandError($("WARN_NO_USER_FOUND"));
                 }
             } else {
-                throw new CommandError(getUserString(currentWarnings[message.guild.id].warner) + " is currently warning someone else. Please wait for them to finish first.");
+                
+                throw new CommandError($("WARN_ALREADY_WARNING", {user: getUserString(currentWarnings[message.guild.id].warner)}));
             }
         } else if (command.startsWith("lswarn ")) {
             var user = command.substr(7);
@@ -162,7 +165,7 @@ function processCommand(message, isMod, command, options) {
             id = parseInt(id) - 1;
 
             if (isNaN(id)) {
-                throw new UserInputError("Invalid ID. Use the `lswarn` command to retrieve a list of IDs.");
+                throw new UserInputError("Invalid ID. See `am:help rmwarn` for more information");
             }
 
             var users = parseUser(user, message.guild);
