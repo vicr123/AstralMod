@@ -1722,7 +1722,7 @@ function processModCommand(message, command) {
     if (isMod(message.member)) {
         if (command.startsWith("oknick")) {
             let userId = command.substr(7);
-            acceptNicknameChange(message.guild.id, userId, message.channel.id, message.author.tag, options);
+            acceptNicknameChange(message.guild.id, userId, message.channel.id, options);
             return true;
         }
     }
@@ -1759,9 +1759,9 @@ function requestNickname(member, nickname, guild, options) {
 
         let botwarningsChannelMessage;
         if (nickname == "") {
-            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix(message.guild.id) + "oknick " + member.user.id + "`";
+            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `[clear]`. `" + prefix(member.guild.id) + "oknick " + member.user.id + "`";
         } else {
-            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix(message.guild.id) + "oknick " + member.user.id + "`";
+            botwarningsChannelMessage = ":arrows_counterclockwise: <@" + member.user.id + "> :arrow_right: `" + nickname + "`. `" + prefix(member.guild.id) + "oknick " + member.user.id + "`";
         }
         botwarningsChannel.send(botwarningsChannelMessage).then(function(message) {
             message.react("✅").then(function() {
@@ -1769,7 +1769,7 @@ function requestNickname(member, nickname, guild, options) {
                 message.awaitReactions(function(reaction) {
                     if (reaction.count <= 1) return false;
                     for (let user of reaction.users) {
-                        if (isMod(message.member)) {
+                        if (isMod(message.guild.member(user[1]))) {
                             return true;
                         }
                     }
@@ -1827,7 +1827,7 @@ function getNickStatus(member, nickname, guild) {
         return "ok";
     }
 
-    return moment(pendingNicks.cooldowns[member.user.id]).utc().add(1, 'd');
+    return moment.duration(moment.utc().add(1, "day").diff(pendingNicks.cooldowns[member.user.id]));
 }
 
 function processAmCommand(message, options, command) {
@@ -1876,43 +1876,24 @@ function processAmCommand(message, options, command) {
     } else if (command == "nick") {
         if (settings.guilds[message.guild.id].nickModeration) {
             let nickResult = getNickStatus(message.member, "", message.guild);
-            if (nickResult instanceof moment) {
-                message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
+            if (moment.isDuration(nickResult)) {
+                message.reply($("NICK_WAIT", {time: {duration: nickResult}}));
             } else if (nickResult == "length") {
-                message.reply(_[locale]("Nicknames need to be less than 32 characters."));
+                message.reply($("NICK_TOO_LONG"));
+            } else if (nickResult == "configuration") {
+                message.reply($("NICK_SERVER_IMPROPER_CONFIG", {prefix: prefix(message.guild.id)}));
             } else {
-                /*
-                message.channel.send("Ok, requesting a nickname reset. React with '🚫' within 5 seconds to cancel.").then(m => {
-                    var rename = true;
-                    m.react('🚫').then(() => {
-                        const filter = (reaction, user) => reaction.emoji.name === '🚫' && user.id === message.member.id;
-                        const collector = m.createReactionCollector(filter, {time: 5000});
-                        collector.on('collect', (_ => {
-                            rename = false;
-                            m.edit("Ok, I've cancelled that.");
-                            m.clearReactions();
-                        }));
-                        collector.on('end', (_ => {
-                            if(rename) {
-                                m.edit("Ok, a nickname reset has been requested.");
-                                requestNickname(message.member, text.substr(8), message.guild);
-                            }
-                            m.clearReactions();
-                        }));
-                    }).catch(err => log(err, logType.critical));
-                }).catch(err => log(err, logType.critical));*/
-
                 awaitUserConfirmation({
-                    title: "Request to reset nickname", 
-                    msg: "Ready to reset your nickname?", 
-                    msgOnSuccess: "A request has been sent to reset your nickname.", 
-                    msgOnFail: "Alright, scratch that.", 
+                    title: $("NICK_RESET_REQUEST_TITLE"), 
+                    msg: $("NICK_RESET_REQUEST_MESSAGE"), 
+                    msgOnSuccess: $("NICK_RESET_REQUEST_SUCCESS"), 
+                    msgOnFail: $("NICK_REQUEST_CANCEL"), 
                     channel: message.channel,
                     author: message.author,
                     locale: options.locale
-                }).then(function() {
+                }).then(() => {
                     requestNickname(message.member, text.substr(8), message.guild, options);
-                }).catch(function() {
+                }).catch(() => {
                     //Don't do anything
                 });
             }
@@ -1924,22 +1905,22 @@ function processAmCommand(message, options, command) {
     } else if (command.startsWith("nick ")) {
         if (settings.guilds[message.guild.id].nickModeration) {
             let nickResult = getNickStatus(message.member, text.substr(8), message.guild);
-            if (nickResult instanceof moment) {
-                message.reply(`There is a one day cooldown between uses of this command; you have ${moment.utc().to(nickResult, true)} remaining.`);
+            if (moment.isDuration(nickResult)) {
+                message.reply($("NICK_WAIT", {time: {duration: nickResult}}));
             } else if (nickResult == "length") {
-                message.reply(_[locale]("Nicknames need to be less than 32 characters."));
+                message.reply($("NICK_TOO_LONG"));
             } else if (nickResult == "configuration") {
-                message.reply(_[locale]("This server is not configured properly for nickname moderation. Get a server administrator to run `" + prefix(message.guild.id) + "config` and set a Bot Warnings channel."));
+                message.reply($("NICK_SERVER_IMPROPER_CONFIG", {prefix: prefix(message.guild.id)}));
             } else {
                 awaitUserConfirmation({
-                    title: "Request to change nickname", 
-                    msg: "Ready to change your nickname?", 
-                    msgOnSuccess: "A request has been sent to reset your nickname.", 
-                    msgOnFail: "Alright, scratch that.", 
+                    title: $("NICK_CHANGE_REQUEST_TITLE"), 
+                    msg: $("NICK_CHANGE_REQUEST_MESSAGE"), 
+                    msgOnSuccess: $("NICK_CHANGE_REQUEST_SUCCESS"), 
+                    msgOnFail: $("NICK_REQUEST_CANCEL"), 
                     channel: message.channel,
                     author: message.author,
                     extraFields: [
-                        ["Nickname", text.substr(8)]
+                        [$("NICK_NICKNAME"), text.substr(8)]
                     ],
                     locale: options.locale
                 }).then(function() {
