@@ -272,5 +272,11 @@
     "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}.",
     "PIC_PROFILE_PICTURE": "Profile Picture",
     "UPTIME": "{{emoji}} AstralMod has been up for about {{time, humanize}} ({{time, d[d] HH:mm:ss}})",
-    "VERSION": "**AstralMod {{version}}**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later."
+    "VERSION": "**AstralMod {{version}}**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later.",
+    "WARN_NO_USER_FOUND": "I couldn't find a user with that name on this server.",
+    "WARN_ENTER_REASON": "{{emoji}} Enter a reason for warning {{user}} or `cancel`.",
+    "WARN_ALREADY_WARNING": "{{user}} is already warning someone right now. Please wait for them to finish first.",
+    "WARN_CANCEL": "{{emoji}} Cancelled. Exiting warning menu.",
+    "WARN_WARNED": "Hey, {{warnee}}! {{warner}} has just warned you for `{{warning}}`. You currently have {{count}} warning.",
+    "WARN_WARNED_plural": "Hey, {{warnee}}! {{warner}} has just warned you for `{{warning}}`. You currently have {{count}} warnings."
 }
