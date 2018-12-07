@@ -1939,12 +1939,12 @@ function processAmCommand(message, options, command) {
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
         embed.setColor("#81EC79");
-        embed.setAuthor(_[locale]("AstralMod " + amVersion), client.user.avatarURL);
-        embed.setDescription(_[locale]("Discord Bot"));
-        embed.addField("File Bug", "File a bug at the [GitHub Repository](https://github.com/vicr123/AstralMod/issues) for AstralMod.");
-        embed.addField("Sources", "Source code for AstralMod is available at the [GitHub Repository](https://github.com/vicr123/AstralMod).");
-        embed.addField("Contributors", "AstralMod is possible due to the work of these wonderful people:\n- Blake#0007\n- reflectronic#5190");
-        embed.setFooter(_[locale]("AstralMod " + amVersion + ". Thanks for using AstralMod!"));
+        embed.setAuthor($("ABOUT_TITLE", {verion: amVersion}), client.user.avatarURL);
+        embed.setDescription($("ABOUT_ABOUT"));
+        embed.addField($("ABOUT_FILE_BUG"), $("ABOUT_FILE_BUG_CONTENT", {link: "(https://github.com/vicr123/AstralMod/issues)"})); 
+        embed.addField($("ABOUT_SOURCE"), $("ABOUT_SOURCE_CONTENT", {link: "(https://github.com/vicr123/AstralMod/issues)"})); 
+        embed.addField($("ABOUT_CONTRIBUTORS"), $("ABOUT_CONTRIBUTORS_CONTENT", {contributors: "\n- Blake#0007\n- reflectronic#5190"}));
+        embed.setFooter($("ABOUT_THANKS", {version: amVersion}));
         message.channel.send(embed);
         return true;
     } else if (command == "setlocale") {
@@ -2049,6 +2049,11 @@ function processAmCommand(message, options, command) {
         message.channel.send("", { embed: embed });
         return true;
     } else if (command.startsWith("sudo")) {
+        if (isMod(message.guild.member)) {
+            message.reply($("SUDO_ALREADY_SUDO"));
+            return;
+        }
+
         let embed = new Discord.RichEmbed;
         embed.setTitle($("SUDO_TITLE", {emoji: ":shield:"}));
         embed.setDescription($("SUDO_USER", {user: message.author.tag}) + "\n" +
@@ -2068,7 +2073,7 @@ function processAmCommand(message, options, command) {
                 if (reaction.count <= 1) return false;
                 if (reaction.emoji.name == "✅" || reaction.emoji.name == "🚫") {
                     for (let user of reaction.users) {
-                        if (isMod(message.guild.members.get(user[0])) && user[1].id != client.user.id) {
+                        if (isMod(message.guild.members.get(user[0])) && user[1].id != client.user.id || (reaction.emoji.name == "🚫" && user[1].id == message.author.id)) {
                             return true;
                         }
                     }
