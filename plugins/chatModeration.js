@@ -225,52 +225,55 @@ function processCommand(message, isMod, command, options) {
             settings.guilds[message.guild.id].blocked[blockId].push("all");
             
             if (blockId == "guild") {
-                message.channel.send("Ok, all features in this server will now be ignored.");
+                message.channel.send($("BLOCK_ALL_BLOCKED_SERVER"));
             } else {
-                message.channel.send("Ok, all features in this channel will now be ignored.");
+                message.channel.send($("BLOCK_ALL_BLOCKED_CHANNEL"));
             }
         } else if (command.startsWith("block ")) {
             let c = command.substr(6).trim().toLowerCase();
 
             if (c.indexOf(" ") != -1) {
-                message.reply("Features are one word. Please specify a valid feature.");
+                message.reply($("BLOCK_ABOUT"));
                 return;
             }
 
             if (c == "block") {
-                message.reply("I can't block the `block` command.");
+                message.reply($("BLOCK_CANT_BLOCK_THIS"));
                 return;
             }
 
             if (c == "unblock") {
-                message.reply("I can't block the `unblock` command.");
+                message.reply($("BLOCK_CANT_BLOCK_UNBLOCK"));
                 return;
             }
 
             if (c == "log" && [settings.guilds[message.guild.id].chatLogs, 
                                settings.guilds[message.guild.id].botWarnings, 
                                settings.guilds[message.guild.id].memberAlerts].includes(message.channel.id)) {
-                message.reply("Log channels already have log collection from them disabled.");
+                message.reply($("BLOCK_LOG_ALREADY_BLOCKED_IN_LOG_CHANNELS"));
                 return;
             }
 
             if (blockId == "guild" && c == "spam") {
-                message.reply("To disable spam control for the server, use the `" + prefix(message.guild.id) + "spamctl` command.");
+                message.reply($("BLOCK_CANT_BLOCK_SPAMCTL_SERVERWIDE", {prefix: prefix(message.guild.id)}));
                 return;
             }
 
             if (blockId == "guild" && c == "log") {
-                message.reply("To disable log collection from the server, use the `" + prefix(message.guild.id) + "config` command to disable message logging.");
+                message.reply($("BLOCK_CANT_BLOCK_LOGS_SERVERWIDE", {prefix: prefix(message.guild.id)}));
                 return;
             }
 
             if (settings.guilds[message.guild.id].blocked[blockId].includes(c)) {
+                if (blockId == "guild") {
+                    message.reply($("BLOCK_COMMAND_ALREADY_DISABLED_SERVER", {command: `\`${c}\``}));
+                }
                 if (c == "spam") {
-                    message.reply("You've already disabled spam control in this channel.");
+                    message.reply($("BLOCK_SPAMCTL_ALREADY_DISABLED_CHANNEL"));
                 } else if (c == "log") { 
-                    message.reply("You've already disabled log collection in this channel.");
+                    message.reply($("BLOCK_LOG_ALREADY_DISABLED_CHANNEL"));
                 } else {
-                    message.reply("You've already disabled `" + c + "`  in this channel.");
+                    message.reply($("BLOCK_COMMAND_ALREADY_DISABLED_CHANNEL", {command: `\`${c}\``}));
                 }
 
                 return;
@@ -279,51 +282,54 @@ function processCommand(message, isMod, command, options) {
             settings.guilds[message.guild.id].blocked[blockId].push(c);
 
             if (blockId == "guild") {
-                message.reply("Ok, I've blocked people from running `" + c + "` in this server.");
+                message.reply($("BLOCK_COMMAND_BLOCKED_SERVER", {command: `\`${c}\``}));
             } else {
                 if (c == "spam") {
-                    message.reply("Ok, I've disabled spam control in this channel.");
+                    message.reply($("BLOCK_SPAMCTL_BLOCKED_CHANNEL"));
                 } else if (c == "log") { 
-                    message.reply("Ok, I've disabled log collection from this channel.");
+                    message.reply($("BLOCK_LOG_BLOCKED_CHANNEL"));
                 } else {
-                    message.reply("Ok, I've blocked people from running `" + c + "`  in this channel.");
+                    message.reply($("BLOCK_COMMAND_BLOCKED_CHANNEL", {command: `\`${c}\``}));
                 }
             }
         } else if (command == "unblock") {
             settings.guilds[message.guild.id].blocked[blockId] = [];
-            message.reply("Ok, every previously blocked feature has now been unblocked.");
+            if (blockId == "guild")
+                message.reply($("UNBLOCK_ALL_UNBLOCKED_SERVER"));
+            else
+                message.reply($("UNBLOCK_ALL_UNBLOCKED_CHANNEL"));
         } else if (command.startsWith("unblock ")) {
             let c = command.substr(8).trim().toLowerCase();
 
             if (c.indexOf(" ") != -1) {
-                message.reply("Features are one word. Please specify a valid feature.");
-                return;
-            }
-
-            if (blockId == "guild" && c == "spam") {
-                message.reply("To enable spam control for the server, use the `" + prefix(message.guild.id) + "spamctl` command.");
+                message.reply($("UNBLOCK_ABOUT"));
                 return;
             }
 
             if (c == "log" && [settings.guilds[message.guild.id].chatLogs, 
                                settings.guilds[message.guild.id].botWarnings, 
                                settings.guilds[message.guild.id].memberAlerts].includes(message.channel.id)) {
-                message.reply("Log channels cannot have have log collection from them disabled. Please try another channel.");
+                message.reply($("UNBLOCK_CANT_UNBLOCK_LOG_IN_LOG_CHANNELS"));
                 return;
             }
 
             if (blockId == "guild" && c == "spam") {
-                message.reply("To disable spam control for the server, use the `" + prefix(message.guild.id) + "spamctl` command.");
+                message.reply($("UNBLOCK_CANT_UNBLOCK_SPAMCTL_SERVERWIDE", {prefix: prefix(message.guild.id)}));
+                return;
+            }
+
+            if (blockId == "guild" && c == "log") {
+                message.reply($("UNBLOCK_CANT_UNBLOCK_LOGS_SERVERWIDE", {prefix: prefix(message.guild.id)}));
                 return;
             }
 
             if (settings.guilds[message.guild.id].blocked[blockId].indexOf(c) == -1) {
                 if (c == "spam") {
-                    message.reply("You haven't disabled spam control in this channel.");
+                    message.reply($("UNBLOCK_SPAMCTL_ALREADY_ENABLED_CHANNEL"));
                 } else if (c == "log") { 
-                    message.reply("You haven't disabled log collection in this channel.");
+                    message.reply($("UNBLOCK_LOG_ALREADY_ENABLED_CHANNEL"));
                 } else {
-                    message.reply("You haven't disabled `" + c + "`  in this channel.");
+                    message.reply($("UNBLOCK_COMMAND_ALREADY_ENABLED_CHANNEL", {command: `\`${c}\``}));
                 }    
                     return;
             }
@@ -331,14 +337,14 @@ function processCommand(message, isMod, command, options) {
             settings.guilds[message.guild.id].blocked[blockId].splice(settings.guilds[message.guild.id].blocked[blockId].indexOf(c), 1);
 
             if (blockId == "guild") {
-                message.reply("Ok, I've allowed people to run `" + c + "` in this server.");
+                message.reply($("UNBLOCK_COMMAND_UNBLOCKED_SERVER", {command: `\`${c}\``}));
             } else {
                 if (c == "spam") {
-                    message.reply("Ok, I've enabled spam control in this channel.");
+                    message.reply($("UNBLOCK_SPAMCTL_UNBLOCKED_CHANNEL"));
                 } else if (c == "log") { 
-                    message.reply("Ok, I've enabled log collection from this channel.");
+                    message.reply($("UNBLOCK_LOG_UNBLOCKED_CHANNEL"));
                 } else {
-                    message.reply("Ok, I've allowed people to runn `" + c + "`  in this channel.");
+                    message.reply($("UNBLOCK_COMMAND_UNBLOCKED_CHANNEL", {command: `\`${c}\``}));
                 }
             }
         }

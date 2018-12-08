@@ -4,6 +4,25 @@
     
     "THIS_LOCALE": "English (please put the name of your locale here in its native language and remove these brackets)",
     
+    "BLOCK_ALL_BLOCKED_SERVER": "Ok, all commands will be ignored in this server.",
+    "BLOCK_ALL_BLOCKED_CHANNEL": "Ok, all commands will be ignored in this channel.",
+    "BLOCK_ABOUT": "Features are one word. Please specify a valid feature. For more information, type `{{prefix}} help block`",
+    "BLOCK_CANT_BLOCK_THIS": "I can't block the `block` command.",
+    "BLOCK_CANT_BLOCK_UNBLOCK": "I can't block the `unblock` command.",
+    "BLOCK_LOG_ALREADY_BLOCKED_IN_LOG_CHANNELS": "Log channels already have log collection from them disabled.",
+    "BLOCK_CANT_BLOCK_SPAMCTL_SERVERWIDE": "To disable spam control for the server, type `{{prefix}}spamctl off`.",
+    "BLOCK_CANT_BLOCK_LOGS_SERVERWIDE": "To disable log collection from the server, use the `{{prefix}} config` command to remove your log channels.",
+    "BLOCK_SPAMCTL_ALREADY_DISABLED_CHANNEL": "You've already disabled spam control in this channel.",
+    "BLOCK_LOG_ALREADY_DISABLED_CHANNEL": "You've already disabled log collection from this channel.",
+    "BLOCK_COMMAND_ALREADY_DISABLED_CHANNEL": "You've already disabled {{command}} in this channel.",
+    "BLOCK_COMMAND_ALREADY_DISABLED_SERVER": "You've already disabled {{command}} in this server.",
+    "BLOCK_COMMAND_BLOCKED_SERVER": "Ok, I've blocked people from running {{command}} in this server.",
+    "BLOCK_COMMAND_BLOCKED_CHANNEL": "Ok, I've blocked people from running {{command}} in this channel.",
+    "BLOCK_SPAMCTL_BLOCKED_CHANNEL": "Ok, I've disabled spam control in this channel.",
+    "BLOCK_LOG_BLOCKED_CHANNEL": "Ok, I've blocked log collection from this channel.",
+
+
+
     "UINFO_RETRIEVING": "Retrieving user information...",
     "UINFO_USER_ID": "User ID: {{id}}",
     "UINFO_USER_INFORMATION": "User Information",
@@ -323,6 +342,21 @@
     "SETTZ_INVALID_TIMEZONE": "That's not a valid timezone.",
     "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}.",
     
+    "UNBLOCK_ALL_UNBLOCKED_SERVER": "Ok, every command that was blocked serverwide has now been unblocked.",
+    "UNBLOCK_ALL_UNBLOCKED_CHANNEL": "Ok, every command that was blocked in this hannel has now been unblocked.",
+    "UNBLOCK_ABOUT": "Features are one word. Please specify a valid feature. For more information, type `{{prefix}} help block`",
+    "UNBLOCK_LOG_ALREADY_BLOCKED_IN_LOG_CHANNELS": "Log channels cannot have have log collection from them disabled.",
+    "UNBLOCK_CANT_BLOCK_SPAMCTL_SERVERWIDE": "To enable spam control for the server, type `{{prefix}}spamctl on`.",
+    "UNBLOCK_CANT_BLOCK_LOGS_SERVERWIDE": "To disable log collection from the server, use the `{{prefix}} config` command to remove your log channels.",
+    "UNBLOCK_SPAMCTL_ALREADY_DISABLED_CHANNEL": "You haven't disabled spam control in this channel.",
+    "UNBLOCK_LOG_ALREADY_DISABLED_CHANNEL": "You haven't disabled log collection from this channel.",
+    "UNBLOCK_COMMAND_ALREADY_DISABLED_CHANNEL": "You haven't disabled {{command}} in this channel.",
+    "UNBLOCK_COMMAND_ALREADY_DISABLED_SERVER": "You haven't disabled {{command}} in this server.",
+    "UNBLOCK_COMMAND_BLOCKED_SERVER": "Ok, I've allowed people to run {{command}} in this server.",
+    "UNBLOCK_COMMAND_BLOCKED_CHANNEL": "Ok, I've allowed people to run {{command}} in this channel.",
+    "UNBLOCK_SPAMCTL_BLOCKED_CHANNEL": "Ok, I've enabled spam control in this channel.",
+    "UNBLOCK_LOG_BLOCKED_CHANNEL": "Ok, I've enabled log collection from this channel.",
+
     
     "UPTIME": "{{emoji}} AstralMod has been up for about {{time, humanize}} ({{time, d[d] HH:mm:ss}})",
     
