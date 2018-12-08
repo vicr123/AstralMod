@@ -160,7 +160,7 @@ function processCommand(message, isMod, command, options) {
             id = parseInt(id) - 1;
 
             if (isNaN(id)) {
-                throw new UserInputError("Invalid ID. See `am:help rmwarn` for more information");
+                throw new UserInputError($("RMWARN_ABOUT", {prefix: prefix(message.guild.id)}));
             }
 
             var users = parseUser(user, message.guild);
@@ -176,7 +176,7 @@ function processCommand(message, isMod, command, options) {
                 }
 
                 if (user == null) {
-                    throw new CommandError("No user found with that name on this server");
+                    throw new CommandError($("RMWARN_NO_USER_FOUND"));
                 } else {
                     var warnings = settings.guilds[message.guild.id].warnings;
                     if (warnings == null) {
@@ -189,23 +189,23 @@ function processCommand(message, isMod, command, options) {
                     }
 
                     if (userWarnings.length == 0) {
-                        message.reply(getUserString(message.guild.member(user)) + " has no warnings.");
+                        message.reply($("RMWARN_NO_WARNINGS", {user: getUserString(message.guild.member(user))}));
                         return;
                     }
 
                     if (userWarnings.length <= id) {
-                        message.reply(getUserString(message.guild.member(user)) + " does not have that many warnings.");
+                        message.reply($("RMWARN_INVALID_INDEX", {user: getUserString(message.guild.member(user))}));
                         return;
                     }
 
                     userWarnings.splice(id, 1);
-                    message.reply(":gear: That warning has been removed. For new warning indices, use `" + prefix(message.guild.id) + "lswarn`.");
+                    message.reply($("RMWARN_SUCCESS", {emoji: ":gear:", prefix: prefix(message.guild.id)}));
 
                     warnings[user] = userWarnings;
                     settings.guilds[message.guild.id].warnings = warnings;
                 }
             } else {
-                throw new CommandError("No user found with that name");
+                throw new CommandError($("RMWARN_NO_USER_FOUND"));
             }
         }
     }
