@@ -1,7 +1,9 @@
 {
     "SPECIAL_STIME": "{{time, stime}}",
     "SPECIAL_DATETIME": "{{time, dddd[,] MMMM D YYYY}} at {{time, stime}} ({{time, Z}})",
+    
     "THIS_LOCALE": "English (please put the name of your locale here in its native language and remove these brackets)",
+    
     "UINFO_RETRIEVING": "Retrieving user information...",
     "UINFO_USER_ID": "User ID: {{id}}",
     "UINFO_USER_INFORMATION": "User Information",
@@ -21,12 +23,28 @@
     "UINFO_BANNED_FROM_plural": "This user has been banned from {{count}} servers known to AstralMod",
     "UINFO_ALERTS": "Alerts",
     "UINFO_BOT_ACCOUNT_WARNING": "This is a bot.",
+
+    "RM_ITS_A_CATASTROPHE": "Catastrophic Failure",
+    "RM_DELETED_NONE": "{{emoji}} No messages from that user were found.",
+    "RM_DELETED_FEWER": "{{emoji}} Only {{count}} message was deleted.",
+    "RM_DELETED_FEWER_plural": "{{emoji}} Only {{count}} messages were deleted.",
+    "RM_DELETED": "{{emoji}} Deleted {{count}} messages.",
+    "RM_DELETED_plural": "{{emoji}} Deleted {{count}} messages.",
+    "RM_TOO_HIGH": "Only 99 messages can be deleted at once.",
+    "RM_NO_USER": "I couldn't find a user with that name.",
+    "RM_NAN": "That's not a number.",
+    "RM_ALL_ABOUT": "The \"all\" option can only be used when passing a user as the second argument.",
+    "RM_ALL_DOWNLOADING": "Give us a minute to find {{count}} message from {{user}}...",
+    "RM_ALL_DOWNLOADING_plural": "Give us a minute to find {{count}} messages from {{user}}...",
+    "RM_ALL_DOWNLOADING_ALL": "Give us a minute to find all messages from {{user}} within the past day...",
+
     "SETLOC_TITLE": "AstralMod Localisation",
     "SETLOC_LANGUAGE": "Alright, your locale is now {{locale}}.",
     "SETLOC_DISCLAIMER": "AstralMod Localisation is in the preview stage. Many items will not be translated.",
     "SETLOC_UNAVAILABLE": "Unfortunately we don't have that locale in AstralMod.",
     "SETLOC_YOUR_LOCALE": "Current Locale",
     "SETLOC_AVAILABLE_LOCALES": "Available Locales",
+    
     "SINFO_RETRIEVING_SERVER": "Retrieving server information...",
     "SINFO_GUILDID": "Guild ID: {{id}}",
     "SINFO_SERVER_INFORMATION": "Server Information",
@@ -43,7 +61,14 @@
     "SINFO_SURPLUS_ROLES_plural": "{{count}} more roles",
     "SINFO_ROLES": "Roles",
     "SINFO_ALERTS": "Alerts",
+    
     "ERROR_DETAILS": "Details",
+    "ERROR_INTERNAL": "Internal Error",
+    "ERROR_USER_INPUT": "User Input Error",
+    "ERROR_NOT_UNDERSTAND": "AstralMod didn't understand what you were trying to say.",
+    "ERROR_LOGGED": "This error has been logged, and we'll look into it.",
+    "ERROR_INTERNAL_DESCRIPTION": "AstralMod has run into a problem trying to process that command.",
+    
     "TIME_PREPARING": "Preparing the time...",
     "TIME_ERROR_DETAILS": "Details",
     "TIME_ERROR": "{{emoji}} Time Error",
@@ -51,11 +76,7 @@
     "TIME_LOCATION_NOT_FOUND": "That location wasn't found. Please be more specific or try a different spelling for the place you are trying to get the time of.",
     "TIME_TIMEZONE_NOT_SET": "{{user}} has not yet set their timezone. Go and bug 'em to `{{prefix}}settz` quickly!",
     "TIME_RESPONSE": "{{clockEmote}} **{{request}}** ({{time, Z}}) {{time, dddd[,] MMMM D}} at {{time, stime}}",
-    "ERROR_INTERNAL": "Internal Error",
-    "ERROR_USER_INPUT": "User Input Error",
-    "ERROR_NOT_UNDERSTAND": "AstralMod didn't understand what you were trying to say.",
-    "ERROR_LOGGED": "This error has been logged, and we'll look into it.",
-    "ERROR_INTERNAL_DESCRIPTION": "AstralMod has run into a problem trying to process that command.",
+    
     "WEATHER_PREPARING": "Preparing the weather...",
     "WEATHER_TITLE": "Weather",
     "WEATHER_CURRENT_WEATHER": "Current Weather",
@@ -72,9 +93,11 @@
     "WEATHER_ERROR_TRY_THIS": "Try this",
     "WEATHER_ERROR_TRY_THIS_DESCRIPTION": "Please be more specific or try a different spelling for the place you are trying to get the weather of. If you're trying to receive your own weather, try resetting your location with `{{prefix}}setloc`.",
     "WEATHER_ERROR_UNSET_LOCATION": "{{user}} has not yet set their location. Go and bug 'em to `{{prefix}}setloc` quickly!",
+    
     "AWAITUSERCONFIRMATION_CANCEL_PROMPT": "Use {{emoji}} within {{time}} seconds to cancel",
     "AWAITUSERCONFIRMATION_FULFILLED": "Fulfilled Request",
     "AWAITUSERCONFIRMATION_CANCELLED": "Cancelled Request",
+    
     "SUDO_ALREADY_SUDO": "You're already a mod.",
     "SUDO_USER": "**User**: {{user}}",
     "SUDO_ROLE": "**Role**: {{role}}",
@@ -83,7 +106,8 @@
     "SUDO_FULFILLED_DESCRIPTION": "Ok, I've given sudo privileges to this user.",
     "SUDO_CANCELLED_DESCRIPTION": "Ok, I've denied sudo privileges to this user.",
     "SUDO_TIMED_OUT": "The request has timed out.",
-    "FIND_USAGE": "Usage: `{{prefix}}find user`. For more information, type `{{prefix}}help find`",
+    "SUDO_FOOTER": "React with {{emoji1}} to confirm and {{emoji2}} to deny. The request will time out in {{time}} minutes.",
+        
     "NICK_NOT_ACCEPTED": "Whoever configured me told me to not accept nickname changes. You should probably ask them about changing yours.",
     "NICK_WAIT": "There is a one day cooldown between uses of this command; you have {{time, humanize}} remaining.",
     "NICK_TOO_LONG": "That nickname is too long; nicknames must be shorter than 32 characters.",
@@ -97,6 +121,8 @@
     "NICK_CHANGE_REQUEST_MESSAGE": "Ready to change your nickname?",
     "NICK_CHANGE_REQUEST_SUCCESS": "Alright, I've sent a request to the mods so they can change your nickname.",
     "FETCHUSER_SUCCESS": "User {{user}} fetched and cached.",
+
+    "FIND_USAGE": "Usage: `{{prefix}}find user`. For more information, type `{{prefix}}help find`",
     "FETCHUSER_FAILURE": "I couldn't fetch that user.",
     "FIND_IN_YOUR_POCKET": "In your pocket",
     "FIND_ON_THE_TABLE": "On the table",
@@ -122,6 +148,7 @@
     "FIND_FOUND_MORE": "-------- {{amount}} more. --------",
     "FIND_NARROW_QUERY": "Please narrow your query.",
     "PING_PINGING": "{{emoji}} I'm here!",
+
     "PING_DONE": "{{emoji}} I'm here! It took {{time}}ms to respond.",
     "PING_DONE_420": "{{emoji}} I'm here! It took either 419ms or 421ms to respond.",
     "PINS_TITLE": "Portably pin a message",
@@ -162,6 +189,7 @@
     "PINS_SHORTCUT_FOOTER": "Pinned by {{user}} | To unpin this message, you can remove your pin reaction.",
     "PINS_SHORTCUT_FOOTER_ATTACHMENTS": "Pinned by {{user}} | {{count}} attachment | To unpin this message, you can remove your pin reaction.",
     "PINS_SHORTCUT_FOOTER_ATTACHMENTS_plural": "Pinned by {{user}} | {{count}} attachments | To unpin this message, you can remove your pin reaction.",
+    
     "GUILD_BAN_ADD_TITLE": "{{emoji}} User Banned",
     "GUILD_BAN_ADD_DESCRIPTION": "A user was banned from this server.",
     "GUILD_BAN_ADD_USER": "User",
@@ -169,9 +197,12 @@
     "GUILD_BAN_ADD_INVITES": "Created Invites",
     "GUILD_BAN_ADD_BANNED_BY": "Banned By",
     "GUILD_BAN_ADD_BAN_REASON": "Reason",
+    
     "SPAM_WARNING": "Y'know, we don't appreciate it when you spam. (#{{warningNo}})",
     "SPAM_GUILD_WARNING": "{{emoji}} {{author}} was spamming on {{channel}}.",
+    
     "SPAM_ENOUGH": "I've told you way too many times. The staff have been informed. (#{{warningNo}})",
+    
     "HELP_CONTENTS": "AstralMod Help Contents",
     "HELP_CONTENTS_INTRODUCTION": "Here are some things you can try. For more information, type `{{prefix}}help [command]`",
     "HELP_CORE_COMMANDS": "AstralMod Core Commands",
@@ -185,12 +216,17 @@
     "HELP_COMMAND_AVAILABLE_OPTIONS": "Available Options",
     "HELP_COMMAND_PARAM": "Parameter {{param}}",
     "HELP_COMMAND_REMARKS": "Remarks",
+    
     "LSWARN_NO_WARNINGS": "{{user}} has no warnings.",
     "LSWARN_TITLE": "Warnings",
     "LSWARN_DESCRIPTION": "Warnings that have been recorded by moderators on this server",
     "LSWARN_WARNING_TITLE": "Warning #{{index}}",
+    
     "LSWARN_WARNING_INFO": "{{warning}}\n\n**Timestamp:** {{timestamp, datetime}}\n**Warned by:** {{warner}}",
+    
     "PIC_NO_RESULTS": "No results.",
+    "PIC_PROFILE_PICTURE": "Profile Picture",
+    
     "RESETSETTINGS_CONFIRMATION_TITLE": "Reset user settings",       
     "RESETSETTINGS_CONFIRMATION_MESSAGE": "We're about to reset your user settings. Before I delete them, I'll send a copy of them to you in DMs.",
     "RESETSETTINGS_REMOVED_SETTINGS_TITLE": "Stuff that will be removed",
@@ -201,6 +237,7 @@
     "RESETSETTINGS_NOT_UNDONE": "Once your settings are reset, apart from your copy in DMs, they're gone forever.",
     "RESETSETTINGS_CONFIRMATION_SUCCESS": "I've deleted your settings from AstralMod. Check your DMs for your old settings file.",
     "RESETSETTINGS_CONFIRMATION_CANCELLED": "Alright, scratch that. If you still want your settings file, you can do `{{prefix}}retrsettings`.",
+    
     "RETRSETTINGS_COMPRESSING_SETTINGS": "Preparing the settings file...",
     "RETRSETTINGS_PROBLEM_COMPRESSING": "There was a problem compressing the settings file.",
     "RETRSETTINGS_COMPRESSING_SUCCESS": "Here are the settings for AstralMod at the moment.",
@@ -209,24 +246,30 @@
     "RETRSETTINGS_PREPARING_SETTINGS": "Preparing your settings file...",
     "RETRSETTINGS_SETTINGS_RETRIEVED": "I've retrieved your settings file.",
     "RETRSETTINGS_CHECK_FOR_SETTINGS": "{{emoji}} Check your DMs for your settings file.",
+    
     "RMTIMER_ABOUT": "Usage: `{{prefix}}rmtimer index`. To find the timer index, use `{{prefix}} timers`. For more information, type `{{prefix}}help rmtimer`",
     "RMTIMER_NO_TIMERS": "You don't have any timers.",
     "RMTIMER_INVALID_INDEX": "You don't have that many timers",
     "RMTIMER_SUCCESS": "That timer has been deleted. For new timer indeces, use {{prefix}}timers",
+    
     "SETLOC_ABOUT": "Usage: `{{prefix}}setloc [your location]`. For more information, type `{{prefix}}help setloc`",
     "SETLOC_CITY_NOT_FOUND": "That's not a city I know of.",
     "SETLOC_CITY_SET": "Your location is now {{place}}, {{countryCode}} ({{lat}}, {{long}})",
+    
     "SETUNIT_IMPERIAL": "Ok, we'll use the imperial system for your units from now on",
     "SETUNIT_METRIC": "Ok, we'll use the metric system for your units from now on",
+    "SETUNIT_INVALID_UNIT": "Units need to be `metric`, `imperial`, `12h` or `24h`",
+
     "SETUNIT_12": "Ok, we'll use 12 hours for your time from now on",
     "SETUNIT_24": "Ok, we'll use 24 hours for your time from now on",
-    "SETUNIT_INVALID_UNIT": "Units need to be `metric`, `imperial`, `12h` or `24h`",
+    
     "SHOO_NO_PERMS": "Only people who have kicking permissions can use this command.",
     "SHOO_TITLE": "Kicking AstralMod :(",
     "SHOO_MESSAGE": "AstralMod is about to leave :(",
     "SHOO_SUCCESS": "{{emoji}} And with that, POW! I'm... gone :(",
     "SHOO_CANCEL": "Yay, I get to stay!",
     "SHOO_FAILURE": "I've been a bad bot; I can't actually seem to get myself out of here. Please kick me.",
+    
     "SINFO_NSFW_ALLOWED": "- This server does not filter explicit content.\n",
     "SINFO_NSFW_ROLE_CHANNEL": "- This server prohibits explicit content, except in NSFW channels, unless you have a role.\n",
     "SINFO_NSFW_CHANNEL": "- This server prohibits explicit content, except in NSFW channels\n",
@@ -235,14 +278,16 @@
     "SINFO_LACKPERM_KICK": "- AstralMod is lacking the Kick permission. AstralMod will not be able to kick users in this server.\n",
     "SINFO_LACKPERM_BAN": "- AstralMod is lacking the Ban permission. AstralMod will not be able to ban users in this server.\n",
     "SINFO_LACKPERM_MANAGE_NICKNAME": "- AstralMod is lacking the Manage Nicknames permission. AstralMod will not be able to change nicknames in this server.\n",
+    
     "SPAMCTL_ABOUT": "Usage: `{{prefix}}spamctl on|off`\nFor more information, `{{prefix}}help spamctl`",
     "SPAMCTL_OFF": "Spam filtering is now on for this server.",
     "SPAMCTL_ON": "Spam filtering is now off for this server.",
+    
     "SPAMDATA_TITLE": "Here's how close I am to getting annoyed at you:", 
     "SPAMDATA_DATA_TITLE": "Anger Levels",
     "SPAMDATA_FORGIVENESS": "**Spam Forgiveness:** {{forgiveness}}",
     "SPAMDATA_DETECTED": "**Spam Detected:** {{detected}}",
-    "SUDO_FOOTER": "React with {{emoji1}} to confirm and {{emoji2}} to deny. The request will time out in {{time}} minutes.",
+    
     "SUGGEST_NOT_ENABLED": "Sorry, but the server owner has not enabled suggestions on the server.",
     "SUGGEST_FURTHER_INSTRUCTIONS": "{{emoji}} I've sent you a DM with further instructions.",
     "SUGGEST_INSTRUCTIONS": "Over here now! Type in your suggestion here and send it to me in this DM. If you want to cancel this suggestion, just send what you've got and I'll ask you if you want to cancel.", 
@@ -252,28 +297,37 @@
     "SUGGEST_CONFIRMATION_CANCEL": "Alright, scratch that. If you want to try again, you'll have to run `{{prefix}}:suggest` again.",
     "SUGGEST_SUGGESTION_TITLE": "{{user}}'s Suggestion",
     "SUGGEST_SUGGESTION_ERROR": "{{emoji}} ERROR: That didn't work.",
+    
     "CALC_DESC": "Calculations",
     "CALC_RESULTS": "Here are your results",
     "CALC_ANSWER_IS": "The answer is",
+    
     "TRANSLATE_TRANSLATING": "Translating...",
     "TRANSLATE_TITLE": "Translate",
     "TRANSLATE_POWERED_BY": "Powered by Yandex.Translate",
     "TRANSLATE_SOURCE": "Source Text ({{fromLang}})",
     "TRANSLATE_TRANSLATED": "Translated Text ({{toLang}})",
+    
     "OKNICK_ACCEPTED": "{{emoji}} User nickname has been accepted.",
     "OKNICK_THAT_DIDNT_WORK": "{{emoji}} ERROR: That didn't work.",
+    
     "CHNK_ABOUT": "Usage: `{{prefix}}chnk user`. For more information, type `{{prefix}}help chnk`.",
     "CHNK_SUCCESS": "{{emoji}} I've changed the nickname of {{user}} to `{{name}}`.",
     "CHNK_MISSING_USER_PERMISSION": "You're not allowed to manage this user.",
     "CHNK_MISSING_BOT_PERMISSION": "I couldn't change the nickname of {{user}}. (Am I missing permissions?)",
     "CHNK_USER_NOT_FOUND": "I couldn't find that user.",
+    
     "SETTINGSSIZE": "The settings file is {{bytes}} bytes long.",
+    
     "SETTZ_ABOUT": "Usage: `{{prefix}}settz [your timezone]`. For more information, type `{{prefix}}help settz`",
     "SETTZ_INVALID_TIMEZONE": "That's not a valid timezone.",
     "SETTZ_TIMEZONE_SET": "Your timezone is now UTC {{offset}}.",
-    "PIC_PROFILE_PICTURE": "Profile Picture",
+    
+    
     "UPTIME": "{{emoji}} AstralMod has been up for about {{time, humanize}} ({{time, d[d] HH:mm:ss}})",
+    
     "VERSION": "**AstralMod {{version}}**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later.",
+    
     "ABOUT_TITLE": "AstralMod {{version}}",
     "ABOUT_ABOUT": "Discord Bot",
     "ABOUT_FILE_BUG": "File a bug",
@@ -283,6 +337,7 @@
     "ABOUT_CONTRIBUTORS": "Contributors",
     "ABOUT_CONTRIBUTORS_CONTENT": "AstralMod is possible due to the work of these wonderful people: {{contributors}}",
     "ABOUT_THANKS": "AstralMod {{version}}. Thanks for using AstralMod!",
+    
     "WARN_NO_USER_FOUND": "I couldn't find a user with that name on this server.",
     "WARN_ENTER_REASON": "{{emoji}} Enter a reason for warning {{user}} or `cancel`.",
     "WARN_ALREADY_WARNING": "{{user}} is already warning someone right now. Please wait for them to finish first.",
