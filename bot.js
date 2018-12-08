@@ -2952,11 +2952,12 @@ async function processMessage(message) {
         } else if (err.name == "CommandError") {
             embed.setTitle(getEmoji("userexception") + " Command Error");
             embed.setDescription("AstralMod couldn't complete that command.");
+            embed.setDescription($("ERROR_COULDNT_COMPLETE"));
         } else {
             log("Uncaught Exception:", logType.critical);
             log(err.stack, logType.critical);
 
-            embed.setTitle(getEmoji("userexception") + " " + $("ERROR_INTERNAL"));
+            embed.setTitle(getEmoji("exception") + " " + $("ERROR_INTERNAL"));
             embed.setFooter($("ERROR_LOGGED"));
             embed.setDescription($("ERROR_INTERNAL_DESCRIPTION"));
         }

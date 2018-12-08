@@ -51,30 +51,21 @@ function processCommand(message, isMod, command, options) {
                     message.channel.send($("RM_DELETED", {count: messagesDeleted - 1, emoji:":white_check_mark:"}));
                 }
             }
+
             var failedDelete = function(err) {
+                let embed = new Discord.RichEmbed;
+                embed.setColor("#EC7979");
+
                 if (num >= 99) {
-                    message.channel.send("", new Discord.RichEmbed({
-                        fields: [
-                            {
-                                name: "Details",
-                                value: "Only 99 messages can be deleted at once."
-                            }
-                        ],
-                        title: "<:userexception:348796878709850114> User Input Error",
-                        description: "AstralMod didn't understand what you were trying to say.",
-                    }).setColor("#EC7979"));
+                    embed.addField($("ERROR_DETAILS"), $("RM_TOO_HIGH"));
+                    embed.setTitle(getEmoji("userexception") + " " + $("ERROR_USER_INPUT"));
+                    embed.setDescription($("ERROR_NOT_UNDERSTAND"));
                 } else {
-                    message.channel.send("", new Discord.RichEmbed({
-                        fields: [
-                            {
-                                name: "Details",
-                                value: "Catastrophic Failure"
-                            }
-                        ],
-                        title: "<:userexception:348796878709850114> Command Error",
-                        description: "AstralMod couldn't complete that command.",
-                    }).setColor("#EC7979"));
+                    embed.setTitle(getEmoji("exception") + " " + $("ERROR_INTERNAL"));
+                    embed.setDescription($("ERROR_INTERNAL_DESCRIPTION"));
                 }
+                
+                message.channel.send(embed);
             }
 
             if (split == -1) {
