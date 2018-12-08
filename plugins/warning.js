@@ -114,7 +114,7 @@ function processCommand(message, isMod, command, options) {
                 }
 
                 if (user == null) {
-                    throw new CommandError("No user found with that name on this server");
+                    throw new CommandError($("LSWARN_COULDNT_FIND_USER"));
                 } else {
                     var warnings = settings.guilds[message.guild.id].warnings;
                     if (warnings == null) {
@@ -127,14 +127,14 @@ function processCommand(message, isMod, command, options) {
                     }
 
                     if (userWarnings.length == 0) {
-                        message.reply(getUserString(message.guild.member(user)) + " has no warnings.");
+                        message.reply($("LSWARN_NO_WARNINGS", {user: getUserString(message.guild.member(user))}));
                         return;
                     }
 
                     var embed = new Discord.RichEmbed();
                     embed.setColor("#3C3C96");
-                    embed.setTitle("Warnings");
-                    embed.setDescription("Warnings that have been recorded by moderators of this server")
+                    embed.setTitle($("LSWARN_TITLE"));
+                    embed.setDescription($("LSWARN_DESCRIPTION"))
                     for (index in userWarnings) {
                         var warning = userWarnings[index];
 
@@ -143,12 +143,7 @@ function processCommand(message, isMod, command, options) {
                             warner = message.guild.member(warning.warner);
                         }
 
-                        var field = "";
-                        field += warning.reason + "\n\n";
-                        field += "**Timestamp:** " + warning.timestamp + "\n";
-                        field += "**Warned by:** " + warner;
-
-                        embed.addField("Warning #" + (parseInt(index) + 1), field);
+                        embed.addField($("LSWARN_WARNING_TITLE", {index: (parseInt(index) + 1)}), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: warning.timestamp, h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}));
                     }
 
                     message.channel.send("", {embed: embed});

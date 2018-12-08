@@ -2951,7 +2951,6 @@ async function processMessage(message) {
             embed.setDescription($("ERROR_NOT_UNDERSTAND"));
         } else if (err.name == "CommandError") {
             embed.setTitle(getEmoji("userexception") + " Command Error");
-            embed.setDescription("AstralMod couldn't complete that command.");
             embed.setDescription($("ERROR_COULDNT_COMPLETE"));
         } else {
             log("Uncaught Exception:", logType.critical);
