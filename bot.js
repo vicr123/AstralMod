@@ -292,9 +292,7 @@ global.awaitUserConfirmation = function(options) {
             message.react('🚫');
 
             let timeout = setTimeout(function() {
-                if (!options.doNotClear) {
-                    message.clearReactions();
-                }
+                if (!options.doNotClear) message.clearReactions();
 
                 if (options.msgOnSuccess != "") {
                     embed.setDescription(options.msgOnSuccess);
@@ -313,7 +311,8 @@ global.awaitUserConfirmation = function(options) {
             }).then(function() {
                 //Cancel the function
                 clearTimeout(timeout);
-                message.clearReactions();
+                
+                if (!options.doNotClear) message.clearReactions();
 
                 if (options.msgOnFail != "") {
                     embed.setDescription(options.msgOnFail);
