@@ -41,12 +41,15 @@ function processCommand(message, isMod, command, options) {
                 title: $("SUGGEST_CONFIRMATION_TITLE"),
                 msg: $("SUGGEST_CONFIRMATION_MESSAGE",  {guild: message.guild.name}),
                 msgOnSuccess: $("SUGGEST_CONFIRMATION_SUCCESS"),
-                msgOnFail: $("SUGGEST_CONFIRMATION_CANCEL"),
+                msgOnFail: $("SUGGEST_CONFIRMATION_CANCEL", {prefix: prefix(message.guild.id)}),
                 channel: message.author.dmChannel,
                 author: message.author,
                 time: 10,
                 locale: options.locale,
-                doNotClear: true
+                doNotClear: true,
+                extraFields: [
+                    [$("SUGGEST_CONFIRMATION_SUGGESTION_TITLE"), coll.content]
+                ]
             }).then(() => {
                 let embed = new Discord.RichEmbed();
                 embed.setAuthor($$("SUGGEST_SUGGESTION_TITLE", {user: message.author.username}), message.author.avatarURL);
@@ -55,6 +58,9 @@ function processCommand(message, isMod, command, options) {
                 embed.setTimestamp();
                 message.guild.channels.get(settings.guilds[message.guild.id].suggestions).send(embed);
             }).catch((err) => {
+                if (!err) return; //User cancelled
+
+                //Exception of some sort?
                 log(err, logType.warning);
                 message.author.dmChannel.send($("SUGGEST_SUGGESTION_ERROR", {emoji: ":no_entry_sign:"}));
             });
