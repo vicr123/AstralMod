@@ -21,6 +21,7 @@
 var client;
 var consts;
 const moment = require('moment');
+const fs = require('fs')
 
 var pingMessage = null;
 var pingDate = null;
@@ -30,10 +31,11 @@ function processCommand(message, isMod, command, options) {
     if (command == "uptime") {
         message.reply($("UPTIME", {emoji: ":clock4:", time: { duration: moment.duration(client.uptime, "milliseconds"), settings: {trim: false} }}));
     } else if (command == "settingssize") {
-        let stats;
-        try {
-            stats = fs.statSync("settings.json");
-        } catch(err) { } // ignored
+        
+        let stats = fs.statSync("settings.json");
+
+        log("no")
+        log(stats == undefined);
 
         message.reply($("SETTINGSSIZE", {bytes: stats["size"] == undefined ? JSON.stringify(settings).length * 2 : stats["size"]}));
     }
