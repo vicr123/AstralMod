@@ -180,6 +180,56 @@ function utcOffsetFromTimezone(location) {
     }
 }
 
+function getTime(location, member) {
+    return new Promise(function(resolve, reject) {
+        if (utcOffsetFromTimezone(location) !== undefined) { //Check for a UTC offset and a UTC named timezone first
+            resolve({
+                offset: utcOffsetFromTimezone(location),
+                location: location.toUpperCase()
+            });
+            return;
+        }
+
+        let returnUserWeather = function(user) {
+            if (settings.users[user.id] == null || settings.users[user.id].timezone == null) {
+                reject($("TIME_TIMEZONE_NOT_SET", {user: user.username, prefix: prefix(member.guild.id)}));
+            } else {
+                resolve({
+                    offset: settings.users[user.id].timezone,
+                    location: user.username
+                });
+            }
+        };
+
+        if (location == "") {
+            returnUserWeather(member);
+            return;
+        }
+
+        let userParseResult = parseUser(location.trim(), member.guild);
+        if (userParseResult.length > 0) {
+            returnUserWeather(userParseResult[0]);
+            return;
+        }
+
+        //Now we check Yahoo
+        let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
+        query.exec(function(err, data) {
+            if (err || data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
+                reject($("TIME_LOCATION_NOT_FOUND"));
+                return;
+            }
+
+            //We have a good location
+            let dat = data.query.results.channel;
+            resolve({
+                location: dat.location.city + ", " + dat.location.country,
+                offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ") + 1).toLowerCase())
+            });
+        });
+    })
+}
+
 function getClockEmoji(date = new Date()) {
     var hour = date.getHours();
     if (hour > 11) {
@@ -269,29 +319,22 @@ async function processCommand(message, isMod, command, options) {
         var utcOffset;
         var location = command.substr(6);
 
-        utcOffset = parseFloat(location);
-        if (isNaN(utcOffset)) {
-            utcOffset = utcOffsetFromTimezone(location);
-        }
-
-        if (isNaN(utcOffset) || utcOffset < -14 || utcOffset > 14) {
-            message.reply($("SETTZ_ABOUT", {prefix: prefix(message.guild.id)}));
-        } else {
+        getTime(location, message.member).then(obj => {
             var userSettings = settings.users[message.author.id];
 
             if (userSettings == null) {
                 userSettings = {};
             }
-            userSettings.timezone = utcOffset;
-
+            
+            userSettings.timezone = obj.offset;
+    
             settings.users[message.author.id] = userSettings;
-
-            if (isNaN(parseFloat(utcOffset))) {
-                throw new UserInputError($("SETTZ_INVALID_TIMEZONE"));
-            } else {
-                message.reply($("SETTZ_TIMEZONE_SET", {offset: parseFloat(utcOffset)}));
-            }
-        }
+            
+             message.reply($("SETTZ_TIMEZONE_SET", {offset: obj.offset}));
+        }).catch(() => {
+            message.reply($("SETTZ_INVALID_TIMEZONE"))
+        });
+        
     } else if (command == "settz") {
         message.reply($("SETTZ_ABOUT", {prefix: prefix(message.guild.id)}));
     } else if (command.startsWith("timer ")) {
@@ -442,53 +485,7 @@ async function processCommand(message, isMod, command, options) {
 
         sendPreloader($("TIME_PREPARING"), message.channel).then(mte => {
             let messageToEdit = mte;
-            new Promise(function(resolve, reject) {
-                if (utcOffsetFromTimezone(location) !== undefined) { //Check for a UTC offset and a UTC named timezone first
-                    resolve({
-                        offset: utcOffsetFromTimezone(location),
-                        location: location.toUpperCase()
-                    });
-                    return;
-                }
-
-                let returnUserWeather = function(user) {
-                    if (settings.users[user.id] == null || settings.users[user.id].timezone == null) {
-                        reject($("TIME_TIMEZONE_NOT_SET", {user: user.username, prefix: prefix(message.guild.id)}));
-                    } else {
-                        resolve({
-                            offset: settings.users[user.id].timezone,
-                            location: user.username
-                        });
-                    }
-                };
-
-                if (location == "") {
-                    returnUserWeather(message.author);
-                    return;
-                }
-
-                let userParseResult = parseUser(location.trim(), message.guild);
-                if (userParseResult.length > 0) {
-                    returnUserWeather(userParseResult[0]);
-                    return;
-                }
-
-                //Now we check Yahoo
-                let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
-                query.exec(function(err, data) {
-                    if (err || data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
-                        reject($("TIME_LOCATION_NOT_FOUND"));
-                        return;
-                    }
-
-                    //We have a good location
-                    let dat = data.query.results.channel;
-                    resolve({
-                        location: dat.location.city + ", " + dat.location.country,
-                        offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ") + 1).toLowerCase())
-                    });
-                });
-            }).then(function(timeDescriptor) {
+            getTime(location, message.member).then(function(timeDescriptor) {
                 let time = moment.utc();
 
                 messageToEdit.edit($("TIME_RESPONSE", {
@@ -552,44 +549,39 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
             case "time":
                 help.title = prefix(message.guild.id) + "time";
                 help.usageText = prefix(message.guild.id) + "time tz";
-                help.helpText = "Returns the time at tz";
-                help.param1 = "- A UTC Offset\n" +
-                              "- A timezone code known to AstralMod\n" +
-                              "- A user known to AstralMod";
+                help.helpText = h$("TIME_HELPTEXT");
+                help.param1 = h$("TIME_PARAM1");
                 break;
             case "settz":
                 help.title = prefix(message.guild.id) + "settz";
                 help.usageText = prefix(message.guild.id) + "settz timezone";
-                help.helpText = "Sets your timezone to timezone";
-                help.param1 = "- A UTC Offset detailing your timezone\n"
-                              "- A timezone code known to AstralMod representing your timezone\n";
-                help.remarks = "By using this command, your timezone will be available to anyone who asks AstralMod.";
+                help.helpText = h$("SETTZ_HELPTEXT");
+                help.param1 = h$("SETTZ_PARAM1");
+                help.remarks = h$("SETTZ_REMARKS");
                 break;
             case "timer":
                 help.title = prefix(message.guild.id) + "timer";
                 help.usageText = prefix(message.guild.id) + "timer time [rem]";
-                help.helpText = "Sets a timer for the amount of time specified in time";
-                help.param1 = "- A number, in minutes\n"
-                              "- A number followed by either `s`, `m`, `h`.\n";
-                help.param2 = "*Optional Parameter*\n" +
-                              "Text to be sent when timer expires";
+                help.helpText = h$("TIMER_HELPTEXT");
+                help.param1 = h$("TIMER_PARAM1");
+                help.param2 = h$("TIMER_PARAM2");
                 break;
             case "timers":
                 help.title = prefix(message.guild.id) + "timer";
-                help.helpText = "Lists your current timers";
+                help.helpText = h$("TIMERS_HELPTEXT");
                 break;
             case "rmtimer":
                 help.title = prefix(message.guild.id) + "rmtimer";
                 help.usageText = prefix(message.guild.id) + "rmtimer index";
-                help.helpText = "Removes the timer at index";
-                help.param1 = "Index of the timer you wish to remove. This can be obtained with `" + prefix(message.guild.id) + "timers`";
+                help.helpText = h$("RMTIMER_HELPTEXT");
+                help.param1 = h$("RMTIMER_PARAM1", {prefix: prefix(message.guild.id)});
                 break;
         }
 

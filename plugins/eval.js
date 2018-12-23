@@ -144,15 +144,15 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
             case "eval":
                 help.title = prefix(message.guild.id) + "eval";
                 help.usageText = prefix(message.guild.id) + "pic user";
-                help.helpText = "Returns the user's profile picture";
-                help.param1 = "A user to retrieve the profile picture";
+                help.helpText = h$("EVAL_HELPTEXT");
+                help.remarks = h$("EVAL_REMARKS");
         }
 
         return help;

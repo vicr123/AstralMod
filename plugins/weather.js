@@ -655,28 +655,24 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
             case "weather":
                 help.title = prefix(message.guild.id) + "weather";
                 help.usageText = prefix(message.guild.id) + "weather [options] [location]";
-                help.helpText = "Returns the weather at [location]";
-                help.param1 = "- A location\n" +
-                              "- A user whose location is known to AstralMod\n";
-                help.availableOptions = "`--metric` Return results in metric\n" +
-                               "`--imperial` Return results in imperial\n" +
-                               "`--24` Return results in 24 hour time\n" +
-                               "`--12` Return hours in 12 hour time";
-                help.remarks = "You can set your preferred units using `" + prefix(message.guild.id) + "setunit`.";
+                help.helpText = h$("WEATHER_HELPTEXT");
+                help.param1 = h$("WEATHER_PARAM1");
+                help.availableOptions = h$("WEATHER_AVAILABLEOPTIONS");
+                help.remarks = h$("WEATHER_REMARKS", {prefix: prefix(message.guild.id)});
                 break;
             case "setloc":
                 help.title = prefix(message.guild.id) + "setloc";
                 help.usageText = prefix(message.guild.id) + "setloc [location]";
-                help.helpText = "Sets your location to [location]";
-                help.param1 = "- A location";
-                help.remarks = "By using this command, your location will be available to anyone who asks AstralMod. To reduce privacy concerns, it's a good idea to enter the name of a large city near you or a city slightly offset from your actual location.";
+                help.helpText = h$("SETLOC_HELPTEXT");
+                help.param1 = h$("SETLOC_PARAM1");
+                help.remarks = h$("SETLOC_REMARKS");
                 break;
         }
 

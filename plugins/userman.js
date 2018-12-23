@@ -583,31 +583,31 @@ module.exports = {
             case "uinfo":
                 help.title = prefix(message.guild.id) + "uinfo";
                 help.usageText = prefix(message.guild.id) + "uinfo user";
-                help.helpText = "Acquire information about a user";
+                help.helpText = h$("UINFO_HELPTEXT");
                 help.options = [
-                    "--index [num] Zero based index of user to query"
+                    h$("UINFO_OPTION1")
                 ]
-                help.param1 = "- The user of which to acquire information";
+                help.param1 = h$("UINFO_PARAM1");
                 break;
             case "fetchuser":
                 help.title = prefix(message.guild.id) + "fetchuser";
                 help.usageText = prefix(message.guild.id) + "fetchuser [ID]";
-                help.helpText = "Tells AstralMod about the existance of a user";
-                help.param1 = "The user ID you want to tell AstralMod about.";
-                help.remarks = "AstralMod will search for users from all of Discord."
+                help.helpText = h$("FETCHUSER_HELPTEXT");
+                help.param1 = h$("FETCHUSER_PARAM1");
+                help.remarks = h$("FETCHUSER_REMARKS")
                 break;
             case "find":
                 help.title = prefix(message.guild.id) + "find";
                 help.usageText = prefix(message.guild.id) + "find user";
-                help.helpText = "Finds a user and returns their ID";
-                help.param1 = "The user you want to find.";
-                help.remarks = "AstralMod will search for users from all connected servers."
+                help.helpText = h$("FIND_HELPTEXT");
+                help.param1 = h$("FIND_PARAM1");
+                help.remarks = h$("FIND_REMARKS")
                 break;
             case "deal":
                 help.title = prefix(message.guild.id) + "deal";
                 help.usageText = prefix(message.guild.id) + "deal user";
-                help.helpText = "Manages a user";
-                help.param1 = "- The user to manage";
+                help.helpText = h$("DEAL_HELPTEXT");
+                help.param1 = h$("DEAL_PARAM1");
                 break;
         }
 
