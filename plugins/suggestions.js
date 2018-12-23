@@ -93,13 +93,13 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
             case "suggest":
-                help.title = "am:suggest";
-                help.helpText = "Sends a suggestion to the server.";
+                help.title = prefix(message.guild.id) + "suggest";
+                help.helpText = h$("SUGGEST_HELPTEXT");
                 break;
         }
 

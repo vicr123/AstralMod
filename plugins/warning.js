@@ -269,27 +269,28 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
             case "warn":
                 help.title = prefix(message.guild.id) + "warn";
                 help.usageText = prefix(message.guild.id) + "warn [user]";
-                help.helpText = "Warns a user.";
-                help.param1 = "The user to warn";
+                help.helpText = h$("WARN_HELPTEXT");
+                help.param1 = h$("WARN_PARAM1");
                 break;
             case "lswarn":
                 help.title = prefix(message.guild.id) + "lswarn";
                 help.usageText = prefix(message.guild.id) + "lswarn [user]";
-                help.helpText = "Lists all warnings for a user.";
+                help.helpText = h$("LSWARN_HELPTEXT");
+                help.param1 = h$("LSWARN_PARAM1");
                 break;
             case "rmwarn":
                 help.title = prefix(message.guild.id) + "rmwarn";
                 help.usageText = prefix(message.guild.id) + "rmwarn [#id] [user]";
-                help.helpText = "Removes a warning from a user.";
-                help.param1 = "The ID of the warning you want to remove";
-                help.param2 = "The user that you want to remove the warning from";
+                help.helpText = h$("RMWARN_HELPTEXT");
+                help.param1 = h$("RMWARN_PARAM1");
+                help.param2 = h$("RMWARN_PARAM2");
                 break;
         }
 

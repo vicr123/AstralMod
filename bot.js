@@ -2558,7 +2558,7 @@ function processSingleConfigure(message, guild) {
             if (text == "yes" || text == "y") {
                 try {
                     guildSetting.blocked[guildSetting.memberAlerts].splice(guildSetting.blocked[guildSetting.memberAlerts].indexOf("log"), 1);
-                } catch { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
+                } catch (err) { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
 
                 guildSetting.memberAlerts = guildSetting.tentativeMemberAlerts;
 
@@ -2613,7 +2613,7 @@ function processSingleConfigure(message, guild) {
             } else if (text == "yes" || text == "y") {
                 try {
                     guildSetting.blocked[guildSetting.chatLogs].splice(guildSetting.blocked[guildSetting.chatLogs].indexOf("log"), 1);
-                } catch { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
+                } catch (err) { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
 
                 guildSetting.chatLogs = guildSetting.tentativeChatLogs;
 
@@ -2661,7 +2661,7 @@ function processSingleConfigure(message, guild) {
             if (text == "yes" || text == "y") {
                 try {
                     guildSetting.blocked[guildSetting.botWarnings].splice(guildSetting.blocked[guildSetting.botWarnings].indexOf("log"), 1);
-                } catch { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
+                } catch (err) { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
 
                 guildSetting.botWarnings = guildSetting.tentativeBotWarnings;
 

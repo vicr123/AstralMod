@@ -209,19 +209,19 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
             case "spamctl":
-                help.title = "mod:spamctl";
-                help.usageText = "mod:spamctl on|off";
-                help.helpText = "Toggles spam control on or off for this server";
-                help.param1 = "Either `on` or `off`.";
+                help.title = prefix(message.guild.id) + "spamctl";
+                help.usageText = prefix(message.guild.id) + "spamctl on|off";
+                help.helpText = h$("SPAMCTL_HELPTEXT");
+                help.param1 = h$("SPAMCTL_PARAM1");
                 break;
             case "spamdata":
-                help.title = "am:spamdata";
-                help.helpText = "Queries spam data for current user";
+                help.title = prefix(message.guild.id) + "spamdata";
+                help.helpText = h$("SPAMDATA_HELPTEXT");
                 break;
         }
 

@@ -30,7 +30,12 @@ function processCommand(message, isMod, command, options) {
     if (command == "uptime") {
         message.reply($("UPTIME", {emoji: ":clock4:", time: { duration: moment.duration(client.uptime, "milliseconds"), settings: {trim: false} }}));
     } else if (command == "settingssize") {
-        message.reply($("SETTINGSSIZE", {bytes: JSON.stringify(settings).length}));
+        let stats;
+        try {
+            stats = fs.statSync("settings.json");
+        } catch(err) { } // ignored
+
+        message.reply($("SETTINGSSIZE", {bytes: stats["size"] == undefined ? JSON.stringify(settings).length * 2 : stats["size"]}));
     }
 }
 
@@ -56,17 +61,17 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
             case "uptime":
                 help.title = prefix(message.guild.id) + "uptime";
-                help.helpText = "Queries AstralMod for the amount of time since it started.";
+                help.helpText = h$("UPTIME_HELPTEXT");
                 break;
             case "settingssize":
                 help.title = prefix(message.guild.id) + "settingssize";
-                help.helpText = "Returns the approximate file size of the settings file";
+                help.helpText = h$("SETTINGSSIZE_HELPTEXT");
                 break;
         }
 
