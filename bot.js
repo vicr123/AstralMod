@@ -1109,6 +1109,33 @@ function processConsoleInput(line) {
         } else {
             log("Couldn't find token", logType.critical);
         }
+    } else if (lLine.startsWith("block ")) {
+        let blocked = line.substr(6);
+        if (settings.generalConfiguration.blockedUsers == undefined) {
+            settings.generalConfiguration.blockedUsers = []
+        }
+
+        settings.generalConfiguration.blockedUsers.push(blocked);
+    } else if (lLine.startsWith("unblock ")) {
+        let unblocked = line.substr(8);
+        if (settings.generalConfiguration.blockedUsers == undefined) {
+            settings.generalConfiguration.blockedUsers = [];
+            return;
+        }
+
+        settings.generalConfiguration.blockedUsers = settings.generalConfiguration.blockedUsers.filter(u => u != unblocked);
+        
+    } else if (lLine == "blocked") {
+        if (settings.generalConfiguration.blockedUsers == undefined) {
+            settings.generalConfiguration.blockedUsers = [];
+            return;
+        }
+
+        log("List of blocked users:", logType.info);
+        for (let blocked of settings.generalConfiguration.blockedUsers) {
+            log(blocked, logType.info);
+        }
+
     } else if (lLine.startsWith("broadcast ")) {
         //Broadcast message to each server in either #general or the bot warnings general
         var broadcast = line.substr(10);
@@ -2812,6 +2839,10 @@ async function processMessage(message) {
 
         if (settings.users[message.author.id].locale == null) {
             settings.users[message.author.id].locale = "en";
+        }
+
+        if (settings.generalConfiguration.blockedUsers.includes(message.author.id)) {
+            return;
         }
 
         let options = {

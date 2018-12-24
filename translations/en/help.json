@@ -110,6 +110,10 @@
     "RMWARN_PARAM2": "The user that you want to remove the warning from.",
 
     "WEATHER_HELPTEXT": "Gets the weather at a location",
-    "WEATHER_PARAM1": "- A user whose location is known to AstralMod\n- A location known to AstralMod",
-    "WEATHER_AVAILABLEOPTIONS": "`--user [user]` Lets you get the weather of a user rather than a location"
+    "WEATHER_PARAM1": "- A user whose location is known to AstralMod.\n- A location known to AstralMod.",
+    "WEATHER_AVAILABLEOPTIONS": "`--user [user]` Lets you get the weather of a user rather than a location.",
+    "WEATHER_REMARKS": "You can set your preferred untis using `{{prefix}}setunit`.",
+    "SETLOC_HELPTEXT": "Sets your location",
+    "SETLOC_PARAM1": "Any location known to AstralMod.",
+    "SETLOC_REMARKS": "By using this command, your location will be available to anyone who asks AstralMod. To reduce privacy concerns, it's a good idea to enter the name of a large city near you or a city slightly offset from your actual location."
 }
