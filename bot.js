@@ -1669,6 +1669,7 @@ global.uinfo = function(user, channel, locale, offset, h24 = true, guild = null,
 }
 
 function processModCommand(message, command) {
+    let $ = _[settings.users[message.author.id].locale];
     var text = message.content;
     var lText = text.toLowerCase();
 
@@ -1687,7 +1688,7 @@ function processModCommand(message, command) {
             if (guildSetting != null) {
                 if (guildSetting.configuringStage != 0) {
                     if (guildSetting.configuringUser == message.author.id) {
-                        message.reply("You're already trying to configure `" + client.guilds.get(key).name + "`. Finish configuring that server first, and then you can configure this server.");
+                        message.reply($("CONFIG_ALREADY_CONFIGURATING", {guild: client.guilds.get(key).name}));
                         return true;
                     }
                 }
@@ -1705,9 +1706,11 @@ function processModCommand(message, command) {
         }
 
         if (settings.guilds[message.guild.id].requiresConfig) {
+            // This branch is dead; no strings here need translation
             if (message.author.id == global.botOwner.id || message.author.id == message.guild.owner.user.id) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
+
                 message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, separated by a space.");
 
                 var roles = "```";
@@ -1730,9 +1733,9 @@ function processModCommand(message, command) {
             if (message.author.id == global.botOwner.id || message.author.id == message.guild.owner.user.id || message.member.hasPermission("ADMINISTRATOR")) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
-                message.author.send(getSingleConfigureWelcomeText(message.guild));
+                message.author.send($("CONFIG_INTRO"), getSingleConfigureWelcomeText(message.guild, message.author));
 
-                message.reply(":arrow_left: Continue in DMs.");
+                message.reply($("CONFIG_CONTINUE_IN_DMS"), {emoji: ":arrow_left:"});
             }
         }
     } else if (lText == prefix(message.guild.id) + "poweroff") {
@@ -2326,77 +2329,83 @@ function processAmCommand(message, options, command) {
     return false;
 }
 
-function getSingleConfigureWelcomeText(guild) {
+function getSingleConfigureWelcomeText(guild, author) {
     var guildSetting = settings.guilds[guild.id];
-    var string = "What would you like to configure? Type the number next to the option you want to set:```";
+    let $ = _[settings.users[author.id].locale];
+    
+    let embed = new Discord.RichEmbed();
 
+    
     if (guildSetting.modRoles == null) {
-        string += "1 Staff Roles        Using Discord Permissions\n";
+        embed.addField($("CONFIG_STAFF_ROLES_TITLE", {number: 1}), $("CONFIG_STAFF_ROLES_DISCORD_PERMISSIONS"), true);
     } else {
-        string += "1 Staff Roles        " + guildSetting.modRoles.length + " roles\n";
+        embed.addField($("CONFIG_STAFF_ROLES_TITLE", {number: 1}), $("CONFIG_STAFF_ROLES_COUNT", {count: guildSetting.modRoles.length}), true);
     }
 
     if (guild.channels.get(guildSetting.memberAlerts) == null) {
-        string += "2 Member Alerts      Disabled\n";
+        embed.addField($("CONFIG_MEMBER_ALERTS_TITLE", {number: 2}), $("CONFIG_DISABLED"), true);
     } else {
-        string += "2 Member Alerts      #" + guild.channels.get(guildSetting.memberAlerts).name + "\n";
+        embed.addField($("CONFIG_MEMBER_ALERTS_TITLE", {number: 2}), `<#${guild.channels.get(guildSetting.memberAlerts).id}>`, true);
     }
 
     if (guild.channels.get(guildSetting.chatLogs) == null) {
-        string += "3 Chat Logs          Disabled\n";
+        embed.addField($("CONFIG_CHAT_LOGS_TITLE", {number: 3}), $("CONFIG_DISABLED"), true);
     } else {
-        string += "3 Chat Logs          #" + guild.channels.get(guildSetting.chatLogs).name + "\n";
+        embed.addField($("CONFIG_CHAT_LOGS_TITLE", {number: 3}), `<#${guild.channels.get(guildSetting.chatLogs).id}>`, true);
     }
 
     if (guild.channels.get(guildSetting.botWarnings) == null) {
-        string += "4 Bot Warnings       Disabled\n";
+        embed.addField($("CONFIG_BOT_WARNINGS_TITLE", {number: 4}), $("CONFIG_DISABLED"), true);
     } else {
-        string += "4 Bot Warnings       #" + guild.channels.get(guildSetting.botWarnings).name + "\n";
+        embed.addField($("CONFIG_CHAT_LOGS_TITLE", {number: 4}), `<#${guild.channels.get(guildSetting.botWarnings).id}>`, true);
     }
 
     if (guild.channels.get(guildSetting.suggestions) == null) {
-        string += "5 Suggestions        Disabled\n";
+        embed.addField($("CONFIG_SUGGESTIONS_TITLE", {number: 5}), $("CONFIG_DISABLED"), true);
     } else {
-        string += "5 Suggestions        #" + guild.channels.get(guildSetting.suggestions).name + "\n";
+        embed.addField($("CONFIG_SUGGESTIONS_TITLE", {number: 4}), `<#${guild.channels.get(guildSetting.suggestions).id}>`, true);
     }
 
     if (guildSetting.locale == null) {
         guildSetting.locale = "en"
     }
 
-    string += "6 Locale             " + guildSetting.locale + "\n";
+    let thisLocale = _[guildSetting.locale]("THIS_LOCALE");
+    if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
+    if (guildSetting.locale == "en") thisLocale = "English";
 
-    string += "7 Server prefix      " + (guildSetting.serverPrefix === undefined ? "Default" : guildSetting.serverPrefix) + "\n";
+    
+    embed.addField($("CONFIG_LOCALE_TITLE", {number: 6}), `${thisLocale} (${guildSetting.locale})`, true);
+    embed.addField($("CONFIG_SERVER_PREFIX_TITLE", {number: 7}), guildSetting.serverPrefix === undefined ? $("CONFIG_SERVER_PREFIX_DEFAULT", {prefix: prefix()}) : guildSetting.serverPrefix, true);
 
 
     if (guildSetting.nickModeration == null || guildSetting.nickModeration == false) {
-        string += "a Nick Moderation    Disabled\n";
+        embed.addField($("CONFIG_NICK_MODERATION_TITLE", {number: "A"}), $("CONFIG_DISABLED"), true);
     } else {
-        string += "a Nick Moderation    Enabled\n";
+        embed.addField($("CONFIG_NICK_MODERATION_TITLE", {number: "A"}), $("CONFIG_ENABLED"), true);
     }
 
 
     if (guildSetting.echoOffensive == null || guildSetting.echoOffensive == false) {
-        string += "b Filter expletives  Disabled\n";
+        embed.addField($("CONFIG_FILTERING_TITLE", {number: "B"}), $("CONFIG_DISABLED"), true);
     } else {
-        string += "b Filter expletives  Enabled\n";
+        embed.addField($("CONFIG_FILTERING_TITLE", {number: "B"}), $("CONFIG_ENABLED"), true);
     }
 
     if (guildSetting.pinToPin == null || guildSetting.pinToPin == false) {
-        string += "c Pin to pin         Disabled\n";
+        embed.addField($("CONFIG_PIN_TO_PIN_TITLE", {number: "C"}), $("CONFIG_DISABLED"), true);
     } else {
-        string += "c Pin to pin         Enabled\n";
+        embed.addField($("CONFIG_PIN_TO_PIN_TITLE", {number: "C"}), $("CONFIG_ENABLED"), true);
     }
 
+    embed.setFooter($("CONFIG_FOOTER"));
+    embed.setColor("#81EC79")
 
-    string += "\n";
-    string += "0 Exit Configuration Menu\n";
-    string += "< Reset AstralMod```"
-
-    return string;
+    return embed;
 }
 
 function processSingleConfigure(message, guild) {
+    let $ = _[settings.users[message.author.id].locale]
     var text = message.content.toLowerCase();
     var guildSetting = settings.guilds[guild.id];
 
@@ -2408,10 +2417,10 @@ function processSingleConfigure(message, guild) {
                     requiresConfig: false
                 };
                 log("Configuration for " + guild.id + " purged.", logType.good);
-                message.author.send("AstralMod configuration for this server has been reset. To set up AstralMod, just `" + prefix(message.guild.id) + "config` in the server.");
+                message.author.send($("CONFIG_CONFIG_PURGED", {prefix: prefix(message.guild.id)}));
             } else { //Cancel
-                message.author.send("Returning to Main Menu.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CANCEL_CONFIGURATION"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
             }
             break;
@@ -2421,11 +2430,11 @@ function processSingleConfigure(message, guild) {
                 case "1": //Staff Roles
                     settings.guilds[guild.id].configuringUser = message.author.id;
                     settings.guilds[guild.id].configuringStage = 0;
-                    message.author.send("Enter the roles of mods on this server, seperated by a space. To cancel, just type `cancel`, and to clear, type `clear`.");
+                    message.author.send($("CONFIG_STAFF_SETUP"));
 
                     var roles = "```";
                     for (let [id, role] of guild.roles) {
-                        roles += role.id + " = " + role.name + "\n";
+                        roles += role.id + " — " + role.name + "\n";
                     }
                     roles += "```";
                     message.author.send(roles);
@@ -2433,23 +2442,23 @@ function processSingleConfigure(message, guild) {
                     guildSetting.configuringStage = 10;
                     break;
                 case "2": //Member Alerts
-                    message.author.send("What's the ID of the channel where I can post member alerts? Alternatively, enter \"none\" if you want to disable member alerts, and type \"cancel\" to cancel.");
+                    message.author.send($("CONFIG_MEMBER_ALERT_SETUP"));
                     guildSetting.configuringStage = 20;
                     break;
                 case "3": //Chat Logs
-                    message.author.send("What's the ID of the channel where I can post chat logs? Alternatively, enter \"none\" if you want to disable chat logs, and type \"cancel\" to cancel.");
+                    message.author.send($("CONFIG_CHAT_LOGS_SETUP"));
                     guildSetting.configuringStage = 30;
                     break;
                 case "4": //Bot warnings
-                    message.author.send("What's the ID of the channel where I can post general warnings? Alternatively, enter \"none\" if you want to disable general warnings, and type \"cancel\" to cancel.");
+                    message.author.send($("CONFIG_BOT_WARNINGS_SETUP"));
                     guildSetting.configuringStage = 40;
                     break;
                 case "5": //Suggestions
-                    message.author.send("What's the ID of the channel where I can post suggestions? Alternatively, enter \"none\" if you want to disable suggestions, and type \"cancel\" to cancel.");
+                    message.author.send();
                     guildSetting.configuringStage = 50;
                     break;
-                case "6": //Suggestions
-                    message.author.send("What locale do you want to use for this server? The available locales are:");
+                case "6": //Locale
+                    message.author.send($("CONIFG_LOCALE_SETUP"));
                     let locales = "";
                     for (let locale of availableTranslations) {
                         let thisLocale = _[locale]("THIS_LOCALE");
@@ -2461,12 +2470,12 @@ function processSingleConfigure(message, guild) {
                     message.author.send(locales);
                     guildSetting.configuringStage = 60;
                     break;
-                case "7": //Suggestions
-                    message.author.send("What do you want AstralMod's prefix to be? Alternatively, enter \"default\" to just use AstralMod's default prefix.");
+                case "7": //Server prefix
+                    message.author.send($("CONFIG_SERVER_PREFIX_SETUP"));
                     guildSetting.configuringStage = 70;
                     break;
                 case "0": //Exit
-                    message.author.send("Configuration complete.");
+                    message.author.send($("CONFIG_CONFIGURATION_COMPLETE"));
                     guildSetting.configuringUser = null;
                     break;
                 case "a": //Nick Moderation
@@ -2476,42 +2485,41 @@ function processSingleConfigure(message, guild) {
                         guildSetting.nickModeration = true;
                     }
 
-                    message.author.send("Ok, I've toggled nickname moderation.");
-                    message.author.send(getSingleConfigureWelcomeText(guild));
+                    message.author.send($("CONFIG_NICK_MODERATION_TOGGLED"));
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
                 case "b": //Nick Moderation
                     if (guildSetting.echoOffensive) {
                         guildSetting.echoOffensive = false;
+                        message.author.send($("CONFIG_FILTERING_OFF"));
                     } else {
                         guildSetting.echoOffensive = true;
+                        message.author.send($("CONFIG_FILTERING_ON"));
                     }
 
-                    message.author.send("Ok, I'll filter expletive words in my messages from now on.");
-                    message.author.send(getSingleConfigureWelcomeText(guild));
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
                 case "c": //Pin to pin
                     guildSetting.pinToPin = !guildSetting.pinToPin;
                     
-                    message.author.send(`Ok, I've toggled people from using the ${consts.config.pinToPinEmoji} emoji to pin messages.`);
-                    message.author.send(getSingleConfigureWelcomeText(guild));
+                    message.author.send($("CONFIG_PINTOPIN_TOGGLED", {emoji: consts.config.pinToPinEmoji}));
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
-                case "<": //Reset AstralMod
-                    message.author.send("**Reset AstralMod**\n" +
-                                        "Resetting AstralMod for this server. This will clear all settings **and warnings** for this server and you'll need to set up AstralMod again to use it.\n" +
-                                        "To reset AstralMod, respond with `Reset AstralMod`.");
+                case "!": //Reset AstralMod
+                    message.author.send($("CONFIG_RESET_ASTRALMOD_CONFIRMATION"));
                     guildSetting.configuringStage = -10;
                     break;
                 default:
                     //message.author.send("That's not an option.");
-                    message.author.send(getSingleConfigureWelcomeText(guild));
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
             }
             break;
         }
         case 10: { //Staff Roles
-            if (text == "cancel") {
-                message.author.send(getSingleConfigureWelcomeText(guild));
+            if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "clear") {
+            } else if (text.toLowerCase() == $("CONFIG_CLEAR").toLowerCase()) {
                 guildSetting.modRoles = null;
                 guildSetting.configuringStage = 0;
             } else {
@@ -2528,52 +2536,52 @@ function processSingleConfigure(message, guild) {
                 }
 
                 if (!isValid) {
-                    message.author.send("Let's try this again. Enter the roles of mods on this server, seperated by a space.");
+                    message.author.send($("CONFIG_STAFF_INVALID"));
                     return;
                 } else {
                     guildSetting.tentativeModRoles = roles;
 
-                    message.author.send("Is this correct?");
+                    message.author.send($("CONFIG_STAFF_CONFIRMATION"));
                     guildSetting.configuringStage = 11;
                 }
             }
             break;
         }
         case 11: { //Staff Roles Confirm
-            if (text == "yes" || text == "y") {
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION").toLowerCase()) {
                 guildSetting.modRoles = guildSetting.tentativeModRoles;
                 delete guildSetting.tentativeModRoles;
 
-                message.author.send("Thanks, I'll save that.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "no" || text == "n") {
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION").toLowerCase()) {
                 guildSetting.tentativeModRoles = null;
-                message.author.send("Let's try this again. Enter the roles of mods on this server, seperated by a space.");
+                message.author.send($("CONFIG_STAFF_INVALID"));
                 guildSetting.configuringStage = 10;
             } else {
-                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
 
         case 20: { //Member Alerts Channel
-            if (text == "cancel") {
-                message.author.send(getSingleConfigureWelcomeText(guild));
+            if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "none") {
-                message.author.send("You're disabling member alerts. Is that correct?");
+            } else if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
+                message.author.send($("CONFIG_MEMBER_ALERT_DISBLING"));
                 guildSetting.tentativeMemberAlerts = null;
                 guildSetting.configuringStage = 21;
             } else {
                 if (!guild.channels.has(text)) {
-                    message.author.send("That channel doesn't exist. Try again.");
+                    message.author.send($("CONFIG_CHANNEL_DOESNT_EXIST"));
                 } else {
                     var channel = guild.channels.get(text);
                     if (channel.type != "text") {
-                        message.author.send("That's not a text channel. Try again.");
+                        message.author.send($("CONFIG_CHANNEL_INVALID_CHANNEL"));
                     } else {
-                        message.author.send("You're setting #" + channel.name + " as the member alerts channel. Is that correct?");
+                        message.author.send($("CONFIG_MEMBER_ALERT_CONFIRMATION", {channel: channel.name}));
                         guildSetting.tentativeMemberAlerts = channel.id;
                         guildSetting.configuringStage = 21;
                     }
@@ -2582,7 +2590,7 @@ function processSingleConfigure(message, guild) {
             break;
         }
         case 21: { //Member Alerts Channel - Confirm
-            if (text == "yes" || text == "y") {
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION").toLowerCase()) {
                 try {
                     guildSetting.blocked[guildSetting.memberAlerts].splice(guildSetting.blocked[guildSetting.memberAlerts].indexOf("log"), 1);
                 } catch (err) { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
@@ -2596,36 +2604,36 @@ function processSingleConfigure(message, guild) {
                 
                 delete guildSetting.tentativeMemberAlerts;
 
-                message.author.send("Thanks, I'll save that.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "no" || text == "n") {
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeMemberAlerts = null;
-                message.author.send("Let's try this again. What's the ID of the channel where I can post member alerts?");
+                message.author.send($("CONFIG_MEMBER_ALERT_CANCELLED"));
                 guildSetting.configuringStage = 20;
             } else {
-                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
 
         case 30: { //Chat Logs Channel
-            if (text == "cancel") {
-                message.author.send(getSingleConfigureWelcomeText(guild));
+            if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "none") {
-                message.author.send("You're disabling chat logs. Is that correct?");
+            } else if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
+                message.author.send($("CONFIG_CHAT_LOGS_DISABLE"));
                 guildSetting.tentativeChatLogs = null;
                 guildSetting.configuringStage = 31;
             } else {
                 if (!guild.channels.has(text)) {
-                    message.author.send("That channel doesn't exist. Try again.");
+                    message.author.send($("CONFIG_CHANNEL_DOESNT_EXIST"));
                 } else {
                     var channel = guild.channels.get(text);
                     if (channel.type != "text") {
-                        message.author.send("That's not a text channel. Try again.");
+                        message.author.send($("CONFIG_CHANNEL_INVALID_CHANNEL"));
                     } else {
-                        message.author.send("You're setting #" + channel.name + " as the Chat logs channel. Is that correct?");
+                        message.author.send($("CONFIG_CHAT_LOGS_CONFIRMATION", {channel: channel.name}));
                         guildSetting.tentativeChatLogs = channel.id;
                         guildSetting.configuringStage = 31;
                     }
@@ -2634,10 +2642,10 @@ function processSingleConfigure(message, guild) {
             break;
         }
         case 31: { //Chat Logs Channel - Confirm
-            if (text == "cancel") {
-                message.author.send(getSingleConfigureWelcomeText(guild));
+            if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "yes" || text == "y") {
+            } else if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
                 try {
                     guildSetting.blocked[guildSetting.chatLogs].splice(guildSetting.blocked[guildSetting.chatLogs].indexOf("log"), 1);
                 } catch (err) { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
@@ -2651,32 +2659,32 @@ function processSingleConfigure(message, guild) {
 
                 delete guildSetting.tentativeChatLogs;
 
-                message.author.send("Thanks, I'll save that.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "no" || text == "n") {
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeChatLogs = null;
-                message.author.send("Let's try this again. What's the ID of the channel where I can post chat logs?");
+                message.author.send($("CONFIG_CHAT_LOGS_RETRY"));
                 guildSetting.configuringStage = 30;
             } else {
-                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
         case 40: { //Botwarnings Channel
-            if (text == "none") {
-                message.author.send("You're disabling general warnings. Is that correct?");
+            if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
+                message.author.send($("CONFIG_BOT_WARNINGS_DISABLE"));
                 guildSetting.tentativeBotWarnings = null;
                 guildSetting.configuringStage = 41;
             } else {
                 if (!guild.channels.has(text)) {
-                    message.author.send("That channel doesn't exist. Try again.");
+                    message.author.send($("CONFIG_CHANNEL_DOESNT_EXIST"));
                 } else {
                     var channel = guild.channels.get(text);
                     if (channel.type != "text") {
-                        message.author.send("That's not a text channel. Try again.");
+                        message.author.send($("CONFIG_CHANNEL_INVALID_CHANNEL"));
                     } else {
-                        message.author.send("You're setting #" + channel.name + " as the general warnings channel. Is that correct?");
+                        message.author.send($("CONFIG_BOT_WARNINGS_CONFIRMATION", {channel: channel.name}));
                         guildSetting.tentativeBotWarnings = channel.id;
                         guildSetting.configuringStage = 41;
                     }
@@ -2685,7 +2693,7 @@ function processSingleConfigure(message, guild) {
             break;
         }
         case 41: { //Botwarnings Channel - Confirm
-            if (text == "yes" || text == "y") {
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
                 try {
                     guildSetting.blocked[guildSetting.botWarnings].splice(guildSetting.blocked[guildSetting.botWarnings].indexOf("log"), 1);
                 } catch (err) { } //If it's not disabled (i.e. we're changing channels) we'll need to clear that channel's block status, but we can ignore any "cannot read property of null" errors
@@ -2699,33 +2707,33 @@ function processSingleConfigure(message, guild) {
 
                 delete guildSetting.tentativeBotWarnings;
 
-                message.author.send("Thanks, I'll save that.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "no" || text == "n") {
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeBotWarnings = null;
-                message.author.send("Let's try this again. What's the ID of the channel where I can post general warnings?");
+                message.author.send($("CONFIG_BOT_WARNINGS_RETRY"));
                 guildSetting.configuringStage = 40;
             } else {
-                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
 
         case 50: { //Suggestions Channel
-            if (text == "none") {
-                message.author.send("You're disabling suggestions. Is that correct?");
+            if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
+                message.author.send($("CONFIG_SUGGESTIONS_DISABLE"));
                 guildSetting.tentativeBotWarnings = null;
                 guildSetting.configuringStage = 51;
             } else {
                 if (!guild.channels.has(text)) {
-                    message.author.send("That channel doesn't exist. Try again.");
+                    message.author.send($("CONFIG_CHANNEL_DOESNT_EXIST"));
                 } else {
                     var channel = guild.channels.get(text);
                     if (channel.type != "text") {
-                        message.author.send("That's not a text channel. Try again.");
+                        message.author.send($("CONFIG_CHANNEL_INVALID_CHANNEL"));
                     } else {
-                        message.author.send("You're setting #" + channel.name + " as the suggestions channel. Is that correct?");
+                        message.author.send($("CONFIG_SUGGESTIONS_CONFIRMATION", {channel: channel.name}));
                         guildSetting.tentativeSuggestions = channel.id;
                         guildSetting.configuringStage = 51;
                     }
@@ -2734,25 +2742,25 @@ function processSingleConfigure(message, guild) {
             break;
         }
         case 51: { //Suggestions Channel - Confirm
-            if (text == "yes" || text == "y") {
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
                 guildSetting.suggestions = guildSetting.tentativeSuggestions;
                 delete guildSetting.tentativeSuggestions;
 
-                message.author.send("Thanks, I'll save that.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "no" || text == "n") {
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeSuggestions = null;
-                message.author.send("Let's try this again. What's the ID of the channel where I can post suggestions?");
+                message.author.send($("CONFIG_SUGGESTIONS_RETRY"));
                 guildSetting.configuringStage = 50;
             } else {
-                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
         case 60: { //Locale
             if (!availableTranslations.includes(text)) {
-                message.author.send("That locale doesn't exist. The available locales are:");
+                message.author.send($("CONFIG_LOCALE_INVALID"));
                 
                 let locales = "";
                 for (let locale of availableTranslations) {
@@ -2764,57 +2772,55 @@ function processSingleConfigure(message, guild) {
                 
                 message.author.send(locales);
             } else {
-                message.author.send("You're setting " + text + " as the server locale. Is that correct?");
+                message.author.send($("CONFIG_LOCALE_CONFIRMATION", {locale: text}));
                 guildSetting.tentativeLocale = text;
                 guildSetting.configuringStage = 61;
             }
             break;
         }
         case 61: { //Locale - Confirm
-            if (text == "yes" || text == "y") {
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
                 guildSetting.locale = guildSetting.tentativeLocale;
                 delete guildSetting.tentativeLocale;
 
-                message.author.send("Thanks, I'll save that.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
-            } else if (text == "no" || text == "n") {
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.locale = "en";
-                message.author.send("Let's try this again. What should the locale of the server be?");
+                message.author.send($("CONFIG_LOCALE_RETRY"));
                 guildSetting.configuringStage = 60;
             } else {
-                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
         case 70: { //Server prefix
-            if (text.trim() == "") {
-                message.author.send("You can't set your prefix to that. Try something else");
-            } else if (text == "default") {
-                message.author.send("You're setting AstralMod's prefix to the default one. Is that correct?");
+            if (text.toLowerCase() == $("CONFIG_DEFAULT").toLowerCase() || text == prefix()) {
+                message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: prefix()}));
                 guildSetting.tentativePrefix = undefined;
                 guildSetting.configuringStage = 71;
             } else {
-                message.author.send("You're AstralMod's prefix as `" + text + "`. Is that correct?");
+                message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: text}));
                 guildSetting.tentativePrefix = text;
                 guildSetting.configuringStage = 71;
             }
             break;
         }
         case 71: { //Locale - Confirm
-            if (text == "yes" || text == "y") {
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
                 guildSetting.serverPrefix = guildSetting.tentativePrefix;
                 delete guildSetting.tentativePrefix;
 
-                message.author.send("Thanks, I'll save that.");
-                message.author.send(getSingleConfigureWelcomeText(guild));
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
             } else if (text == "no" || text == "n") {
                 guildSetting.serverPrefix = undefined;
-                message.author.send("Let's try this again. What should the prefix for commands be?");
+                message.author.send($("CONFIG_SERVER_PREFIX_RETRY"));
                 guildSetting.configuringStage = 70;
             } else {
-                message.author.send("I didn't quite understand what you said. Try \"yes\" or \"no\".");
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
