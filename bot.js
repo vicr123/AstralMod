@@ -91,10 +91,15 @@ i18next.use(i18nextbackend).init({
         format: function fmt(value, format, lng) {
             if (value == null) return "[[[TRANSLATION ERROR]]]";
             if (value.duration && moment.isDuration(value.duration)) {
+                //Special case for Chinese
+                if (lng.startsWith("zh")) lng = "zh-cn";
+
+                let m = value.duration.locale(lng);
+                
                 if (format == "humanize") {
-                    return value.duration.humanize(value.prefixed);
+                    return m.humanize(value.prefixed);
                 } else {
-                    return value.duration.format(format, value.settings);
+                    return m.format(format, value.settings);
                 }
             }
 
@@ -2365,7 +2370,7 @@ function getSingleConfigureWelcomeText(guild, author) {
     if (guild.channels.get(guildSetting.suggestions) == null) {
         embed.addField($("CONFIG_SUGGESTIONS_TITLE", {number: 5}), $("CONFIG_DISABLED"), true);
     } else {
-        embed.addField($("CONFIG_SUGGESTIONS_TITLE", {number: 4}), `<#${guild.channels.get(guildSetting.suggestions).id}>`, true);
+        embed.addField($("CONFIG_SUGGESTIONS_TITLE", {number: 5}), `<#${guild.channels.get(guildSetting.suggestions).id}>`, true);
     }
 
     if (guildSetting.locale == null) {

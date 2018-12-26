@@ -127,7 +127,7 @@ function utcOffsetFromTimezone(location) {
         case "cxt":
         case "davt":
         case "hovt":
-        case "iict":
+        case "ict":
         case "krat":
         case "tha":
         case "wit":
@@ -196,13 +196,13 @@ function getTime(location, member) {
             } else {
                 resolve({
                     offset: settings.users[user.id].timezone,
-                    location: user.username
+                    location: getUserString(user)
                 });
             }
         };
 
         if (location == "") {
-            returnUserWeather(member);
+            returnUserWeather(member.user);
             return;
         }
 
