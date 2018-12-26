@@ -1,7 +1,5 @@
 # AstralMod
-Discord Moderation Bot for Bits & Bytes, theShell and many other servers
-
-[![Discord Bots](https://discordbots.org/api/widget/status/282048599574052864.svg)](https://discordbots.org/bot/282048599574052864)
+Discord Moderation Bot for bits & Bytes, theShell and many other servers
 
 ## Invite
 [Invite AstralMod to your server](https://discordapp.com/oauth2/authorize?client_id=282048599574052864&scope=bot&permissions=461843558)
