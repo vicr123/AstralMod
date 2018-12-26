@@ -3439,6 +3439,13 @@ function vacuumSettings() {
         process.exit(1);
     }
 
+    //Check that blocked users is a valid setting
+    if (!settings.generalConfiguration.hasOwnProperty("blockedUsers")) {
+        changesMade = true;
+        settings.generalConfiguration.blockedUsers = [];
+        log("Added blocked users to settings", logType.info);
+    }
+
     //Check that each guild still exists
     var availableGuilds = [];
     for (let [id, guild] of client.guilds) {
