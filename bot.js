@@ -228,7 +228,9 @@ global.filterOffensive = function(offensive) {
 global.getEmoji = function(emojiName) {
     if (consts.config.emojiServer == null) return ":arrow_right:"; //No emoji server configured
     try {
-        return client.guilds.get(consts.config.emojiServer).emojis.find("name", emojiName).toString();
+        return client.guilds.get(consts.config.emojiServer).emojis.find(function(item) {
+            return item.name == emojiName;
+        }).toString();
     } catch (err) {
         return ":arrow_right:";
     }
@@ -3443,6 +3445,13 @@ function vacuumSettings() {
         log("AstralMod Configuration is corrupted. AstralMod cannot continue running. Exiting now.", logType.critical);
         debugger;
         process.exit(1);
+    }
+
+    //Check that blocked users is a valid setting
+    if (!settings.generalConfiguration.hasOwnProperty("blockedUsers")) {
+        changesMade = true;
+        settings.generalConfiguration.blockedUsers = [];
+        log("Added blocked users to settings", logType.info);
     }
 
     //Check that each guild still exists
