@@ -265,5 +265,15 @@
     "SHOO_TITLE": "Đuổi AstralMod :(",
     "SHOO_MESSAGE": "AstralMod đang chuẩn bị thoát :(",
     "SHOO_SUCCESS": "{{emoji}} Và với đó, POW, tôi sẽ... thoát :(",
-    "SHOO_CANCEL": "Yay, tôi được ở lại!"
+    "SHOO_CANCEL": "Yay, tôi được ở lại!",
+    "RMWARN_NO_WARNINGS": "{{user}} không có cảnh báo phạt.",
+    "RMWARN_SUCCESS": "{{emoji}} Cảnh báo phạt đó đã bị xóa. Để xem số cảnh báo mới, dùng `{{prefix}}lswarn`",
+    "SETLOC_CITY_NOT_FOUND": "Tôi không biết thành phố đó.",
+    "SETLOC_CITY_SET": "Vị trí của bạn đã bị đặt thành {{place}}, {{countryCode}} ({{lát}},{{long}})",
+    "SHOO_NO_PERMS": "Chỉ người dùng có phép đuổi người dùng được sự dụng lệnh này.",
+    "SPAMDATA_DATA_TITLE": "Độ giận",
+    "SPAMDATA_FORGIVENESS": "**Tin nhắn rác đã thả:** {{forgiveness}}",
+    "SPAMDATA_DETECTED": "**Tin nhắn rác đã thấy nhận:** {{detected}}",
+    "UNBLOCK_ALL_UNBLOCKED_SERVER": "Ok, mọi lệnh đã bị chặn bay giờ được gỡ lệnh chặn.",
+    "VERSION": "*AstralMod {{version}}**\nRô-bột Discord"
 }
