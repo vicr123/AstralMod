@@ -29,12 +29,67 @@ var consts;
 
 let sunnyImage, moonyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage;
 
-function getDataFromCode(code, ctx, timeOfDay = "transition") {
-    log(code.toString(), logType.debug);
+let transArr = {
+    0: "WEATHERSTRING_TORNADO",
+    1: "WEATHERSTRING_TROPICALSTORM",
+    2: "WEATHERSTRING_HURRICANE",
+    3: "WEATHERSTRING_SEVERETHUNDERSTORMS",
+    4: "WEATHERSTRING_THUNDERSTORMS",
+    5: "WEATHERSTRINGS_RAINANDSNOW",
+    6: "WEATHERSTRINGS_RAINANDSLEET",
+    7: "WEATHERSTRINGS_SNOWANDSLEET",
+    8: "WEATHERSTRINGS_FREEZINGDRIZZLE",
+    9: "WEATHERSTRINGS_DRIZZLE",
+    10: "WEATHERSTRINGS_FREEZINGRAIN",
+    11: "WEATHERSTRINGS_SHOWERS",
+    12: "WEATHERSTRINGS_SHOWERS",
+    13: "WEATHERSTRINGS_SNOWFLURRIES",
+    14: "WEATHERSTRINGS_LIGHTSNOWSHOWERS",
+    15: "WEATHERSTRINGS_BLOWINGSNOW",
+    16: "WEATHERSTRINGS_SNOW",
+    17: "WEATHERSTRINGS_HAIL",
+    18: "WEATHERSTRINGS_SLEET",
+    19: "WEATHERSTRINGS_DUST",
+    20: "WEATHERSTRINGS_FOG",
+    21: "WEATHERSTRINGS_HAZE",
+    22: "WEATHERSTRINGS_SMOCK",
+    23: "WEATHERSTRINGS_BLUSTER",
+    24: "WEATHERSTRINGS_WIND",
+    25: "WEATHERSTRINGS_COLD",
+    26: "WEATHERSTRINGS_CLOUDY",
+    27: "WEATHERSTRINGS_MOSTLYCLOUDY",
+    28: "WEATHERSTRINGS_MOSTLYCLOUDY",
+    29: "WEATHERSTRINGS_PARTLYCLOUDY",
+    30: "WEATHERSTRINGS_PARTLYCLOUDY",
+    31: "WEATHERSTRING_CLEAR",
+    32: "WEATHERSTRING_SUNNY",
+    33: "WEATHERSTRING_FAIR",
+    34: "WEATHERSTRING_FAIR",
+    35: "WEATHERSTRING_RAINANDHAIL",
+    36: "WEATHERSTRING_HOT",
+    37: "WEATHERSTRING_ISOLATEDTHUNDERSTORMS",
+    38: "WEATHERSTRING_SCATTEREDTHUNDERSTORMS",
+    39: "WEATHERSTRING_SCATTEREDTHUNDERSTORMS",
+    40: "WEATHERSTRING_SCATTEREDSHOWERS",
+    41: "WEATHERSTRING_HEAVYSNOW",
+    42: "WEATHERSTRING_SCATTEREDSNOWSHOWERS",
+    43: "WEATHERSTRING_HEAVYSNOW",
+    44: "WEATHERSTRINGS_PARTLYCLOUDY",
+    45: "WEATHERSTRING_THUNDERSHOWERS",
+    46: "WEATHERSTRING_SNOWSHOWERS",
+    47: "WEATHERSTRING_ISOLATEDTHUNDERSHOWERS",
+    3200: "WEATHERSTRING_NOTAVAILABLE"
+}
+
+
+
+function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
+    log("code: " + code.toString(), logType.debug);
     let retval = {}
+
+    retval.weatherString = $(transArr[code]);
     
     switch (code) {
-        case 23:
         case 31:
         case 32:
         case 33:
@@ -48,6 +103,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
                 retval.text = "black";
                 retval.image = sunnyImage;
             } else if (timeOfDay == "night") {
+                retval.weatherString = $("WEATHERSTRING_CLEAR")
                 retval.gradient = "rgb(0, 50, 100)";
                 retval.secondary = "rgb(0, 25, 50)";
                 retval.text = "white";
@@ -96,6 +152,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition") {
             retval.image = rainImage;
             break;
         case 0:
+        case 23:
         case 24:
             //Windy
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
@@ -223,7 +280,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                     var canvas = new Canvas(500, 410);
                     var ctx = canvas.getContext('2d');
-                    let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx, timeOfDay);
+                    let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx, timeOfDay, $);
 
                     let tempUnit = "°" + data.query.results.channel.units.temperature;
                     let speedUnit = data.query.results.channel.units.speed;
@@ -280,17 +337,17 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     ctx.fillText(data.query.results.channel.location.region + " - " + data.query.results.channel.location.country, 175 - countryWidth.width / 2, 245);
 
                     ctx.font = "40px Contemporary";
-                    let conditionWidth = ctx.measureText(data.query.results.channel.item.condition.text);
+                    let conditionWidth = ctx.measureText(display.weatherString);
                     if (conditionWidth.width > 325) {
                         let textCanvas = new Canvas(conditionWidth.width, 50);
                         let txtCtx = textCanvas.getContext('2d');
                         txtCtx.font = "light 40px Contemporary";
                         txtCtx.fillStyle = display.text;
-                        txtCtx.fillText(data.query.results.channel.item.condition.text, 0, 40);
+                        txtCtx.fillText(display.weatherString, 0, 40);
 
                         ctx.drawImage(textCanvas, 13, 240, 325, 50);
                     } else {
-                        ctx.fillText(data.query.results.channel.item.condition.text, 175 - conditionWidth.width / 2, 280);
+                        ctx.fillText(display.weatherString, 175 - conditionWidth.width / 2, 280);
                     }
 
                     ctx.font = "30px Contemporary";
@@ -409,7 +466,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         }
                         let day = data.query.results.channel.item.forecast[key];
 
-                        let display = getDataFromCode(parseInt(day.code), ctx);
+                        let display = getDataFromCode(parseInt(day.code), ctx, null, _[options.locale]);
 
                         ctx.font = "20px Contemporary";
 

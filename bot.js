@@ -48,7 +48,7 @@ global.prefix = (id) => {
     
 var amVersion;
 if (process.argv.indexOf("--blueprint") == -1) {
-    amVersion = "2.10";
+    amVersion = consts.config.version;
     global.defaultPrefix = consts.config.prefix;
 } else {
     amVersion = "Blueprint";
