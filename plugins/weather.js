@@ -330,7 +330,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         ctx.drawImage(textCanvas, 10, 30, 325, 50);
                     } else {
                         //ctx.fillText(currentWeatherText, (350 / 2) - (currentWeatherWidth.width / 2), 30);
-                        ctx.fillText(pubDate, (350 / 2) - (dateWidt.width / 2), 50);
+                        ctx.fillText(pubDate, (350 / 2) - (dateWidth.width / 2), 50);
                     }
 
 
