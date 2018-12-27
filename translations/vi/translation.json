@@ -368,7 +368,7 @@
     "WARN_ENTER_REASON": "{{emoji}} Đánh lý do để đặt cảnh báo phạt trên {{user}} hoặc `cancel`.",
     "WARN_ALREADY_WARNING": "{{user}} đang đặt cảnh báo phạt trên người khác bây giờ. Vui lòng chờ cho họ xong đã.",
     "WARN_CANCEL": "{{emoji}} Đã hủy. Bây giờ thoát menu cảnh báo phạt.",
-    "WARN_WARNED": "{{warnee}}, nghe lời!{{warner}} đã đặt cảnh báo phạt cho bạn tại vì `{{warning}}`. Bây giờ, bạn có {{count}} cảnh báo phạt.",
+    "WARN_WARNED": "{{warnee}}, nghe lời! {{warner}} đã đặt cảnh báo phạt cho bạn tại vì `{{warning}}`. Bây giờ, bạn có {{count}} cảnh báo phạt.",
     "CONFIG_CONTINUE_IN_DMS": "{{emoji}} Tiếp tục trong DMs.",
     "CONFIG_ALREADY_CONFIGURATING": "Bạn đang cấu hình {{guild}}. Kết thúc việc cấu hình máy chủ đó trước, rồi sau đó bạn cấu hình máy chủ này được.",
     "CONFIG_INTRO": "Bạn muốn cấu hình gì? Đánh số bên sau tùy chọn bạn muốn đặt:",
