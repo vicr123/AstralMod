@@ -319,8 +319,19 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     //let pubDate = "As of " + date.format("dddd, MMMM D") + " at " + date.format(timeString) + tz;
 
                     let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:date.utcOffset(timeModule.utcOffsetFromTimezone(tz.trim().toLowerCase()), true), h24:options.h24}});
-                    let windWidth = ctx.measureText(pubDate);
-                    ctx.fillText(pubDate, (350 / 2) - (windWidth.width / 2), 50);
+                    let dateWidth = ctx.measureText(pubDate);
+                    if (dateWidth.width > 325) {
+                        let textCanvas = new Canvas(dateWidth.width, 50);
+                        let txtCtx = textCanvas.getContext('2d');
+                        txtCtx.font = "14px Contemporary";
+                        txtCtx.fillStyle = display.text;
+                        txtCtx.fillText(pubDate, 0, 20);
+
+                        ctx.drawImage(textCanvas, 10, 30, 325, 50);
+                    } else {
+                        //ctx.fillText(currentWeatherText, (350 / 2) - (currentWeatherWidth.width / 2), 30);
+                        ctx.fillText(pubDate, (350 / 2) - (windWidth.width / 2), 50);
+                    }
 
 
                     //Image goes between 100-200px y
