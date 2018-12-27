@@ -576,7 +576,7 @@ module.exports = {
             ]
         }
     },
-    acquireHelp: function(helpCmd, message) {
+    acquireHelp: function(helpCmd, message, h$) {
         var help = {};
 
         switch (helpCmd) {
