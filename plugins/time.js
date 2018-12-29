@@ -127,6 +127,7 @@ function utcOffsetFromTimezone(location) {
         case "cxt":
         case "davt":
         case "hovt":
+        case "novt":
         case "ict":
         case "krat":
         case "tha":
@@ -180,7 +181,7 @@ function utcOffsetFromTimezone(location) {
     }
 }
 
-function getTime(location, member) {
+function getTime(location, member, $) {
     return new Promise(function(resolve, reject) {
         if (utcOffsetFromTimezone(location) !== undefined) { //Check for a UTC offset and a UTC named timezone first
             resolve({
@@ -319,7 +320,7 @@ async function processCommand(message, isMod, command, options) {
         var utcOffset;
         var location = command.substr(6);
 
-        getTime(location, message.member).then(obj => {
+        getTime(location, message.member, $).then(obj => {
             var userSettings = settings.users[message.author.id];
 
             if (userSettings == null) {
@@ -485,7 +486,7 @@ async function processCommand(message, isMod, command, options) {
 
         sendPreloader($("TIME_PREPARING"), message.channel).then(mte => {
             let messageToEdit = mte;
-            getTime(location, message.member).then(function(timeDescriptor) {
+            getTime(location, message.member, $).then(function(timeDescriptor) {
                 let time = moment.utc();
 
                 messageToEdit.edit($("TIME_RESPONSE", {

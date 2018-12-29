@@ -117,7 +117,9 @@ i18next.use(i18nextbackend).init({
                     m = moment.utc(value.date).locale(lng);
                 }
 
-                m = m.utcOffset(value.offset == undefined ? m.zone : value.offset);
+                if (value.offset != null) {
+                    m = m.utcOffset(value.offset);
+                }
 
                 if (format == "datetime") {
                     return arguments.callee(_[lng]("SPECIAL_DATETIME", { time: {date: m, h24: value.h24, offset: value.offset} }));
