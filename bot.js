@@ -2021,7 +2021,7 @@ function processAmCommand(message, options, command) {
             message.channel.send(embed);
         }
 
-        if (availableTranslations.getTranslation(locale) !== null) {
+        if (availableTranslations.getTranslation(locale) != undefined) {
             setLocale(availableTranslations.getTranslation(locale));
             return true;
         }
@@ -2029,7 +2029,22 @@ function processAmCommand(message, options, command) {
         //Locale unavailable
         locale = settings.users[message.author.id].locale;
         if (locale == null) locale = "en";
-        message.author.reply(_[locale]("SETLOC_UNAVAILABLE"));
+        var embed = new Discord.RichEmbed();
+        embed.setColor("#EC7979");
+        embed.setAuthor($("SETLOC_TITLE"));
+        embed.setDescription($("SETLOC_UNAVAILABLE"))
+        
+        let availableLocales = "";
+        for (let locale of availableTranslations) {
+            let thisLocale = _[locale]("THIS_LOCALE");
+            if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
+            if (locale == "en") thisLocale = "English";
+            availableLocales += "`" + locale + "` - " + thisLocale + "\n";
+        }
+        embed.addField($("SETLOC_AVAILABLE_LOCALES"), availableLocales);
+        embed.setFooter($("SETLOC_DISCLAIMER"));
+
+        message.channel.send(embed);
         return true;
     } else if (command == "help") { //General help
         var embed = new Discord.RichEmbed();
@@ -2451,18 +2466,50 @@ function processSingleConfigure(message, guild) {
                     break;
                 case "2": //Member Alerts
                     message.author.send($("CONFIG_MEMBER_ALERT_SETUP"));
+                    var str = "```\n";
+                    for (let [,channel] of guild.channels) {
+                        if (channel.type == "text") {
+                            str += `${channel.id} — #${channel.name}\n`
+                        }
+                    }
+                    str += "```"
+                    message.author.send(str);
                     guildSetting.configuringStage = 20;
                     break;
                 case "3": //Chat Logs
                     message.author.send($("CONFIG_CHAT_LOGS_SETUP"));
+                    var str = "```\n";
+                    for (let [,channel] of guild.channels) {
+                        if (channel.type == "text") {
+                            str += `${channel.id} — #${channel.name}\n`
+                        }
+                    }
+                    str += "```"
+                    message.author.send(str);
                     guildSetting.configuringStage = 30;
                     break;
                 case "4": //Bot warnings
                     message.author.send($("CONFIG_BOT_WARNINGS_SETUP"));
+                    var str = "```\n";
+                    for (let [,channel] of guild.channels) {
+                        if (channel.type == "text") {
+                            str += `${channel.id} — #${channel.name}\n`
+                        }
+                    }
+                    str += "```"
+                    message.author.send(str);
                     guildSetting.configuringStage = 40;
                     break;
                 case "5": //Suggestions
-                    message.author.send();
+                    message.author.send($("CONFIG_SUGGESTIONS_SETUP"));
+                    var str = "```\n";
+                    for (let [,channel] of guild.channels) {
+                        if (channel.type == "text") {
+                            str += `${channel.id} — #${channel.name}\n`
+                        }
+                    }
+                    str += "```"
+                    message.author.send(str);
                     guildSetting.configuringStage = 50;
                     break;
                 case "6": //Locale
@@ -2618,6 +2665,14 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeMemberAlerts = null;
                 message.author.send($("CONFIG_MEMBER_ALERT_CANCELLED"));
+                var str = "```\n";
+                for (let [,channel] of guild.channels) {
+                    if (channel.type == "text") {
+                        str += `${channel.id} — #${channel.name}\n`
+                    }
+                }
+                str += "```"
+                message.author.send(str);
                 guildSetting.configuringStage = 20;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2673,6 +2728,14 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeChatLogs = null;
                 message.author.send($("CONFIG_CHAT_LOGS_RETRY"));
+                var str = "```\n";
+                for (let [,channel] of guild.channels) {
+                    if (channel.type == "text") {
+                        str += `${channel.id} — #${channel.name}\n`
+                    }
+                }
+                str += "```"
+                message.author.send(str);
                 guildSetting.configuringStage = 30;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2721,6 +2784,14 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeBotWarnings = null;
                 message.author.send($("CONFIG_BOT_WARNINGS_RETRY"));
+                var str = "```\n";
+                for (let [,channel] of guild.channels) {
+                    if (channel.type == "text") {
+                        str += `${channel.id} — #${channel.name}\n`
+                    }
+                }
+                str += "```"
+                message.author.send(str);
                 guildSetting.configuringStage = 40;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2760,6 +2831,14 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeSuggestions = null;
                 message.author.send($("CONFIG_SUGGESTIONS_RETRY"));
+                var str = "```\n";
+                for (let [,channel] of guild.channels) {
+                    if (channel.type == "text") {
+                        str += `${channel.id} — #${channel.name}\n`
+                    }
+                }
+                str += "```"
+                message.author.send(str);
                 guildSetting.configuringStage = 50;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2797,6 +2876,14 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.locale = "en";
                 message.author.send($("CONFIG_LOCALE_RETRY"));
+                var str = "```\n";
+                for (let [,channel] of guild.channels) {
+                    if (channel.type == "text") {
+                        str += `${channel.id} — #${channel.name}\n`
+                    }
+                }
+                str += "```"
+                message.author.send(str);
                 guildSetting.configuringStage = 60;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2826,6 +2913,14 @@ function processSingleConfigure(message, guild) {
             } else if (text == "no" || text == "n") {
                 guildSetting.serverPrefix = undefined;
                 message.author.send($("CONFIG_SERVER_PREFIX_RETRY"));
+                var str = "```\n";
+                for (let [,channel] of guild.channels) {
+                    if (channel.type == "text") {
+                        str += `${channel.id} — #${channel.name}\n`
+                    }
+                }
+                str += "```"
+                message.author.send(str);
                 guildSetting.configuringStage = 70;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -3133,27 +3228,26 @@ function messageDeleted(message) {
             return;
         }
 
-        var msg = ":wastebasket: **" + getUserString(message.author) + "** <#" + message.channel.id + "> `" + message.createdAt.toUTCString() + "`.";
+        let glocale = settings.guilds[message.guild.id].locale;
+        let $$ = _[glocale];    
 
-        if (message.cleanContent.length) {
-            msg += "\n```\n" +
-                parseCleanContent(message.cleanContent) + "\n" +
-                "```";
-        }
+        var msg = $$("GUILD_MESSAGE_DELETE", {time: {date: moment(message.createdAt), h24: true}, emoji: ":wastebasket:", user: getUserString(message.author), channel: `<#${message.channel.id}>`,
+            message: message.cleanContent.length ? "```\n" + parseCleanContent(message.cleanContent) + "\n" +"```" : $$("GUILD_MESSAGE_NO_CONTENT")})
+        
+        channel.send(msg);
 
         if (message.attachments.size > 0) {
-            msg += "\nThe following files were attached to this message:";
+            var msg = $$("GUILD_ATTACHMENTS");
 
-            for (let [key, attachment] of message.attachments) {
-                if (attachment.height == null) {
-                    msg += "\n```" + attachment.filename + " @ " + parseInt(attachment.filesize) + " bytes long```";
-                } else {
-                    msg += "\n" + attachment.proxyURL;
+            for (let [, attachment] of message.attachments) {
+                msg += "\n" + $$("GUILD_ATTACHMENT", {filename: attachment.filename, count: parseInt(attachment.filesize)});
+                if (attachment.height != null) {
+                    msg += attachment.proxyURL;
                 }
             }
-        }
 
-        channel.send(msg);
+            channel.send(msg);
+        }
     }
 }
 
@@ -3176,39 +3270,30 @@ function messageUpdated(oldMessage, newMessage) {
             return;
         }   
 
-        var msg = ":pencil2: **" + getUserString(oldMessage.author) + "** <#" + oldMessage.channel.id + "> `" + oldMessage.createdAt.toUTCString() + "`.\n";
+        let glocale = settings.guilds[newMessage.guild.id].locale;
+        let $$ = _[glocale];    
 
-
-        if (oldMessage.cleanContent.length) {
-            msg += "```\n" +
-                oldMessage.cleanContent + "\n" +
-                "```";
-        } else {
-            msg += "```\n[no content]\n```";
-        }
-
-        msg += "```\n" +
-            newMessage.cleanContent + "\n" +
-            "```";
-
-        if (oldMessage.attachments.size > 0) {
-            msg += "\nThe following files were attached to this message:";
-
-            for (let [key, attachment] of oldMessage.attachments) {
-                if (attachment.height == null) {
-                    msg += "\n```" + attachment.filename + " @ " + parseInt(attachment.filesize) + " bytes long```";
-                } else {
-                    msg += "\n" + attachment.proxyURL;
-                }
-            }
-        }
+        var msg = $$("GUILD_MESSAGE_EDIT", {time: {date: moment(oldMessage.createdAt), h24: true}, emoji: ":pencil:", user: getUserString(oldMessage.author), channel: `<#${oldMessage.channel.id}>`,
+        oldmessage: oldMessage.cleanContent.length ? "```\n" + parseCleanContent(oldMessage.cleanContent) +"\n```" : $$("GUILD_MESSAGE_NO_CONTENT"), newmessage: newMessage.cleanContent.length ? "```\n" + parseCleanContent(newMessage.cleanContent) + "```\n" : $$("GUILD_MESSAGE_NO_CONTENT")})
 
         channel.send(msg);
+
+        if (oldMessage.attachments.size > 0) {
+            var msg = $$("GUILD_ATTACHMENTS");
+    
+            for (let [, attachment] of oldMessage.attachments) {
+                msg += "\n" + $$("GUILD_ATTACHMENT", {filename: attachment.filename, count: parseInt(attachment.filesize)});
+                if (attachment.height != null) {
+                    msg += attachment.proxyURL;
+                }
+            }
+            
+            channel.send(msg);
+        }    
     }
 }
 
 function memberAdd(member) {
-    let glocale = settings.guilds[member.guild.id].locale;
     var channel = null;
     if (member.guild != null) {
         if (settings.guilds[member.guild.id].memberAlerts != null) {
@@ -3220,17 +3305,23 @@ function memberAdd(member) {
         }
     }
 
+    let glocale = settings.guilds[member.guild.id].locale;
+    let $$ = _[glocale];    
+
     if (channel != null) {
         let sendWelcome = function(inviteCode) {
             if (inviteCode == "") {
-                channel.send(":arrow_right: <@" + member.user.id + ">");
+                channel.send($$("GUILD_USER_ADD", {emoji: ":arrow_right:", user: `<@${member.user.id}>`}))
             } else {
-                channel.send(":arrow_right: <@" + member.user.id + "> + Invite " + inviteCode);
+                channel.send($$("GUILD_USER_ADD", {emoji: ":arrow_right:", user: `<@${member.user.id}>`, invite: inviteCode}))
             }
     
             uinfo(member.user, channel, glocale, 0, true, member.guild, true);
     
-            if (member.guild.id == 287937616685301762) {
+            //This is a candidate for confighood...
+            //This one will go in AM 3.1 too :)
+
+            if (member.guild.id == consts.wow.id) {
                 var now = new Date();
                 var joinDate = member.user.createdAt;
                 if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
@@ -3558,7 +3649,10 @@ function guildMemberUpdate(oldUser, newUser) {
                 channel = oldUser.guild.channels.get(guildSetting.botWarnings);
                 if (channel != null) {
                     if (newUser.nickname == null) {
-                        channel.send(":abcd: " + getUserString(oldUser).replace("@", "@​") + " :arrow_right: [cleared]");
+                        let glocale = settings.guilds[oldUser.guild.id].locale;
+                        let $$ = _[glocale];    
+                        
+                        channel.send(":abcd: " + getUserString(oldUser).replace("@", "@​") + " :arrow_right: " + $$("GUILD_NICKNAME_CLEARED"));
                     } else {
                         channel.send(":abcd: " + getUserString(oldUser).replace("@", "@​") + " :arrow_right: " + newUser.nickname.toString().replace("@", "@​"));
                     }
