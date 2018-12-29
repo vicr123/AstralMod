@@ -433,5 +433,10 @@
     "CONFIG_FILTERING_OFF": "Ok, tôi sẽ không lọc từ ngữ trong tin nhắn của tôi từ đây.",
     "CONFIG_FILTERING_ON": "Ok, tôi sẽ lọc từ ngữ trong tin nhắn của tôi từ đây.",
     "CONFIG_PINTOPIN_TOGGLED": "Ok, tôi chuyển đổi khả năng để dùng {{emoji}} để đặt ghim trên tin nhắn.",
-    "CONFIG_RESET_ASTRALMOD_CONFIRMATION": "**Đặt lại AstralMod**\nBây giờ chuẩn bị đặt lại AstralMod cho máy chủ này. Lệnh này sẽ xóa tất cả cài đặt **và cảnh báo phạt** cho máy chủ này, và bạn sẽ cần cài đặt AstralMod lại để dùng.\nĐể đạt AstralMod lại, trả lời với `Reset AstralMod`."
+    "CONFIG_RESET_ASTRALMOD_CONFIRMATION": "**Đặt lại AstralMod**\nBây giờ chuẩn bị đặt lại AstralMod cho máy chủ này. Lệnh này sẽ xóa tất cả cài đặt **và cảnh báo phạt** cho máy chủ này, và bạn sẽ cần cài đặt AstralMod lại để dùng.\nĐể đạt AstralMod lại, trả lời với `Reset AstralMod`.",
+    "TIME_UTC": "UTC {{number}}",
+    "TIMER_HOWTO": "Sự dụng: `{{prefix}}timer [thời lượng] [lý do]`. Để hiểu thêm, đánh `{{prefix}}help timer`",
+    "TIMER_SET_TITLE": "{{emoji}} Bộ hẹn giờ đã đạt",
+    "TIMER_SET_DESCRIPTION": "Ok, tôi sẽ đạt bộ hẹn giờ bay giờ.",
+    "TIMER_SET_DURATION": "Thời lượng"
 }
