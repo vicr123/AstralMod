@@ -3474,6 +3474,25 @@ function vacuumSettings() {
         }
     }
 
+    for (let key in settings.users) {
+        log("Checking internal user " + key);
+
+        if(settings.users[key].hasOwnProperty("timers") && settings.users[key].timers.length > 0)
+            for(let timer of settings.users[key].timers) {
+                if (timer.timeout instanceof Date) {
+                    log(`Detected timer on user ${key} with Date timeout. Converting to moment.`, logType.info);
+                    timer.timeout = moment(timer.timeout);
+                    changesMade = true;
+                }
+
+                if (typeof timer.timeout == 'string' || timer.timeout instanceof String) {
+                    log(`Detected spoiled timer on user ${key} Deleting timer.`, logType.info);
+                    settings.users[key].timers[timer] = null;
+                    changesMade = true;
+                }
+            }
+    }
+
     //Iterate over all guilds in settings
     for (let key in settings.guilds) {
         log("Checking internal guild " + key);
