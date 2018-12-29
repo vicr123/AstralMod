@@ -432,13 +432,14 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     ctx.fillText(compass + "° (" + cardinal + ")", 227, 345);
 
                     //Draw sunrise info
+                    log(data.query.results.channel.astronomy.sunrise);
                     ctx.drawImage(sunriseImage, 200, 355, 20, 20);
-                    let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
-                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24, offset: options.offset}}), 227, 370);
+                    let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:mm a");
+                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24}}), 227, 370);
 
                     //Draw sunset info
                     ctx.drawImage(sunsetImage, 200, 380, 20, 20);
-                    let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:m a");
+                    let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:mm a");
                     ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24, offset: options.offset}}), 227, 395);
 
 
