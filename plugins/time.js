@@ -182,7 +182,7 @@ function utcOffsetFromTimezone(location) {
 
 function getTime(location, member, $) {
     return new Promise(function(resolve, reject) {
-        if (!isNan(parseFloat(location)) && (-14 < parseFloat(location) & parseFloat(location) < 14)) { //Check for a manually specified UTC offset
+        if (!isNaN(parseFloat(location)) && (-14 < parseFloat(location) & parseFloat(location) < 14)) { //Check for a manually specified UTC offset
             resolve({
                 offset: parseFloat(location),
                 location: $("TIME_UTC", )
@@ -262,7 +262,7 @@ function getClockEmoji(date = new Date()) {
 }
 
 function pollTimers() {
-    var date = new Date().getTime();
+    var date = moment()
     for (key in settings.users) {
         var userSetting = settings.users[key];
         if (userSetting != null) {
@@ -270,37 +270,23 @@ function pollTimers() {
                 for (index in userSetting.timers) {
                     var timer = userSetting.timers[index];
                     if (timer.timeout < date) {
+                        let $ = _[userSetting.locale];
+
                         var embed = new Discord.RichEmbed();
 
-                        embed.setTitle(":alarm_clock: Timer Elapsed");
+                        embed.setTitle($("TIMER_ELAPSED_TITLE", {emoji: ":alarm_clock:"}));
                         embed.setColor("#FED266");
 
                         if (timer.reason == "") {
-                            embed.setDescription("<@" + timer.author + "> I've been told to ping you.");
+                            embed.setDescription($("TIMER_ELAPSED_DESCRIPTION", {ping: `<@${timer.author}>`}));
                         } else {
-                            embed.setDescription("<@" + timer.author + "> I've been told to remind you about this.");
-                            embed.addField("Reason", timer.reason, false);
-                        }
-
-                        let tz;
-                        if (settings.users[timer.author] == null || !settings.users.hasOwnProperty(timer.author) || !settings.users[timer.author].hasOwnProperty("timezone"))  {
-                            tz = 0;
-                        } else {
-                            tz = settings.users[timer.author].timezone;
-                        }
-
-                        let hourType;
-                        if (settings.users[timer.author] == null || !settings.users.hasOwnProperty(timer.author) || !settings.users[timer.author].hasOwnProperty("timezone"))  {
-                            hourType = "24h";
-                        } else {
-                            hourType = settings.users[timer.author];
+                            embed.setDescription($("TIMER_ELAPSED_DESCRIPITION_WITH_REASON", {ping: `<@${timer.author}>`}));
+                            embed.addField($("TIMER_ELAPSED_REASON_TITLE"), timer.reason, false);
                         }
 
 
-                        let time = moment(timer.timeout);
-
-                        embed.addField("Timeout Date", time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm Z" : "h:mm A Z"), false);
-                        embed.setFooter("To see all your timers, use " + prefix(message.guild.id) + "timers.");
+                        embed.addField($("TIMER_ELAPSED_TIMEOUT_DATE_TITLE"), $("SPECIAL_DATETIME", {time: {date: timer.timeout, h24: userSetting.h24, offset: userSetting.timezone}}), false);
+                        embed.setFooter($("TIMER_ELAPSED_FOOTER", {prefix: prefix(timer.channel == undefined ? undefined : client.channels.get(timer.channel).guild.id)}));
 
                         try {
                             if (timer.isChannelUser) {
@@ -344,6 +330,8 @@ async function processCommand(message, isMod, command, options) {
         
     } else if (command == "settz") {
         message.reply($("SETTZ_ABOUT", {prefix: prefix(message.guild.id)}));
+    } else if (command == "timer") {
+        message.reply($("TIMER_HOWTO", {prefix: prefix(message.guild.id)}))
     } else if (command.startsWith("timer ")) {
         var time;
         var indexOfFirstSplit = command.indexOf(" ", 6);
@@ -359,25 +347,25 @@ async function processCommand(message, isMod, command, options) {
         var seconds = parseTime(time);
 
         if (isNaN(seconds)) {
-            throw new UserInputError("Invalid length of time.");
+            throw new UserInputError($("TIMER_INVALID"));
         } else {
             var embed = new Discord.RichEmbed();
 
-            embed.setTitle(":alarm_clock: Timer Set");
+            embed.setTitle($("TIMER_SET_TITLE", {emoji: ":alarm_clock:"}));
             embed.setColor("#FED266");
-            embed.setDescription("Ok, I'll set that timer now.");
-            embed.addField("Duration", seconds + " seconds.", false);
+            embed.setDescription($("TIMER_SET_DESCRIPTION"));
+            embed.addField($("TIMER_SET_DURATION"), $("TIMER_SET_DURATION_CONTENT", {duration: {duration: moment.duration(moment().diff(moment().add(seconds, 'seconds')))}, timeout: {date: moment().add(seconds, 'seconds'), offset: options.offset, h24: options.h24}}), false);
 
             if (reason != "") {
-                embed.addField("Reason", reason, false);
+                embed.addField($("TIMER_SET_REASON"), reason, false);
             }
 
             if (!isMod) {
-                embed.addField("Alert", "Since you're not a moderator, I'll DM you the timer. Make sure that you allow DMs from this server, or you won't receive it.");
+                embed.addField($("TIMER_SET_ALERT"), $("TIMER_SET_ALERT_DESCRIPTION"));
             }
             message.channel.send("", {embed: embed});
 
-            var endDate = new Date().getTime() + seconds * 1000;
+            var endDate = moment().add(seconds, 'seconds');
 
             var timerObject = {
                 reason: reason,
@@ -398,18 +386,6 @@ async function processCommand(message, isMod, command, options) {
             settings.users[message.author.id].timers.push(timerObject);
         }
     } else if (command.startsWith("timers")) {
-        var hourType = settings.users[message.author.id].timeunit === undefined ? "24h" : settings.users[message.author.id].timeunit;
-        let setHour = false;
-        for (const param of command.split(" ")) {
-            if (param === "--12") {
-                setHour = true;
-                hourType = "12h"
-            } else if (param === "--24") {
-                setHour = true;
-                hourType = "24h"
-            }
-        }
-
         var userSetting = settings.users[message.author.id];
 
         if (userSetting == null) {
@@ -429,35 +405,36 @@ async function processCommand(message, isMod, command, options) {
 
         var embed = new Discord.RichEmbed();
         embed.setColor("#FED266");
-        embed.setTitle(":alarm_clock: Running Timers");
-        embed.setDescription("Timers that AstralMod is currently keeping track of for you")
+        embed.setTitle($("TIMERS_TITLE", {emoji: ":alarm_clock:"}));
+        embed.setDescription($("TIMERS_DESCRIPTION"))
         for (index in userSetting.timers) {
             var timer = userSetting.timers[index];
 
             var field = "";
-            field += "This timer will elapse in about " + moment.duration(timer.timeout - new Date().getTime()).humanize() + "\n";
-            let time = moment(timer.timeout);
-            field += "**Timeout date:** " + time.format("dddd, MMMM D,") + " at " + time.format(hourType === "24h" ? "HH:mm Z" : "h:mm A Z") + "\n";
+            field += $("TIMERS_ELAPSE", {duration: {duration: moment.duration(moment().diff(timer.timeout))}}) + "\n";
+            field +=  $("TIMERS_TIMEOUT_DATE", {timeout: {date: timer.timeout, h24: options.h24, offset: options.offset}}) + "\n";
 
             if (timer.reason == "") {
-                field += "**Reason:** No reason was provided\n";
+                field += $("TIMERS_REASON", {reason: $("TIMERS_NO_REASON")});
             } else {
-                field += "**Reason:** " + timer.reason + "\n";
+                field += $("TIMERS_REASON", {reason: timer.reason});
             }
+
+            field += "\n"
 
             if (timer.isChannelUser) {
-                field += "**Channel:** A DM will be sent";
+                field += $("TIMERS_CHANNEL", {reason: $("TIMERS_DM")});
             } else {
-                field += "**Channel:** <#" + timer.channel + ">";
+                field += $("TIMERS_CHANNEL", {reason: `<#${timer.channel}>`});
             }
 
-            embed.addField("Timer #" + parseInt(index), field);
+            embed.addField($("TIMERS_HEADER", {index: parseInt(index) + 1}), field);
         }
 
         message.channel.send("", {embed: embed});
     } else if (command.startsWith("rmtimer ")) {
         var timerToRemove = command.substr(8);
-        var index = parseInt(timerToRemove);
+        var index = parseInt(timerToRemove) - 1;
 
         if (isNaN(index)) {
             message.reply($("RMTIMER_ABOUT", {prefix: prefix(message.guild.id)}));
@@ -494,7 +471,7 @@ async function processCommand(message, isMod, command, options) {
             let messageToEdit = mte;
             getTime(location, message.member, $).then(function(timeDescriptor) {
                 let time = moment.utc();
-                messageToEdit.edit($("TIME_RESPONSE", {
+                messageToEdit.edit($("TIME", {
                     clockEmote: getClockEmoji(time.toDate()),
                     request: timeDescriptor.location,
                     time: {
