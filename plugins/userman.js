@@ -21,6 +21,8 @@
 var client;
 var consts;
 
+const moment = require('moment');
+
 //Variables for the deal command
 /*var actionMember = {};
 var actioningMember = {};
@@ -58,82 +60,80 @@ function pollBans() {
 let dealMessage = null;
 
 function processDeal(message) {
+    let $ = _[settings.users[message.author.id].locale];
+
     //Handle the deal command
     dealMessage.clearReactions();
 
     var msg = message.content;
     var member = actions[message.guild.id].actionMember;
     if (actions[message.guild.id].actionStage == 0) { //Select Action
-        if (msg.toLowerCase() == "cancel") { //Cancel Action
-            message.channel.send(':gear: Cancelled. Exiting action menu.');
+        if (msg.toLowerCase() == $("DEAL_CANCEL").toLowerCase()) { //Cancel Action
+            message.channel.send($("DEAL_CANCELLED", {emoji: ":gear:"}));
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == "interrogate" || msg.toLowerCase() == "i") && (message.guild.id == consts.bnb.id || message.guild.id == 287937616685301762 || message.guild.id == 305039436490735627)) {
+        } else if ((msg.toLowerCase() == $("DEAL_INTERROGATE_TEXT") || msg.toLowerCase() == $("DEAL_INTERROGATE_ABBREVIATION")) && (message.guild.id == consts.bnb.id || message.guild.id == consts.wow.id)) {
             if (message.guild.id == consts.bnb.id) {
                 member.addRole(member.guild.roles.get(consts.bnb.interrogationRole));
-            } else if (message.guild.id == 287937616685301762) {
-                member.addRole(member.guild.roles.get("319847521440497666"));
-            } else if (message.guild.id == 305039436490735627) {
-                member.addRole(member.guild.roles.get("326250571692769281"));
-            }
+            } else if (message.guild.id == consts.wow.id) {
+                member.addRole(member.guild.roles.get(consts.wow.interrogationRole));
+            } 
+            
             member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
-            message.channel.send(':gear: ' + getUserString(member) + " has been placed in interrogation.");
+            message.channel.send($("DEAL_INTERROGATED", {emoji: ":gear:", user: getUserString(member)}));
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == "jail" || msg.toLowerCase() == "j") && (message.guild.id == consts.bnb.id || message.guild.id == 263368501928919040 || message.guild.id == 305039436490735627)) {
+        } else if ((msg.toLowerCase() == $("DEAL_JAIL_TEXT") || msg.toLowerCase() == $("DEAL_JAIL_ABBREVIATION")) && (message.guild.id == consts.bnb.id)) { //WoW has no jail
             if (message.guild.id == consts.bnb.id) {
                 member.addRole(member.guild.roles.get(consts.bnb.jailRole));
-            } else if (message.guild.id == 305039436490735627) {
-                member.addRole(member.guild.roles.get("310196007919157250"));
-            } else {
-                member.addRole(member.guild.roles.get("267731524734943233"));
             }
+
             member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
-            message.channel.send(':gear: ' + getUserString(member) + " has been placed in jail.");
+            message.channel.send($("DEAL_JAILED", {emoji: ":gear:", user: getUserString(member)}));
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == "mute" || msg.toLowerCase() == "m") && (message.guild.id == consts.bnb.id || message.guild.id == 305039436490735627)) {
+        } else if ((msg.toLowerCase() == $("DEAL_MUTE_TEXT") || msg.toLowerCase() == $("DEAL_MUTE_ABBREVIATION")) && (message.guild.id == consts.bnb.id || message.guild.id == consts.wow.id)) {
             var roleId;
             if (message.guild.id == consts.bnb.id) {
                 roleId = consts.bnb.jailRole;
-            } else if (message.guild.id == 305039436490735627) {
-                roleId = "309883481024888842";
+            } else if (message.guild.id == consts.wow.id) {
+                roleId = "431965501355327500";
             }
             
             if (member.roles.get(roleId)) {
                 member.removeRole(member.roles.get(roleId));
-                message.channel.send(':gear: ' + getUserString(member) + " has been removed from time out.");
+                message.channel.send($("DEAL_UNMUTED", {emoji: ":gear:", user: getUserString(member)}));
                 member = null;
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             } else {
                 member.addRole(member.guild.roles.get(roleId));
-                message.channel.send(':gear: ' + getUserString(member) + " has been placed on time out.");
+                message.channel.send($("DEAL_MUTED", {emoji: ":gear:", user: getUserString(member)}));
                 member = null;
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }
-        } else if (msg.toLowerCase() == "kick" || msg.toLowerCase() == "k") {
+        } else if ((msg.toLowerCase() == $("DEAL_KICK_TEXT") || msg.toLowerCase() == $("DEAL_KICK_ABBREVIATION"))) {
             actions[message.guild.id].actionStage = 1;
-            message.channel.send(":gear: Enter reason for kicking " + getUserString(member) + " or `cancel`.");
+            message.channel.send($("DEAL_KICK_REASON", {emoji: ":gear:", user: getUserString(member)}));
             actions[message.guild.id].actionToPerform = "kick";
-        } else if (msg.toLowerCase() == "ban" || msg.toLowerCase() == "b") {
+        } else if ((msg.toLowerCase() == $("DEAL_BAN_TEXT") || msg.toLowerCase() == $("DEAL_BAN_ABBREVIATION"))) {
             actions[message.guild.id].actionStage = 1;
-            message.channel.send(":gear: Enter reason for banning " + getUserString(member) + " or `cancel`.");
+            message.channel.send($("DEAL_BAN_REASON", {emoji: ":gear:", user: getUserString(member)}));
             actions[message.guild.id].actionToPerform = "ban";
-        } else if (msg.toLowerCase() == "nick" || msg.toLowerCase == "nickname" || msg.toLowerCase() == "n") {
+        } else if ((msg.toLowerCase() == $("DEAL_NICK_TEXT") || msg.toLowerCase() == $("DEAL_NICK_ABBREVIATION"))) {
             actions[message.guild.id].actionStage = 1;
-            message.channel.send(":gear: Enter new nickname for " + getUserString(member) + ". Alternatively type `clear` or `cancel`.");
+            message.channel.send($("DEAL_NICK_NAME", {emoji: ":gear:", user: getUserString(member)}));
             actions[message.guild.id].actionToPerform = "nick";
-        } else if (msg.toLowerCase() == "tempban" || msg.toLowerCase() == "t") {
+        } else if ((msg.toLowerCase() == $("DEAL_TEMPBAN_TEXT") || msg.toLowerCase() == $("DEAL_TEMPBAN_ABBREVIATION"))) {
             actions[message.guild.id].actionStage = 1;
-            message.channel.send(":gear: Enter time to ban " + getUserString(member) + " for, or `cancel`.");
+            message.channel.send($("DEAL_TEMPBAN_TIME", {emoji: ":gear:", user: getUserString(member)}));
             actions[message.guild.id].actionToPerform = "tempban";
         } else {
-            message.channel.send(':gear: Unknown command. Exiting action menu.');
+            message.channel.send($("DEAL_UNKNOWN_COMMAND", {emoji: ":gear:"}));
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
@@ -142,29 +142,27 @@ function processDeal(message) {
                 logPromiseRejection(message, "messageDelete");
         });
     } else if (actions[message.guild.id].actionStage == 1) {
-        if (msg.toLowerCase() == "cancel") {
-            message.channel.send(':gear: Cancelled. Exiting action menu.');
+        if (msg.toLowerCase() == $("DEAL_CANCEL").toLowerCase()) {
+            message.channel.send($("DEAL_CANCELLED", {emoji: ":gear:"}));
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
         } else if (actions[message.guild.id].actionToPerform == "kick") {
             let kickFunction = function() {
                 member.kick(msg).then(function(member) {
-                    message.channel.send(':gear: ' + getUserString(member) + " has been kicked from the server.");
+                    message.channel.send($("DEAL_KICK_SUCCESS", {emoji: ":gear:", user: getUserString(member)}));
                     member = null;
                     actions[message.guild.id] = null;
                     releaseInput(message.guild.id);
                 }).catch(function() {
-                    message.channel.send(':gear: ' + getUserString(member) + " couldn't be kicked from the server. Exiting action menu");
+                    message.channel.send($("DEAL_KICK_FAILED", {emoji: ":gear:", user: getUserString(member)}));
                     member = null;
                     actions[message.guild.id] = null;
                     releaseInput(message.guild.id);
                 });
             }
 
-            member.send(":arrow_backward: You have been kicked from **" + message.guild.name + "** for the following reason:```\n" + msg + "```" + 
-                getRandom("Come back once you've grown up.",
-                          "You may re-enter, but it may be a good idea to step back for a bit.") + " :slight_smile:")
+            member.send($("DEAL_KICK_MESSAGE", {emoji: ":arrow_backward:", guild: `**${message.guild.name}**`, reason: `\`\`\`${msg}\`\`\``, smiley: ":slight_smile:"}))
                 .then(kickFunction).catch(kickFunction);
         } else if (actions[message.guild.id].actionToPerform == "ban") {
             if (banDescriptor[message.guild.id] == null) {
@@ -178,43 +176,43 @@ function processDeal(message) {
 
             let banFunction = function() {
                 member.ban(msg).then(function(member) {
-                    message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server.");
+                    message.channel.send($("DEAL_BAN_SUCCESS", {emoji: ":gear:", user: getUserString(member)}));
                     member = null;
                     actions[message.guild.id] = null;
                     releaseInput(message.guild.id);
                 }).catch(function() {
-                    message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu.");
+                    message.channel.send($("DEAL_BAN_FAILED", {emoji: ":gear:", user: getUserString(member)}));
                     member = null;
                     actions[message.guild.id] = null;
                     releaseInput(message.guild.id);
                 });
             }
 
-            member.send(":rewind: You have been banned from **" + message.guild.name + "** for the following reason:```\n" + msg + "```Have a good day, and we hope never to see you again. :slight_smile:")
+            member.send($("DEAL_BAN_MESSAGE", {emoji: ":rewind:", guild: `**${message.guild.name}**`, reason: `\`\`\`${msg}\`\`\``, smiley: ":slight_smile:"}))
                 .then(banFunction).catch(banFunction);
         } else if (actions[message.guild.id].actionToPerform == "tempban") {
             let timeToParse = msg.toLowerCase();
-            let time = parseTime(timeToParse);
+            var time = parseTime(timeToParse);
             if (isNaN(time)) {
-                message.channel.send(":gear: You'll need to supply a time for this user to be banned for. For example, `5d` for five days, or `30m` for 30 minutes. Alternatively, type `cancel` to cancel the temporary ban.");                
+                message.channel.send($("DEAL_TEMPBAN_TIME_INVALID", {emoji: ":gear:"}));                
             } else {
-                let endDate = new Date().getTime() + time * 1000;
+                var endDate = moment().add(time, 'seconds')
                 actions[message.guild.id].time = endDate;
                 actions[message.guild.id].actionStage = 2;
-                message.channel.send(":gear: Enter reason for temporarily banning " + getUserString(member) + " for " + parseInt(time) + " seconds until " + new Date(endDate).toUTCString() + ", or `cancel`.");
+                message.channel.send($("DEAL_TEMPBAN_REASON", {emoji: ":gear:", user: getUserString(member), duration: {duration: moment.duration(moment().diff(endDate))}, enddate: {date: endDate}}));
             }
         } else if (actions[message.guild.id].actionToPerform == "nick") {
             if (msg.toLowerCase() == "clear") {
                 msg = "";
             }
-            
+
             member.setNickname(msg).then(function(member) {
-                message.channel.send(':gear: ' + getUserString(member) + " has changed their nickname.");
+                message.channel.send($("DEAL_NICK_SUCCESS", {emoji: ":gear:", user: getUserString(member)}));
                 member = null;
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
             }).catch(function() {
-                message.channel.send(':gear: ' + getUserString(member) + " couldn't have their nickname changed. Exiting action menu.");
+                message.channel.send($("DEAL_NICK_FAILED", {emoji: ":gear:", user: getUserString(member)}));
                 member = null;
                 actions[message.guild.id] = null;
                 releaseInput(message.guild.id);
@@ -224,8 +222,8 @@ function processDeal(message) {
             logPromiseRejection(message, "messageDelete");
         });
     } else if (actions[message.guild.id].actionStage == 2) {
-        if (msg.toLowerCase() == "cancel") {
-            message.channel.send(':gear: Cancelled. Exiting action menu.');
+        if (msg.toLowerCase() == $("DEAL_CANCEL").toLowerCase()) {
+            message.channel.send($("DEAL_CANCELLED", {emoji: ":gear:"}));
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
@@ -244,18 +242,18 @@ function processDeal(message) {
         
                     settings.guilds[message.guild.id].tempbans.push(banObject);
 
-                    message.channel.send(':gear: ' + getUserString(member) + " has been banned from the server. This ban will be lifted at " + new Date(actions[message.guild.id].time).toUTCString() + ".");
+                    message.channel.send($("DEAL_TEMPBAN_SUCCESS", {emoji: ":gear:", user: getUserString(member)}));
                     member = null;
                     actions[message.guild.id] = null;
                     releaseInput(message.guild.id);
                 }).catch(function() {
-                    message.channel.send(':gear: ' + getUserString(member) + " couldn't be banned from the server. Exiting action menu");
+                    message.channel.send($("DEAL_TEMPBAN_FAILED", {emoji: ":gear:", user: getUserString(member)}));
                     member = null;
                     actions[message.guild.id] = null;
                     releaseInput(message.guild.id);
                 });
             }
-            member.send(":rewind: You have been temporarily banned from **" + message.guild.name + "** for the following reason:```\n" + msg + "```Your ban will be lifted on " + new Date(actions[message.guild.id].time).toUTCString() + ". Have a good day. :slight_smile:")
+            member.send($("DEAL_TEMPBAN_MESSAGE", {emoji: ":rewind:", guild: `**${message.guild.name}**`, reason: `\`\`\`${msg}\`\`\``, smiley: ":slight_smile:", duration: {duration: moment.duration(moment().diff(actions[message.guild.id].time))}, enddate: {offset: settings.users[member.id].timezone, date: moment(actions[message.guild.id].time)}}))
                 .then(banFunction).catch(banFunction);
         }
     }
@@ -415,7 +413,7 @@ function processCommand(message, isMod, command, options) {
         return true;
     } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
         if (actions[message.guild.id] != null) {
-            message.channel.send(':no_entry_sign: ERROR: ' + getUserString(actions[message.guild.id].actioningMember) + " is already managing another user.");
+            message.channel.send($("DEAL_ALREADY_DEALING", {emoji: "Lno_entry_sign:", user: getUserString(actions[message.guild.id].actioningMember)}));
         } else {
             if (command.startsWith("deal")) {
                 command = command.substr(5);
@@ -437,51 +435,76 @@ function processCommand(message, isMod, command, options) {
                 }
 
                 if (user == null) {
-                    throw new CommandError("No user found with that name on this server");
+                    throw new CommandError($("DEAL_USER_NOT_FOUND"));
                 } else {
                     var member = message.guild.member(user);
                     if (member == null) {
-                        throw new CommandError("An internal error was encountered.");
+                        throw new CommandError($("DEAL_INTERNAL_ERROR"));
                     } else {
-                        if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                            throw new CommandError("You're not allowed to manage this user.");
+                        if (false && member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
+                            throw new CommandError($("DEAL_NO_PERMISSIONS"));
                         } else {
                             var canDoActions = false;
-                            var msg = ':gear: ' + getUserString(member) + ": `cancel` ";
-                            let reactions = ["🇨"];
-                            if (member.kickable) {
-                                msg += '`(k)ick` ';
-                                canDoActions = true;
-                                reactions.push("🇰");
-                            }
-                            
-                            if (member.bannable) {
-                                msg += '`(b)an` `(t)empban` ';
-                                canDoActions = true;
-                                reactions.push("🇧");
-                                reactions.push("🇹");
-                            }
+                            var msg = $("DEAL_STRING", 
+                            {
+                                emoji: ":gear:", 
+                                user: getUserString(member),
+                                cancel: `\`${$("DEAL_CANCEL")}\` `,
+                                kick: (() => { 
+                                    if (member.kickable) {
+                                        canDoActions = true;
+                                        return `\`${$("DEAL_KICK")}\` `;
+                                    }
+                                    return ""
+                                })(),
+                                ban: (() => { 
+                                    if (member.bannable) {
+                                        canDoActions = true;
+                                        return `\`${$("DEAL_BAN")}\` `;
+                                    }
+                                    return ""
+                                })(),
+                                tempban: (() => { 
+                                    if (member.bannable) {
+                                        canDoActions = true;
+                                        return `\`${$("DEAL_TEMPBAN")}\` `;
+                                    }
+                                    return ""
+                                })(),
+                                nick: (() => { 
+                                    if (!member.highestRole.comparePositionTo(message.guild.me.highestRole) >= 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
+                                        canDoActions = true;
+                                        return `\`${$("DEAL_NICK")}\` `;
+                                    }
+                                    return ""
+                                })(),
+                                
+                                //TODO: Replace these with options
+                                //Maybe for AM 3.1 :)
 
-                            if (!member.highestRole.comparePositionTo(message.guild.me.highestRole) >= 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
-                                msg += '`(n)ick` ';
-                                canDoActions = true;
-                                reactions.push("🇳");
-                            }
-                            
-                            if (message.guild.id == 287937616685301762 || message.guild.id == consts.bnb.id) {
-                                msg += "`(i)nterrogate` ";
-                                canDoActions = true;
-                            }
-                            
-                            if (message.guild.id == consts.bnb.id || message.guild.id == 263368501928919040) {
-                                msg += "`(j)ail` ";
-                                canDoActions = true;
-                            }
-                            
-                            if (message.guild.id == consts.bnb.id) {
-                                msg += "`(m)ute` ";
-                                canDoActions = true;
-                            }
+                                interrogate: (() => { 
+                                    if (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id) {
+                                        canDoActions = true;
+                                        return `\`${$("DEAL_INTERROGATE")}\` `;
+                                    }
+                                    return ""
+                                })(),
+                                jail: (() => { 
+                                    if (message.guild.id == consts.bnb.id) {
+                                        canDoActions = true;
+                                        return `\`${$("DEAL_JAIL")}\` `;
+                                    }
+                                    return ""
+                                })(),
+                                mute: (() => { 
+                                    if (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id) {
+                                        canDoActions = true;
+                                        return `\`${$("DEAL_MUTE")}\` `;
+                                    }
+                                    return ""
+                                })(),
+
+                            })
                             
                             if (canDoActions) {
                                 let messageAuthor = message.author.id;
@@ -492,46 +515,9 @@ function processCommand(message, isMod, command, options) {
                                 message.channel.send(msg).then(function(message) {
                                     dealMessage = message;
                                     captureInput(processDeal, message.guild.id, messageAuthor);
-
-                                    for (reaction in reactions) {
-                                        message.react(reactions[reaction]);
-                                    }
-                                    
-                                    message.awaitReactions(function(reaction) {
-                                        if (reaction.count > 1 && reaction.users.has(messageAuthor)) {
-                                            return true;
-                                        }
-                                        return false;
-                                    }, {
-                                        max: 1
-                                    }).then(function(reactions) {
-                                        message.clearReactions();
-
-                                        let msg = {};
-                                        let reaction = reactions.first();
-                                        if (reaction.emoji.name == "🇨") {
-                                            msg.content = "c";
-                                        } else if (reaction.emoji.name == "🇰") {
-                                            msg.content = "k";
-                                        } else if (reaction.emoji.name == "🇧") {
-                                            msg.content = "b";
-                                        } else if (reaction.emoji.name == "🇹") {
-                                            msg.content = "t";
-                                        } else if (reaction.emoji.name == "🇳") {
-                                            msg.content = "n";
-                                        }
-                                        msg.guild = message.guild;
-                                        msg.channel = message.channel;
-                                        msg.delete = function() {
-                                            return new Promise(function(resolve, reject) {
-                                                resolve();
-                                            });
-                                        }
-                                        processDeal(msg);
-                                    });
                                 });
                             } else {
-                                throw new CommandError("No actions can be perfomed on this user.");
+                                throw new CommandError($("DEAL_NO_ACTIONS"));
                             }
                         }
                     }

@@ -180,8 +180,15 @@ function utcOffsetFromTimezone(location) {
     }
 }
 
-function getTime(location, member) {
+function getTime(location, member, $) {
     return new Promise(function(resolve, reject) {
+        if (!isNan(parseFloat(location)) && (-14 < parseFloat(location) & parseFloat(location) < 14)) { //Check for a manually specified UTC offset
+            resolve({
+                offset: parseFloat(location),
+                location: $("TIME_UTC", )
+            })
+        }
+
         if (utcOffsetFromTimezone(location) !== undefined) { //Check for a UTC offset and a UTC named timezone first
             resolve({
                 offset: utcOffsetFromTimezone(location),
@@ -319,7 +326,7 @@ async function processCommand(message, isMod, command, options) {
         var utcOffset;
         var location = command.substr(6);
 
-        getTime(location, message.member).then(obj => {
+        getTime(location, message.member, $).then(obj => {
             var userSettings = settings.users[message.author.id];
 
             if (userSettings == null) {
@@ -485,9 +492,8 @@ async function processCommand(message, isMod, command, options) {
 
         sendPreloader($("TIME_PREPARING"), message.channel).then(mte => {
             let messageToEdit = mte;
-            getTime(location, message.member).then(function(timeDescriptor) {
+            getTime(location, message.member, $).then(function(timeDescriptor) {
                 let time = moment.utc();
-
                 messageToEdit.edit($("TIME_RESPONSE", {
                     clockEmote: getClockEmoji(time.toDate()),
                     request: timeDescriptor.location,
