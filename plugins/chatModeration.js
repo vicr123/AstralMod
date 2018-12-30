@@ -197,7 +197,7 @@ function processCommand(message, isMod, command, options) {
             }
 
             if (user.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
-                throw new CommandError($("CHNK_MISSING_PERMISSION"));
+                throw new CommandError($("CHNK_MISSING_USER_PERMISSION"));
             }
 
             let nick = "";

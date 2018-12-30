@@ -38,6 +38,42 @@ const i18next = require('i18next');
 let i18nextbackend = require('i18next-node-fs-backend');
 
 
+var nodeCleanup = require('node-cleanup');
+nodeCleanup(function (exitCode, signal) {
+    if (global.settings != null) {
+        log("Saving settings...");
+        try {
+            var contents = JSON.stringify(settings, null, 4);
+    
+            //Encrypt the contents
+            let iv = Buffer.from(crypto.randomBytes(16)).toString("hex").slice(0, 16);
+    
+            var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
+            var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8"), cipher.final())]);
+    
+            fs.writeFileSync("settings.json", settingsJson, "utf8");
+            fs.writeFileSync("iv", iv);
+            log("Settings saved!", logType.good);
+        } catch (exception) {
+            log("Settings couldn't be saved. You may lose some settings.", logType.critical);
+        }
+    }
+    
+    log("Now exiting AstralMod.", logType.good);
+
+    client.user.setStatus('invisible').then(() => {
+        process.kill(process.pid, signal);
+    })
+    
+    nodeCleanup.uninstall(); // don't call cleanup handler again
+    return false;
+}, {
+    ctrl_C: "{^C}",
+    uncaughtException: "Uh oh. Look what happened:"
+});
+
+
+
 global.prefix = (id) => {
     if (id && settings && settings.guilds && settings.guilds[id] && settings.guilds[id].serverPrefix) {
         return settings.guilds[id].serverPrefix;
@@ -768,11 +804,11 @@ pluginsButton.on('click', function() {
 screen.append(pluginsButton);
 
 textBox.key('C-c', function(ch, key) {
-    shutdown();
+    process.exit();
 });
 
 screen.key('C-c', function() {
-    shutdown();
+    process.exit();
 });
 
 screen.key('C-g', function() {
@@ -1065,7 +1101,7 @@ function processConsoleInput(line) {
                    "exit                    Exits AstralMod";
         log(help, logType.info);
     } else if (lLine == "exit") {
-        shutdown();
+        process.exit();
     } else if (lLine == "loadunenc") {
         log("Usage: loadunenc [filename]", logType.critical);
     } else if (lLine.startsWith("loadunenc ")) {
@@ -1453,33 +1489,6 @@ textBox.key('tab', function() {
     }
 });
 
-function shutdown() {
-    if (global.settings != null) {
-        log("Saving settings...");
-        try {
-            var contents = JSON.stringify(settings, null, 4);
-
-            //Encrypt the contents
-            let iv = Buffer.from(crypto.randomBytes(16)).toString("hex").slice(0, 16);
-
-            var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
-            var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8"), cipher.final())]);
-
-            fs.writeFileSync("settings.json", settingsJson, "utf8");
-            fs.writeFileSync("iv", iv);
-            log("Settings saved!", logType.good);
-        } catch (exception) {
-            log("Settings couldn't be saved. You may lose some settings.", logType.critical);
-        }
-    }
-
-    log("Now exiting AstralMod.", logType.good);
-    process.exit(0);
-}
-
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
-
 log("Welcome to AstralMod!", logType.good);
 
 global.getUserString = function(user) {
@@ -1749,9 +1758,9 @@ function processModCommand(message, command) {
     } else if (lText == prefix(message.guild.id) + "poweroff") {
         if (message.author.id == global.botOwner.id) {
             message.reply("AstralMod is now exiting.").then(function () {
-                shutdown();
+                process.exit();
             }).then(function() {
-                shutdown();
+                process.exit();
             });
         }
     }
@@ -2101,7 +2110,7 @@ function processAmCommand(message, options, command) {
         message.channel.send("", { embed: embed });
         return true;
     } else if (command.startsWith("sudo")) {
-        if (isMod(message.guild.member)) {
+        if (isMod(message.member)) {
             message.reply($("SUDO_ALREADY_SUDO"));
             return;
         }
@@ -2978,7 +2987,7 @@ async function processMessage(message) {
                     options.locale = availableTranslations.getTranslation(param.substr(2));
                 } else {
                     continue;
-                }
+                }   
 
                 text = text.replace(param, "");
             }
@@ -3127,7 +3136,7 @@ function newGuild(guild) {
         }
 
 
-        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by tying `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
+        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by typing `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
         if (channel == null) {
             guild.owner.send(message);
         } else {
@@ -3412,6 +3421,8 @@ function banAdd(guild, user) {
             channel.send("", {embed: embed});
         });
     }
+
+    countBans();
 }
 
 function memberRemove(member) {
@@ -3689,6 +3700,9 @@ function resume(replayed) {
 
 function countBans() {
     banCounts = {};
+    
+    banCounts['334842311135577346'] = 1;
+    
     for (let [id, guild] of client.guilds) {
         guild.fetchBans().then(function(bans) {
             for ([uid, user] of bans) {
@@ -3870,6 +3884,29 @@ function readyOnce() {
     setTimeout(saveSettings, 30000);
 
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
+
+    if (process.argv.includes("--debug")) {
+        client.users.set("334842301035577346", {
+            avatar: "341014541221625868",
+            avatarURL: "https://cdn.discordapp.com/attachments/337665122908504074/341014541221625868/9k1.png",
+            bot: false,
+            client: client,
+            createdAt: new Date("2017-07-12T23:43:21+0000"),
+            discriminator: "0889",
+            displayAvatarURL: "https://cdn.discordapp.com/attachments/337665122908504074/341014541221625868/9k1.png",
+            dmChannel: client.users.get("384454726512672768").dmChannel,
+            id: "334842311135577346",
+            presence: {
+                game: null,
+                status: "offline",
+            },
+            tag: "Vrabbers#0889",
+            username: "Vrabbers",
+
+            send: (content, options) => client.users.get("384454726512672768").send(content, options),
+            toString: () => "<@334842311135577346>"
+        })
+    }
 
     countBans();
     loadInvites();
