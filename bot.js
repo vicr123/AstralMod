@@ -1538,8 +1538,7 @@ function setGame() {
     client.user.setActivity(getRandom("with ban buttons",
                                       "Annoying Victor",
                                       prefix() + "help",
-                                      "v." + amVersion,
-                                      "v." + amVersion,
+                                      "Version " + amVersion,
                                       "Google Pay",
                                       "theShell",
                                       "Monopoly",
@@ -3040,8 +3039,6 @@ function newGuild(guild) {
             channel.send(message);
         }
     }
-
-    postDBL();
 }
 
 function removeGuild(guild) {
@@ -3050,8 +3047,6 @@ function removeGuild(guild) {
         settings.guilds[guild.id] = null;
         delete settings.guilds[guild.id];
         log("Removed Guild: " + guild.id, logType.info);
-
-        postDBL();
     } else {
         log("Attempted to delete unavailable guild: " + guild.id, logType.warning);
     }
@@ -3479,6 +3474,25 @@ function vacuumSettings() {
         }
     }
 
+    for (let key in settings.users) {
+        log("Checking internal user " + key);
+
+        if(settings.users[key].hasOwnProperty("timers") && settings.users[key].timers.length > 0)
+            for(let timer of settings.users[key].timers) {
+                if (timer.timeout instanceof Date) {
+                    log(`Detected timer on user ${key} with Date timeout. Converting to moment.`, logType.info);
+                    timer.timeout = moment(timer.timeout);
+                    changesMade = true;
+                }
+
+                if (typeof timer.timeout == 'string' || timer.timeout instanceof String) {
+                    log(`Detected spoiled timer on user ${key} Deleting timer.`, logType.info);
+                    settings.users[key].timers[timer] = null;
+                    changesMade = true;
+                }
+            }
+    }
+
     //Iterate over all guilds in settings
     for (let key in settings.guilds) {
         log("Checking internal guild " + key);
@@ -3773,8 +3787,6 @@ function readyOnce() {
         renderScreen();
     }, 1000);
 
-    postDBL();
-
     client.fetchApplication().then(app => global.botOwner = app.owner);
 }
 
@@ -3792,52 +3804,6 @@ client.on('reconnecting', function() {
 
     commandEmitter.emit('disconnect');
 });
-
-function postDBL() {
-    if (process.argv.indexOf("--nodbl") == -1) {
-        //Post server count to DBL
-        let payload;
-
-        if (client.shard == null) {
-            payload = JSON.stringify({
-                server_count: client.guilds.size
-            });
-        } else {
-            payload = JSON.stringify({
-                server_count: client.guilds.size,
-                shard_id: client.shard.id,
-                shard_count: client.shard.count
-            });
-        }
-
-        let request = https.request({
-            host: "discordbots.org",
-            port: 443,
-            path: "/api/bots/" + client.user.id + "/stats",
-            method: "POST",
-            headers: {
-                "User-Agent": "AstralMod/" + amVersion,
-                "Authorization": consts.keys.dblKey,
-                "Content-Type": "application/json"
-            }
-        }, function(res) {
-            res.setEncoding("utf8");
-            res.on("data", function(data) {
-                try {
-                    let response = JSON.parse(data);
-                    if (response.hasOwnProperty("error")) {
-                        log("DBL: " + response.error, logType.error);
-                    }
-                } catch (err) {
-                    log("DBL: " + data, logType.error);
-                }
-            });
-        })
-
-        request.write(payload);
-        request.end();
-    }
-}
 
 if (process.argv.indexOf("--debug") == -1) {
     log("Running AstralMod without --debug command line flag. Debug output disabled.", logType.info);

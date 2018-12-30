@@ -12,7 +12,6 @@
             "console": "integratedTerminal",
             "args": [
                 "--blueprint",
-                "--nodbl"
             ]
         },
         {
@@ -23,8 +22,6 @@
             "console": "integratedTerminal",
             "args": [
                 "--debug",
-                "--blueprint",
-                "--nodbl"
             ]
         },
         {
