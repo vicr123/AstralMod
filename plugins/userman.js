@@ -341,7 +341,7 @@ function processCommand(message, isMod, command, options) {
             uinfo(users[index], message.channel, locale, options.offset, options.h24);
         } else {
             throw new CommandError("No user found with that name");
-        }
+            }
 
         return true;
     } else if (command == "find") {

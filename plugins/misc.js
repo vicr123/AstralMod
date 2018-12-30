@@ -25,6 +25,7 @@ let translate;
 
 function obtainPic(user, channel, $) {
     let embed = new Discord.RichEmbed();
+
     embed.setAuthor(user.tag, user.displayAvatarURL);
     embed.setTitle($("PIC_PROFILE_PICTURE"));
     embed.setImage(user.displayAvatarURL);
