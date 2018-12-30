@@ -472,7 +472,7 @@ async function processCommand(message, isMod, command, options) {
             let messageToEdit = mte;
             getTime(location, message.member, $).then(function(timeDescriptor) {
                 let time = moment.utc();
-                messageToEdit.edit($("TIME", {
+                messageToEdit.edit($("TIME_RESPONSE", {
                     clockEmote: getClockEmoji(time.toDate()),
                     request: timeDescriptor.location,
                     time: {
