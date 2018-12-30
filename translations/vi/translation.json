@@ -117,7 +117,7 @@
     "PINS_PINS_DESCRIPTION": "Đây là tất cả tin nhắn bạn đặt ghim trên",
     "PINS_HOWTO_PIN": "Để đặt ghim trên tin nhắn, dùng lệnh `{{prefix}}pin`",
     "PINS_HOWTO_PAGINATE": "Trang {{pageNumber}}/{{numberOfPages}}. Để xem trang khác, dùng `{{prefix}}pins [số trang]`",
-    "PINS_HOWTO_VIEW": "*Dùng `{{prefix}}pins --view {{pinNumber}}` để xem ảnh này.**",
+    "PINS_HOWTO_VIEW": "*Dùng `{{prefix}}pins --view {{pinNumber}}` để xem ảnh này.*",
     "PINS_PIN_AUTHOR": "     - *{{pinAuthor}}* trong {{channel}} {{jumpToMessage}}",
     "PINS_UNPIN_USAGE": "Sử dụng: `{{prefix}}unpin id`. Dùng `{{prefix}}pins`để tìm ID ghim. Để hiểu thêm, đánh `{{prefix}}help unpin`.",
     "PINS_UNPIN_SUCCESS": "Okay, tôi gỡ ghim trên tin nhắn đó.",
