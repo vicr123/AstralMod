@@ -577,7 +577,7 @@ function processCommand(message, isMod, command, options) {
                 }
                 throw new UserInputError($("WEATHER_ERROR_UNSET_LOCATION", {user: users[0].username, prefix: prefix(message.guild.id)}));
             } else {
-                throw new CommandError("No user found with that name");
+                throw new CommandError($("WEATHER_USER_NOT_FOUND"));
             }
         }
     } else if (command == "weather") {
@@ -586,7 +586,7 @@ function processCommand(message, isMod, command, options) {
         }
 
         if (settings.users[message.author.id].location == null) {
-            throw new CommandError("Unknown location. Please set your location with `" + prefix(message.guild.id) + "setloc`");
+            throw new UserInputError($("WEATHER_ERROR_UNSET_LOCATION", {user: message.author.username, prefix: prefix(message.guild.id)}));
         } else {
             sendCurrentWeather(message, settings.users[message.author.id].location, "id", options, message.author.tag, skiiness);
         }
@@ -599,29 +599,45 @@ function processCommand(message, isMod, command, options) {
             var query = new YQL("select * from geo.places where text=\""+ location +"\"");
             
             query.exec(function(err, data) {
-                if (err) {
-                    throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
-                } else {
-                    var userSettings = settings.users[message.author.id];
-                
-                    if (userSettings == null) {
-                        userSettings = {};
-                    }
-                    var place;
-                    if (data.query.results.place[0] != null) place = data.query.results.place[0];
-                    else place = data.query.results.place;
-                        
-                    userSettings.location = place.woeid;
-            
-                    settings.users[message.author.id] = userSettings;
-                        
-                    log(place);
-                        
-                    //Translation through the ages
+                try {
+                    if (err) {
+                        throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
+                    } else {
+                        if (data == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
+                        if (data.query == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
+                        if (data.query.results == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
+                        if (data.query.results.place == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
+    
+                        var userSettings = settings.users[message.author.id];
                     
-                    //message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
-                    //message.reply("Your location is now " + place.name + ", " + place.country.code + " (" + place.centroid.latitude + ", " + place.centroid.longitude + ")");
-                    message.reply($("SETLOC_CITY_SET", {place: place.name, countryCode: place.country.code, lat: place.centroid.latitude, long: place.centroid.longitude}))
+                        if (userSettings == null) {
+                            userSettings = {};
+                        }
+                        var place;
+                        if (data.query.results == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
+                        if (data.query.results.place[0] != null) place = data.query.results.place[0];
+                        else place = data.query.results.place;
+                            
+                        userSettings.location = place.woeid;
+                
+                        settings.users[message.author.id] = userSettings;
+                            
+                        log(place);
+                            
+                        //Translation through the ages
+                        
+                        //message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
+                        //message.reply("Your location is now " + place.name + ", " + place.country.code + " (" + place.centroid.latitude + ", " + place.centroid.longitude + ")");
+                        message.reply($("SETLOC_CITY_SET", {place: place.name, countryCode: place.country.code, lat: place.centroid.latitude, long: place.centroid.longitude}))
+                    } 
+                } catch (err) {
+                    let embed = new Discord.RichEmbed;
+                    embed.setColor("#EC7979");
+                    embed.addField($("ERROR_DETAILS"), err.message);
+                    embed.setTitle(getEmoji("userexception") + " " + $("ERROR_USER_INPUT"));
+                    embed.setDescription($("ERROR_NOT_UNDERSTAND"));
+                    
+                    message.channel.send(embed);
                 }
             });
         }

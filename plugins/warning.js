@@ -90,7 +90,7 @@ function processCommand(message, isMod, command, options) {
                         }
                         currentWarnings[message.guild.id] = tracker;
 
-                        message.channel.send($("WARN_ENTER_REASON", {user: getUserString(user), emoji: ":gear:"}));
+                        message.channel.send($("WARN_ENTER_REASON", {user: getUserString(client.users.get(user)), emoji: ":gear:"}));
                     }
                 } else {
                     throw new CommandError($("WARN_NO_USER_FOUND"));
@@ -143,13 +143,13 @@ function processCommand(message, isMod, command, options) {
                             warner = message.guild.member(warning.warner);
                         }
 
-                        embed.addField($("LSWARN_WARNING_TITLE", {index: (parseInt(index) + 1)}), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: warning.timestamp, h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}));
+                        embed.addField($("LSWARN_WARNING_TITLE", {index: (parseInt(index) + 1)}), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: warning.timestamp, h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}), true);
                     }
 
                     message.channel.send("", {embed: embed});
                 }
             } else {
-                throw new CommandError("No user found with that name");
+                throw new CommandError($("LSWARN_COULDNT_FIND_USER"));
             }
         } else if (command.startsWith("rmwarn ")) {
             var args = command.substr(7);
@@ -160,7 +160,8 @@ function processCommand(message, isMod, command, options) {
             id = parseInt(id) - 1;
 
             if (isNaN(id)) {
-                throw new UserInputError($("RMWARN_ABOUT", {prefix: prefix(message.guild.id)}));
+                message.reply($("RMWARN_ABOUT", {prefix: prefix(message.guild.id)}));
+                return;
             }
 
             var users = parseUser(user, message.guild);
@@ -189,17 +190,19 @@ function processCommand(message, isMod, command, options) {
                     }
 
                     if (userWarnings.length == 0) {
-                        message.reply($("RMWARN_NO_WARNINGS", {user: getUserString(message.guild.member(user))}));
-                        return;
+                        throw new UserInputError($("RMWARN_NO_WARNINGS", {user: getUserString(message.guild.member(user))}));
                     }
 
                     if (userWarnings.length <= id) {
-                        message.reply($("RMWARN_INVALID_INDEX", {user: getUserString(message.guild.member(user))}));
-                        return;
+                        throw new UserInputError($("RMWARN_INVALID_INDEX", {user: getUserString(message.guild.member(user))}));
                     }
 
+                    if (id < 0) {
+                        throw new UserInputError($("RMWARN_INVALID_INDEX", {user: getUserString(message.guild.member(user))}));
+                    }        
+
                     userWarnings.splice(id, 1);
-                    message.reply($("RMWARN_SUCCESS", {emoji: ":gear:", prefix: prefix(message.guild.id)}));
+                    message.channel.send($("RMWARN_SUCCESS", {emoji: ":gear:", prefix: prefix(message.guild.id)}));
 
                     warnings[user] = userWarnings;
                     settings.guilds[message.guild.id].warnings = warnings;

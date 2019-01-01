@@ -21,6 +21,7 @@
 var client;
 var consts;
 const Discord = require('discord.js');
+const moment = require('moment')
 
 function processCommand(message, isMod, command, options) {
     let $ = _[options.locale];
@@ -38,21 +39,34 @@ function processCommand(message, isMod, command, options) {
             var args = command.substr(3);
             var split = args.indexOf(" ");
 
-            var successfulDelete = function(messages) {
+            var messagesToDelete = [];
+
+            var successfulDelete = function(messages, m) {
                 var messagesDeleted = messages.size;
 
-                if (messages.size != num && num != -1) {
+                if (messagesToDelete.length > 1) {
+                    var messagesDeleted = messagesToDelete.length;
+                }
+
+
+                if (messagesDeleted != num && num != -1) {
                     if (messagesDeleted == 1) {
                         throw new CommandError($("RM_ITS_A_CATASTROPHE"));
                     } else {
-                        message.channel.send($("RM_DELETED_FEWER", {count: messagesDeleted - 1, emoji: ":large_orange_diamond:"}));
+                        if (m)
+                            m.edit($("RM_DELETED_FEWER", {count: messagesDeleted - 1, emoji: ":large_orange_diamond:"}));
+                        else
+                            message.channel.send($("RM_DELETED_FEWER", {count: messagesDeleted - 1, emoji: ":large_orange_diamond:"}));
                     }
                 } else {
-                    message.channel.send($("RM_DELETED", {count: messagesDeleted - 1, emoji:":white_check_mark:"}));
+                    if (m)
+                        m.edit($("RM_DELETED", {count: messagesDeleted - 1, emoji:":white_check_mark:"}));
+                    else
+                        message.channel.send($("RM_DELETED", {count: messagesDeleted - 1, emoji:":white_check_mark:"}));
                 }
             }
 
-            var failedDelete = function(err) {
+            var failedDelete = err => {
                 let embed = new Discord.RichEmbed;
                 embed.setColor("#EC7979");
 
@@ -63,6 +77,8 @@ function processCommand(message, isMod, command, options) {
                 } else {
                     embed.setTitle(getEmoji("exception") + " " + $("ERROR_INTERNAL"));
                     embed.setDescription($("ERROR_INTERNAL_DESCRIPTION"));
+                    embed.addField($("ERROR_DETAILS"), err.message);
+                    log(err, logType.critical);
                 }
                 
                 message.channel.send(embed);
@@ -88,19 +104,7 @@ function processCommand(message, isMod, command, options) {
                 
                 var users = parseUser(userString, message.guild);
                 if (users.length > 0) {
-                    user = null;
-
-                    //Filter out members
-                    for (var i = 0; i < users.length; i++) {
-                        if (message.guild.members.has(users[i].id)) {
-                            user = users[i].id;
-                            i = users.length;
-                        }
-                    }
-
-                    if (user == null) {
-                        throw new CommandError($("RM_NO_USER"));
-                    }
+                    user = users[0]
                 } else {
                     throw new CommandError($("RM_NO_USER"));
                 }
@@ -108,7 +112,7 @@ function processCommand(message, isMod, command, options) {
 
             if (num != numString && num != -1) {
                 throw new UserInputError($("RM_NAN"));
-            } else if (user == "") {
+            } else if (!(user instanceof Discord.User)) {
                 if (num == -1) {
                     throw new UserInputError($("RM_ALL_ABOUT"));
                 } else {
@@ -120,32 +124,35 @@ function processCommand(message, isMod, command, options) {
                     num = num + 1; //Also remove the mod:rm command
                 }
 
-                var messagesToDelete = [
+                messagesToDelete = [
                     message
                 ]
-                var userMember = message.guild.member(user);
+
+                var userMember = user;
 
                 //Search for the previous num messages from user
                 var messagesFound = 0;
                 var forceStop = false;
                 
-                function nextBatch(allMessages) {
+                function nextBatch(allMessages, preloader) {
                     for (let [id, message] of allMessages) {
-                        if (message.author.id == user) {
+                        if (message.author.id == user.id) {
                             messagesToDelete.push(message);
                             messagesFound++;
     
                             if (messagesFound == num - 1) {
                                 break;
                             }
-                            if (messagesFound == 100) {
+                            if (messagesFound == 99) {
                                 forceStop = true;
                                 break;
                             }
                         }
                         lastMessage = id;
 
-                        if (message.createdAt.getTime() - new Date().getTime() > 86400000) {
+                        log("processed batch");
+
+                        if (moment(message.createdAt) <= moment().subtract(1, 'day')) {
                             forceStop = true;
                             break;
                         }
@@ -155,22 +162,25 @@ function processCommand(message, isMod, command, options) {
                         if (messagesFound.length == 0) {
                             message.channel.send($("RM_DELETED_NONE", {emoji: ":no_entry_sign:"}));
                         } else {
-                            message.channel.bulkDelete(messagesToDelete, true).then(successfulDelete).catch(failedDelete);
+                            message.channel.bulkDelete(messagesToDelete, true).then(r => successfulDelete(r, preloader)).catch(failedDelete);
                         }
                     } else {
-                        message.channel.fetchMessages({limit: 50, before: lastMessage}).then(nextBatch).catch(function() {
-                            message.channel.bulkDelete(messagesToDelete, true).then(successfulDelete).catch(failedDelete);
+                        message.channel.fetchMessages({limit: 50, before: lastMessage}).then(r => nextBatch(r, preloader)).catch(function() {
+                            message.channel.bulkDelete(messagesToDelete, true).then(r => successfulDelete(r, preloader)).catch(failedDelete);
                         });
                     }
                 }
 
-                message.channel.fetchMessages({limit: 50, before: message.id}).then(nextBatch).catch(failedDelete);
-
                 if (num != -1) {
-                    message.reply($("RM_ALL_DOWNLOADING", {count: num - 1, user: getUserString(userMember)}));
+                    sendPreloader($("RM_ALL_DOWNLOADING", {count: num - 1, user: getUserString(userMember)}), message.channel).then(m => {
+                        message.channel.fetchMessages({limit: 50, before: message.id}).then(r => nextBatch(r, m)).catch(failedDelete);
+                    })
                 } else {
-                    message.reply($("RM_ALL_DOWNLOADING_ALL", {user: getUserString(userMember)}));
+                    sendPreloader($("RM_ALL_DOWNLOADING_ALL", {user: getUserString(userMember)}), message.channel).then(m => {
+                        message.channel.fetchMessages({limit: 50, before: message.id}).then(r => nextBatch(r, m)).catch(failedDelete);
+                    })
                 }
+
             }
         } else if (command == "chnk") {
             message.channel.send($("CHNK_ABOUT", {prefix: prefix(message.guild.id)}));

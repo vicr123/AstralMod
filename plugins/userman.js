@@ -441,7 +441,7 @@ function processCommand(message, isMod, command, options) {
                     if (member == null) {
                         throw new CommandError($("DEAL_INTERNAL_ERROR"));
                     } else {
-                        if (false && member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
+                        if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
                             throw new CommandError($("DEAL_NO_PERMISSIONS"));
                         } else {
                             var canDoActions = false;
@@ -472,7 +472,7 @@ function processCommand(message, isMod, command, options) {
                                     return ""
                                 })(),
                                 nick: (() => { 
-                                    if (!member.highestRole.comparePositionTo(message.guild.me.highestRole) >= 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
+                                    if (message.guild.me.highestRole.comparePositionTo(member.highestRole) > 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_NICK")}\` `;
                                     }
@@ -483,21 +483,21 @@ function processCommand(message, isMod, command, options) {
                                 //Maybe for AM 3.1 :)
 
                                 interrogate: (() => { 
-                                    if (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id) {
+                                    if (member.manageable && (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id)) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_INTERROGATE")}\` `;
                                     }
                                     return ""
                                 })(),
                                 jail: (() => { 
-                                    if (message.guild.id == consts.bnb.id) {
+                                    if (member.manageable && (message.guild.id == consts.bnb.id)) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_JAIL")}\` `;
                                     }
                                     return ""
                                 })(),
                                 mute: (() => { 
-                                    if (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id) {
+                                    if (member.manageable && (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id)) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_MUTE")}\` `;
                                     }
@@ -570,9 +570,7 @@ module.exports = {
                 help.title = prefix(message.guild.id) + "uinfo";
                 help.usageText = prefix(message.guild.id) + "uinfo user";
                 help.helpText = h$("UINFO_HELPTEXT");
-                help.options = [
-                    h$("UINFO_OPTION1")
-                ]
+                help.availableOptions = h$("UINFO_OPTION1");
                 help.param1 = h$("UINFO_PARAM1");
                 break;
             case "fetchuser":
