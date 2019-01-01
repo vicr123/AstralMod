@@ -92,6 +92,7 @@
     "UINFO_HELPTEXT": "Gets information about a user",
     "UINFO_OPTION1": "`--index [num]` Zero based index of user to query",
     "UINFO_PARAM1": "The user that you want to get the information of.",
+    
     "FETCHUSER_HELPTEXT": "Adds a user to AstralMod's user store",
     "FETCHUSER_PARAM1": "The user ID you want to add to AstralMod's store.",
     "FETCHUSER_REMARKS": "AstralMod is only aware of users it's in servers with. You can use this commands to let AstralMod know about users from other servers so you can use commands like `uinfo` or `pic` on them.",
