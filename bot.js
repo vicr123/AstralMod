@@ -37,9 +37,7 @@ const client = new Discord.Client({
 const i18next = require('i18next');
 let i18nextbackend = require('i18next-node-fs-backend');
 
-
-var nodeCleanup = require('node-cleanup');
-nodeCleanup(function (exitCode, signal) {
+global.shutdown = () => {
     if (global.settings != null) {
         log("Saving settings...");
         try {
@@ -58,21 +56,19 @@ nodeCleanup(function (exitCode, signal) {
             log("Settings couldn't be saved. You may lose some settings.", logType.critical);
         }
     }
-    
+        
     log("Now exiting AstralMod.", logType.good);
 
-    client.user.setStatus('invisible').then(() => {
-        process.kill(process.pid, signal);
+    client.user.setStatus("invisible").then((user) => {
+        // log(user.presence.status);
+        process.exit();
     })
-    
-    nodeCleanup.uninstall(); // don't call cleanup handler again
-    return false;
-}, {
-    ctrl_C: "{^C}",
-    uncaughtException: "Uh oh. Look what happened:"
-});
+}
 
-
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+process.on("SIGQUIT", shutdown);
+process.on("SIGHUP", shutdown);
 
 global.prefix = (id) => {
     if (id && settings && settings.guilds && settings.guilds[id] && settings.guilds[id].serverPrefix) {
@@ -337,7 +333,13 @@ global.awaitUserConfirmation = function(options) {
             message.react('🚫');
 
             let timeout = setTimeout(function() {
-                if (!options.doNotClear) message.clearReactions();
+                if (!options.doNotClear) 
+                    message.clearReactions();
+                else {
+                    for (let [, reaction] of message.reactions) {
+                        reaction.remove().catch(() => { });
+                    }
+                }
 
                 if (options.msgOnSuccess != "") {
                     embed.setDescription(options.msgOnSuccess);
@@ -357,7 +359,13 @@ global.awaitUserConfirmation = function(options) {
                 //Cancel the function
                 clearTimeout(timeout);
                 
-                if (!options.doNotClear) message.clearReactions();
+                if (!options.doNotClear) 
+                    message.clearReactions();
+                else {
+                    for (let [, reaction] of message.reactions) {
+                        reaction.remove().catch(() => { });
+                    }
+                }
 
                 if (options.msgOnFail != "") {
                     embed.setDescription(options.msgOnFail);
@@ -804,11 +812,11 @@ pluginsButton.on('click', function() {
 screen.append(pluginsButton);
 
 textBox.key('C-c', function(ch, key) {
-    process.exit();
+    shutdown();
 });
 
 screen.key('C-c', function() {
-    process.exit();
+    shutdown();
 });
 
 screen.key('C-g', function() {
@@ -1101,7 +1109,7 @@ function processConsoleInput(line) {
                    "exit                    Exits AstralMod";
         log(help, logType.info);
     } else if (lLine == "exit") {
-        process.exit();
+        shutdown();
     } else if (lLine == "loadunenc") {
         log("Usage: loadunenc [filename]", logType.critical);
     } else if (lLine.startsWith("loadunenc ")) {
@@ -1758,9 +1766,9 @@ function processModCommand(message, command) {
     } else if (lText == prefix(message.guild.id) + "poweroff") {
         if (message.author.id == global.botOwner.id) {
             message.reply("AstralMod is now exiting.").then(function () {
-                process.exit();
+                shutdown();
             }).then(function() {
-                process.exit();
+                shudtdown();
             });
         }
     }
@@ -3885,7 +3893,7 @@ function readyOnce() {
 
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
 
-    if (process.argv.includes("--debug")) {
+    if (process.argv.includes("--debug")) { //Leaf hair :)
         client.users.set("334842301035577346", {
             avatar: "341014541221625868",
             avatarURL: "https://cdn.discordapp.com/attachments/337665122908504074/341014541221625868/9k1.png",
@@ -3906,6 +3914,8 @@ function readyOnce() {
             send: (content, options) => client.users.get("384454726512672768").send(content, options),
             toString: () => "<@334842311135577346>"
         })
+
+
     }
 
     countBans();
