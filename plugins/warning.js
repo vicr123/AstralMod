@@ -1,7 +1,7 @@
 /****************************************
  *
  *   Warnings: Plugin for AstralMod that manages warnings
- *   Copyright (C) 2017 Victor Tran
+ *   Copyright (C) 2019 Victor Tran, John Tur
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by

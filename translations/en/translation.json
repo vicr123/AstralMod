@@ -392,7 +392,7 @@
     "SPAMCTL_OFF": "Spam filtering is now off for this server.",
     "SPAMCTL_ON": "Spam filtering is now on for this server.",
     "SPAMCTL_OFF_TEXT": "off",
-    "SPAMCTL_ON_TEXT": "off",
+    "SPAMCTL_ON_TEXT": "on",
     "SPAMCTL_CURRENTLY_OFF": "Spam filtering is currently off for this server.",
     "SPAMCTL_CURRENTLY_ON": "Spam filtering is currently on for this server.",
     
