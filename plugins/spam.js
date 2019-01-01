@@ -162,34 +162,35 @@ function processCommand(message, isMod, command, options) {
             }
             replyStr += "\n" + $("SPAMCTL_ABOUT", {prefix: prefix(message.guild.id)});
             message.reply(replyStr);
-        }
-    }
-
-    if (command == "spamdata") {
-        /** @type{Array} */
-        var lastMessagesOfUser = spamObject.lastMessages[message.author.id];
-        if (lastMessagesOfUser == null) {
-            lastMessagesOfUser = [];
+            }
         }
 
-        /** @type{Number} */
-        var spamCountingUser = spamObject.spamCounting[message.author.id];
-        if (spamCountingUser == null) {
-            spamCountingUser = 0;
+        if (command == "spamdata") {
+            /** @type{Array} */
+            var lastMessagesOfUser = spamObject.lastMessages[message.author.id];
+            if (lastMessagesOfUser == null) {
+                lastMessagesOfUser = [];
+            }
+
+            /** @type{Number} */
+            var spamCountingUser = spamObject.spamCounting[message.author.id];
+            if (spamCountingUser == null) {
+                spamCountingUser = 0;
+            }
+
+            /** @type{Number} */
+            var nonSpamCountingUser = spamObject.nonSpamCounting[message.author.id];
+            if (nonSpamCountingUser == null) {
+                nonSpamCountingUser = 0;
+            }
+
+            var embed = new Discord.RichEmbed;
+            embed.setAuthor(message.member.displayName, message.author.displayAvatarURL);
+            embed.addField($("SPAMDATA_DATA_TITLE"), `${$("SPAMDATA_DETECTED")} ${spamCountingUser}\n${$("SPAMDATA_FORGIVENESS")} ${nonSpamCountingUser}`, true);
+            embed.setColor(consts.colors.info);
+
+            message.reply($("SPAMDATA_TITLE"), {embed: embed});
         }
-
-        /** @type{Number} */
-        var nonSpamCountingUser = spamObject.nonSpamCounting[message.author.id];
-        if (nonSpamCountingUser == null) {
-            nonSpamCountingUser = 0;
-        }
-
-        var embed = new Discord.RichEmbed;
-        embed.setAuthor(message.member.displayName, message.author.displayAvatarURL);
-        embed.addField($("SPAMDATA_DATA_TITLE"), `${$("SPAMDATA_DETECTED")} ${spamCountingUser}\n${$("SPAMDATA_FORGIVENESS")} ${nonSpamCountingUser}`, true);
-        embed.setColor(consts.colors.info);
-
-        message.reply($("SPAMDATA_TITLE"), {embed: embed});
     }
 }
 
