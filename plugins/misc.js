@@ -182,7 +182,7 @@ function processCommand(message, isMod, command, options) {
                     message.reply(":large_orange_diamond: " + stdout);
                 } else {
                     let embed = new Discord.RichEmbed("calculation");
-                    embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
+                    embed.setAuthor("theCalculator", "https://raw.githubusercontent.com/vicr123/contemporary-icons/master/apps/16/accessories-calculator.svg");
                     embed.setColor("#EC7979");
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
                     embed.setDescription($("CALC_DESC"));
