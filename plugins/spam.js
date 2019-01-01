@@ -144,11 +144,11 @@ function processCommand(message, isMod, command, options) {
     if (isMod) {
         if (command.startsWith("spamctl ")) {
             var isOn = command.substr(8);
-            if (isOn == "on") {
+            if (isOn.toLowerCase() == $("SPAMCTL_ON_TEXT").toLowerCase()) {
                 settings.guilds[message.guild.id].spamCtl = true;
                 message.reply($("SPAMCTL_ON"));
-            } else if (isOn == "off") {
-                settings.guilds[message.guild.id].spamCtl = false;
+                if (isOn.toLowerCase() == $("SPAMCTL_OFF_TEXT").toLowerCase()) {
+                    settings.guilds[message.guild.id].spamCtl = false;
                 message.reply($("SPAMCTL_OFF"));
             } else {
                 message.reply($("SPAMCTL_ABOUT"));
@@ -187,7 +187,7 @@ function processCommand(message, isMod, command, options) {
         var embed = new Discord.RichEmbed;
         embed.setAuthor(message.member.displayName, message.author.displayAvatarURL);
         embed.addField($("SPAMDATA_DATA_TITLE"), `${$("SPAMDATA_DETECTED")} ${spamCountingUser}\n${$("SPAMDATA_FORGIVENESS")} ${nonSpamCountingUser}`, true);
-        embed.setColor("#81EC79");
+        embed.setColor(consts.colors.info);
 
         message.reply($("SPAMDATA_TITLE"), {embed: embed});
     }
@@ -221,11 +221,12 @@ module.exports = {
     },
     acquireHelp: function(helpCmd, message, h$) {
         var help = {};
+        let $ = _[settings.users[message.author.id].locale];
 
         switch (helpCmd) {
             case "spamctl":
                 help.title = prefix(message.guild.id) + "spamctl";
-                help.usageText = prefix(message.guild.id) + "spamctl on|off";
+                help.usageText = prefix(message.guild.id) + `spamctl ${$("SPAMCTL_ON_TEXT")}|${$("SPAMCTL_OFF_TEXT")}`;
                 help.helpText = h$("SPAMCTL_HELPTEXT");
                 help.param1 = h$("SPAMCTL_PARAM1");
                 break;

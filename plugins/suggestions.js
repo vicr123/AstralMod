@@ -53,7 +53,7 @@ function processCommand(message, isMod, command, options) {
             }).then(() => {
                 let embed = new Discord.RichEmbed();
                 embed.setAuthor($$("SUGGEST_SUGGESTION_TITLE", {user: message.author.username}), message.author.avatarURL);
-                embed.setColor("#81EC79");
+                embed.setColor(consts.colors.info);
                 embed.setDescription(coll.content);
                 embed.setTimestamp();
                 message.guild.channels.get(settings.guilds[message.guild.id].suggestions).send(embed);

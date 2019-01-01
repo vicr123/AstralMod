@@ -40,11 +40,12 @@ function pollBans() {
                     let tempban = guildSetting.tempbans[index];
                     if (tempban.timeout < date) {
                         try {
+                            let $$ = _[settings.guilds[key].locale];
                             //Unban user
-                            client.guilds.get(key).unban(tempban.user, "Temporary Ban lifted");
+                            client.guilds.get(key).unban(tempban.user, $$("GUILD_TEMPBAN_LIFTED_REASON"));
 
                             //Notify server staff
-                            client.channels.get(guildSetting.botWarnings).send(":asterisk: <@" + tempban.user + ">'s temporary ban has been lifted.");
+                            client.channels.get(guildSetting.botWarnings).send($$("GUILD_TEMPBAN_LIFTED", {emoji: ":asterisk:", user: `<@${tempban.user}>`}));
                         } catch (err) {
                             //Couldn't unban user
                         }

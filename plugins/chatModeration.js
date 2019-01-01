@@ -68,7 +68,7 @@ function processCommand(message, isMod, command, options) {
 
             var failedDelete = err => {
                 let embed = new Discord.RichEmbed;
-                embed.setColor("#EC7979");
+                embed.setColor(consts.colors.fail);
 
                 if (num >= 99) {
                     embed.addField($("ERROR_DETAILS"), $("RM_TOO_HIGH"));

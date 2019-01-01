@@ -33,7 +33,7 @@ function menu(options, $, user) { //direction, fetchOptions
     const embed = new Discord.RichEmbed();
     embed.setTitle($("PINS_TITLE"));
     embed.setDescription($("PINS_DESCRIPTION"));
-    embed.setColor("#81EC79");
+    embed.setColor(consts.colors.info);
 
     embed.setFooter($("PINS_FOOTER", {user: user.username}), user.avatarURL);
 
@@ -134,7 +134,7 @@ function processCommand(message, isMod, command, options) {
                         let embed = menu({ message: currentMessage }, $, currentUser);
                         embed.setTitle($("PINS_TITLE"));
                         embed.setDescription($("PINS_PIN_SUCCESS"));
-                        embed.setColor("#81EC79");
+                        embed.setColor(consts.colors.done);
                         
                         flaggingMessage.edit(embed);
 
@@ -149,7 +149,7 @@ function processCommand(message, isMod, command, options) {
                         let embed = new Discord.RichEmbed();
                         embed.setTitle($("PINS_TITLE"));
                         embed.setDescription($("PINS_PIN_CANCEL"));
-                        embed.setColor("#81EC79");
+                        embed.setColor(consts.colors.fail);
                         embed.setFooter($("PINS_FOOTER", {user: currentUser.username}), currentUser.avatarURL);
                         flaggingMessage.edit(embed);
                     }
@@ -179,6 +179,7 @@ function processCommand(message, isMod, command, options) {
         if (!flagArray || flagArray.length < 1) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("PINS_NO_PINS"));
+            embed.setColor(consts.colors.info)
             embed.setDescription($("PINS_NO_PINS_DESCRIPTION", {prefix: prefix(message.guild.id)}));
             return message.channel.send(embed);
         }
@@ -195,7 +196,7 @@ function processCommand(message, isMod, command, options) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("PINS_PIN_TITLE", {emoji: consts.config.pinToPinEmoji, pinNumber: pinNumber}));
             embed.setDescription($("PINS_JUMP_TEXT", {jump: `[${$("PINS_JUMP")}](https://discordapp.com/channels/${channel.guild.id}/${channel.id}/${flagItem.message})`, channel: `<#${channel.id}>`}))
-            embed.setColor("#81EC79");
+            embed.setColor(consts.colors.info);
 
             channel.fetchMessage(flagItem.message).then(function(fMessage) {
                 let flagMessage = fMessage.content + "\n";
@@ -235,7 +236,7 @@ function processCommand(message, isMod, command, options) {
         let embed = new Discord.RichEmbed;
         embed.setTitle($("PINS_PINS_TITLE", {emoji: consts.config.pinToPinEmoji}));
         embed.setDescription($("PINS_PINS_DESCRIPTION"));
-        embed.setColor("#81EC79");
+        embed.setColor(consts.colors.info);
 
 
         let fullPages = Math.ceil(flagArray.length / 4);

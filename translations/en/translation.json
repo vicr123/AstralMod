@@ -290,20 +290,18 @@
     "GUILD_BAN_ADD_INVITES": "Created Invites",
     "GUILD_BAN_ADD_BANNED_BY": "Banned By",
     "GUILD_BAN_ADD_BAN_REASON": "Reason",
-
     "GUILD_MESSAGE_NO_CONTENT": "[no content]",
     "GUILD_NICKNAME_CLEARED": "[cleared]",
-
     "GUILD_MESSAGE_DELETE": "{{emoji}} **{{user}}** {{channel}} `{{time, datetime}}`. {{message}}",
     "GUILD_MESSAGE_EDIT": "{{emoji}} **{{user}}** {{channel}} `{{time, datetime}}`. {{oldmessage}}{{newmessage}}",
-
     "GUILD_USER_ADD": "{{emoji}} {{user}}",
     "GUILD_USER_INVITE": "{{emoji}} {{user}} using invite {{invite}}",
-
     "GUILD_ATTACHMENTS": "The following files were attached to this message:",
     "GUILD_ATTACHMENT": "```{{filename}} @ {{count}} byte long```",
     "GUILD_ATTACHMENT_plural": "```{{filename}} @ {{count}} bytes long```",
-    
+    "GUILD_TEMPBAN_LIFTED": "{{emoji}} {{user}}'s temporary ban has been lifted.",
+    "GUILD_TEMPBAN_LIFTED_REASON": "Temporary ban lifted", 
+
     "SPAM_WARNING": "Y'know, we don't appreciate it when you spam. (#{{warningNo}})",
     "SPAM_GUILD_WARNING": "{{emoji}} {{author}} was spamming on {{channel}}.",
     "SPAM_ENOUGH": "I've told you way too many times. The staff have been informed. (#{{warningNo}})",
@@ -393,6 +391,8 @@
     "SPAMCTL_ABOUT": "Pass `on` or `off` to this command (like this: `{{prefix}}spamctl on`) to toggle this setting. For more information, type `{{prefix}}help spamctl`",
     "SPAMCTL_OFF": "Spam filtering is now off for this server.",
     "SPAMCTL_ON": "Spam filtering is now on for this server.",
+    "SPAMCTL_OFF_TEXT": "off",
+    "SPAMCTL_ON_TEXT": "off",
     "SPAMCTL_CURRENTLY_OFF": "Spam filtering is currently off for this server.",
     "SPAMCTL_CURRENTLY_ON": "Spam filtering is currently on for this server.",
     
