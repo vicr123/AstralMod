@@ -27,7 +27,6 @@
     "localize": "^0.4.7",
     "moment": "^2.21.0",
     "moment-duration-format": "^2.2.2",
-    "node-cleanup": "^2.1.2",
     "openweathermap-js": "^1.0.1",
     "opusscript": "0.0.3",
     "yandex-translate": "^2.1.2",
