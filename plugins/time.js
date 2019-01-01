@@ -186,7 +186,7 @@ function getTime(location, member, $) {
         if (!isNaN(parseFloat(location)) && (-14 < parseFloat(location) & parseFloat(location) < 14)) { //Check for a manually specified UTC offset
             resolve({
                 offset: parseFloat(location),
-                location: $("TIME_UTC", )
+                location: $("TIME_UTC", {number: parseFloat(location)})
             })
         }
 
@@ -238,8 +238,8 @@ function getTime(location, member, $) {
     })
 }
 
-function getClockEmoji(date = new Date()) {
-    var hour = date.getHours();
+function getClockEmoji(date) {
+    var hour = date.hours();
     if (hour > 11) {
         hour -= 12;
     }
@@ -250,7 +250,7 @@ function getClockEmoji(date = new Date()) {
     var firstPart = ":clock" + parseInt(hour);
     var secondPart = ":";
 
-    var min = date.getMinutes();
+    var min = date.minutes();
     if (min > 45) {
         firstPart = ":clock" + parseInt(hour + 1);
         if (hour == 12) {
@@ -472,8 +472,8 @@ async function processCommand(message, isMod, command, options) {
             let messageToEdit = mte;
             getTime(location, message.member, $).then(function(timeDescriptor) {
                 let time = moment.utc();
-                messageToEdit.edit($("TIME_RESPONSE", {
-                    clockEmote: getClockEmoji(time.toDate()),
+                messageToEdit.edit($("TIME", {
+                    clockEmote: getClockEmoji(time.utcOffset(timeDescriptor.offset)),
                     request: timeDescriptor.location,
                     time: {
                         date: time,
