@@ -390,9 +390,11 @@
     "SINFO_LACKPERM_BAN": "- AstralMod is lacking the Ban permission. AstralMod will not be able to ban users in this server.\n",
     "SINFO_LACKPERM_MANAGE_NICKNAME": "- AstralMod is lacking the Manage Nicknames permission. AstralMod will not be able to change nicknames in this server.\n",
     
-    "SPAMCTL_ABOUT": "Usage: `{{prefix}}spamctl on|off`. For more information, type `{{prefix}}help spamctl`",
+    "SPAMCTL_ABOUT": "Pass `on` or `off` to this command (like this: `{{prefix}}spamctl on`) to toggle this setting. For more information, type `{{prefix}}help spamctl`",
     "SPAMCTL_OFF": "Spam filtering is now off for this server.",
     "SPAMCTL_ON": "Spam filtering is now on for this server.",
+    "SPAMCTL_CURRENTLY_OFF": "Spam filtering is currently on for this server.",
+    "SPAMCTL_CURRENTLY_ON": "Spam filtering is currently off for this server.",
     
     "SPAMDATA_TITLE": "Here's how close I am to getting annoyed at you:", 
     "SPAMDATA_DATA_TITLE": "Anger Levels",

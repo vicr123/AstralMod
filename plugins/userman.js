@@ -73,10 +73,10 @@ function processDeal(message) {
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == $("DEAL_INTERROGATE_TEXT") || msg.toLowerCase() == $("DEAL_INTERROGATE_ABBREVIATION")) && (message.guild.id == consts.bnb.id || message.guild.id == consts.wow.id)) {
-            if (message.guild.id == consts.bnb.id) {
+        } else if ((msg.toLowerCase() == $("DEAL_INTERROGATE_TEXT") || msg.toLowerCase() == $("DEAL_INTERROGATE_ABBREVIATION")) && ((consts.bnb && message.guild.id == consts.bnb.id) || (consts.wow && message.guild.id == consts.wow.id))) {
+            if ((consts.bnb && message.guild.id == consts.bnb.id)) {
                 member.addRole(member.guild.roles.get(consts.bnb.interrogationRole));
-            } else if (message.guild.id == consts.wow.id) {
+            } else if ((consts.wow && message.guild.id == consts.wow.id)) {
                 member.addRole(member.guild.roles.get(consts.wow.interrogationRole));
             } 
             
@@ -85,8 +85,8 @@ function processDeal(message) {
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == $("DEAL_JAIL_TEXT") || msg.toLowerCase() == $("DEAL_JAIL_ABBREVIATION")) && (message.guild.id == consts.bnb.id)) { //WoW has no jail
-            if (message.guild.id == consts.bnb.id) {
+        } else if ((msg.toLowerCase() == $("DEAL_JAIL_TEXT") || msg.toLowerCase() == $("DEAL_JAIL_ABBREVIATION")) && ((consts.bnb && message.guild.id == consts.bnb.id))) { //WoW has no jail
+            if ((consts.bnb && message.guild.id == consts.bnb.id)) {
                 member.addRole(member.guild.roles.get(consts.bnb.jailRole));
             }
 
@@ -95,11 +95,11 @@ function processDeal(message) {
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == $("DEAL_MUTE_TEXT") || msg.toLowerCase() == $("DEAL_MUTE_ABBREVIATION")) && (message.guild.id == consts.bnb.id || message.guild.id == consts.wow.id)) {
+        } else if ((msg.toLowerCase() == $("DEAL_MUTE_TEXT") || msg.toLowerCase() == $("DEAL_MUTE_ABBREVIATION")) && ((consts.bnb && message.guild.id == consts.bnb.id) || (consts.wow && message.guild.id == consts.wow.id))) {
             var roleId;
-            if (message.guild.id == consts.bnb.id) {
+            if ((consts.bnb && message.guild.id == consts.bnb.id)) {
                 roleId = consts.bnb.jailRole;
-            } else if (message.guild.id == consts.wow.id) {
+            } else if ((consts.wow && message.guild.id == consts.wow.id)) {
                 roleId = "431965501355327500";
             }
             
@@ -483,21 +483,21 @@ function processCommand(message, isMod, command, options) {
                                 //Maybe for AM 3.1 :)
 
                                 interrogate: (() => { 
-                                    if (member.manageable && (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id)) {
+                                    if (member.manageable && ((consts.wow && message.guild.id == consts.wow.id) || (consts.bnb && message.guild.id == consts.bnb.id))) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_INTERROGATE")}\` `;
                                     }
                                     return ""
                                 })(),
                                 jail: (() => { 
-                                    if (member.manageable && (message.guild.id == consts.bnb.id)) {
+                                    if (member.manageable && (consts.bnb && message.guild.id == consts.bnb.id)) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_JAIL")}\` `;
                                     }
                                     return ""
                                 })(),
                                 mute: (() => { 
-                                    if (member.manageable && (message.guild.id == consts.wow.id || message.guild.id == consts.bnb.id)) {
+                                    if (member.manageable && ((consts.wow && message.guild.id == consts.wow.id) || (consts.bnb && message.guild.id == consts.bnb.id))) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_MUTE")}\` `;
                                     }
