@@ -29,7 +29,7 @@ function obtainPic(user, channel, $) {
     embed.setAuthor(user.tag, user.displayAvatarURL);
     embed.setTitle($("PIC_PROFILE_PICTURE"));
     embed.setImage(user.displayAvatarURL);
-    embed.setColor("#81EC79");
+    embed.setColor(consts.colors.done);
     channel.send(embed);
 }
 
@@ -78,7 +78,7 @@ function processCommand(message, isMod, command, options) {
         }).then(function() {
             var embed = new Discord.RichEmbed("uinfo");
             embed.setAuthor(g.name, g.iconURL);
-            embed.setColor("#81EC79");
+            embed.setColor(consts.colors.info);
             embed.setFooter($("SINFO_GUILDID", {id:g.id}));
             embed.setDescription($("SINFO_SERVER_INFORMATION"));
             {
@@ -195,7 +195,7 @@ function processCommand(message, isMod, command, options) {
                 } else {
                     let embed = new Discord.RichEmbed("calculation");
                     embed.setAuthor("theCalculator", "https://raw.githubusercontent.com/vicr123/contemporary-icons/master/apps/16/accessories-calculator.svg");
-                    embed.setColor("#EC7979");
+                    embed.setColor(consts.colors.done);
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
                     embed.setDescription($("CALC_DESC"));
                     
@@ -217,7 +217,7 @@ function processCommand(message, isMod, command, options) {
                 } else {
                     let embed = new Discord.RichEmbed("calculation");
                     embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
-                    embed.setColor("#81EC79");
+                    embed.setColor(consts.colors.done);
                     //embed.setFooter(tr("Guild ID:") + " " + g.id);
                     embed.setDescription($("CALC_DESC"));
                     
@@ -232,7 +232,7 @@ function processCommand(message, isMod, command, options) {
         });
     } else if (command == "tr") {
         let embed = new Discord.RichEmbed();
-        embed.setColor("#81EC79");
+        embed.setColor(consts.colors.done);
         let str = ""
 
         translate.getLanguages({ui: options.locale.substring(0, 2)}, (err, res) => {
@@ -283,7 +283,7 @@ function processCommand(message, isMod, command, options) {
                         try {
                             let embed = new Discord.RichEmbed();
                             if (res.code != 200) {
-                                embed.setColor("#EC7979");
+                                embed.setColor(consts.colors.fail);
                                 embed.setTitle($("TRANSLATE_ERROR_TITLE"));
                                 embed.setDescription($("TRANSLATE_ERROR_DESCRIPTION")),
                                 embed.addField($("TRANSLATE_ERROR_DETAILS"), res.message);
@@ -293,7 +293,7 @@ function processCommand(message, isMod, command, options) {
                             }
     
                             embed.setAuthor($("TRANSLATE_TITLE"));
-                            embed.setColor("#81EC79");
+                            embed.setColor(consts.colors.done);
                             //embed.setFooter(tr("Guild ID:") + " " + g.id);
                             embed.setTitle($("TRANSLATE_POWERED_BY"));
                             embed.setURL("http://translate.yandex.com/");
@@ -304,7 +304,7 @@ function processCommand(message, isMod, command, options) {
                             message.edit(embed);    
                         } catch (err) {
                             let embed = new Discord.RichEmbed();
-                            embed.setColor("#EC7979");
+                            embed.setColor(consts.colors.fail);
                             embed.setTitle($("TRANSLATE_ERROR_TITLE"));
                             embed.setDescription($("TRANSLATE_ERROR_DESCRIPTION")),
                             embed.addField($("TRANSLATE_ERROR_DETAILS"), err.message);

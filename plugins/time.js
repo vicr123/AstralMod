@@ -263,20 +263,20 @@ function getClockEmoji(date) {
 }
 
 function pollTimers() {
-    var date = moment()
+    var date = moment();
     for (key in settings.users) {
         var userSetting = settings.users[key];
         if (userSetting != null) {
             if (userSetting.timers != null) {
                 for (index in userSetting.timers) {
-                    var timer = userSetting.timers[index];
+                    var timer = userSetting.timers[parseInt(index)];
                     if (timer.timeout < date) {
                         let $ = _[userSetting.locale];
 
                         var embed = new Discord.RichEmbed();
 
                         embed.setTitle($("TIMER_ELAPSED_TITLE", {emoji: ":alarm_clock:"}));
-                        embed.setColor("#FED266");
+                        embed.setColor(consts.colors.done);
 
                         if (timer.reason == "") {
                             embed.setDescription($("TIMER_ELAPSED_DESCRIPTION", {ping: `<@${timer.author}>`}));
@@ -353,7 +353,7 @@ async function processCommand(message, isMod, command, options) {
             var embed = new Discord.RichEmbed();
 
             embed.setTitle($("TIMER_SET_TITLE", {emoji: ":alarm_clock:"}));
-            embed.setColor("#FED266");
+            embed.setColor(consts.colors.info);
             embed.setDescription($("TIMER_SET_DESCRIPTION"));
             embed.addField($("TIMER_SET_DURATION"), $("TIMER_SET_DURATION_CONTENT", {duration: {duration: moment.duration(moment().diff(moment().add(seconds, 'seconds')))}, timeout: {date: moment().add(seconds, 'seconds'), offset: options.offset, h24: options.h24}}), false);
 
@@ -405,7 +405,7 @@ async function processCommand(message, isMod, command, options) {
         }
 
         var embed = new Discord.RichEmbed();
-        embed.setColor("#FED266");
+        embed.setColor(consts.colors.info);
         embed.setTitle($("TIMERS_TITLE", {emoji: ":alarm_clock:"}));
         embed.setDescription($("TIMERS_DESCRIPTION"))
         for (index in userSetting.timers) {
@@ -485,7 +485,7 @@ async function processCommand(message, isMod, command, options) {
                 let embed = new Discord.RichEmbed;
                 embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
                 embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
-                embed.setColor("#EC7979");
+                embed.setColor(consts.colors.fail);
                 embed.addField($("TIME_ERROR_DETAILS"), err);
 
                 messageToEdit.edit(embed);
@@ -494,7 +494,7 @@ async function processCommand(message, isMod, command, options) {
             let embed = new Discord.RichEmbed;
             embed.setTitle($("TIME_ERROR", {emoji: ":clock10:"}));
             embed.setDescription($("TIME_ERROR_NOT_RETRIEVED"));
-            embed.setColor("#EC7979");
+            embed.setColor(consts.colors.fail);
             embed.addField($("ERROR_DETAILS"), err);
 
             messageToEdit.edit(embed);

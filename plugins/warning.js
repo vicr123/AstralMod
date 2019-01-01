@@ -132,7 +132,7 @@ function processCommand(message, isMod, command, options) {
                     }
 
                     var embed = new Discord.RichEmbed();
-                    embed.setColor("#3C3C96");
+                    embed.setColor(consts.colors.info);
                     embed.setTitle($("LSWARN_TITLE"));
                     embed.setDescription($("LSWARN_DESCRIPTION"))
                     for (index in userWarnings) {
@@ -231,7 +231,7 @@ function processCommand(message, isMod, command, options) {
         }
 
         var embed = new Discord.RichEmbed();
-        embed.setColor("#3C3C96");
+        embed.setColor(consts.colors.info);
         embed.setTitle($("LSWARN_TITLE"));
         embed.setDescription($("LSWARN_DESCRIPTION"));
         for (index in userWarnings) {

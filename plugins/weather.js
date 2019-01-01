@@ -99,17 +99,20 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 255, 0)");
             if (timeOfDay == "day") {
                 retval.gradient = "rgb(120, 200, 255)";
+                retval.arr = [120, 200, 255];
                 retval.secondary = "rgb(50, 180, 255)";
                 retval.text = "black";
                 retval.image = sunnyImage;
             } else if (timeOfDay == "night") {
                 retval.weatherString = $("WEATHERSTRING_CLEAR")
                 retval.gradient = "rgb(0, 50, 100)";
+                retval.arr = [0, 50, 100];
                 retval.secondary = "rgb(0, 25, 50)";
                 retval.text = "white";
                 retval.image = moonyImage;
             } else { //transition
                 retval.gradient = "rgb(234, 128, 25)";
+                retval.arr = [234, 128, 25];
                 retval.secondary = "rgb(170, 90, 20)";
                 retval.text = "black";
                 retval.image = sunnyImage;
@@ -133,6 +136,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
+            retval.arr = [200, 200, 200];
             retval.secondary = "rgb(170, 170, 170)";
             retval.text = "black";
             retval.image = cloudyImage;
@@ -147,6 +151,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
+            retval.arr = [200, 200, 200];
             retval.secondary = "rgb(170, 170, 170)";
             retval.text = "black";
             retval.image = rainImage;
@@ -158,6 +163,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
+            retval.arr = [200, 200, 200];
             retval.secondary = "rgb(170, 170, 170)";
             retval.text = "black";
             retval.image = windImage;
@@ -170,6 +176,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
+            retval.arr = [200, 200, 200];
             retval.secondary = "rgb(170, 170, 170)";
             retval.text = "black";
             retval.image = windImage;
@@ -179,6 +186,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
             //retval.gradient.addColorStop(0, "rgba(255, 100, 0, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(255, 100, 0)";
+            retval.arr = [255, 100, 0];
             retval.secondary = "rgb(200, 100, 0)";
             retval.text = "black";
             retval.image = sunnyImage;
@@ -195,6 +203,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
             //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
             //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
             retval.gradient = "rgb(200, 200, 200)";
+            retval.arr = [200, 200, 200];
             retval.secondary = "rgb(170, 170, 170)";
             retval.text = "black";
             retval.image = thunderImage;
@@ -207,6 +216,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
         case 43:
             //Snow
             retval.gradient = "rgb(200, 200, 200)";
+            retval.arr = [200, 200, 200];
             retval.secondary = "rgb(170, 170, 170)";
             retval.text = "black";
             retval.image = snowImage;
@@ -216,6 +226,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
         case 46:
             //Rain + Snow
             retval.gradient = "rgb(200, 200, 200)";
+            retval.arr = [200, 200, 200];
             retval.secondary = "rgb(170, 170, 170)";
             retval.text = "black";
             retval.image = rainsnowImage;
@@ -247,7 +258,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         let embed = new Discord.RichEmbed;
                         embed.setTitle($("WEATHER_ERROR", {emoji: ":thunder_cloud_rain:"}));
                         embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
-                        embed.setColor("#EC7979");
+                        embed.setColor(consts.colors.fail);
                         embed.addField($("WEATHER_ERROR_DETAILS"), $("WEATHER_ERROR_CITY_NOT_FOUND"));
                         embed.addField($("WEATHER_ERROR_TRY_THIS"), $("WEATHER_ERROR_TRY_THIS_DESCRIPTION", {prefix: prefix(message.guild.id)}));
 
@@ -526,7 +537,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
                     e.setTitle($("WEATHER_TITLE"));
                     e.setURL(data.query.results.channel.link);
-                    e.setColor("#81EC79");
+                    // e.setColor(display.arr);
                     e.setFooter(getRandom($("WEATHER_PLEASE_PRINT"),
                                         $("WEATHER_TEAR_PERFORATED_LINE"),
                                         $("WEATHER_SO_MANY_DEGREES"),
@@ -631,7 +642,7 @@ function processCommand(message, isMod, command, options) {
                     } 
                 } catch (err) {
                     let embed = new Discord.RichEmbed;
-                    embed.setColor("#EC7979");
+                    embed.setColor(consts.colors.fail);
                     embed.addField($("ERROR_DETAILS"), err.message);
                     embed.setTitle(getEmoji("userexception") + " " + $("ERROR_USER_INPUT"));
                     embed.setDescription($("ERROR_NOT_UNDERSTAND"));
