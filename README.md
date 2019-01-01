@@ -36,6 +36,9 @@ module.exports = {
 
 3. Run the bot by running `node bot.js` with your preferred options.
 
+### Emoji Server?
+Set up a server with the emoji in the `/emoji` folder, join AstralMod to the server and set the `emojiServer` property in the `consts.js` file to the server ID of that folder.
+
 ### Command line options
 - `--blueprint` Runs AstralMod as AstralMod Blueprint. The version number is replaced with "Blueprint" and the prefix is changed.
 - `--debug` Enables debugging output in the console
