@@ -121,7 +121,9 @@ function processCommand(message, isMod, command, options) {
                         numCharacters += role.name.length;
                     }
                 }
-                msg += "\n + " + $("SINFO_SURPLUS_ROLES", {count: numSurplus});
+
+                if (numSurplus > 0)
+                    msg += "\n + " + $("SINFO_SURPLUS_ROLES", {count: numSurplus});
     
                 embed.addField($("SINFO_ROLES"), msg);
             }
@@ -216,12 +218,35 @@ function processCommand(message, isMod, command, options) {
                 }
             }
         });
+    } else if (command == "tr") {
+        let embed = new Discord.RichEmbed();
+        embed.setColor("#81EC79");
+        let str = ""
+
+        translate.getLanguages({ui: options.locale.substring(0, 2)}, (err, res) => {
+            let counter = 0;
+            for (let [locale, lang] of Object.entries(res.langs).sort((f, s) => f[1].localeCompare(s[1]))){
+                str += `\`${locale}\` — ${lang}\n`
+                counter++;
+                if (counter == 31) {
+                    embed.addField("‍", str, true)
+                    counter = 0;
+                    str = "";
+                }
+            }
+
+            embed.fields[embed.fields.length - 1].value += str;
+
+            embed.fields[0].name = $("TRANSLATE_AVAILABLE_LANGUAGES")
+            message.channel.send(embed);    
+        })
+
     } else if (command.startsWith("tr ")) {
         sendPreloader($("TRANSLATE_TRANSLATING"), message.channel).then(function(message) {
             let words = command.substr(3);
             let args = words.split(" ");
             
-            let toLang = "en";
+            let toLang = options.locale.substring(0, 2);
             let fromLang = "";
             for (let i = 0; i < args.length; i++) {
                 let arg = args[i];
@@ -238,23 +263,43 @@ function processCommand(message, isMod, command, options) {
 
             let sourceText = args.join(" ").trim();
             let doTranslate = function(fromLang, toLang) {
-                let options = {};
-                if (fromLang != "") options.from = fromLang;
-                options.to = toLang;
+                    let options = {};
+                    if (fromLang != "") options.from = fromLang;
+                    options.to = toLang;
 
-                translate.translate(sourceText, options, function(err, res) {
-                    let embed = new Discord.RichEmbed("translate");
-                    embed.setAuthor($("TRANSLATE_TITLE"));
-                    embed.setColor("#81EC79");
-                    //embed.setFooter(tr("Guild ID:") + " " + g.id);
-                    embed.setTitle($("TRANSLATE_POWERED_BY"));
-                    embed.setURL("http://translate.yandex.com/");
+                    translate.translate(sourceText, options, function(err, res) {         
+                        try {
+                            let embed = new Discord.RichEmbed();
+                            if (res.code != 200) {
+                                embed.setColor("#EC7979");
+                                embed.setTitle($("TRANSLATE_ERROR_TITLE"));
+                                embed.setDescription($("TRANSLATE_ERROR_DESCRIPTION")),
+                                embed.addField($("TRANSLATE_ERROR_DETAILS"), res.message);
+    
+                                message.edit(embed);
+                                return;
+                            }
+    
+                            embed.setAuthor($("TRANSLATE_TITLE"));
+                            embed.setColor("#81EC79");
+                            //embed.setFooter(tr("Guild ID:") + " " + g.id);
+                            embed.setTitle($("TRANSLATE_POWERED_BY"));
+                            embed.setURL("http://translate.yandex.com/");
+    
+                            embed.addField($("TRANSLATE_SOURCE", {fromLang: fromLang}), sourceText + "‍");
+                            embed.addField($("TRANSLATE_TRANSLATED", {toLang: toLang}), res.text + "‍");
+    
+                            message.edit(embed);    
+                        } catch (err) {
+                            let embed = new Discord.RichEmbed();
+                            embed.setColor("#EC7979");
+                            embed.setTitle($("TRANSLATE_ERROR_TITLE"));
+                            embed.setDescription($("TRANSLATE_ERROR_DESCRIPTION")),
+                            embed.addField($("TRANSLATE_ERROR_DETAILS"), err.message);
 
-                    embed.addField($("TRANSLATE_SOURCE", {fromLang: fromLang}));
-                    embed.addField($("TRANSLATE_TRANSLATED", {toLang: toLang}));
-
-                    message.edit(embed);
-                });
+                            message.edit(embed);
+                        }
+                    });
             }
 
             if (fromLang == "") {

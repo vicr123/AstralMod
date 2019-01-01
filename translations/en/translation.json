@@ -93,7 +93,7 @@
     "TIME_LOCATION_NOT_FOUND": "That location wasn't found. Please be more specific or try a different spelling for the place you are trying to get the time of.",
     "TIME_TIMEZONE_NOT_SET": "{{user}} has not yet set their timezone. Go and bug 'em to `{{prefix}}settz` quickly!",
     "TIME_UTC": "UTC {{number}}",
-    "TIME_RESPONSE": "{{clockEmote}} **{{request}}** ({{time, Z}}) {{time, dddd[,] MMMM D}} at {{time, stime}}",
+    "TIME": "{{clockEmote}} **{{request}}** ({{time, Z}}) {{time, dddd[,] MMMM D}} at {{time, stime}}",
     
     "TIMER_INVALID": "That's not a valid length of time.",
     "TIMER_HOWTO": "Usage: `{{prefix}}timer [duration] [reason]`. For more information, type `{{prefix}}help timer`",
@@ -134,6 +134,7 @@
     "WEATHER_ERROR": "{{emoji}} Weather Error",
     "WEATHER_ERROR_NOT_RETRIEVED": "AstralMod couldn't get the weather.",
     "WEATHER_ERROR_DETAILS": "Details",
+    "WEATHER_USER_NOT_FOUND": "I couldn't find a user with that name.",
     "WEATHER_ERROR_CITY_NOT_FOUND": "That city was not found",
     "WEATHER_ERROR_TRY_THIS": "Try this",
     "WEATHER_ERROR_TRY_THIS_DESCRIPTION": "Please be more specific or try a different spelling for the place you are trying to get the weather of. If you're trying to receive your own weather, try resetting your location with `{{prefix}}setloc`.\n The requested city may also not have any recorded weather data at the moment. If this is the case, you'll have to wait until there is weather data from that city.",
@@ -326,7 +327,7 @@
     "LSWARN_TITLE": "Warnings",
     "LSWARN_DESCRIPTION": "Warnings that have been recorded by moderators on this server",
     "LSWARN_WARNING_TITLE": "Warning #{{index}}",
-    "LSWARN_WARNING_INFO": "{{warning}}\n\n**Timestamp:** {{timestamp, datetime}}\n**Warned by:** {{warner}}",
+    "LSWARN_WARNING_INFO": "{{warning}}\n**Timestamp:** {{timestamp, datetime}}\n**Warned by:** {{warner}}",
     
     "PIC_NO_RESULTS": "No results.",
     "PIC_PROFILE_PICTURE": "Profile Picture",
@@ -356,10 +357,10 @@
     "RMTIMER_INVALID_INDEX": "You don't have that many timers.",
     "RMTIMER_SUCCESS": "That timer has been deleted. For new timer indices, use `{{prefix}}timers`",
 
-    "RMWARN_ABOUT": "Usage: `{{prefix}}rmwarn index`. To find the warning index, use `{{prefix}}lswarn. For more information, type `{{prefix}}help rmwarn`",
+    "RMWARN_ABOUT": "Usage: `{{prefix}}rmwarn [index] [user]`. To find the warning index, use `{{prefix}}lswarn`. For more information, type `{{prefix}}help rmwarn`",
     "RMWARN_NO_USER_FOUND": "I couldn't find a user with that name on this server.",
     "RMWARN_NO_WARNINGS": "{{user}} has no warnings.",
-    "RMWARN_INVLAID_INDEX": "{{user}} doesn't have that many warnings.",
+    "RMWARN_INVALID_INDEX": "That's not a valid index.",
     "RMWARN_SUCCESS": "{{emoji}} That warning has been deleted. For new timer indices, use `{{prefix}}lswarn`",
     
     "SETLOC_ABOUT": "Usage: `{{prefix}}setloc [your location]`. For more information, type `{{prefix}}help setloc`",
@@ -390,8 +391,8 @@
     "SINFO_LACKPERM_MANAGE_NICKNAME": "- AstralMod is lacking the Manage Nicknames permission. AstralMod will not be able to change nicknames in this server.\n",
     
     "SPAMCTL_ABOUT": "Usage: `{{prefix}}spamctl on|off`. For more information, type `{{prefix}}help spamctl`",
-    "SPAMCTL_OFF": "Spam filtering is now on for this server.",
-    "SPAMCTL_ON": "Spam filtering is now off for this server.",
+    "SPAMCTL_OFF": "Spam filtering is now off for this server.",
+    "SPAMCTL_ON": "Spam filtering is now on for this server.",
     
     "SPAMDATA_TITLE": "Here's how close I am to getting annoyed at you:", 
     "SPAMDATA_DATA_TITLE": "Anger Levels",
@@ -418,6 +419,10 @@
     "TRANSLATE_POWERED_BY": "Powered by Yandex.Translate",
     "TRANSLATE_SOURCE": "Source Text ({{fromLang}})",
     "TRANSLATE_TRANSLATED": "Translated Text ({{toLang}})",
+    "TRANSLATE_AVAILABLE_LANGUAGES": "Available languages",
+    "TRANSLATE_ERROR_TITLE": "Translation Error",
+    "TRANSLATE_ERROR_DESCRIPTION": "There was an error in your translation request.",
+    "TRANSLATE_ERROR_DETAILS": "Details",
     
     "OKNICK_ACCEPTED": "{{emoji}} User nickname has been accepted.",
     "OKNICK_THAT_DIDNT_WORK": "{{emoji}} ERROR: That didn't work.",
