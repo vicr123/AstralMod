@@ -2485,7 +2485,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send($("CONFIG_MEMBER_ALERT_SETUP"));
                     var str = "```\n";
                     for (let [,channel] of guild.channels) {
-                        if (channel.type == "text") {
+                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                             str += `${channel.id} — #${channel.name}\n`
                         }
                     }
@@ -2497,7 +2497,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send($("CONFIG_CHAT_LOGS_SETUP"));
                     var str = "```\n";
                     for (let [,channel] of guild.channels) {
-                        if (channel.type == "text") {
+                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                             str += `${channel.id} — #${channel.name}\n`
                         }
                     }
@@ -2509,7 +2509,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send($("CONFIG_BOT_WARNINGS_SETUP"));
                     var str = "```\n";
                     for (let [,channel] of guild.channels) {
-                        if (channel.type == "text") {
+                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                             str += `${channel.id} — #${channel.name}\n`
                         }
                     }
@@ -2521,7 +2521,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send($("CONFIG_SUGGESTIONS_SETUP"));
                     var str = "```\n";
                     for (let [,channel] of guild.channels) {
-                        if (channel.type == "text") {
+                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                             str += `${channel.id} — #${channel.name}\n`
                         }
                     }
@@ -2684,7 +2684,7 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_MEMBER_ALERT_CANCELLED"));
                 var str = "```\n";
                 for (let [,channel] of guild.channels) {
-                    if (channel.type == "text") {
+                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                         str += `${channel.id} — #${channel.name}\n`
                     }
                 }
@@ -2747,7 +2747,7 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_CHAT_LOGS_RETRY"));
                 var str = "```\n";
                 for (let [,channel] of guild.channels) {
-                    if (channel.type == "text") {
+                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                         str += `${channel.id} — #${channel.name}\n`
                     }
                 }
@@ -2803,7 +2803,7 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_BOT_WARNINGS_RETRY"));
                 var str = "```\n";
                 for (let [,channel] of guild.channels) {
-                    if (channel.type == "text") {
+                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                         str += `${channel.id} — #${channel.name}\n`
                     }
                 }
@@ -2850,7 +2850,7 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_SUGGESTIONS_RETRY"));
                 var str = "```\n";
                 for (let [,channel] of guild.channels) {
-                    if (channel.type == "text") {
+                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                         str += `${channel.id} — #${channel.name}\n`
                     }
                 }
@@ -2895,7 +2895,7 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_LOCALE_RETRY"));
                 var str = "```\n";
                 for (let [,channel] of guild.channels) {
-                    if (channel.type == "text") {
+                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                         str += `${channel.id} — #${channel.name}\n`
                     }
                 }
@@ -2932,7 +2932,7 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_SERVER_PREFIX_RETRY"));
                 var str = "```\n";
                 for (let [,channel] of guild.channels) {
-                    if (channel.type == "text") {
+                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
                         str += `${channel.id} — #${channel.name}\n`
                     }
                 }

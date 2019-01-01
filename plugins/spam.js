@@ -85,8 +85,11 @@ function newMessage(message, options) {
             nonSpamCountingUser = 0;
         }
 
+         /** @type{String} */
         var messageText = message.content.toLowerCase();
-        if (messageText.length > 4) {
+        var regex = messageText.match(/<a?:.+:\d+>/g);
+
+        if (messageText.length > 4 & regex != null && messageText.replace(regex[0], "").length > 4) { // Ignore custom emoji and short messages
             if (lastMessagesOfUser.includes(messageText)) {
                 spamCountingUser++;
 
