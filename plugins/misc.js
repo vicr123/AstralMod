@@ -163,10 +163,22 @@ function processCommand(message, isMod, command, options) {
     } else if (command.startsWith("calc ")) {
         let expr = command.substr(5);
 
-        require('child_process').execFile("/usr/bin/thecalculator", [
+        let calcProcess;
+        if (consts.config.calcProcess == null) {
+            calcProcess = "/usr/bin/thecalculator";
+        } else {
+            calcProcess = consts.config.calcProcess;
+        }
+
+        require('child_process').execFile(calcProcess, [
             "-e",
             expr
-        ], function(err, stdout, stderr) {
+        ], {
+            env: {
+                "LANG": options.locale,
+                "LANGUAGE": options.locale
+            }
+        }, function(err, stdout, stderr) {
             let out = stdout.split("\n").filter(function(element) {
                 if (element == "") {
                     return false;
