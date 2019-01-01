@@ -127,6 +127,7 @@ function utcOffsetFromTimezone(location) {
         case "cxt":
         case "davt":
         case "hovt":
+        case "novt":
         case "ict":
         case "krat":
         case "tha":

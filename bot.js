@@ -149,7 +149,7 @@ i18next.use(i18nextbackend).init({
                     m = moment.utc(value.date).locale(lng);
                 }
 
-                if (value.offset) {
+                if (value.offset != null) {
                     m = m.utcOffset(value.offset);
                 }
 

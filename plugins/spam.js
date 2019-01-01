@@ -151,7 +151,14 @@ function processCommand(message, isMod, command, options) {
                 message.reply($("SPAMCTL_ABOUT"));
             }
         } else if (command == "spamctl") {
-                message.reply($("SPAMCTL_ABOUT"));
+            let replyStr;
+            if (settings.guilds[message.guild.id].spamCtl) {
+                replyStr = $("SPAMCTL_CURRENTLY_ON");
+            } else {
+                replyStr = $("SPAMCTL_CURRENTLY_OFF");
+            }
+            replyStr += "\n" + $("SPAMCTL_ABOUT", {prefix: prefix(message.guild.id)});
+            message.reply(replyStr);
         }
     }
 
