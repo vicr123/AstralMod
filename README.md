@@ -44,3 +44,7 @@ Set up a server with the emoji in the `/emoji` folder, join AstralMod to the ser
 - `--debug` Enables debugging output in the console
 - `--nowelcome` Disables the welcome message that AstralMod sends when it joins a new server
 - `--novacuum` Disables the periodic cleanup of the settings file
+
+### Developing AstralMod
+If you wish to add a command, look at the `plugins` directory. Make your own plugin to include commands.
+If you wish to modify the actual program, look at `bot.js`, or the AstralMod source code.
