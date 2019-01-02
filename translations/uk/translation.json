@@ -1,1 +1,6 @@
-{}
+{
+    "SPECIAL_STIME": "{{time, stime}}",
+    "SPECIAL_DATETIME": "{{time, dddd[,] MMMM D YYYY}} at {{time, stime}} ({{time, Z}})",
+    "THIS_LOCALE": "Українська",
+    "SETLOC_TITLE": "Локалізація AstralMod"
+}
