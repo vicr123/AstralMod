@@ -609,7 +609,7 @@ function processCommand(message, isMod, command, options) {
     if (command.startsWith("weather ")) {
         var location = command.substr(8);
 
-        if (command.indexOf("--user") == -1) {
+        /*if (command.indexOf("--user") == -1) {
             sendCurrentWeather(message, location, "location", options, "", skiiness);
         } else {
             location = location.replace("--user", "").trim();
@@ -629,8 +629,11 @@ function processCommand(message, isMod, command, options) {
             } else {
                 throw new CommandError($("WEATHER_USER_NOT_FOUND"));
             }
-        }
+        }*/
+        sendCurrentWeather(message, "", "", options);
     } else if (command == "weather") {
+        sendCurrentWeather(message, "", "", options);
+        /*
         if (settings.users[message.author.id] == null) {
             settings.users[message.author.id] = {};
         }
@@ -639,10 +642,9 @@ function processCommand(message, isMod, command, options) {
             throw new UserInputError($("WEATHER_ERROR_UNSET_LOCATION", {user: message.author.username, prefix: prefix(message.guild.id)}));
         } else {
             sendCurrentWeather(message, settings.users[message.author.id].location, "id", options, message.author.tag, skiiness);
-        }
+        }*/
     } else if (command.startsWith("setloc ")) {
-        var location = command.substr(7);
-
+        /*
         if (location == "") {
             message.reply($("SETLOC_ABOUT"));
         } else {
@@ -690,9 +692,23 @@ function processCommand(message, isMod, command, options) {
                     message.channel.send(embed);
                 }
             });
-        }
+        }*/
+
+        let embed = new Discord.RichEmbed;
+        embed.setColor(consts.colors.fail);
+        embed.setTitle("Weather Unavailable");
+        embed.setDescription("The weather command is unavailable in AstralMod 3.0. It will be coming back in AstralMod 3.1.");
+        embed.setFooter("We sincerely apologise for the inconvenience.");
+
+        message.channel.send(embed);
     } else if (command == "setloc") {
-        message.reply("Usage: `" + prefix(message.guild.id) + "setloc [your location]`. For more information, `" + prefix(message.guild.id) + "help setloc`");
+        let embed = new Discord.RichEmbed;
+        embed.setColor(consts.colors.fail);
+        embed.setTitle("Weather Unavailable");
+        embed.setDescription("The weather command is unavailable in AstralMod 3.0. It will be coming back in AstralMod 3.1.");
+        embed.setFooter("We sincerely apologise for the inconvenience.");
+
+        message.channel.send(embed);
     }
 }
 
