@@ -27,7 +27,7 @@ const timeModule = require("./time.js");
 var client;
 var consts;
 
-let sunnyImage, moonyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage;
+let sunnyImage, moonyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage, questionImage, unavailImage;
 
 let transArr = {
     0: "WEATHERSTRING_TORNADO",
@@ -238,7 +238,7 @@ function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
 function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
     let $ = _[options.locale];
     sendPreloader($("WEATHER_PREPARING"), message.channel).then(messageToEdit => {
-        let query;
+        /*let query;
         let unit = options.imperial ? "f" : "c";
 
         if (type == "location") {
@@ -251,10 +251,10 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
             try {
                 if (err) {
                     throw new CommandError(err);
-                } else {
+                } else {*/
                     //First case is for a requested city that does not exist. Second case is for when YQL doesn't
                     //have any data for the requested city.
-                    if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
+                    /*if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
                         let embed = new Discord.RichEmbed;
                         embed.setTitle($("WEATHER_ERROR", {emoji: ":thunder_cloud_rain:"}));
                         embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
@@ -264,38 +264,46 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                         messageToEdit.edit(embed);
                         return;
-                    }
+                    }*/
 
                     //Time info
-                    let pd = data.query.results.channel.item.pubDate;
-                    let date = moment(new Date(pd.substring(0, pd.lastIndexOf(" "))));
-                    let tz = pd.substring(pd.lastIndexOf(" "));
-                    let currentDate = moment.utc().add(timeModule.utcOffsetFromTimezone(tz.toLowerCase().trim()) * 3600000, "ms");
+                    //let pd = data.query.results.channel.item.pubDate;
+                    //let date = moment(new Date(pd.substring(0, pd.lastIndexOf(" "))));
+                    //let tz = pd.substring(pd.lastIndexOf(" "));
+                    //let currentDate = moment.utc().add(timeModule.utcOffsetFromTimezone(tz.toLowerCase().trim()) * 3600000, "ms");
 
                     //Determine the time of day
                     let timeOfDay = "day";
-                    let sunriseDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunrise, "YYYY-MM-DD HH:mm A");
-                    sunriseDate.dayOfYear(date.dayOfYear());
-                    sunriseDate.year(date.year());
-                    let sunsetDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunset, "YYYY-MM-DD HH:mm A");
-                    sunsetDate.dayOfYear(date.dayOfYear());
-                    sunsetDate.year(date.year());
+                    //let sunriseDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunrise, "YYYY-MM-DD HH:mm A");
+                    //sunriseDate.dayOfYear(date.dayOfYear());
+                    //sunriseDate.year(date.year());
+                    //let sunsetDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunset, "YYYY-MM-DD HH:mm A");
+                    //sunsetDate.dayOfYear(date.dayOfYear());
+                    //sunsetDate.year(date.year());
 
-                    if (currentDate.isBetween(sunriseDate.clone().add(30, "m"), sunsetDate.clone().subtract(30, "m"))) {
-                        timeOfDay = "day";
-                    } else if (currentDate.isBefore(sunriseDate.clone().subtract(30, "m")) || currentDate.isAfter(sunsetDate.clone().add(30, "m"))) {
-                        timeOfDay = "night";
-                    } else {
-                        timeOfDay = "transition";
-                    }
+                    //if (currentDate.isBetween(sunriseDate.clone().add(30, "m"), sunsetDate.clone().subtract(30, "m"))) {
+                        //timeOfDay = "day";
+                    //} else if (currentDate.isBefore(sunriseDate.clone().subtract(30, "m")) || currentDate.isAfter(sunsetDate.clone().add(30, "m"))) {
+                        //timeOfDay = "night";
+                    //} else {
+                        //timeOfDay = "transition";
+                    //}
 
                     var canvas = new Canvas(500, 410);
                     var ctx = canvas.getContext('2d');
-                    let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx, timeOfDay, $);
+                    //let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx, timeOfDay, $);
+                    let display = {
+                        gradient: "rgb(120, 200, 255)",
+                        arr: [120, 200, 255],
+                        secondary:"rgb(50, 180, 255)",
+                        text: "black",
+                        image: questionImage,
+                        weatherString: "---"
+                    }
 
-                    let tempUnit = "°" + data.query.results.channel.units.temperature;
-                    let speedUnit = data.query.results.channel.units.speed;
-                    let pressureUnit = data.query.results.channel.units.pressure;
+                    let tempUnit = "°C"; // + data.query.results.channel.units.temperature;
+                    let speedUnit = "km/h"; //data.query.results.channel.units.speed;
+                    let pressureUnit = "mb"; //data.query.results.channel.units.pressure;
 
                     ctx.fillStyle = display.gradient;
                     ctx.fillRect(0, 0, 350, 410);
@@ -329,7 +337,8 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                     //let pubDate = "As of " + date.format("dddd, MMMM D") + " at " + date.format(timeString) + tz;
 
-                    let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:date.utcOffset(timeModule.utcOffsetFromTimezone(tz.trim().toLowerCase()), true), h24:options.h24}});
+                    //let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:date.utcOffset(timeModule.utcOffsetFromTimezone(tz.trim().toLowerCase()), true), h24:options.h24}});
+                    let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:moment(), h24:options.h24}});
                     let dateWidth = ctx.measureText(pubDate);
                     if (dateWidth.width > 325) {
                         let textCanvas = new Canvas(dateWidth.width, 50);
@@ -350,13 +359,13 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                    ctx.font = "bold 20px Contemporary";
                    ctx.fillStyle = display.text;
-                   let cityWidth = ctx.measureText(data.query.results.channel.location.city);
-                   ctx.fillText(data.query.results.channel.location.city, 175 - cityWidth.width / 2, 228);
+                   let cityWidth = ctx.measureText("---");
+                   ctx.fillText("---", 175 - cityWidth.width / 2, 228);
 
                     ctx.font = "12px Contemporary";
                     ctx.fillStyle = display.text;
-                    let countryWidth = ctx.measureText(data.query.results.channel.location.region + " - " + data.query.results.channel.location.country);
-                    ctx.fillText(data.query.results.channel.location.region + " - " + data.query.results.channel.location.country, 175 - countryWidth.width / 2, 245);
+                    let countryWidth = ctx.measureText("---" + " - " + "---");
+                    ctx.fillText("---" + " - " + "---", 175 - countryWidth.width / 2, 245);
 
                     ctx.font = "40px Contemporary";
                     let conditionWidth = ctx.measureText(display.weatherString);
@@ -373,11 +382,11 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     }
 
                     ctx.font = "30px Contemporary";
-                    let currentTemp = data.query.results.channel.item.condition.temp + tempUnit;
+                    let currentTemp = "---" + tempUnit;
                     let tempWidth = ctx.measureText(currentTemp);
                     ctx.fillText(currentTemp, 175 - tempWidth.width / 2, 315);
 
-                    if (skiiness) {
+                    /*if (skiiness) {
                         let skiiness = "";
                         let temp = data.query.results.channel.item.condition.temp;
                         if (data.query.results.channel.units.temperature == "F") {
@@ -392,28 +401,28 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                         ctx.font = "20px Contemporary";
                         ctx.fillText(skiiness, 175 + tempWidth.width / 2, 315);
-                    }
+                    }*/
 
 
                     //Draw wind info
                     ctx.drawImage(windImage, 50, 330, 20, 20);
                     ctx.font = "14px Contemporary";
-                    let currentWind = data.query.results.channel.wind.speed + " " + speedUnit;
+                    let currentWind = "---" + " " + speedUnit;
                     ctx.fillText(currentWind, 77, 345);
 
                     //Draw humidity info
                     ctx.drawImage(humidImage, 50, 355, 20, 20);
-                    let currentHumid = data.query.results.channel.atmosphere.humidity + "%";
+                    let currentHumid = "---" + "%";
                     ctx.fillText(currentHumid, 77, 370);
 
                     //Draw pressure info
                     //Yahoo's pressure API returns bad results - we have to manually fix them.
                     ctx.drawImage(pressureImage, 50, 380, 20, 20);
-                    let pressureResult = data.query.results.channel.atmosphere.pressure;
-                    let sigPlaces = 3;
+                    //let pressureResult = "---";
+                    //let sigPlaces = 3;
 
                     // Millibars were requested - convert milli-feet of head to millibars
-                    if (pressureUnit === "in") {
+                    /*if (pressureUnit === "in") {
                         pressureUnit = "inHg";
                         let feetOfHead = parseFloat(pressureResult) / 1000; //For whatever reason they don't actually give it in real feet of head
                         pressureResult = feetOfHead * 29.890669; //Conversion to milliBars
@@ -423,14 +432,14 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     else {
                         pressureResult = parseFloat(pressureResult) / 33.864;
                         sigPlaces = 0;
-                    }
+                    }*/
 
-                    let currentPressure = pressureResult.toFixed(sigPlaces) + " " + pressureUnit;
+                    let currentPressure = "---" + " " + pressureUnit; //pressureResult.toFixed(sigPlaces) + " " + pressureUnit;
                     ctx.fillText(currentPressure, 77, 395);
 
                     //Draw wind speed
                     ctx.drawImage(compassImage, 200, 330, 20, 20);
-                    let compass = parseInt(data.query.results.channel.wind.direction);
+                    /*let compass = parseInt(data.query.results.channel.wind.direction);
                     let cardinal;
                     if (compass < 22) {
                         cardinal = "N";
@@ -451,18 +460,22 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     } else {
                         cardinal = "N";
                     }
-                    ctx.fillText(compass + "° (" + cardinal + ")", 227, 345);
+                    ctx.fillText(compass + "° (" + cardinal + ")", 227, 345);*/
+                    ctx.fillText("---" + "° (" + "---" + ")", 227, 345);
 
                     //Draw sunrise info
-                    log(data.query.results.channel.astronomy.sunrise);
                     ctx.drawImage(sunriseImage, 200, 355, 20, 20);
-                    let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
+                    ctx.drawImage(sunsetImage, 200, 380, 20, 20);
+                    /*let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
                     ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24}}), 227, 370);
 
                     //Draw sunset info
                     ctx.drawImage(sunsetImage, 200, 380, 20, 20);
                     let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:m a");
-                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24}}), 227, 395);
+                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24}}), 227, 395);*/
+
+                    ctx.fillText("---", 227, 370);
+                    ctx.fillText("---", 227, 395);
 
                     ctx.beginPath();
                     ctx.strokeStyle = display.text;
@@ -481,22 +494,22 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     } else {
                         ml = moment.localeData(options.locale);
                     }
-                    for (key in data.query.results.channel.item.forecast) {
+                    for (key in [1,2,3,4,5]) {
                         current++;
                         if (current > 5) {
                             break;
                         }
-                        let day = data.query.results.channel.item.forecast[key];
+                        //let day = data.query.results.channel.item.forecast[key];
 
-                        let display = getDataFromCode(parseInt(day.code), ctx, null, _[options.locale]);
+                        //let display = getDataFromCode(parseInt(day.code), ctx, null, _[options.locale]);
 
                         ctx.font = "20px Contemporary";
 
-                        let dayText = day.day.toUpperCase();
+                        let dayText = "---";
                         if (current == 1) {
                             dayText = $("WEATHER_TODAY").toUpperCase();
                         } else {
-                            dayText = ml.weekdaysShort()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(day.day.toLowerCase())].toUpperCase().trim();
+                            //dayText = ml.weekdaysShort()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(day.day.toLowerCase())].toUpperCase().trim();
                         }
                         let dayWidth = ctx.measureText(dayText);
                         
@@ -518,25 +531,52 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         }
 
                         //Draw image
-                        ctx.drawImage(display.image, 380, (current - 1) * 82 + 9, 64, 64);
+                        ctx.drawImage(questionImage, 380, (current - 1) * 82 + 9, 64, 64);
 
                         //Draw temperatures
-                        ctx.fillText(day.high + "°", 450, (current - 1) * 82 + 30);
-                        ctx.fillText(day.low + "°", 450, (current - 1) * 82 + 60);
+                        ctx.fillText("---" + "°", 450, (current - 1) * 82 + 30);
+                        ctx.fillText("---" + "°", 450, (current - 1) * 82 + 60);
 
                         ctx.beginPath();
                         ctx.moveTo(350, current * 82);
                         ctx.lineTo(500, current * 82);
                         ctx.stroke();
-
                     }
+
+                    //Now overlay the weather with an error
+                    ctx.fillStyle = "rgba(255, 0, 0, 0.65)";
+                    ctx.fillRect(0, 0, 500, 410);
+
+                    ctx.drawImage(unavailImage, 175, 60, 150, 150);
+
+                    ctx.fillStyle = "rgb(255, 255, 255)";
+                    ctx.font = "30px Contemporary";
+                    let unavailableText = ctx.measureText("Weather Unavailable");
+                    ctx.fillText("Weather Unavailable", (500 / 2) - (unavailableText.width / 2), 250);
+
+                    ctx.font = "20px Contemporary";
+                    ctx.textAlign = "center";
+                    ctx.fillText("The weather command is unavailable in", (500 / 2), 300);
+                    ctx.fillText("AstralMod 3.0. It will be coming back", (500 / 2), 320);
+                    ctx.fillText("in AstralMod 3.1.", (500 / 2), 340);
+
+                    ctx.font = "15px Contemporary";
+                    ctx.fillText("We sincerely apologise for the inconvenience.", (500 / 2), 370);
+
+                    /*ctx.strokeStyle = "rgb(255, 255, 255)";
+                    ctx.beginPath();
+                    ctx.moveTo(0, 40);
+                    ctx.lineTo(500, 40);
+                    ctx.moveTo(0, 380);
+                    ctx.lineTo(500, 380);
+                    ctx.stroke();*/
 
                     let e = new Discord.RichEmbed();
                     e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
                     e.setImage("attachment://weather.png");
-                    e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
+                    //e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
                     e.setTitle($("WEATHER_TITLE"));
-                    e.setURL(data.query.results.channel.link);
+                    //e.setURL(data.query.results.channel.link);
                     // e.setColor(display.arr);
                     e.setFooter(getRandom($("WEATHER_PLEASE_PRINT"),
                                         $("WEATHER_TEAR_PERFORATED_LINE"),
@@ -545,7 +585,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     message.channel.send(e).then(function() {
                         messageToEdit.delete();
                     });
-                }
+                /*}
             } catch (err) {
                 if (process.argv.indexOf("--debug") !== -1) {
                     message.channel.send(err.stack);
@@ -553,7 +593,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                 messageToEdit.edit(err.toString() + "\nTry resetting your location with `" + prefix(message.guild.id) + "setloc`");
             }
-        });
+        });*/
     });
 }
 
@@ -732,6 +772,16 @@ module.exports = {
         rainsnowImage = new Canvas.Image();
         fs.readFile("./plugins/images/rainsnow.png", function(err, data) {
             rainsnowImage.src = data;
+        });
+
+        questionImage = new Canvas.Image();
+        fs.readFile("./plugins/images/question.png", function(err, data) {
+            questionImage.src = data;
+        });
+
+        unavailImage = new Canvas.Image();
+        fs.readFile("./plugins/images/unavail.png", function(err, data) {
+            unavailImage.src = data;
         });
 
         commandEmitter.on('processCommand', processCommand);
