@@ -220,6 +220,8 @@ function getTime(location, member, $) {
             return;
         }
 
+        reject($("TIME_LOCATION_NOT_FOUND"));
+        /*
         //Now we check Yahoo
         let query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\")");
         query.exec(function(err, data) {
@@ -234,7 +236,7 @@ function getTime(location, member, $) {
                 location: dat.location.city + ", " + dat.location.country,
                 offset: utcOffsetFromTimezone(dat.item.pubDate.substring(dat.item.pubDate.lastIndexOf(" ") + 1).toLowerCase())
             });
-        });
+        }); */
     })
 }
 
