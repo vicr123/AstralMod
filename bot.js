@@ -1740,7 +1740,7 @@ function processModCommand(message, command) {
                 message.author.send("Welcome to AstralMod! To start, let's get the roles of mods on the server. Enter the roles of mods on this server, separated by a space.");
 
                 var roles = "```";
-                for (let [id, role] of message.guild.roles) {
+                for (let [, role] of message.guild.roles) {
                     roles += role.id + " = " + role.name + "\n";
                 }
                 roles += "```";
@@ -2370,6 +2370,18 @@ function processAmCommand(message, options, command) {
     return false;
 }
 
+function getChannels(guild) {
+    let str = "```\n";
+    for (let channel of guild.channels.array().sort((a, b) => a.name.localeCompare(b.name))) {
+        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
+            str += `${channel.id} — #${channel.name}\n`
+        }
+    }
+    str += "```"
+
+    return str;
+}
+
 function getSingleConfigureWelcomeText(guild, author) {
     var guildSetting = settings.guilds[guild.id];
     let $ = _[settings.users[author.id].locale];
@@ -2474,7 +2486,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send($("CONFIG_STAFF_SETUP"));
 
                     var roles = "```";
-                    for (let [id, role] of guild.roles) {
+                    for (let role of guild.roles.array().sort((a, b) => a.name.localeCompare(b.name))) {
                         roles += role.id + " — " + role.name + "\n";
                     }
                     roles += "```";
@@ -2484,50 +2496,22 @@ function processSingleConfigure(message, guild) {
                     break;
                 case "2": //Member Alerts
                     message.author.send($("CONFIG_MEMBER_ALERT_SETUP"));
-                    var str = "```\n";
-                    for (let [,channel] of guild.channels) {
-                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                            str += `${channel.id} — #${channel.name}\n`
-                        }
-                    }
-                    str += "```"
-                    message.author.send(str);
+                    message.author.send(getChannels(guild));
                     guildSetting.configuringStage = 20;
                     break;
                 case "3": //Chat Logs
                     message.author.send($("CONFIG_CHAT_LOGS_SETUP"));
-                    var str = "```\n";
-                    for (let [,channel] of guild.channels) {
-                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                            str += `${channel.id} — #${channel.name}\n`
-                        }
-                    }
-                    str += "```"
-                    message.author.send(str);
+                    message.author.send(getChannels(guild));
                     guildSetting.configuringStage = 30;
                     break;
                 case "4": //Bot warnings
                     message.author.send($("CONFIG_BOT_WARNINGS_SETUP"));
-                    var str = "```\n";
-                    for (let [,channel] of guild.channels) {
-                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                            str += `${channel.id} — #${channel.name}\n`
-                        }
-                    }
-                    str += "```"
-                    message.author.send(str);
+                    message.author.send(getChannels(guild));
                     guildSetting.configuringStage = 40;
                     break;
                 case "5": //Suggestions
                     message.author.send($("CONFIG_SUGGESTIONS_SETUP"));
-                    var str = "```\n";
-                    for (let [,channel] of guild.channels) {
-                        if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                            str += `${channel.id} — #${channel.name}\n`
-                        }
-                    }
-                    str += "```"
-                    message.author.send(str);
+                    message.author.send(getChannels(guild));
                     guildSetting.configuringStage = 50;
                     break;
                 case "6": //Locale
@@ -2594,6 +2578,7 @@ function processSingleConfigure(message, guild) {
                 guildSetting.configuringStage = 0;
             } else if (text.toLowerCase() == $("CONFIG_CLEAR").toLowerCase()) {
                 guildSetting.modRoles = null;
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
             } else {
                 var roles = text.split(" ");
@@ -2683,14 +2668,7 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeMemberAlerts = null;
                 message.author.send($("CONFIG_MEMBER_ALERT_CANCELLED"));
-                var str = "```\n";
-                for (let [,channel] of guild.channels) {
-                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                        str += `${channel.id} — #${channel.name}\n`
-                    }
-                }
-                str += "```"
-                message.author.send(str);
+                message.author.send(getChannels(guild));
                 guildSetting.configuringStage = 20;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2746,14 +2724,7 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeChatLogs = null;
                 message.author.send($("CONFIG_CHAT_LOGS_RETRY"));
-                var str = "```\n";
-                for (let [,channel] of guild.channels) {
-                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                        str += `${channel.id} — #${channel.name}\n`
-                    }
-                }
-                str += "```"
-                message.author.send(str);
+                message.author.send(getChannels(guild));
                 guildSetting.configuringStage = 30;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2765,6 +2736,9 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_BOT_WARNINGS_DISABLE"));
                 guildSetting.tentativeBotWarnings = null;
                 guildSetting.configuringStage = 41;
+            } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
             } else {
                 if (!guild.channels.has(text)) {
                     message.author.send($("CONFIG_CHANNEL_DOESNT_EXIST"));
@@ -2802,14 +2776,7 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeBotWarnings = null;
                 message.author.send($("CONFIG_BOT_WARNINGS_RETRY"));
-                var str = "```\n";
-                for (let [,channel] of guild.channels) {
-                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                        str += `${channel.id} — #${channel.name}\n`
-                    }
-                }
-                str += "```"
-                message.author.send(str);
+                message.author.send(getChannels(guild));
                 guildSetting.configuringStage = 40;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2822,11 +2789,17 @@ function processSingleConfigure(message, guild) {
                 message.author.send($("CONFIG_SUGGESTIONS_DISABLE"));
                 guildSetting.tentativeBotWarnings = null;
                 guildSetting.configuringStage = 51;
+            } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
             } else {
                 if (!guild.channels.has(text)) {
                     message.author.send($("CONFIG_CHANNEL_DOESNT_EXIST"));
+                } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                    guildSetting.configuringStage = 0;
                 } else {
-                    var channel = guild.channels.get(text);
+                        var channel = guild.channels.get(text);
                     if (channel.type != "text") {
                         message.author.send($("CONFIG_CHANNEL_INVALID_CHANNEL"));
                     } else {
@@ -2849,14 +2822,7 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.tentativeSuggestions = null;
                 message.author.send($("CONFIG_SUGGESTIONS_RETRY"));
-                var str = "```\n";
-                for (let [,channel] of guild.channels) {
-                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                        str += `${channel.id} — #${channel.name}\n`
-                    }
-                }
-                str += "```"
-                message.author.send(str);
+                message.author.send(getChannels(guild));
                 guildSetting.configuringStage = 50;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2864,23 +2830,29 @@ function processSingleConfigure(message, guild) {
             break;
         }
         case 60: { //Locale
-            if (!availableTranslations.includes(text)) {
-                message.author.send($("CONFIG_LOCALE_INVALID"));
-                
-                let locales = "";
-                for (let locale of availableTranslations) {
-                    let thisLocale = _[locale]("THIS_LOCALE");
-                    if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
-                    if (locale == "en") thisLocale = "English";
-                    locales += "`" + locale + "` - " + thisLocale + "\n";
-                }
-                
-                message.author.send(locales);
+            if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
             } else {
-                message.author.send($("CONFIG_LOCALE_CONFIRMATION", {locale: text}));
-                guildSetting.tentativeLocale = text;
-                guildSetting.configuringStage = 61;
+                if (!availableTranslations.includes(text)) {
+                    message.author.send($("CONFIG_LOCALE_INVALID"));
+                    
+                    let locales = "";
+                    for (let locale of availableTranslations) {
+                        let thisLocale = _[locale]("THIS_LOCALE");
+                        if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
+                        if (locale == "en") thisLocale = "English";
+                        locales += "`" + locale + "` - " + thisLocale + "\n";
+                    }
+                    
+                    message.author.send(locales);
+                } else {
+                    message.author.send($("CONFIG_LOCALE_CONFIRMATION", {locale: text}));
+                    guildSetting.tentativeLocale = text;
+                    guildSetting.configuringStage = 61;
+                }
             }
+
             break;
         }
         case 61: { //Locale - Confirm
@@ -2894,14 +2866,7 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.locale = "en";
                 message.author.send($("CONFIG_LOCALE_RETRY"));
-                var str = "```\n";
-                for (let [,channel] of guild.channels) {
-                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                        str += `${channel.id} — #${channel.name}\n`
-                    }
-                }
-                str += "```"
-                message.author.send(str);
+                message.author.send(getChannels(guild));
                 guildSetting.configuringStage = 60;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
@@ -2909,16 +2874,21 @@ function processSingleConfigure(message, guild) {
             break;
         }
         case 70: { //Server prefix
-            if (text.toLowerCase() == $("CONFIG_DEFAULT").toLowerCase() || text == prefix()) {
-                message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: prefix()}));
-                guildSetting.tentativePrefix = undefined;
-                guildSetting.configuringStage = 71;
+            if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
             } else {
-                message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: text}));
-                guildSetting.tentativePrefix = text;
-                guildSetting.configuringStage = 71;
+                if (text.toLowerCase() == $("CONFIG_DEFAULT").toLowerCase() || text == prefix()) {
+                    message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: prefix()}));
+                    guildSetting.tentativePrefix = undefined;
+                    guildSetting.configuringStage = 71;
+                } else {
+                    message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: text}));
+                    guildSetting.tentativePrefix = text;
+                    guildSetting.configuringStage = 71;
+                }
+                break;
             }
-            break;
         }
         case 71: { //Locale - Confirm
             if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
@@ -2931,14 +2901,7 @@ function processSingleConfigure(message, guild) {
             } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
                 guildSetting.serverPrefix = undefined;
                 message.author.send($("CONFIG_SERVER_PREFIX_RETRY"));
-                var str = "```\n";
-                for (let [,channel] of guild.channels) {
-                    if (channel.type == "text" && channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-                        str += `${channel.id} — #${channel.name}\n`
-                    }
-                }
-                str += "```"
-                message.author.send(str);
+                message.author.send(getChannels(guild));
                 guildSetting.configuringStage = 70;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));

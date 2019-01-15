@@ -291,6 +291,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                     var canvas = new Canvas(500, 410);
                     var ctx = canvas.getContext('2d');
+
                     //let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx, timeOfDay, $);
                     let display = {
                         gradient: "rgb(120, 200, 255)",
@@ -359,8 +360,21 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                    ctx.font = "bold 20px Contemporary";
                    ctx.fillStyle = display.text;
-                   let cityWidth = ctx.measureText("---");
-                   ctx.fillText("---", 175 - cityWidth.width / 2, 228);
+                   let funText = skiiness ? "Even if the weather is down, the admirable ski jacket is not! ∞ ski jacket!" : "---";
+                   let funWidth = ctx.measureText(funText);
+                   if (funWidth.width > 325) {
+                       let textCanvas = new Canvas(funWidth.width, 50);
+                       let txtCtx = textCanvas.getContext('2d');
+                       txtCtx.font = "bold 20px Contemporary";
+                       txtCtx.fillStyle = display.text;
+                       txtCtx.fillText(funText, 0, 40);
+
+                       ctx.drawImage(textCanvas, 13, 180, 325, 50);
+                   } else {
+                        ctx.fillText(funText, 175 - funWidth.width / 2, 228);
+                   }
+
+
 
                     ctx.font = "12px Contemporary";
                     ctx.fillStyle = display.text;
@@ -385,23 +399,6 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     let currentTemp = "---" + tempUnit;
                     let tempWidth = ctx.measureText(currentTemp);
                     ctx.fillText(currentTemp, 175 - tempWidth.width / 2, 315);
-
-                    /*if (skiiness) {
-                        let skiiness = "";
-                        let temp = data.query.results.channel.item.condition.temp;
-                        if (data.query.results.channel.units.temperature == "F") {
-                            temp = (temp - 32) * 5/9;
-                        }
-
-                        if (temp < 5) {
-                            skiiness = "∞ ski jacket";
-                        } else if (temp < 40) {
-                            skiiness = "1 ski jacket";
-                        }
-
-                        ctx.font = "20px Contemporary";
-                        ctx.fillText(skiiness, 175 + tempWidth.width / 2, 315);
-                    }*/
 
 
                     //Draw wind info
@@ -542,7 +539,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         ctx.lineTo(500, current * 82);
                         ctx.stroke();
                     }
-
+                    
                     //Now overlay the weather with an error
                     ctx.fillStyle = "rgba(255, 0, 0, 0.65)";
                     ctx.fillRect(0, 0, 500, 410);
@@ -572,6 +569,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     ctx.stroke();*/
 
                     let e = new Discord.RichEmbed();
+                    e.setColor(consts.colors.none)
                     e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
                     e.setImage("attachment://weather.png");
                     //e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
@@ -606,6 +604,7 @@ function processCommand(message, isMod, command, options) {
     command = command.replace("--skiiness", "");
     command = command.trim();
 
+
     if (command.startsWith("weather ")) {
         var location = command.substr(8);
 
@@ -630,9 +629,9 @@ function processCommand(message, isMod, command, options) {
                 throw new CommandError($("WEATHER_USER_NOT_FOUND"));
             }
         }*/
-        sendCurrentWeather(message, "", "", options);
+        sendCurrentWeather(message, "", "", options, "", skiiness);
     } else if (command == "weather") {
-        sendCurrentWeather(message, "", "", options);
+        sendCurrentWeather(message, "", "", options, "", skiiness);
         /*
         if (settings.users[message.author.id] == null) {
             settings.users[message.author.id] = {};

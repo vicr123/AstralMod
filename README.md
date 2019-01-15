@@ -29,7 +29,8 @@ module.exports = {
     colors: { // These are the colors used for embeds.
         done: "#FFC000",
         info: "#1E3C8C",
-        fail: "#FF5000"
+        fail: "#FF5000",
+        none: "#36393F"
     }
 }
 ```
