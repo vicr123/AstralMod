@@ -270,9 +270,8 @@ function pollTimers() {
         var userSetting = settings.users[key];
         if (userSetting != null) {
             if (userSetting.timers != null) {
-                for (index in userSetting.timers) {
-                    var timer = userSetting.timers[parseInt(index)];
-                    if (timer.timeout < date) {
+                for (timer of userSetting.timers) {
+                    if (moment(timer.timeout) < date) {
                         let $ = _[userSetting.locale];
 
                         var embed = new Discord.RichEmbed();
@@ -288,7 +287,7 @@ function pollTimers() {
                         }
 
 
-                        embed.addField($("TIMER_ELAPSED_TIMEOUT_DATE_TITLE"), $("SPECIAL_DATETIME", {time: {date: timer.timeout, h24: userSetting.h24, offset: userSetting.timezone}}), false);
+                        embed.addField($("TIMER_ELAPSED_TIMEOUT_DATE_TITLE"), $("SPECIAL_DATETIME", {time: {date: moment(timer.timeout), h24: userSetting.timeunit !== "12h", offset: userSetting.timezone}}), false);
                         embed.setFooter($("TIMER_ELAPSED_FOOTER", {prefix: prefix(timer.channel == undefined ? undefined : client.channels.get(timer.channel).guild.id)}));
 
                         try {
@@ -300,8 +299,7 @@ function pollTimers() {
                         } catch (err) {
                             //Couldn't send timer
                         }
-
-                        settings.users[key].timers.splice(index, 1);
+                        settings.users[key].timers = userSetting.timers.filter((value) => value != timer);
                     }
                 }
             }
@@ -414,8 +412,8 @@ async function processCommand(message, isMod, command, options) {
             var timer = userSetting.timers[index];
 
             var field = "";
-            field += $("TIMERS_ELAPSE", {duration: {duration: moment.duration(moment().diff(timer.timeout))}}) + "\n";
-            field +=  $("TIMERS_TIMEOUT_DATE", {timeout: {date: timer.timeout, h24: options.h24, offset: options.offset}}) + "\n";
+            field += $("TIMERS_ELAPSE", {duration: {duration: moment.duration(moment().diff(moment(timer.timeout)))}}) + "\n";
+            field +=  $("TIMERS_TIMEOUT_DATE", {timeout: {date: moment(timer.timeout), h24: options.h24, offset: options.offset}}) + "\n";
 
             if (timer.reason == "") {
                 field += $("TIMERS_REASON", {reason: $("TIMERS_NO_REASON")});
