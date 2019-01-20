@@ -24,7 +24,7 @@ module.exports = {
         bprefix: "am#", // This is the default prefix used by AstralMod when it is running as AstralMod Blueprint.
         pinToPinEmoji: "📌", // This is used as the emoji for the Portable Pins and the Pin to Pin feature. You can generally leave this as the default, but if you have other bots that interpret the 📌 emoji as something else, you might want to change it.
         calcProcess: "/usr/bin/thecalculator", // This is a path to the compiled binary for theCalculator, used for calculating expressions in 'am:calc'. You can leave this blank, but 'am:calc' will be disabled. You can grab a copy of theCalculator at https://github.com/vicr123/thecalculator/releases.
-        emojiServer: "" // This is the server ID of a server that has all of the AstralMod-specific emoji. The list of emoji is specified below. You can leave this blank, but all custom emoji will be replaced by ➡.
+        emojiServer: "" // This is the server ID of a server that has all of the AstralMod-specific emoji. More information about setting up the emoji can be found below. You can leave this blank, but all custom emoji will be replaced by ➡.
     },
     colors: { // These are the colors used for embeds.
         done: "#FFC000",
@@ -37,8 +37,8 @@ module.exports = {
 
 3. Run the bot by running `node bot.js` with your preferred options.
 
-### Emoji Server?
-Set up a server with the emoji in the `/emoji` folder, join AstralMod to the server and set the `emojiServer` property in the `consts.js` file to the server ID of that folder.
+### AstralMod Emoji?
+Set up a server and upload the the emoji in the `/emoji` folder to it. You can change the actual emoji picture to whatever you want, but make sure to keep the names the same. Then, invite your bot into it, and set the `emojiServer` value in the `consts.js` file to the server ID of that server.
 
 ### Command line options
 - `--blueprint` Runs AstralMod as AstralMod Blueprint. The version number is replaced with "Blueprint" and the prefix is changed.
