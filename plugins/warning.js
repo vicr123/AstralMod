@@ -143,7 +143,7 @@ function processCommand(message, isMod, command, options) {
                             warner = message.guild.member(warning.warner);
                         }
 
-                        embed.addField($("LSWARN_WARNING_TITLE", {index: (parseInt(index) + 1)}), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: warning.timestamp, h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}), true);
+                        embed.addField($("LSWARN_WARNING_TITLE", {index: (parseInt(index) + 1)}), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: moment(warning.timestamp), h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}), true);
                     }
 
                     message.channel.send("", {embed: embed});
@@ -242,7 +242,7 @@ function processCommand(message, isMod, command, options) {
                 warner = message.guild.member(warning.warner);
             }
 
-            embed.addField("Warning #" + (parseInt(index) + 1), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: warning.timestamp, h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}), true);
+            embed.addField("Warning #" + (parseInt(index) + 1), $("LSWARN_WARNING_INFO", {warning: warning.reason, timestamp: {date: moment(warning.timestamp), h24: options.h24, offset: options.offset}, warner: warner, interpolation: {escapeValue: false}}), true);
         }
 
         message.channel.send("", {embed: embed});

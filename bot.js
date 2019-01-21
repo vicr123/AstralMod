@@ -3558,7 +3558,7 @@ function vacuumSettings() {
                     timer.timeout = moment(timer.timeout);
                     changesMade = true;
                 }
-            }
+            }   
     }
 
     //Iterate over all guilds in settings
@@ -3568,9 +3568,10 @@ function vacuumSettings() {
             changesMade = true;
             log("Deleting guild " + key + " as this guild is no longer recognised.", logType.info);
             delete settings.guilds[key];
+            continue;
         }
 
-        for (let logChannel in ["chatLogs, botWarnings, memberAlerts"]) {
+        for (let logChannel of ["chatLogs, botWarnings, memberAlerts"]) {
             if(settings.guilds[key][logChannel] != undefined) {
                 if (settings.guilds[key].blocked[logChannel] == undefined) {
                     log(`Detected logging channel ${settings.guilds[key].chatLogs} without blocked feature list. Creating array.`, logType.info);
@@ -3586,16 +3587,16 @@ function vacuumSettings() {
             }
         }
 
-        for (let warnArray in settings.guilds[key].warnings) {
+/*         for (let warnArray in settings.guilds[key].warnings) {
             for (let warn of settings.guilds[key].warnings[warnArray]) {
                 if (typeof warn.timestamp === 'string' || warn.timestamp instanceof String) {
                     log("Detected warning with String timestamp. Converting to moment.", logType.info);
-                    warn.timestamp = moment(warn.timestamp);
+                    warn.timestamp = moment(warn.timestamp).utc();
                     changesMade = true;
                 }
             }
         }
-
+ */
         if (settings.guilds[key].locale == undefined) {
             changesMade = true;
             log(`Detected guild ${key} without set locale. Setting locale to en.`, logType.info);
