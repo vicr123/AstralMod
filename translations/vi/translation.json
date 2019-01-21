@@ -250,7 +250,7 @@
     "LSWARN_TITLE": "Cảnh báo phạt",
     "LSWARN_DESCRIPTION": "Cảnh báo phạt đã bị ghi nhận bởi người quản lý trên máy chủ này",
     "LSWARN_WARNING_TITLE": "Cảnh báo phạt #{{index}}",
-    "LSWARN_WARNING_INFO": "{{warning}}\n\n**Dấu thời gian:** {{timestamp, datetime}}\n**Báo phạt bởi:** {{timestamp, datetime}}",
+    "LSWARN_WARNING_INFO": "{{warning}}\n\n**Dấu thời gian:** {{timestamp, datetime}}\n**Báo phạt bởi:** {{warner, datetime}}",
     "RETRSETTINGS_COMPRESSING_SETTINGS": "Đang chuẩn bị tệp cài đặt...",
     "RETRSETTINGS_PROBLEM_COMPRESSING": "Đã xảy ra lỗi khi nén tệp cài đật.",
     "RETRSETTINGS_COMPRESSING_SUCCESS": "Đây là cài đặt AstralMod bây giờ.",
