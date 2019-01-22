@@ -272,10 +272,10 @@ function processCommand(message, isMod, command, options) {
                 let fieldName =  $("PINS_PIN_TITLE_COMPACT", {pinNumber})
                 if (!channel) {
                     embed.addField(fieldName, $("PINS_CHANNEL_GONE"));
-                }
-    
-                if (channel.nsfw && !nsfw) {
-                    embed.addField(fieldName, $("PINS_CHANNEL_NSFW"));
+                } else {
+                    if (channel.nsfw && !nsfw) {
+                        embed.addField(fieldName, $("PINS_CHANNEL_NSFW"));
+                    }
                 }
     
                 try {
