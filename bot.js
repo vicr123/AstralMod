@@ -324,7 +324,7 @@ global.awaitUserConfirmation = function(options) {
         if (options.extraFields != null) {
             for (let field in options.extraFields) {
                 let currentField = options.extraFields[field];
-                embed.addField(currentField[0], currentField[1]);
+                embed.addField(currentField[0], currentField[1] == "" ? "‍" : currentField[1]); // No, I'm not stupid - there is a ZWJ there!
             }
         }
 
