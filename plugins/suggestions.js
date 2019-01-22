@@ -56,7 +56,10 @@ function processCommand(message, isMod, command, options) {
                 embed.setColor(consts.colors.info);
                 embed.setDescription(coll.content);
                 embed.setTimestamp();
-                message.guild.channels.get(settings.guilds[message.guild.id].suggestions).send(embed);
+                message.guild.channels.get(settings.guilds[message.guild.id].suggestions).send({
+                    embed: embed,
+                    files: coll.attachments.array().map(a => new Discord.Attachment(a.url))
+                });
             }).catch((err) => {
                 if (!err) return; //User cancelled
 
