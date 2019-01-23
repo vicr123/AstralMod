@@ -20,423 +20,280 @@
 
 const Discord = require('discord.js');
 const moment = require('moment');
-const YQL = require('yql');
 const Canvas = require('canvas');
 const fs = require('fs');
-const timeModule = require("./time.js");
+const nominatim = require("nominatim-geocoder");
+const yrnoModule = require("yr.no-forecast");
 var client;
 var consts;
 
+const geocoder = new nominatim();
+const yrno = yrnoModule({
+    version: "1.9"
+});
+
 let sunnyImage, moonyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage, questionImage, unavailImage;
 
-let transArr = {
-    0: "WEATHERSTRING_TORNADO",
-    1: "WEATHERSTRING_TROPICALSTORM",
-    2: "WEATHERSTRING_HURRICANE",
-    3: "WEATHERSTRING_SEVERETHUNDERSTORMS",
-    4: "WEATHERSTRING_THUNDERSTORMS",
-    5: "WEATHERSTRINGS_RAINANDSNOW",
-    6: "WEATHERSTRINGS_RAINANDSLEET",
-    7: "WEATHERSTRINGS_SNOWANDSLEET",
-    8: "WEATHERSTRINGS_FREEZINGDRIZZLE",
-    9: "WEATHERSTRINGS_DRIZZLE",
-    10: "WEATHERSTRINGS_FREEZINGRAIN",
-    11: "WEATHERSTRINGS_SHOWERS",
-    12: "WEATHERSTRINGS_SHOWERS",
-    13: "WEATHERSTRINGS_SNOWFLURRIES",
-    14: "WEATHERSTRINGS_LIGHTSNOWSHOWERS",
-    15: "WEATHERSTRINGS_BLOWINGSNOW",
-    16: "WEATHERSTRINGS_SNOW",
-    17: "WEATHERSTRINGS_HAIL",
-    18: "WEATHERSTRINGS_SLEET",
-    19: "WEATHERSTRINGS_DUST",
-    20: "WEATHERSTRINGS_FOG",
-    21: "WEATHERSTRINGS_HAZE",
-    22: "WEATHERSTRINGS_SMOCK",
-    23: "WEATHERSTRINGS_BLUSTER",
-    24: "WEATHERSTRINGS_WIND",
-    25: "WEATHERSTRINGS_COLD",
-    26: "WEATHERSTRINGS_CLOUDY",
-    27: "WEATHERSTRINGS_MOSTLYCLOUDY",
-    28: "WEATHERSTRINGS_MOSTLYCLOUDY",
-    29: "WEATHERSTRINGS_PARTLYCLOUDY",
-    30: "WEATHERSTRINGS_PARTLYCLOUDY",
-    31: "WEATHERSTRING_CLEAR",
-    32: "WEATHERSTRING_SUNNY",
-    33: "WEATHERSTRING_FAIR",
-    34: "WEATHERSTRING_FAIR",
-    35: "WEATHERSTRING_RAINANDHAIL",
-    36: "WEATHERSTRING_HOT",
-    37: "WEATHERSTRING_ISOLATEDTHUNDERSTORMS",
-    38: "WEATHERSTRING_SCATTEREDTHUNDERSTORMS",
-    39: "WEATHERSTRING_SCATTEREDTHUNDERSTORMS",
-    40: "WEATHERSTRING_SCATTEREDSHOWERS",
-    41: "WEATHERSTRING_HEAVYSNOW",
-    42: "WEATHERSTRING_SCATTEREDSNOWSHOWERS",
-    43: "WEATHERSTRING_HEAVYSNOW",
-    44: "WEATHERSTRINGS_PARTLYCLOUDY",
-    45: "WEATHERSTRING_THUNDERSHOWERS",
-    46: "WEATHERSTRING_SNOWSHOWERS",
-    47: "WEATHERSTRING_ISOLATEDTHUNDERSHOWERS",
-    3200: "WEATHERSTRING_NOTAVAILABLE"
-}
-
-
-
-function getDataFromCode(code, ctx, timeOfDay = "transition", $) {
+function getDataFromCode(code, ctx, $) {
     log("code: " + code.toString(), logType.debug);
-    let retval = {}
 
-    retval.weatherString = $(transArr[code]);
-    
-    switch (code) {
-        case 31:
-        case 32:
-        case 33:
-        case 34:
-            //Clear
-            //retval.gradient.addColorStop(0, "rgba(0, 200, 255, 0.5)");
-            //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 255, 0)");
-            if (timeOfDay == "day") {
-                retval.gradient = "rgb(120, 200, 255)";
-                retval.arr = [120, 200, 255];
-                retval.secondary = "rgb(50, 180, 255)";
-                retval.text = "black";
-                retval.image = sunnyImage;
-            } else if (timeOfDay == "night") {
-                retval.weatherString = $("WEATHERSTRING_CLEAR")
-                retval.gradient = "rgb(0, 50, 100)";
-                retval.arr = [0, 50, 100];
-                retval.secondary = "rgb(0, 25, 50)";
-                retval.text = "white";
-                retval.image = moonyImage;
-            } else { //transition
-                retval.gradient = "rgb(234, 128, 25)";
-                retval.arr = [234, 128, 25];
-                retval.secondary = "rgb(170, 90, 20)";
-                retval.text = "black";
-                retval.image = sunnyImage;
-            }
-            break;
-        case 1: 
-        case 2:
-        case 7:
-        case 17:
-        case 18:
-        case 22:
-        case 25:
-        case 26:
-        case 27:
-        case 28:
-        case 29:
-        case 30:
-        case 35:
-        case 44:
-            //Cloudy
-            //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
-            //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            retval.gradient = "rgb(200, 200, 200)";
-            retval.arr = [200, 200, 200];
-            retval.secondary = "rgb(170, 170, 170)";
-            retval.text = "black";
-            retval.image = cloudyImage;
-            break;
-        case 6:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-            //Rainy
-            //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
-            //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            retval.gradient = "rgb(200, 200, 200)";
-            retval.arr = [200, 200, 200];
-            retval.secondary = "rgb(170, 170, 170)";
-            retval.text = "black";
-            retval.image = rainImage;
-            break;
-        case 0:
-        case 23:
-        case 24:
-            //Windy
-            //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
-            //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            retval.gradient = "rgb(200, 200, 200)";
-            retval.arr = [200, 200, 200];
-            retval.secondary = "rgb(170, 170, 170)";
-            retval.text = "black";
-            retval.image = windImage;
-            break;
-        case 19:
-        case 20:
-        case 21:
-        case 22:
-            //Fog
-            //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
-            //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            retval.gradient = "rgb(200, 200, 200)";
-            retval.arr = [200, 200, 200];
-            retval.secondary = "rgb(170, 170, 170)";
-            retval.text = "black";
-            retval.image = windImage;
-            break;
-        case 36:
-            //Hot
-            //retval.gradient.addColorStop(0, "rgba(255, 100, 0, 0.5)");
-            //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            retval.gradient = "rgb(255, 100, 0)";
-            retval.arr = [255, 100, 0];
-            retval.secondary = "rgb(200, 100, 0)";
-            retval.text = "black";
-            retval.image = sunnyImage;
-            break;
-        case 3:
-        case 4:
-        case 37:
-        case 38:
-        case 39:
-        case 40:
-        case 45:
-        case 47:
-            //Thunder
-            //retval.gradient.addColorStop(0, "rgba(100, 100, 100, 0.5)");
-            //retval.gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            retval.gradient = "rgb(200, 200, 200)";
-            retval.arr = [200, 200, 200];
-            retval.secondary = "rgb(170, 170, 170)";
-            retval.text = "black";
-            retval.image = thunderImage;
-            break;
-        case 13:
-        case 14:
-        case 15:
-        case 16:
-        case 41:
-        case 43:
-            //Snow
-            retval.gradient = "rgb(200, 200, 200)";
-            retval.arr = [200, 200, 200];
-            retval.secondary = "rgb(170, 170, 170)";
-            retval.text = "black";
-            retval.image = snowImage;
-            break;
-        case 5:
-        case 42:
-        case 46:
-            //Rain + Snow
-            retval.gradient = "rgb(200, 200, 200)";
-            retval.arr = [200, 200, 200];
-            retval.secondary = "rgb(170, 170, 170)";
-            retval.text = "black";
-            retval.image = rainsnowImage;
-            break;
+    const codes = {
+        "Sun": {
+            textKey: "WEATHER_COND_SUN",
+            background: "clear",
+            icon: sunnyImage
+        },
+        "LightCloud": {
+            textKey: "WEATHER_COND_LIGHTCLOUD",
+            background: "clear",
+            icon: cloudyImage
+        },
+        "PartlyCloud": {
+            textKey: "WEATHER_COND_PARTCLOUD",
+            background: "clear",
+            icon: cloudyImage
+        },
+        "Cloud": {
+            textKey: "WEATHER_COND_CLOUD",
+            background: "cloud",
+            icon: cloudyImage
+        }
     }
-    return retval;
+
+    if (codes.hasOwnProperty(code)) {
+        return codes[code];
+    } else {
+        return {
+            textKey: "WEATHER_COND_UNKNOWN",
+            background: "cloud",
+            icon: questionImage
+        };
+    }
 }
 
 function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
     let $ = _[options.locale];
     sendPreloader($("WEATHER_PREPARING"), message.channel).then(messageToEdit => {
-        /*let query;
-        let unit = options.imperial ? "f" : "c";
 
+        let locationPromise;
         if (type == "location") {
-            query = new YQL("select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"" + location + "\") and u=\"" + unit + "\"");
-        } else if (type == "id") {
-            query = new YQL("select * from weather.forecast where woeid=" + location + " and u=\"" + unit + "\"");
+            //Call the geocoder to find the coordinates
+            locationPromise = geocoder.search({
+                q: location
+            }).then(function(response) {
+                //TODO: Check if the response is null
+                return Promise.resolve({
+                    lat: response[0].lat,
+                    lon: response[0].lon,
+                    loc: response[0].display_name
+                });
+            });
+        } else if (type = "id") {
+            if (typeof location == "object") {
+                locationPromise = Promise.resolve(location);
+            } else {
+                //Return an error
+                let embed = new Discord.RichEmbed;
+                embed.setTitle($("WEATHER_ERROR", {emoji: ":thunder_cloud_rain:"}));
+                embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
+                embed.setColor(consts.colors.fail);
+                embed.addField($("WEATHER_ERROR_DETAILS"), "reset id needed");
+                embed.addField($("WEATHER_ERROR_TRY_THIS"), $("WEATHER_ERROR_TRY_THIS_DESCRIPTION", {prefix: prefix(message.guild.id)}));
+
+                messageToEdit.edit(embed);
+                return;
+            }
         }
 
-        query.exec(function(err, data) {
-            try {
-                if (err) {
-                    throw new CommandError(err);
-                } else {*/
-                    //First case is for a requested city that does not exist. Second case is for when YQL doesn't
-                    //have any data for the requested city.
-                    /*if (data.query.results === null || Object.keys(data.query.results.channel).length === 1) {
-                        let embed = new Discord.RichEmbed;
-                        embed.setTitle($("WEATHER_ERROR", {emoji: ":thunder_cloud_rain:"}));
-                        embed.setDescription($("WEATHER_ERROR_NOT_RETRIEVED"));
-                        embed.setColor(consts.colors.fail);
-                        embed.addField($("WEATHER_ERROR_DETAILS"), $("WEATHER_ERROR_CITY_NOT_FOUND"));
-                        embed.addField($("WEATHER_ERROR_TRY_THIS"), $("WEATHER_ERROR_TRY_THIS_DESCRIPTION", {prefix: prefix(message.guild.id)}));
+        var canvas = new Canvas(500, 410);
+        var ctx = canvas.getContext('2d');
+        let locString;
 
-                        messageToEdit.edit(embed);
-                        return;
-                    }*/
+        locationPromise.then(function(locinfo) {
+            locString = locinfo.loc.trim();
+            return yrno.getWeather({
+                lat: locinfo.lat,
+                lon: locinfo.lon
+            });
+        }).then(function(weather) {
+            return weather.getForecastForTime(moment.utc()).then(function(currentWeather) {
+                if (currentWeather == null) {
+                    currentWeather = {};
+                }                
 
-                    //Time info
-                    //let pd = data.query.results.channel.item.pubDate;
-                    //let date = moment(new Date(pd.substring(0, pd.lastIndexOf(" "))));
-                    //let tz = pd.substring(pd.lastIndexOf(" "));
-                    //let currentDate = moment.utc().add(timeModule.utcOffsetFromTimezone(tz.toLowerCase().trim()) * 3600000, "ms");
+                let display;
+                if (currentWeather.hasOwnProperty("icon")) {
+                    display = getDataFromCode(currentWeather.icon, ctx, $);
+                } else {
+                    display = getDataFromCode("unknown", ctx, $);
+                }
 
-                    //Determine the time of day
-                    let timeOfDay = "day";
-                    //let sunriseDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunrise, "YYYY-MM-DD HH:mm A");
-                    //sunriseDate.dayOfYear(date.dayOfYear());
-                    //sunriseDate.year(date.year());
-                    //let sunsetDate = moment.utc("1970-01-01 " + data.query.results.channel.astronomy.sunset, "YYYY-MM-DD HH:mm A");
-                    //sunsetDate.dayOfYear(date.dayOfYear());
-                    //sunsetDate.year(date.year());
-
-                    //if (currentDate.isBetween(sunriseDate.clone().add(30, "m"), sunsetDate.clone().subtract(30, "m"))) {
-                        //timeOfDay = "day";
-                    //} else if (currentDate.isBefore(sunriseDate.clone().subtract(30, "m")) || currentDate.isAfter(sunsetDate.clone().add(30, "m"))) {
-                        //timeOfDay = "night";
-                    //} else {
-                        //timeOfDay = "transition";
-                    //}
-
-                    var canvas = new Canvas(500, 410);
-                    var ctx = canvas.getContext('2d');
-
-                    //let display = getDataFromCode(parseInt(data.query.results.channel.item.condition.code), ctx, timeOfDay, $);
-                    let display = {
-                        gradient: "rgb(120, 200, 255)",
-                        arr: [120, 200, 255],
-                        secondary:"rgb(50, 180, 255)",
-                        text: "black",
-                        image: questionImage,
-                        weatherString: "---"
+                let fill;
+                const fills = {
+                    "clear": {
+                        primary: "rgb(120, 200, 255)",
+                        secondary: "rgb(50, 180, 255)",
+                        pen: "black"
+                    },
+                    "cloud": {
+                        primary: "rgb(200, 200, 200)",
+                        secondary: "rgb(170, 170, 170)",
+                        pen: "black"
                     }
+                }
 
-                    let tempUnit = "°C"; // + data.query.results.channel.units.temperature;
-                    let speedUnit = "km/h"; //data.query.results.channel.units.speed;
-                    let pressureUnit = "mb"; //data.query.results.channel.units.pressure;
+                fill = fills[display.background];
 
-                    ctx.fillStyle = display.gradient;
-                    ctx.fillRect(0, 0, 350, 410);
+                let tempUnit = "°C";
+                let speedUnit = "km/h";
 
-                    ctx.fillStyle = display.secondary;
-                    ctx.fillRect(350, 0, 150, 410);
+                ctx.fillStyle = fill.primary;
+                ctx.fillRect(0, 0, 350, 410);
 
-                    ctx.font = "20px Contemporary";
-                    ctx.fillStyle = display.text;
+                ctx.fillStyle = fill.secondary;
+                ctx.fillRect(350, 0, 150, 410);
 
-                    let currentWeatherText = $("WEATHER_CURRENT_WEATHER");
-                    if (user != "") {
-                        currentWeatherText += " - " + user;
-                    }
+                ctx.font = "20px Contemporary";
+                ctx.fillStyle = fill.pen;
 
-                    let currentWeatherWidth = ctx.measureText(currentWeatherText);
-                    if (currentWeatherWidth.width > 325) {
-                        let textCanvas = new Canvas(currentWeatherWidth.width, 30);
-                        let txtCtx = textCanvas.getContext('2d');
-                        txtCtx.font = "20px Contemporary";
-                        txtCtx.fillStyle = display.text;
-                        txtCtx.fillText(currentWeatherText, 0, 20);
+                let currentWeatherText = $("WEATHER_CURRENT_WEATHER");
+                if (user != "") {
+                    currentWeatherText += " - " + user;
+                }
 
-                        ctx.drawImage(textCanvas, 10, 10, 325, 30);
+                let currentWeatherWidth = ctx.measureText(currentWeatherText);
+                if (currentWeatherWidth.width > 325) {
+                    let textCanvas = new Canvas(currentWeatherWidth.width, 30);
+                    let txtCtx = textCanvas.getContext('2d');
+                    txtCtx.font = "20px Contemporary";
+                    txtCtx.fillStyle = fill.pen;
+                    txtCtx.fillText(currentWeatherText, 0, 20);
+
+                    ctx.drawImage(textCanvas, 10, 10, 325, 30);
+                } else {
+                    ctx.fillText(currentWeatherText, (350 / 2) - (currentWeatherWidth.width / 2), 30);
+                }
+
+                //Draw 'as of' info
+                ctx.font = "14px Contemporary";
+
+                let pubDate
+                
+                if (currentWeather.hasOwnProperty("from")) {
+                    pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:moment(currentWeather.from), h24:options.h24}});
+                } else {
+                    pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:moment(), h24:options.h24}});
+                }
+
+                let dateWidth = ctx.measureText(pubDate);
+                if (dateWidth.width > 325) {
+                    let textCanvas = new Canvas(dateWidth.width, 50);
+                    let txtCtx = textCanvas.getContext('2d');
+                    txtCtx.font = "14px Contemporary";
+                    txtCtx.fillStyle = fill.pen;
+                    txtCtx.fillText(pubDate, 0, 20);
+
+                    ctx.drawImage(textCanvas, 10, 30, 325, 50);
+                } else {
+                    ctx.fillText(pubDate, (350 / 2) - (dateWidth.width / 2), 50);
+                }
+
+                //Image goes between 100-200px y
+                ctx.drawImage(display.icon, 100, 60);
+
+                let locPart1;
+                let locPart2;
+                if (locString.includes(", ")) {
+                    locPart1 = locString.substr(0, locString.indexOf(", "));
+                    locPart2 = locString.substr(locString.indexOf(", ") + 2);
+                }
+
+                ctx.font = "bold 20px Contemporary";
+                ctx.fillStyle = fill.pen;
+                let lp1 = ctx.measureText(locPart1);
+                if (lp1.width > 325) {
+                    let textCanvas = new Canvas(lp1.width, 50);
+                    let txtCtx = textCanvas.getContext('2d');
+                    txtCtx.font = "bold 20px Contemporary";
+                    txtCtx.fillStyle = fill.pen;
+                    txtCtx.fillText(locPart1, 0, 40);
+
+                    ctx.drawImage(textCanvas, 13, 180, 325, 50);
+                } else {
+                    ctx.fillText(locPart1, 175 - lp1.width / 2, 228);
+                }
+
+                ctx.font = "12px Contemporary";
+                ctx.fillStyle = fill.pen;
+                let lp2 = ctx.measureText(locPart2);
+                if (lp2.width > 325) {
+                    let textCanvas = new Canvas(lp2.width, 20);
+                    let txtCtx = textCanvas.getContext('2d');
+                    txtCtx.font = "12px Contemporary";
+                    txtCtx.fillStyle = display.text;
+                    txtCtx.fillText(locPart2, 0, 20);
+
+                    ctx.drawImage(textCanvas, 13, 225, 325, 20);
+                } else {
+                    ctx.fillText(locPart2, 175 - lp2.width / 2, 245);
+                }
+
+                ctx.font = "40px Contemporary";
+                let conditionWidth = ctx.measureText($(display.textKey));
+                if (conditionWidth.width > 325) {
+                    let textCanvas = new Canvas(conditionWidth.width, 50);
+                    let txtCtx = textCanvas.getContext('2d');
+                    txtCtx.font = "light 40px Contemporary";
+                    txtCtx.fillStyle = fill.pen;
+                    txtCtx.fillText($(display.textKey), 0, 40);
+
+                    ctx.drawImage(textCanvas, 13, 240, 325, 50);
+                } else {
+                    ctx.fillText($(display.textKey), 175 - conditionWidth.width / 2, 280);
+                }
+
+                ctx.font = "30px Contemporary";
+                let currentTemp = (currentWeather.hasOwnProperty("temperature") ? currentWeather.temperature.value : "---") + tempUnit;
+                let tempWidth = ctx.measureText(currentTemp);
+                ctx.fillText(currentTemp, 175 - tempWidth.width / 2, 315);
+
+
+                //Draw wind info
+                //met.no gives us the info in meters per second
+                let windSpeed;
+
+                if (currentWeather.hasOwnProperty("windSpeed")) {
+                    let mps = parseFloat(currentWeather.windSpeed.mps);
+                    if (options.imperial) {
+                        //Change to miles per hour
+                        windSpeed = (mps * 2.237).toFixed(1);
                     } else {
-                        ctx.fillText(currentWeatherText, (350 / 2) - (currentWeatherWidth.width / 2), 30);
+                        //Change to kilometers per hour
+                        windSpeed = (mps * (1/1000) / (1/3600)).toFixed(1);
                     }
+                } else {
+                    windSpeed = "---";
+                }
 
-                    //Draw 'as of' info
-                    ctx.font = "14px Contemporary";
+                ctx.drawImage(windImage, 50, 330, 20, 20);
+                ctx.font = "14px Contemporary";
+                let currentWind = windSpeed + " " + speedUnit;
+                ctx.fillText(currentWind, 77, 345);
 
-                    //let pubDate = "As of " + date.format("dddd, MMMM D") + " at " + date.format(timeString) + tz;
+                //Draw humidity info
+                ctx.drawImage(humidImage, 50, 355, 20, 20);
+                let currentHumid = (currentWeather.hasOwnProperty("humidity") ? currentWeather.humidity.value : "---") + "%";
+                ctx.fillText(currentHumid, 77, 370);
 
-                    //let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:date.utcOffset(timeModule.utcOffsetFromTimezone(tz.trim().toLowerCase()), true), h24:options.h24}});
-                    let pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:moment(), h24:options.h24}});
-                    let dateWidth = ctx.measureText(pubDate);
-                    if (dateWidth.width > 325) {
-                        let textCanvas = new Canvas(dateWidth.width, 50);
-                        let txtCtx = textCanvas.getContext('2d');
-                        txtCtx.font = "14px Contemporary";
-                        txtCtx.fillStyle = display.text;
-                        txtCtx.fillText(pubDate, 0, 20);
+                //Draw pressure info
+                ctx.drawImage(pressureImage, 50, 380, 20, 20);
+                let currentPressure = (currentWeather.hasOwnProperty("pressure") ? currentWeather.pressure.value + " " + currentWeather.pressure.unit : "---"); //pressureResult.toFixed(sigPlaces) + " " + pressureUnit;
+                ctx.fillText(currentPressure, 77, 395);
 
-                        ctx.drawImage(textCanvas, 10, 30, 325, 50);
-                    } else {
-                        //ctx.fillText(currentWeatherText, (350 / 2) - (currentWeatherWidth.width / 2), 30);
-                        ctx.fillText(pubDate, (350 / 2) - (dateWidth.width / 2), 50);
-                    }
-
-
-                    //Image goes between 100-200px y
-                   ctx.drawImage(display.image, 100, 60);
-
-                   ctx.font = "bold 20px Contemporary";
-                   ctx.fillStyle = display.text;
-                   let funText = skiiness ? "Even if the weather is down, the admirable ski jacket is not! ∞ ski jacket!" : "---";
-                   let funWidth = ctx.measureText(funText);
-                   if (funWidth.width > 325) {
-                       let textCanvas = new Canvas(funWidth.width, 50);
-                       let txtCtx = textCanvas.getContext('2d');
-                       txtCtx.font = "bold 20px Contemporary";
-                       txtCtx.fillStyle = display.text;
-                       txtCtx.fillText(funText, 0, 40);
-
-                       ctx.drawImage(textCanvas, 13, 180, 325, 50);
-                   } else {
-                        ctx.fillText(funText, 175 - funWidth.width / 2, 228);
-                   }
-
-
-
-                    ctx.font = "12px Contemporary";
-                    ctx.fillStyle = display.text;
-                    let countryWidth = ctx.measureText("---" + " - " + "---");
-                    ctx.fillText("---" + " - " + "---", 175 - countryWidth.width / 2, 245);
-
-                    ctx.font = "40px Contemporary";
-                    let conditionWidth = ctx.measureText(display.weatherString);
-                    if (conditionWidth.width > 325) {
-                        let textCanvas = new Canvas(conditionWidth.width, 50);
-                        let txtCtx = textCanvas.getContext('2d');
-                        txtCtx.font = "light 40px Contemporary";
-                        txtCtx.fillStyle = display.text;
-                        txtCtx.fillText(display.weatherString, 0, 40);
-
-                        ctx.drawImage(textCanvas, 13, 240, 325, 50);
-                    } else {
-                        ctx.fillText(display.weatherString, 175 - conditionWidth.width / 2, 280);
-                    }
-
-                    ctx.font = "30px Contemporary";
-                    let currentTemp = "---" + tempUnit;
-                    let tempWidth = ctx.measureText(currentTemp);
-                    ctx.fillText(currentTemp, 175 - tempWidth.width / 2, 315);
-
-
-                    //Draw wind info
-                    ctx.drawImage(windImage, 50, 330, 20, 20);
-                    ctx.font = "14px Contemporary";
-                    let currentWind = "---" + " " + speedUnit;
-                    ctx.fillText(currentWind, 77, 345);
-
-                    //Draw humidity info
-                    ctx.drawImage(humidImage, 50, 355, 20, 20);
-                    let currentHumid = "---" + "%";
-                    ctx.fillText(currentHumid, 77, 370);
-
-                    //Draw pressure info
-                    //Yahoo's pressure API returns bad results - we have to manually fix them.
-                    ctx.drawImage(pressureImage, 50, 380, 20, 20);
-                    //let pressureResult = "---";
-                    //let sigPlaces = 3;
-
-                    // Millibars were requested - convert milli-feet of head to millibars
-                    /*if (pressureUnit === "in") {
-                        pressureUnit = "inHg";
-                        let feetOfHead = parseFloat(pressureResult) / 1000; //For whatever reason they don't actually give it in real feet of head
-                        pressureResult = feetOfHead * 29.890669; //Conversion to milliBars
-                    }
-
-                    // Inches of mercury was requested - convert millibars to inches of mercury
-                    else {
-                        pressureResult = parseFloat(pressureResult) / 33.864;
-                        sigPlaces = 0;
-                    }*/
-
-                    let currentPressure = "---" + " " + pressureUnit; //pressureResult.toFixed(sigPlaces) + " " + pressureUnit;
-                    ctx.fillText(currentPressure, 77, 395);
-
-                    //Draw wind speed
-                    ctx.drawImage(compassImage, 200, 330, 20, 20);
-                    /*let compass = parseInt(data.query.results.channel.wind.direction);
+                //Draw wind speed
+                ctx.drawImage(compassImage, 200, 330, 20, 20);
+                if (currentWeather.hasOwnProperty("windDirection")) {
+                    let compass = parseFloat(currentWeather.windDirection.deg);
                     let cardinal;
                     if (compass < 22) {
                         cardinal = "N";
@@ -457,141 +314,112 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     } else {
                         cardinal = "N";
                     }
-                    ctx.fillText(compass + "° (" + cardinal + ")", 227, 345);*/
-                    ctx.fillText("---" + "° (" + "---" + ")", 227, 345);
-
-                    //Draw sunrise info
-                    ctx.drawImage(sunriseImage, 200, 355, 20, 20);
-                    ctx.drawImage(sunsetImage, 200, 380, 20, 20);
-                    /*let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
-                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24}}), 227, 370);
-
-                    //Draw sunset info
-                    ctx.drawImage(sunsetImage, 200, 380, 20, 20);
-                    let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:m a");
-                    ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24}}), 227, 395);*/
-
-                    ctx.fillText("---", 227, 370);
-                    ctx.fillText("---", 227, 395);
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = display.text;
-                    ctx.moveTo(350, 0);
-                    ctx.lineTo(350, 410);
-                    ctx.stroke();
-
-                    //350 - 500x for upcoming weather data
-                    //82px per data pane
-
-                    let current = 0;
-                    
-                    let ml;
-                    if (options.locale.startsWith("zh")) {
-                        ml = moment.localeData("zh-cn");
-                    } else {
-                        ml = moment.localeData(options.locale);
-                    }
-                    for (key in [1,2,3,4,5]) {
-                        current++;
-                        if (current > 5) {
-                            break;
-                        }
-                        //let day = data.query.results.channel.item.forecast[key];
-
-                        //let display = getDataFromCode(parseInt(day.code), ctx, null, _[options.locale]);
-
-                        ctx.font = "20px Contemporary";
-
-                        let dayText = "---";
-                        if (current == 1) {
-                            dayText = $("WEATHER_TODAY").toUpperCase();
-                        } else {
-                            //dayText = ml.weekdaysShort()[["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(day.day.toLowerCase())].toUpperCase().trim();
-                        }
-                        let dayWidth = ctx.measureText(dayText);
-                        
-                        if (dayWidth.width > 72) {
-                            let textCanvas = new Canvas(dayWidth.width, dayWidth.emHeightAscent + dayWidth.emHeightDescent);
-                            let txtCtx = textCanvas.getContext('2d');
-                            txtCtx.font = "20px Contemporary";
-                            txtCtx.fillStyle = ctx.fillStyle;
-                            txtCtx.fillText(dayText, 0, 20);
-
-                            ctx.rotate(-Math.PI / 2);
-                            ctx.drawImage(textCanvas, -current * 82 + 5, 372 - dayWidth.emHeightAscent, 72, dayWidth.emHeightAscent + dayWidth.emHeightDescent);
-                            ctx.rotate(Math.PI / 2);
-                        } else {
-                            let y = (current - 1) * 82 + 41 + (dayWidth.width / 2);
-                            ctx.rotate(-Math.PI / 2);
-                            ctx.fillText(dayText, -y, 372);
-                            ctx.rotate(Math.PI / 2);
-                        }
-
-                        //Draw image
-                        ctx.drawImage(questionImage, 380, (current - 1) * 82 + 9, 64, 64);
-
-                        //Draw temperatures
-                        ctx.fillText("---" + "°", 450, (current - 1) * 82 + 30);
-                        ctx.fillText("---" + "°", 450, (current - 1) * 82 + 60);
-
-                        ctx.beginPath();
-                        ctx.moveTo(350, current * 82);
-                        ctx.lineTo(500, current * 82);
-                        ctx.stroke();
-                    }
-                    
-                    //Now overlay the weather with an error
-                    ctx.fillStyle = "rgba(255, 0, 0, 0.65)";
-                    ctx.fillRect(0, 0, 500, 410);
-
-                    ctx.drawImage(unavailImage, 175, 60, 150, 150);
-
-                    ctx.fillStyle = "rgb(255, 255, 255)";
-                    ctx.font = "30px Contemporary";
-                    let unavailableText = ctx.measureText("Weather Unavailable");
-                    ctx.fillText("Weather Unavailable", (500 / 2) - (unavailableText.width / 2), 250);
-
-                    ctx.font = "20px Contemporary";
-                    ctx.textAlign = "center";
-                    ctx.fillText("The weather command is unavailable in", (500 / 2), 300);
-                    ctx.fillText("AstralMod 3.0. It will be coming back", (500 / 2), 320);
-                    ctx.fillText("in AstralMod 3.1.", (500 / 2), 340);
-
-                    ctx.font = "15px Contemporary";
-                    ctx.fillText("We sincerely apologise for the inconvenience.", (500 / 2), 370);
-
-                    /*ctx.strokeStyle = "rgb(255, 255, 255)";
-                    ctx.beginPath();
-                    ctx.moveTo(0, 40);
-                    ctx.lineTo(500, 40);
-                    ctx.moveTo(0, 380);
-                    ctx.lineTo(500, 380);
-                    ctx.stroke();*/
-
-                    let e = new Discord.RichEmbed();
-                    e.setColor(consts.colors.none)
-                    e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
-                    e.setImage("attachment://weather.png");
-                    //e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
-                    e.setTitle($("WEATHER_TITLE"));
-                    //e.setURL(data.query.results.channel.link);
-                    // e.setColor(display.arr);
-                    e.setFooter(getRandom($("WEATHER_PLEASE_PRINT"),
-                                        $("WEATHER_TEAR_PERFORATED_LINE"),
-                                        $("WEATHER_SO_MANY_DEGREES"),
-                                        $("WEATHER_LONGER_DAYS")));
-                    message.channel.send(e).then(function() {
-                        messageToEdit.delete();
-                    });
-                /*}
-            } catch (err) {
-                if (process.argv.indexOf("--debug") !== -1) {
-                    message.channel.send(err.stack);
+                    ctx.fillText(compass + "° (" + cardinal + ")", 227, 345);
+                } else {
+                    ctx.fillText("---", 227, 345);
                 }
 
-                messageToEdit.edit(err.toString() + "\nTry resetting your location with `" + prefix(message.guild.id) + "setloc`");
-            }
-        });*/
+                //Draw sunrise info
+                ctx.drawImage(sunriseImage, 200, 355, 20, 20);
+                //let sunriseTime = moment(data.query.results.channel.astronomy.sunrise, "h:m a");
+                //ctx.fillText($("SPECIAL_STIME", {time: {date: sunriseTime, h24:options.h24}}), 227, 370);
+
+                //Draw sunset info
+                ctx.drawImage(sunsetImage, 200, 380, 20, 20);
+                //let sunsetTime = moment(data.query.results.channel.astronomy.sunset, "h:m a");
+                //ctx.fillText($("SPECIAL_STIME", {time: {date: sunsetTime, h24:options.h24}}), 227, 395);
+
+                ctx.fillText("---", 227, 370);
+                ctx.fillText("---", 227, 395);
+
+                ctx.beginPath();
+                ctx.strokeStyle = fill.pen;
+                ctx.moveTo(350, 0);
+                ctx.lineTo(350, 410);
+                ctx.stroke();
+
+                return weather.getFiveDaySummary();
+            }).then(function(fiveDaySummary) {
+                let current = 0;
+                for (key in fiveDaySummary) {
+                    let data = fiveDaySummary[key];
+                    current++;
+                    if (current > 5) {
+                        break;
+                    }
+
+                    let display;
+                    if (data.hasOwnProperty("icon")) {
+                        display = getDataFromCode(data.icon, ctx, $);
+                    } else {
+                        display = getDataFromCode("unknown", ctx, $);
+                    }
+
+                    ctx.font = "20px Contemporary";
+
+                    if (current == 1) {
+                        dayText = $("WEATHER_TODAY").toUpperCase();
+                    } else {
+                        let day = moment(data.from);
+                        if (options.locale.startsWith("zh")) {
+                            dayText = day.locale("zh-cn").format("ddd");
+                        } else {
+                            dayText = day.locale(options.locale).format("ddd");
+                        }
+                    }
+                    let dayWidth = ctx.measureText(dayText);
+                    
+                    if (dayWidth.width > 72) {
+                        let textCanvas = new Canvas(dayWidth.width, dayWidth.emHeightAscent + dayWidth.emHeightDescent);
+                        let txtCtx = textCanvas.getContext('2d');
+                        txtCtx.font = "20px Contemporary";
+                        txtCtx.fillStyle = ctx.fillStyle;
+                        txtCtx.fillText(dayText, 0, 20);
+
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.drawImage(textCanvas, -current * 82 + 5, 372 - dayWidth.emHeightAscent, 72, dayWidth.emHeightAscent + dayWidth.emHeightDescent);
+                        ctx.rotate(Math.PI / 2);
+                    } else {
+                        let y = (current - 1) * 82 + 41 + (dayWidth.width / 2);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.fillText(dayText, -y, 372);
+                        ctx.rotate(Math.PI / 2);
+                    }
+
+                    //Draw image
+                    ctx.drawImage(display.icon, 380, (current - 1) * 82 + 9, 64, 64);
+
+                    //Draw temperatures
+                    ctx.fillText((data.hasOwnProperty("maxTemperature") ? parseFloat(data.maxTemperature.value).toFixed() : "---") + "°", 450, (current - 1) * 82 + 30);
+                    ctx.fillText((data.hasOwnProperty("minTemperature") ? parseFloat(data.minTemperature.value).toFixed() : "---") + "°", 450, (current - 1) * 82 + 60);
+
+                    ctx.beginPath();
+                    ctx.moveTo(350, current * 82);
+                    ctx.lineTo(500, current * 82);
+                    ctx.stroke();
+                }
+
+                return Promise.resolve();
+            });
+        }).then(function() {
+            //Send the required information
+
+            let e = new Discord.RichEmbed();
+            e.setColor(consts.colors.none)
+            e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
+            e.setImage("attachment://weather.png");
+            //e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
+            e.setTitle($("WEATHER_TITLE"));
+            //e.setURL(data.query.results.channel.link);
+            // e.setColor(display.arr);
+            e.setFooter(getRandom($("WEATHER_PLEASE_PRINT"),
+                                $("WEATHER_TEAR_PERFORATED_LINE"),
+                                $("WEATHER_SO_MANY_DEGREES"),
+                                $("WEATHER_LONGER_DAYS")));
+            message.channel.send(e).then(function() {
+                messageToEdit.delete();
+            });
+        });
     });
 }
 
@@ -608,7 +436,7 @@ function processCommand(message, isMod, command, options) {
     if (command.startsWith("weather ")) {
         var location = command.substr(8);
 
-        /*if (command.indexOf("--user") == -1) {
+        if (command.indexOf("--user") == -1) {
             sendCurrentWeather(message, location, "location", options, "", skiiness);
         } else {
             location = location.replace("--user", "").trim();
@@ -628,11 +456,8 @@ function processCommand(message, isMod, command, options) {
             } else {
                 throw new CommandError($("WEATHER_USER_NOT_FOUND"));
             }
-        }*/
-        sendCurrentWeather(message, "", "", options, "", skiiness);
+        }
     } else if (command == "weather") {
-        sendCurrentWeather(message, "", "", options, "", skiiness);
-        /*
         if (settings.users[message.author.id] == null) {
             settings.users[message.author.id] = {};
         }
@@ -641,7 +466,7 @@ function processCommand(message, isMod, command, options) {
             throw new UserInputError($("WEATHER_ERROR_UNSET_LOCATION", {user: message.author.username, prefix: prefix(message.guild.id)}));
         } else {
             sendCurrentWeather(message, settings.users[message.author.id].location, "id", options, message.author.tag, skiiness);
-        }*/
+        }
     } else if (command.startsWith("setloc ")) {
         /*
         if (location == "") {
