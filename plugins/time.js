@@ -287,7 +287,17 @@ function pollTimers() {
 
 
                         embed.addField($("TIMER_ELAPSED_TIMEOUT_DATE_TITLE"), $("SPECIAL_DATETIME", {time: {date: moment(timer.timeout), h24: userSetting.timeunit !== "12h", offset: userSetting.timezone}}), false);
-                        embed.setFooter($("TIMER_ELAPSED_FOOTER", {prefix: prefix(timer.channel == undefined ? undefined : client.channels.get(timer.channel).guild.id)}));
+                        if (timer.isChannelUser) {
+                            embed.setFooter($("TIMER_ELAPSED_FOOTER", {prefix: "am:"}));
+                        } else {
+                            let channel = client.channels.get(timer.channel);
+                            if (channel == undefined || channel.guild == null) {
+                                embed.setFooter($("TIMER_ELAPSED_FOOTER", {prefix: "am:"}));
+                            } else {
+                                embed.setFooter($("TIMER_ELAPSED_FOOTER", {prefix: prefix(channel.guild.id)}));
+                            }
+                        }
+                        
 
                         try {
                             if (timer.isChannelUser) {
