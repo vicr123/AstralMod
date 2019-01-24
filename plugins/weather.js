@@ -116,7 +116,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                 lon: locinfo.lon
             });
         }).then(function(weather) {
-            return weather.getForecastForTime(moment.utc()).then(function(currentWeather) {
+            return weather.getForecastForTime(new Date()).then(function(currentWeather) {
                 if (currentWeather == null) {
                     currentWeather = {};
                 }                
