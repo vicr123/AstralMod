@@ -2615,7 +2615,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send($("CONFIG_PINTOPIN_TOGGLED", {emoji: consts.config.pinToPinEmoji}));
                     message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
-                case "!": //Reset AstralMod
+                case ">": //Reset AstralMod
                     message.author.send($("CONFIG_RESET_ASTRALMOD_CONFIRMATION"));
                     guildSetting.configuringStage = -10;
                     break;
