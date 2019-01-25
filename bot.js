@@ -2450,6 +2450,7 @@ function getSingleConfigureWelcomeText(guild, author) {
     }
 
 
+
     if (guildSetting.locale == null) {
         guildSetting.locale = "en"
     }
@@ -2458,10 +2459,12 @@ function getSingleConfigureWelcomeText(guild, author) {
     if (thisLocale == _.en("THIS_LOCALE")) thisLocale = "";
     if (guildSetting.locale == "en") thisLocale = "English";
 
-    
-    embed.addField($("CONFIG_LOCALE_TITLE", {number: 9}), `${thisLocale} (${guildSetting.locale})`, true);
-    embed.addField($("CONFIG_SERVER_PREFIX_TITLE", {number: 0}), guildSetting.serverPrefix === undefined ? $("CONFIG_SERVER_PREFIX_DEFAULT", {prefix: prefix()}) : guildSetting.serverPrefix, true);
 
+    embed.addField($("CONFIG_LOCALE_TITLE", {number: 9}), `${thisLocale} (${guildSetting.locale})`, true);
+    embed.addField($("CONFIG_SERVER_PREFIX_TITLE", {number: 10}), guildSetting.serverPrefix === undefined ? $("CONFIG_SERVER_PREFIX_DEFAULT", {prefix: prefix()}) : guildSetting.serverPrefix, true);
+
+    embed.addBlankField(true);
+    embed.addBlankField(true);
 
     if (guildSetting.nickModeration == null || guildSetting.nickModeration == false) {
         embed.addField($("CONFIG_NICK_MODERATION_TITLE", {number: "A"}), $("CONFIG_DISABLED"), true);
@@ -2488,7 +2491,7 @@ function getSingleConfigureWelcomeText(guild, author) {
         embed.addField($("CONFIG_NEW_USER_NOTIFICATION_TITLE", {number: "D"}), $("CONFIG_ENABLED"), true);
     }
 
-    embed.setFooter($("CONFIG_FOOTER"));
+    embed.setFooter($("CONFIG_FOOTER", {exit: "<", reset: "<<"}));
     embed.setColor(consts.colors.info)
 
     return embed;
@@ -2574,7 +2577,7 @@ function processSingleConfigure(message, guild) {
                     message.author.send(locales);
                     guildSetting.configuringStage = 90;
                     break;
-                case "0": //Server prefix
+                case "10": //Server prefix
                     message.author.send($("CONFIG_SERVER_PREFIX_SETUP"));
                     guildSetting.configuringStage = 100;
                     break;
