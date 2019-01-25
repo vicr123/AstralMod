@@ -1731,9 +1731,8 @@ function processModCommand(message, command) {
             }
         }
 
-        if (settings.guilds[message.guild.id].requiresConfig) {
-            // This branch is dead; no strings here need translation
-            if (message.author.id == global.botOwner.id || message.author.id == message.guild.owner.user.id) {
+        if (settings.guilds[message.guild.id].requiresConfig) { // Unused
+/*             if (message.author.id == global.botOwner.id || message.author.id == message.guild.owner.user.id) {
                 settings.guilds[message.guild.id].configuringUser = message.author.id;
                 settings.guilds[message.guild.id].configuringStage = 0;
 
@@ -1752,7 +1751,7 @@ function processModCommand(message, command) {
                 message.reply("You're not " + message.guild.owner.displayName);
                 return true;
             }
-        } else {
+ */        } else {
             //Configuration menu
 
             //Make sure person has necessary permissions
@@ -2382,6 +2381,19 @@ function getChannels(guild) {
     return str;
 }
 
+function getRoles(guild) {
+    var roles = "```\n";
+    for (let role of guild.roles.array().sort((a, b) => a.name.localeCompare(b.name))) {
+        roles += role.id + " — " + role.name + "\n";
+    }
+    roles += "```";
+    
+    return roles;
+}
+
+
+
+
 function getSingleConfigureWelcomeText(guild, author) {
     var guildSetting = settings.guilds[guild.id];
     let $ = _[settings.users[author.id].locale];
@@ -2419,6 +2431,25 @@ function getSingleConfigureWelcomeText(guild, author) {
         embed.addField($("CONFIG_SUGGESTIONS_TITLE", {number: 5}), `<#${guild.channels.get(guildSetting.suggestions).id}>`, true);
     }
 
+    if (guild.roles.get(guildSetting.interrogation) == null) {
+        embed.addField($("CONFIG_INTERROGATION_TITLE", {number: 6}), $("CONFIG_DISABLED"), true);
+    } else {
+        embed.addField($("CONFIG_INTERROGATION_TITLE", {number: 6}), `${guild.roles.get(guildSetting.interrogation).name}`, true);
+    }
+
+    if (guild.roles.get(guildSetting.mutedRole) == null) {
+        embed.addField($("CONFIG_MUTED_TITLE", {number: 7}), $("CONFIG_DISABLED"), true);
+    } else {
+        embed.addField($("CONFIG_MUTED_TITLE", {number: 7}), `${guild.roles.get(guildSetting.mutedRole).name}`, true);
+    }
+
+    if (guild.roles.get(guildSetting.jailedRole) == null) {
+        embed.addField($("CONFIG_JAILED_TITLE", {number: 8}), $("CONFIG_DISABLED"), true);
+    } else {
+        embed.addField($("CONFIG_JAILED_TITLE", {number: 8}), `${guild.roles.get(guildSetting.jailedRole).name}`, true);
+    }
+
+
     if (guildSetting.locale == null) {
         guildSetting.locale = "en"
     }
@@ -2428,8 +2459,8 @@ function getSingleConfigureWelcomeText(guild, author) {
     if (guildSetting.locale == "en") thisLocale = "English";
 
     
-    embed.addField($("CONFIG_LOCALE_TITLE", {number: 6}), `${thisLocale} (${guildSetting.locale})`, true);
-    embed.addField($("CONFIG_SERVER_PREFIX_TITLE", {number: 7}), guildSetting.serverPrefix === undefined ? $("CONFIG_SERVER_PREFIX_DEFAULT", {prefix: prefix()}) : guildSetting.serverPrefix, true);
+    embed.addField($("CONFIG_LOCALE_TITLE", {number: 9}), `${thisLocale} (${guildSetting.locale})`, true);
+    embed.addField($("CONFIG_SERVER_PREFIX_TITLE", {number: 0}), guildSetting.serverPrefix === undefined ? $("CONFIG_SERVER_PREFIX_DEFAULT", {prefix: prefix()}) : guildSetting.serverPrefix, true);
 
 
     if (guildSetting.nickModeration == null || guildSetting.nickModeration == false) {
@@ -2449,6 +2480,12 @@ function getSingleConfigureWelcomeText(guild, author) {
         embed.addField($("CONFIG_PIN_TO_PIN_TITLE", {number: "C"}), $("CONFIG_DISABLED"), true);
     } else {
         embed.addField($("CONFIG_PIN_TO_PIN_TITLE", {number: "C"}), $("CONFIG_ENABLED"), true);
+    }
+
+    if (guildSetting.newUserAlert == null || guildSetting.newUserAlert == false) {
+        embed.addField($("CONFIG_NEW_USER_NOTIFICATION_TITLE", {number: "D"}), $("CONFIG_DISABLED"), true);
+    } else {
+        embed.addField($("CONFIG_NEW_USER_NOTIFICATION_TITLE", {number: "D"}), $("CONFIG_ENABLED"), true);
     }
 
     embed.setFooter($("CONFIG_FOOTER"));
@@ -2484,13 +2521,7 @@ function processSingleConfigure(message, guild) {
                     settings.guilds[guild.id].configuringUser = message.author.id;
                     settings.guilds[guild.id].configuringStage = 0;
                     message.author.send($("CONFIG_STAFF_SETUP"));
-
-                    var roles = "```";
-                    for (let role of guild.roles.array().sort((a, b) => a.name.localeCompare(b.name))) {
-                        roles += role.id + " — " + role.name + "\n";
-                    }
-                    roles += "```";
-                    message.author.send(roles);
+                    message.author.send(getRoles(guild));
 
                     guildSetting.configuringStage = 10;
                     break;
@@ -2514,7 +2545,23 @@ function processSingleConfigure(message, guild) {
                     message.author.send(getChannels(guild));
                     guildSetting.configuringStage = 50;
                     break;
-                case "6": //Locale
+                case "6": //Interrogation
+                    message.author.send($("CONFIG_INTERROGATION_SETUP"));
+                    message.author.send(getRoles(guild));
+                    guildSetting.configuringStage = 60;
+                    break;
+                case "7": //Muted
+                    message.author.send($("CONFIG_MUTED_SETUP"));
+                    message.author.send(getRoles(guild));
+                    guildSetting.configuringStage = 70;
+                    break;
+                case "8": //Jailed
+                    message.author.send($("CONFIG_JAILED_SETUP"));
+                    message.author.send(getRoles(guild));
+                    guildSetting.configuringStage = 80;
+                    break;
+
+                case "9": //Locale
                     message.author.send($("CONIFG_LOCALE_SETUP"));
                     let locales = "";
                     for (let locale of availableTranslations) {
@@ -2525,13 +2572,13 @@ function processSingleConfigure(message, guild) {
                     }
                     
                     message.author.send(locales);
-                    guildSetting.configuringStage = 60;
+                    guildSetting.configuringStage = 90;
                     break;
-                case "7": //Server prefix
+                case "0": //Server prefix
                     message.author.send($("CONFIG_SERVER_PREFIX_SETUP"));
-                    guildSetting.configuringStage = 70;
+                    guildSetting.configuringStage = 100;
                     break;
-                case "0": //Exit
+                case "<": //Exit
                     message.author.send($("CONFIG_CONFIGURATION_COMPLETE"));
                     guildSetting.configuringUser = null;
                     break;
@@ -2556,9 +2603,15 @@ function processSingleConfigure(message, guild) {
 
                     message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
+                case "d": //New user alert
+                    guildSetting.newUserAlert = !guildSetting.newUserAlert;
+                    
+                    message.author.send($("CONFIG_NEWUSERALERT_TOGGLED"));
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                    break;
                 case "c": //Pin to pin
                     guildSetting.pinToPin = !guildSetting.pinToPin;
-                    
+                        
                     message.author.send($("CONFIG_PINTOPIN_TOGGLED", {emoji: consts.config.pinToPinEmoji}));
                     message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
@@ -2787,7 +2840,7 @@ function processSingleConfigure(message, guild) {
         case 50: { //Suggestions Channel
             if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
                 message.author.send($("CONFIG_SUGGESTIONS_DISABLE"));
-                guildSetting.tentativeBotWarnings = null;
+                guildSetting.tentativeSuggestions = null;
                 guildSetting.configuringStage = 51;
             } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
                 message.author.send(getSingleConfigureWelcomeText(guild, message.author));
@@ -2829,7 +2882,130 @@ function processSingleConfigure(message, guild) {
             }
             break;
         }
-        case 60: { //Locale
+        case 60: { //Interrogation role
+            if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
+                message.author.send($("CONFIG_INTERROGATION_DISABLE"));
+                guildSetting.tentativeInterrogation = null;
+                guildSetting.configuringStage = 61;
+            } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
+            } else {
+                if (!guild.roles.has(text)) {
+                    message.author.send($("CONFIG_ROLE_DOESNT_EXIST"));
+                } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                    guildSetting.configuringStage = 0;
+                } else {
+                    var role = guild.roles.get(text);
+                    message.author.send($("CONFIG_INTERROGATION_CONFIRMATION", {role: role.name}));
+                    guildSetting.tenativeInterrogation = role.id;
+                    guildSetting.configuringStage = 61;
+                }
+            }
+            break;
+        }
+        case 61: { //Interrogation role - Confirm
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
+                guildSetting.interrogation = guildSetting.tenativeInterrogation;
+                delete guildSetting.tenativeInterrogation;
+
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
+                guildSetting.tentativeInterrogation = null;
+                message.author.send($("CONFIG_INTERROGATION_RETRY"));
+                message.author.send(getRoles(guild));
+                guildSetting.configuringStage = 60;
+            } else {
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
+            }
+            break;
+        }
+        case 70: { //Muted role
+            if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
+                message.author.send($("CONFIG_MUTED_DISABLE"));
+                guildSetting.tentativeMuted = null;
+                guildSetting.configuringStage = 71;
+            } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
+            } else {
+                if (!guild.roles.has(text)) {
+                    message.author.send($("CONFIG_ROLE_DOESNT_EXIST"));
+                } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                    guildSetting.configuringStage = 0;
+                } else {
+                    var role = guild.roles.get(text);
+                    message.author.send($("CONFIG_MUTED_CONFIRMATION", {role: role.name}));
+                    guildSetting.tentativeMuted = role.id;
+                    guildSetting.configuringStage = 71;
+                }
+            }
+            break;
+        }
+        case 71: { //Muted role - Confirm
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
+                guildSetting.mutedRole = guildSetting.tentativeMuted;
+                delete guildSetting.tentativeMuted;
+
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
+                guildSetting.tentativeMuted = null;
+                message.author.send($("CONFIG_MUTED_RETRY"));
+                message.author.send(getRoles(guild));
+                guildSetting.configuringStage = 70;
+            } else {
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
+            }
+            break;
+        }
+        case 80: { //Jailed role
+            if (text.toLowerCase() == $("CONFIG_NONE").toLowerCase()) {
+                message.author.send($("CONFIG_JAILED_DISABLE"));
+                guildSetting.tentativeJailed = null;
+                guildSetting.configuringStage = 81;
+            } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
+            } else {
+                if (!guild.roles.has(text)) {
+                    message.author.send($("CONFIG_ROLE_DOESNT_EXIST"));
+                } else if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                    guildSetting.configuringStage = 0;
+                } else {
+                    var role = guild.roles.get(text);
+                    message.author.send($("CONFIG_JAILED_CONFIRMATION", {role: role.name}));
+                    guildSetting.tentativeJailed = role.id;
+                    guildSetting.configuringStage = 81;
+                }
+            }
+            break;
+        }
+        case 81: { //Jailed role - Confirm
+            if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
+                guildSetting.jailedRole = guildSetting.tentativeJailed;
+                delete guildSetting.tentativeJailed;
+
+                message.author.send($("CONFIG_CONFIGURATED"));
+                message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                guildSetting.configuringStage = 0;
+            } else if (text.toLowerCase() == $("CONFIG_NO").toLowerCase() || text.toLowerCase() == $("CONFIG_NO_ABBREVIATION")) {
+                guildSetting.tentativeSuggestions = null;
+                message.author.send($("CONFIG_JAILED_RETRY"));
+                message.author.send(getRoles(guild));
+                guildSetting.configuringStage = 80;
+            } else {
+                message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
+            }
+            break;
+        }
+        case 90: { //Locale
             if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
                 message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
@@ -2849,13 +3025,13 @@ function processSingleConfigure(message, guild) {
                 } else {
                     message.author.send($("CONFIG_LOCALE_CONFIRMATION", {locale: text}));
                     guildSetting.tentativeLocale = text;
-                    guildSetting.configuringStage = 61;
+                    guildSetting.configuringStage = 91;
                 }
             }
 
             break;
         }
-        case 61: { //Locale - Confirm
+        case 91: { //Locale - Confirm
             if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
                 guildSetting.locale = guildSetting.tentativeLocale;
                 delete guildSetting.tentativeLocale;
@@ -2867,13 +3043,13 @@ function processSingleConfigure(message, guild) {
                 guildSetting.locale = "en";
                 message.author.send($("CONFIG_LOCALE_RETRY"));
                 message.author.send(getChannels(guild));
-                guildSetting.configuringStage = 60;
+                guildSetting.configuringStage = 90;
             } else {
                 message.author.send($("CONFIG_NOT_VALID_CONFIRMATION"));
             }
             break;
         }
-        case 70: { //Server prefix
+        case 100: { //Server prefix
             if (text.toLowerCase() == $("CONFIG_CANCEL").toLowerCase()) {
                 message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                 guildSetting.configuringStage = 0;
@@ -2881,16 +3057,16 @@ function processSingleConfigure(message, guild) {
                 if (text.toLowerCase() == $("CONFIG_DEFAULT").toLowerCase() || text == prefix()) {
                     message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: prefix()}));
                     guildSetting.tentativePrefix = undefined;
-                    guildSetting.configuringStage = 71;
+                    guildSetting.configuringStage = 101;
                 } else {
                     message.author.send($("CONFIG_SERVER_PREFIX_CONFIRMATION", {prefix: text}));
                     guildSetting.tentativePrefix = text;
-                    guildSetting.configuringStage = 71;
+                    guildSetting.configuringStage = 101;
                 }
                 break;
             }
         }
-        case 71: { //Locale - Confirm
+        case 101: { //Locale - Confirm
             if (text.toLowerCase() == $("CONFIG_YES").toLowerCase() || text.toLowerCase() == $("CONFIG_YES_ABBREVIATION")) {
                 guildSetting.serverPrefix = guildSetting.tentativePrefix;
                 delete guildSetting.tentativePrefix;
@@ -3302,13 +3478,11 @@ function memberAdd(member) {
             //This is a candidate for confighood...
             //This one will go in AM 3.1 too :)
 
-            if (member.guild.id == consts.wow.id) {
+            if (settings.guilds[member.guild.id].newUserAlert) {
                 var now = new Date();
                 var joinDate = member.user.createdAt;
                 if (joinDate.getDate() == now.getDate() && joinDate.getMonth() == now.getMonth() && joinDate.getFullYear() == now.getFullYear()) {
-                    if (member.guild.id == 287937616685301762) {
-                        channel.send(":calendar: <@&326915978392764426> This member was created today.");
-                    }
+                    channel.send($$("GUILD_RECENT_ALERT", {emoji: ":calendar:", staff: settings.guilds[member.guild.id].modRoles == null ? "" : `<@&${settings.guilds[member.guild.id].modRoles[0]}>`}));
                 }
             }
         };
