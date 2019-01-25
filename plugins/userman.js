@@ -22,6 +22,7 @@ var client;
 var consts;
 
 const moment = require('moment');
+const Discord = require('discord.js');
 
 //Variables for the deal command
 /*var actionMember = {};
@@ -170,13 +171,13 @@ function processDeal(message) {
                 banDescriptor[message.guild.id] = {};
             }
 
-            banDescriptor[message.guild.id][member.user.id] = {
+            banDescriptor[message.guild.id][member.id] = {
                 author: message.author,
                 reason: msg
             };
 
             let banFunction = function() {
-                member.ban(msg).then(function(member) {
+                message.guild.ban(member, { reason: msg }).then(function(member) {
                     message.channel.send($("DEAL_BAN_SUCCESS", {emoji: ":gear:", user: getUserString(member)}));
                     member = null;
                     actions[message.guild.id] = null;
@@ -421,26 +422,35 @@ function processCommand(message, isMod, command, options) {
             } else if (command.startsWith("manage")) {
                 command = command.substr(7);
             }
-            var memberID = command.replace("<", "").replace(">", "").replace("@", "").replace("!", "");
-
-            var users = parseUser(memberID, message.guild);
+            var users = parseUser(command, message.guild);
             if (users.length > 0) {
-                var user = null;
-
-                //Filter out members
-                for (var i = 0; i < users.length; i++) {
-                    if (message.guild.members.has(users[i].id)) {
-                        user = users[i].id;
-                        i = users.length;
-                    }
-                }
+                var user = users[0];
 
                 if (user == null) {
                     throw new CommandError($("DEAL_USER_NOT_FOUND"));
                 } else {
                     var member = message.guild.member(user);
                     if (member == null) {
-                        throw new CommandError($("DEAL_INTERNAL_ERROR"));
+                        var msg = $("DEAL_STRING", {
+                            emoji: ":gear:", 
+                            user: user.username,
+                            cancel: `\`${$("DEAL_CANCEL")}\` `,
+                            ban: (() => { 
+                                if (message.guild.me.hasPermission(Discord.Permissions.FLAGS.BAN_MEMBERS)) {
+                                    canDoActions = true;
+                                    return `\`${$("DEAL_BAN")}\` `;
+                                }
+                                return ""
+                            })(),
+                            tempban: (() => { 
+                                if (message.guild.me.hasPermission(Discord.Permissions.FLAGS.BAN_MEMBERS)) {
+                                    canDoActions = true;
+                                    return `\`${$("DEAL_TEMPBAN")}\` `;
+                                }
+                                return ""
+                            })()
+                        });
+
                     } else {
                         if (member.highestRole.comparePositionTo(message.member.highestRole) >= 0) {
                             throw new CommandError($("DEAL_NO_PERMISSIONS"));
@@ -473,7 +483,7 @@ function processCommand(message, isMod, command, options) {
                                     return ""
                                 })(),
                                 nick: (() => { 
-                                    if (message.guild.me.highestRole.comparePositionTo(member.highestRole) > 0 && message.guild.me.hasPermission("MANAGE_NICKNAMES")) {
+                                    if (message.guild.me.highestRole.comparePositionTo(member.highestRole) > 0 && message.guild.me.hasPermission(Discord.Permissions.FLAGS.MANAGE_NICKNAMES)) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_NICK")}\` `;
                                     }
@@ -506,21 +516,21 @@ function processCommand(message, isMod, command, options) {
                                 })(),
 
                             })
-                            
-                            if (canDoActions) {
-                                let messageAuthor = message.author.id;
-                                actions[message.guild.id] = {};
-                                actions[message.guild.id].actionMember = member;
-                                actions[message.guild.id].actioningMember = message.author;
-                                actions[message.guild.id].actionStage = 0;
-                                message.channel.send(msg).then(function(message) {
-                                    dealMessage = message;
-                                    captureInput(processDeal, message.guild.id, messageAuthor);
-                                });
-                            } else {
-                                throw new CommandError($("DEAL_NO_ACTIONS"));
-                            }
                         }
+                    }
+
+                    if (canDoActions) {
+                        let messageAuthor = message.author.id;
+                        actions[message.guild.id] = {};
+                        actions[message.guild.id].actionMember = member == null ? user : member;
+                        actions[message.guild.id].actioningMember = message.author;
+                        actions[message.guild.id].actionStage = 0;
+                        message.channel.send(msg).then(function(message) {
+                            dealMessage = message;
+                            captureInput(processDeal, message.guild.id, messageAuthor);
+                        });
+                    } else {
+                        throw new CommandError($("DEAL_NO_ACTIONS"));
                     }
                 }
             } else {
