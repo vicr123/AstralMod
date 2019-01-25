@@ -70,7 +70,7 @@ process.on("SIGTERM", shutdown);
 process.on("SIGQUIT", shutdown);
 process.on("SIGHUP", shutdown);
 
-global.prefix = (id) => {
+global.prefix = function(id) {
     if (id && settings && settings.guilds && settings.guilds[id] && settings.guilds[id].serverPrefix) {
         return settings.guilds[id].serverPrefix;
     }
@@ -2461,7 +2461,7 @@ function getSingleConfigureWelcomeText(guild, author) {
 
 
     embed.addField($("CONFIG_LOCALE_TITLE", {number: 9}), `${thisLocale} (${guildSetting.locale})`, true);
-    embed.addField($("CONFIG_SERVER_PREFIX_TITLE", {number: 10}), guildSetting.serverPrefix === undefined ? $("CONFIG_SERVER_PREFIX_DEFAULT", {prefix: prefix()}) : guildSetting.serverPrefix, true);
+    embed.addField($("CONFIG_SERVER_PREFIX_TITLE", {number: 10}), guildSetting.serverPrefix == null ? $("CONFIG_SERVER_PREFIX_DEFAULT", {prefix: prefix()}) : guildSetting.serverPrefix, true);
 
     embed.addBlankField(true);
     embed.addBlankField(true);
@@ -3199,15 +3199,15 @@ async function processMessage(message) {
                 //Determine if this is a command
                 if (isMod(message.member) || text == prefix(message.guild.id) + "config") { //This is a mod command
                     if (!processModCommand(message, text.substr(prefixLength).toLowerCase())) {
-                        if (!processAmCommand(message, options, text.substr(prefixLength).toLowerCase())) {
+                        if (!processAmCommand(message, options, text.substr(prefixLength).toLowerCase().trim())) {
                             //Pass command onto plugins
                             commandEmitter.emit('processCommand', message, true, text.substr(prefixLength).toLowerCase(), options);
                         }
                     }
                 } else {
-                    if (!processAmCommand(message, options, text.substr(prefixLength).toLowerCase())) {
+                    if (!processAmCommand(message, options, text.substr(prefixLength).toLowerCase().trim())) {
                         //Pass command onto plugins
-                        commandEmitter.emit('processCommand', message, false, text.substr(prefixLength).toLowerCase(), options);
+                        commandEmitter.emit('processCommand', message, false, text.substr(prefixLength).toLowerCase().trim(), options);
                     }
                 }
             } else {
