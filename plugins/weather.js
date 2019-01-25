@@ -34,11 +34,20 @@ const yrno = yrnoModule({
 
 let sunnyImage, moonyImage, cloudyImage, thunderImage, rainImage, windImage, fogImage, humidImage, pressureImage, sunriseImage, sunsetImage, compassImage, snowImage, rainsnowImage, questionImage, unavailImage;
 
+
 function getDataFromCode(code, ctx, $) {
     log("code: " + code.toString(), logType.debug);
 
+    let dark = false;
+    if (code.includes("Dark_")) {
+        dark = true;
+        code = code.replace("Dark_", "");
+    }
+
+    code = code.replace("Sun", "")
+
     const codes = {
-        "Sun": {
+        "": { //This is Sun, but we replaced Sun with empty string to avoid having to deal with duplicates.
             textKey: "WEATHER_COND_SUN",
             background: "clear",
             icon: sunnyImage
@@ -57,10 +66,112 @@ function getDataFromCode(code, ctx, $) {
             textKey: "WEATHER_COND_CLOUD",
             background: "cloud",
             icon: cloudyImage
-        }
+        },
+        "LightRain": {
+            textKey: "WEATHER_CONT_LIGHTRAIN",
+            background: "cloud",
+            icon: rainImage
+        },
+        "LightRainThunder": {
+            textKey: "WEATHER_CONT_LIGHTRAINTHUNDER",
+            background: "cloud",
+            icon: rainImage
+        },
+        "HeavySleet": {
+            textKey: "WEATHER_COND_HEAVYSLEET",
+            background: "cloud",
+            icon: rainsnowImage
+        },
+        "HeavySleetThunder": {
+            textKey: "WEATHER_COND_HEAVYSLEETTHUNDER",
+            background: "cloud",
+            icon: rainsnowImage
+        },
+        "Sleet": {
+            textKey: "WEATHER_COND_SLEET",
+            background: "cloud",
+            icon: rainsnowImage
+        },
+        "SleetThunder": {
+            textKey: "WEATHER_COND_SLEETTHUNDER",
+            background: "cloud",
+            icon: rainsnowImage
+        },
+        "LightSleet": {
+            textKey: "WEATHER_COND_LIGHTSLEET",
+            background: "cloud",
+            icon: rainsnowImage
+        },
+        "LightSleetThunder": {
+            textKey: "WEATHER_COND_LIGHTSLEETTHUNDER",
+            background: "cloud",
+            icon: rainsnowImage
+        },
+        "LightSnow": {
+            textKey: "WEATHER_COND_LIGHTSNOW",
+            background: "cloud",
+            icon: snowImage
+        },
+        "LightSnowThunder": {
+            textKey: "WEATHER_COND_LIGHTSNOWTHUNDER",
+            background: "cloud",
+            icon: snowImage
+        },
+        "Snow": {
+            textKey: "WEATHER_COND_SNOW",
+            background: "cloud",
+            icon: snowImage
+        },
+        "HeavySnow": {
+            textKey: "WEATHER_COND_HEAVYSNOW",
+            background: "cloud",
+            icon: snowImage
+        },
+        "HeavySnowThunder": {
+            textKey: "WEATHER_COND_HEAVYSNOWTHUNDER",
+            background: "cloud",
+            icon: snowImage
+        },
+        "SnowThunder": {
+            textKey: "WEATHER_COND_SNOWTHUNDER",
+            background: "cloud",
+            icon: snowImage
+        },
+        "Rain": {
+            textKey: "WEATHER_COND_RAIN",
+            background: "cloud",
+            icon: rainImage
+        },
+        "RainThunder": {
+            textKey: "WEATHER_COND_RAINTHUNDER",
+            background: "cloud",
+            icon: rainImage
+        },
+        "Fog": {
+            textKey: "WEATHER_COND_FOG",
+            background: "cloud",
+            icon: fogImage
+        },
+        "Drizzle": {
+            textKey: "WEATHER_COND_DRIZZLE",
+            background: "cloud",
+            icon: rainImage
+        },
+        "DrizzleThunder": {
+            textKey: "WEATHER_COND_DRIZZLETHUNDER",
+            background: "cloud",
+            icon: rainImage
+        },
     }
 
+
     if (codes.hasOwnProperty(code)) {
+        if (dark) {
+            let c = codes[code];
+            c.background = "night";
+            return c;
+        }
+
         return codes[code];
     } else {
         return {
@@ -116,7 +227,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                 lon: locinfo.lon
             });
         }).then(function(weather) {
-            return weather.getForecastForTime(new Date()).then(function(currentWeather) {
+            return weather.getForecastForTime(weather.getFirstDateInPayload()).then(function(currentWeather) {
                 if (currentWeather == null) {
                     currentWeather = {};
                 }                
@@ -139,6 +250,9 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                         primary: "rgb(200, 200, 200)",
                         secondary: "rgb(170, 170, 170)",
                         pen: "black"
+                    },
+                    "night": {
+
                     }
                 }
 
@@ -182,7 +296,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                 if (currentWeather.hasOwnProperty("from")) {
                     pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:moment(currentWeather.from), h24:options.h24}});
                 } else {
-                    pubDate = $("WEATHER_DATE_UPDATED", {updated:{date:moment(), h24:options.h24}});
+                    pubDate = $("WEATHER_DATE_UPDATED", {updated: "Never"});
                 }
 
                 let dateWidth = ctx.measureText(pubDate);
@@ -468,63 +582,32 @@ function processCommand(message, isMod, command, options) {
             sendCurrentWeather(message, settings.users[message.author.id].location, "id", options, message.author.tag, skiiness);
         }
     } else if (command.startsWith("setloc ")) {
-        /*
+        var location = command.substr(7);
         if (location == "") {
             message.reply($("SETLOC_ABOUT"));
         } else {
-            var query = new YQL("select * from geo.places where text=\""+ location +"\"");
-            
-            query.exec(function(err, data) {
-                try {
-                    if (err) {
-                        throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
-                    } else {
-                        if (data == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
-                        if (data.query == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
-                        if (data.query.results == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
-                        if (data.query.results.place == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
-    
-                        var userSettings = settings.users[message.author.id];
-                    
-                        if (userSettings == null) {
-                            userSettings = {};
-                        }
-                        var place;
-                        if (data.query.results == null) throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
-                        if (data.query.results.place[0] != null) place = data.query.results.place[0];
-                        else place = data.query.results.place;
-                            
-                        userSettings.location = place.woeid;
-                
-                        settings.users[message.author.id] = userSettings;
-                            
-                        log(place);
-                            
-                        //Translation through the ages
-                        
-                        //message.reply(tr("Your location is now $[1], $[2] ($[3], $[4]).", place.name, place.country.code, place.centroid.latitude, place.centroid.longitude));
-                        //message.reply("Your location is now " + place.name + ", " + place.country.code + " (" + place.centroid.latitude + ", " + place.centroid.longitude + ")");
-                        message.reply($("SETLOC_CITY_SET", {place: place.name, countryCode: place.country.code, lat: place.centroid.latitude, long: place.centroid.longitude}))
-                    } 
-                } catch (err) {
-                    let embed = new Discord.RichEmbed;
-                    embed.setColor(consts.colors.fail);
-                    embed.addField($("ERROR_DETAILS"), err.message);
-                    embed.setTitle(getEmoji("userexception") + " " + $("ERROR_USER_INPUT"));
-                    embed.setDescription($("ERROR_NOT_UNDERSTAND"));
-                    
-                    message.channel.send(embed);
+            geocoder.search({
+                q: location
+            }).then(function(response) {
+                if (response == undefined || response.length < 1) {
+                    throw new UserInputError($("SETLOC_CITY_NOT_FOUND"));
                 }
+
+                var userSettings = settings.users[message.author.id];
+                    
+                if (userSettings == null) {
+                    userSettings = {};
+                }
+
+                userSettings.location = {
+                    lat: response[0].lat,
+                    lon: response[0].lon,
+                    loc: response[0].display_name
+                };
+
+                message.reply($("SETLOC_CITY_SET", {place: response[0].display_name, lat: response[0].lat, long: response[0].lon}))
             });
-        }*/
-
-        let embed = new Discord.RichEmbed;
-        embed.setColor(consts.colors.fail);
-        embed.setTitle("Weather Unavailable");
-        embed.setDescription("The weather command is unavailable in AstralMod 3.0. It will be coming back in AstralMod 3.1.");
-        embed.setFooter("We sincerely apologise for the inconvenience.");
-
-        message.channel.send(embed);
+        }
     } else if (command == "setloc") {
         let embed = new Discord.RichEmbed;
         embed.setColor(consts.colors.fail);

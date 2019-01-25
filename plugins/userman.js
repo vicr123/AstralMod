@@ -414,7 +414,7 @@ function processCommand(message, isMod, command, options) {
         return true;
     } else if (command.startsWith("deal ") || command.startsWith("manage ")) {
         if (actions[message.guild.id] != null) {
-            message.channel.send($("DEAL_ALREADY_DEALING", {emoji: "Lno_entry_sign:", user: getUserString(actions[message.guild.id].actioningMember)}));
+            message.channel.send($("DEAL_ALREADY_DEALING", {emoji: ":no_entry_sign:", user: getUserString(actions[message.guild.id].actioningMember)}));
         } else {
             if (command.startsWith("deal")) {
                 command = command.substr(5);
