@@ -75,47 +75,80 @@ function processDeal(message) {
             member = null;
             actions[message.guild.id] = null;
             releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == $("DEAL_INTERROGATE_TEXT") || msg.toLowerCase() == $("DEAL_INTERROGATE_ABBREVIATION")) && ((consts.bnb && message.guild.id == consts.bnb.id) || (consts.wow && message.guild.id == consts.wow.id))) {
-            if ((consts.bnb && message.guild.id == consts.bnb.id)) {
-                member.addRole(member.guild.roles.get(consts.bnb.interrogationRole));
-            } else if ((consts.wow && message.guild.id == consts.wow.id)) {
-                member.addRole(member.guild.roles.get(consts.wow.interrogationRole));
-            } 
-            
-            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
-            message.channel.send($("DEAL_INTERROGATED", {emoji: ":gear:", user: getUserString(member)}));
-            member = null;
-            actions[message.guild.id] = null;
-            releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == $("DEAL_JAIL_TEXT") || msg.toLowerCase() == $("DEAL_JAIL_ABBREVIATION")) && ((consts.bnb && message.guild.id == consts.bnb.id))) { //WoW has no jail
-            if ((consts.bnb && message.guild.id == consts.bnb.id)) {
-                member.addRole(member.guild.roles.get(consts.bnb.jailRole));
-            }
-
-            member.setVoiceChannel(member.guild.channels.get(member.guild.afkChannelID));
-            message.channel.send($("DEAL_JAILED", {emoji: ":gear:", user: getUserString(member)}));
-            member = null;
-            actions[message.guild.id] = null;
-            releaseInput(message.guild.id);
-        } else if ((msg.toLowerCase() == $("DEAL_MUTE_TEXT") || msg.toLowerCase() == $("DEAL_MUTE_ABBREVIATION")) && ((consts.bnb && message.guild.id == consts.bnb.id) || (consts.wow && message.guild.id == consts.wow.id))) {
-            var roleId;
-            if ((consts.bnb && message.guild.id == consts.bnb.id)) {
-                roleId = consts.bnb.jailRole;
-            } else if ((consts.wow && message.guild.id == consts.wow.id)) {
-                roleId = "431965501355327500";
-            }
-            
+        } else if ((msg.toLowerCase() == $("DEAL_INTERROGATE_TEXT") || msg.toLowerCase() == $("DEAL_INTERROGATE_ABBREVIATION"))) {
+            var roleId = settings.guilds[message.guild.id].jailedRole;
             if (member.roles.get(roleId)) {
-                member.removeRole(member.roles.get(roleId));
-                message.channel.send($("DEAL_UNMUTED", {emoji: ":gear:", user: getUserString(member)}));
-                member = null;
-                actions[message.guild.id] = null;
+                member.removeRole(member.roles.get(roleId)).then(() => {
+                    message.channel.send($("DEAL_UNINTERROGATED", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                }).catch(() => {
+                    message.channel.send($("DEAL_UNINTERROGATED_FAIL", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                })
                 releaseInput(message.guild.id);
             } else {
-                member.addRole(member.guild.roles.get(roleId));
-                message.channel.send($("DEAL_MUTED", {emoji: ":gear:", user: getUserString(member)}));
-                member = null;
-                actions[message.guild.id] = null;
+                member.addRole(member.guild.roles.get(roleId)).then(() => {
+                    message.channel.send($("DEAL_INTERROGATED", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;    
+                }).catch(() => {
+                    message.channel.send($("DEAL_INTERROGATED_FAIL", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                });
+                releaseInput(message.guild.id);
+            }
+        } else if ((msg.toLowerCase() == $("DEAL_JAIL_TEXT") || msg.toLowerCase() == $("DEAL_JAIL_ABBREVIATION"))) {
+            var roleId = settings.guilds[message.guild.id].jailedRole;
+            if (member.roles.get(roleId)) {
+                member.removeRole(member.roles.get(roleId)).then(() => {
+                    message.channel.send($("DEAL_UNJAILED", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                }).catch(() => {
+                    message.channel.send($("DEAL_UNJAILED_FAIL", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                })
+                releaseInput(message.guild.id);
+            } else {
+                member.addRole(member.guild.roles.get(roleId)).then(() => {
+                    message.channel.send($("DEAL_JAILED", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;    
+                }).catch(() => {
+                    message.channel.send($("DEAL_JAILED_FAIL", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                });
+                releaseInput(message.guild.id);
+            }
+        } else if ((msg.toLowerCase() == $("DEAL_MUTE_TEXT") || msg.toLowerCase() == $("DEAL_MUTE_ABBREVIATION"))) {
+            var roleId = settings.guilds[message.guild.id].mutedRole;
+            
+            if (member.roles.get(roleId)) {
+                member.removeRole(member.roles.get(roleId)).then(() => {
+                    message.channel.send($("DEAL_UNMUTED", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                }).catch(() => {
+                    message.channel.send($("DEAL_UNMUTED_FAIL", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                })
+                releaseInput(message.guild.id);
+            } else {
+                member.addRole(member.guild.roles.get(roleId)).then(() => {
+                    message.channel.send($("DEAL_MUTED", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;    
+                }).catch(() => {
+                    message.channel.send($("DEAL_MUTED_FAIL", {emoji: ":gear:", user: getUserString(member)}));
+                    member = null;
+                    actions[message.guild.id] = null;
+                });
                 releaseInput(message.guild.id);
             }
         } else if ((msg.toLowerCase() == $("DEAL_KICK_TEXT") || msg.toLowerCase() == $("DEAL_KICK_ABBREVIATION"))) {
@@ -494,21 +527,21 @@ function processCommand(message, isMod, command, options) {
                                 //Maybe for AM 3.1 :)
 
                                 interrogate: (() => { 
-                                    if (member.manageable && ((consts.wow && message.guild.id == consts.wow.id) || (consts.bnb && message.guild.id == consts.bnb.id))) {
+                                    if (member.manageable && settings.guilds[message.guild.id].interrogation != null) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_INTERROGATE")}\` `;
                                     }
                                     return ""
                                 })(),
                                 jail: (() => { 
-                                    if (member.manageable && (consts.bnb && message.guild.id == consts.bnb.id)) {
+                                    if (member.manageable && settings.guilds[message.guild.id].jailedRole != null) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_JAIL")}\` `;
                                     }
                                     return ""
                                 })(),
                                 mute: (() => { 
-                                    if (member.manageable && ((consts.wow && message.guild.id == consts.wow.id) || (consts.bnb && message.guild.id == consts.bnb.id))) {
+                                    if (member.manageable && settings.guilds[message.guild.id].mutedRole != null) {
                                         canDoActions = true;
                                         return `\`${$("DEAL_MUTE")}\` `;
                                     }
