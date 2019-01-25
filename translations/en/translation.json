@@ -543,7 +543,7 @@
     "CONFIG_FILTERING_TITLE": "**{{number}}** — Expletive filtering",
     "CONFIG_PIN_TO_PIN_TITLE": "**{{number}}** — Pin to pin",
     "CONFIG_NEW_USER_NOTIFICATION_TITLE": "**{{number}}** — Recent user alerts",
-    "CONFIG_FOOTER": "0 — Exit configuration menu | ! — Reset Astralmod",
+    "CONFIG_FOOTER": "< — Exit configuration menu | > — Reset Astralmod",
     "CONFIG_CANCEL_CONFIGURATION": "Returning to main menu.",
     "CONFIG_CONFIGURATION_COMPLETE": "Configuration complete.",
     "CONFIG_CONFIGURATED": "Thanks, I'll save that.",
