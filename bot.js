@@ -4029,31 +4029,6 @@ function readyOnce() {
 
     log("AstralMod " + amVersion + " - locked and loaded!", logType.good);
 
-    if (process.argv.includes("--debug")) { //Leaf hair :)
-        client.users.set("334842301035577346", {
-            avatar: "341014541221625868",
-            avatarURL: "https://cdn.discordapp.com/attachments/337665122908504074/341014541221625868/9k1.png",
-            bot: false,
-            client: client,
-            createdAt: new Date("2017-07-12T23:43:21+0000"),
-            discriminator: "0889",
-            displayAvatarURL: "https://cdn.discordapp.com/attachments/337665122908504074/341014541221625868/9k1.png",
-            dmChannel: client.users.get("384454726512672768").dmChannel,
-            id: "334842311135577346",
-            presence: {
-                game: null,
-                status: "offline",
-            },
-            tag: "Vrabbers#0889",
-            username: "Vrabbers",
-
-            send: (content, options) => client.users.get("384454726512672768").send(content, options),
-            toString: () => "<@334842311135577346>"
-        })
-
-
-    }
-
     countBans();
     loadInvites();
     setInterval(loadInvites, 300000);
