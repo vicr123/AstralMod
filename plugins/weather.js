@@ -26,7 +26,7 @@ const nominatim = require("nominatim-geocoder");
 const yrnoModule = require("yr.no-forecast");
 var client;
 var consts;
-
+    
 const geocoder = new nominatim();
 const yrno = yrnoModule({
     version: "1.9"
