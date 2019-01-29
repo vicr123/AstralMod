@@ -1516,9 +1516,10 @@ global.parseUser = function(query, guild = null) {
         query = query.substr(2);
         query = query.slice(0, -1);
     }
+
     var searchResults = [];
 
-    for (let [snowflake, user] of client.users) {
+    for (let [, user] of client.users) {
         if (user.username.toLowerCase() == query.toLowerCase()) {
             searchResults.unshift(user);
         } else if (user.username.toLowerCase().indexOf(query.toLowerCase()) != -1) {
@@ -1532,7 +1533,7 @@ global.parseUser = function(query, guild = null) {
 
     if (guild != null) {
         var guildSpecificResults = [];
-        for (let [snowflake, member] of guild.members) {
+        for (let [, member] of guild.members) {
             if (member.nickname != null) {
                 if (member.nickname.toLowerCase() == query.toLowerCase()) {
                     guildSpecificResults.unshift(member.user);
@@ -1544,6 +1545,7 @@ global.parseUser = function(query, guild = null) {
 
         var pop = guildSpecificResults.pop();
         while (pop != undefined) {
+            searchResults = searchResults.filter(o => o != pop)
             searchResults.unshift(pop);
             pop = guildSpecificResults.pop();
         }
