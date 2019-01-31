@@ -387,7 +387,7 @@
     "CONFIG_NICK_MODERATION_TITLE": "**{{number}}** — Yêu cầu thay đổi tên nick",
     "CONFIG_FILTERING_TITLE": "**{{number}}** — Lọc từ chửi thề",
     "CONFIG_PIN_TO_PIN_TITLE": "**{{number}}** — Ghim để ghim",
-    "CONFIG_FOOTER": "0 — Thoát menu cấu hình | ! — Đặt lại Astralmod",
+    "CONFIG_FOOTER": "{{exit}} — Thoát menu cấu hình | {{reset}} — Đặt lại Astralmod",
     "CONFIG_CANCEL_CONFIGURATION": "Quay trở lại menu chính.",
     "CONFIG_CONFIGURATION_COMPLETE": "Việc cấu hình đã hoàn tất.",
     "CONFIG_CONFIGURATED": "Cảm ơn, tôi sẽ lưu.",
