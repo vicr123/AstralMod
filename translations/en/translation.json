@@ -397,6 +397,11 @@
     "CALC_DESC": "Calculations",
     "CALC_RESULTS": "Here are your results",
     "CALC_ANSWER_IS": "The answer is",
+
+    "GRAPH_DESC": "Plot",
+    "GRAPH_PLOTTING": "Plotting expressions...",
+    "GRAPH_RESULTS": "Here are your results",
+    "GRAPH_ERROR": "{{emoji}} Couldn't graph that expression",
     
     "TRANSLATE_TRANSLATING": "Translating...",
     "TRANSLATE_TITLE": "Translate",
