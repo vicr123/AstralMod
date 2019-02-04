@@ -26,9 +26,9 @@ const readline = require('readline');
 const events = require('events');
 const blessed = require('blessed');
 const moment = require('moment');
-require("moment-duration-format");
 const http = require('http');
-const https = require('https');
+require("moment-duration-format");
+const WebSocketServer = require('websocket').server;
 const crypto = require('crypto');
 const client = new Discord.Client({
     restTimeOffset: 10,
@@ -930,7 +930,6 @@ global.log = function(logMessage, type = logType.debug) {
     } else {
         logMessage = logMessage.toString();
     }
-
     //Log a message to the console
     if (type == logType.debug) {
         if (process.argv.indexOf("--debug") == -1) {
@@ -1004,6 +1003,11 @@ global.log = function(logMessage, type = logType.debug) {
         }
 
         var logOutput = logFormatting + logString + "\x1b[0m";
+
+        if (global.wsServer) {
+            global.wsServer.broadcast(logOutput.replace(/\x1b\[[0-9;]*m/g, ""));
+        }
+    
 
         logBox.log("[" + new Date().toLocaleTimeString("us", {
             hour12: false
@@ -1213,7 +1217,7 @@ function processConsoleInput(line) {
                     channel = guild.channels.array()[0];
                 }
 
-                if (channel != null) {
+                if (channel != null && channel.type == "text") {
                     channel.send("SERVICE ANNOUNCEMENT: " + broadcast);
                 }
             }
@@ -4072,8 +4076,10 @@ if (process.argv.indexOf("--debug") == -1) {
     });
 }
 
-if (process.argv.indexOf("--httpserver") != -1) {
-    log("Initializing HTTP server");
+
+if (process.argv.indexOf("--websocket") != -1) {
+    log("Initializing Websocket...");
+
     var httpServer = http.createServer(function(req, res) {
         if (req.method == "GET") {
             if (req.url == "/") {
@@ -4083,22 +4089,32 @@ if (process.argv.indexOf("--httpserver") != -1) {
                 res.writeHead(400, "Not Found");
                 res.end();
             }
-        } else if (req.method == "POST") {
-            var body = "";
-            req.on('data', function(chunk) {
-                body += chunk;
-            });
-            req.on('end', function() {
-                var command = body;
-                textBox.setValue("> " + command);
-                textBox.submit();
-
-                res.writeHead(204, "No Content");
-                res.end();
-            });
         }
     });
     httpServer.listen(28931);
+
+
+    global.wsServer = new WebSocketServer({
+        httpServer: httpServer
+    });
+
+    
+    // WebSocket server
+    wsServer.on('request', function(request) {
+        var connection = request.accept(null, request.origin);
+    
+        connection.on('message', function(message) {
+            try {
+                processConsoleInput(message.utf8Data);
+            } catch (e) {
+
+            }
+        });
+    
+        connection.on('close', function(connection) {
+            // close user connection
+        });
+    });
 }
 
 log("Checking configuration...", logType.info);

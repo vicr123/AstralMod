@@ -30,6 +30,7 @@
     "nominatim-geocoder": "^0.1.4",
     "openweathermap-js": "^1.0.1",
     "opusscript": "0.0.3",
+    "websocket": "^1.0.28",
     "yandex-translate": "^2.1.2",
     "yr.no-forecast": "^2.1.0"
   }
