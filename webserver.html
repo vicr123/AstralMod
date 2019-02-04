@@ -14,7 +14,7 @@
 </style>
     </head>
     <body style="overflow: hidden;">
-        <h1 style="font-family:'Contemporary Regular'">AstralMod Console</h1>
+        <h1 style="font-family: monospace">AstralMod Console</h1>
         <div class="wrapper">
             <div style="height:calc(100% - 80px); overflow: scroll; display: flex; flex-direction: column-reverse;" id="output"></div>
             <div id="status">
@@ -28,15 +28,24 @@
             const textbox = document.getElementById("nextCommand");
             const output = document.getElementById("output");
 
-            socket.onmessage = e => {
+            function onMessage(e) {
+                var payload = JSON.parse(e.data)
                 var newNode = document.createElement('div');   
                 var code = document.createElement('code');
-                code.innerHTML = event.data;
+                code.innerHTML = payload.msg;
+                code.style.color = payload.color
                 
                 newNode.append(code);
-                output.insertBefore(newNode, output.firstChild);
+                return output.insertBefore(newNode, output.firstChild);
             }
 
+            socket.onmessage = onMessage;
+            
+            socket.onclose = () => {
+                onMessage({data: JSON.stringify({msg: "AstralMod has closed.", color: "black"})}).style.fontStyle = "italic";
+                document.getElementById("status").remove();
+            }
+            
             textbox.addEventListener("keyup", function(event) {
                 event.preventDefault();
                 if (event.keyCode === 13) {

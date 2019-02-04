@@ -28,13 +28,13 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program with Websocket",
+            "name": "Launch Program with HTTP server",
             "program": "${workspaceFolder}/bot.js",
             "console": "integratedTerminal",
             "args": [
                 "--debug",
                 "--blueprint",
-                "--websocket"
+                "--httpserver"
             ]
         },
 
