@@ -519,8 +519,8 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
             //Send the required information
 
             let e = new Discord.RichEmbed();
-            e.setColor(consts.colors.none)
-            e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"))
+            e.setColor(consts.colors.none);
+            e.attachFile(new Discord.Attachment(canvas.toBuffer(), "weather.png"));
             e.setImage("attachment://weather.png");
             //e.setThumbnail("https://poweredby.yahoo.com/white_retina.png");
             e.setTitle($("WEATHER_TITLE"));
