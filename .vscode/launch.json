@@ -27,6 +27,19 @@
         },
         {
             "type": "node",
+            "request": "launch",
+            "name": "Launch Program with Websocket",
+            "program": "${workspaceFolder}/bot.js",
+            "console": "integratedTerminal",
+            "args": [
+                "--debug",
+                "--blueprint",
+                "--websocket"
+            ]
+        },
+
+        {
+            "type": "node",
             "request": "attach",
             "name": "Attach to Port",
             "address": "localhost",
