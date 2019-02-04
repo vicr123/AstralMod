@@ -45,7 +45,7 @@ Set up a server and upload the the emoji in the `/emoji` folder to it. You can c
 - `--debug` Enables debugging output in the console
 - `--nowelcome` Disables the welcome message that AstralMod sends when it joins a new server
 - `--novacuum` Disables the periodic cleanup of the settings file
-- `--websocket` Enables the web interface, accessible at http://127.0.0.1:28931
+- `--httpserver` Enables the web interface, accessible at http://127.0.0.1:28931
 
 ### Developing AstralMod
 If you wish to add a command, look at the `plugins` directory. Make your own plugin to include commands.
