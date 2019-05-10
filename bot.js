@@ -85,14 +85,25 @@ global.prefix = function(id) {
     
     return defaultPrefix;
 }
+
+global.displayName = function() {
+    if (amVersion == "Blueprint") {
+        return name;
+    }
     
-if (process.argv.indexOf("--blueprint") == -1) {
-    global.amVersion = "3.0";
-    global.defaultPrefix = consts.config.prefix;
-} else {
+    return `${name} ${amVersion}`
+}
+    
+if (process.argv.includes("--blueprint")) {
     amVersion = "Blueprint";
     global.defaultPrefix = consts.config.bprefix;
+    global.name = consts.config.bname
+} else {
+    global.amVersion = consts.config.version;
+    global.defaultPrefix = consts.config.prefix;
+    global.name = consts.config.name;
 }
+
 global.botOwner = undefined;
 
 global.tempMods = {};
@@ -184,7 +195,7 @@ i18next.use(i18nextbackend).init({
             return value;
         },
         escapeValue: false,
-        defaultVariables: { name: consts.config.name }
+        defaultVariables: { name: global.name, version: amVersion }
     }
 });
 
@@ -2005,7 +2016,7 @@ function processAmCommand(message, options, command) {
         }
         return true;
     } else if (command == "version") {
-        message.channel.send($("VERSION", {version: amVersion}));
+        message.channel.send($("VERSION", {name: displayName()}));
         return true;
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
@@ -2014,8 +2025,8 @@ function processAmCommand(message, options, command) {
         embed.setDescription($("ABOUT_ABOUT"));
         embed.addField($("ABOUT_FILE_BUG"), $("ABOUT_FILE_BUG_CONTENT", {link: "(https://github.com/vicr123/AstralMod/issues)"})); 
         embed.addField($("ABOUT_SOURCE"), $("ABOUT_SOURCE_CONTENT", {link: "(https://github.com/vicr123/AstralMod/issues)"})); 
-        embed.addField($("ABOUT_CONTRIBUTORS"), $("ABOUT_CONTRIBUTORS_CONTENT", {contributors: "\n- Blake#0007\n- reflectronic#5190"}));
-        embed.setFooter($("ABOUT_THANKS", {version: amVersion}));
+        embed.addField($("ABOUT_CONTRIBUTORS"), $("ABOUT_CONTRIBUTORS_CONTENT", {contributors: "\n- Blake#0007\n- reflectronic#6230"}));
+        embed.setFooter($("ABOUT_THANKS", {name: displayName()}));
         message.channel.send(embed);
         return true;
     } else if (command == "setlocale") {
@@ -2131,7 +2142,8 @@ function processAmCommand(message, options, command) {
             }
         }
 
-        embed.setFooter($("HELP_FOOTER", {amVersion: amVersion}));
+        embed.setFooter($("HELP_FOOTER", {name: displayName()}));
+
         message.channel.send("", { embed: embed });
         return true;
     } else if (command.startsWith("sudo")) {
@@ -2350,7 +2362,8 @@ function processAmCommand(message, options, command) {
                 embed.addField($("HELP_COMMAND_REMARKS"), help.remarks);
             }
         }
-        embed.setFooter("AstralMod " + amVersion);
+
+        embed.setFooter(displayName());
         message.channel.send("", { embed: embed });
         return true;
     } else if (command.startsWith("critical ") && process.argv.includes("--debug")) {
@@ -3320,7 +3333,7 @@ function newGuild(guild) {
         }
 
 
-        let message = ":wave: Welcome to " + consts.config.name + "! To get started, set me up in `" + guild.name + "` by typing `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
+        let message = ":wave: Welcome to " + global.name + "! To get started, set me up in `" + guild.name + "` by typing `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
         if (channel == null) {
             guild.owner.send(message);
         } else {
@@ -4157,7 +4170,11 @@ if (Discord.version != requireDiscordVersion) {
         ]
         try {
             if (consts.keys.token != null) {
-                client.login(consts.keys.token).catch(function() {
+                client.login(consts.keys.token).then(() => {
+                    if (!process.argv.includes("--nousername")) {
+                        client.user.setUsername(global.name)
+                    }
+                }).catch(function() {
                     log("Couldn't establish a connection to Discord.", logType.critical);
                 });
             } else {

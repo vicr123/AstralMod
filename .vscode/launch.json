@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch",
             "program": "${workspaceFolder}/bot.js",
             "console": "integratedTerminal",
             "args": [
@@ -17,7 +17,15 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program with debug messages",
+            "name": "Launch without Blueprint",
+            "program": "${workspaceFolder}/bot.js",
+            "console": "integratedTerminal",
+            "args": []
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch with debug logs",
             "program": "${workspaceFolder}/bot.js",
             "console": "integratedTerminal",
             "args": [
@@ -28,7 +36,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program with HTTP server",
+            "name": "Launch with HTTP server",
             "program": "${workspaceFolder}/bot.js",
             "console": "integratedTerminal",
             "args": [
@@ -37,7 +45,6 @@
                 "--httpserver"
             ]
         },
-
         {
             "type": "node",
             "request": "attach",
