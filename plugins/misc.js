@@ -287,7 +287,7 @@ function processCommand(message, isMod, command, options) {
                     let embed = new Discord.RichEmbed();
                     embed.attachFile(new Discord.Attachment(stdout, "graph.png"));
                     embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
-                    embed.setColor(consts.colors.done);
+                    embed.setColor(consts.colors.none);
                     embed.setDescription($("GRAPH_DESC"));
                     embed.setImage("attachment://graph.png");
                     message.reply($("GRAPH_RESULTS"), {embed: embed}).then(function(message) {
