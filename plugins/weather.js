@@ -612,7 +612,7 @@ function processCommand(message, isMod, command, options) {
         let embed = new Discord.RichEmbed;
         embed.setColor(consts.colors.fail);
         embed.setTitle("Weather Unavailable");
-        embed.setDescription("The weather command is unavailable in AstralMod 3.0. It will be coming back in AstralMod 3.1.");
+        embed.setDescription(`The weather command is unavailable in ${consts.config.name} 3.0. It will be coming back in ${consts.config.name} 3.1.`);
         embed.setFooter("We sincerely apologise for the inconvenience.");
 
         message.channel.send(embed);

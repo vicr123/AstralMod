@@ -93,7 +93,6 @@ if (process.argv.indexOf("--blueprint") == -1) {
     amVersion = "Blueprint";
     global.defaultPrefix = consts.config.bprefix;
 }
-
 global.botOwner = undefined;
 
 global.tempMods = {};
@@ -184,7 +183,8 @@ i18next.use(i18nextbackend).init({
             if (format == "bold") return "**" + value + "**";
             return value;
         },
-        escapeValue: false
+        escapeValue: false,
+        defaultVariables: { name: consts.config.name }
     }
 });
 
@@ -3320,7 +3320,7 @@ function newGuild(guild) {
         }
 
 
-        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by typing `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
+        let message = ":wave: Welcome to " + consts.config.name + "! To get started, set me up in `" + guild.name + "` by typing `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
         if (channel == null) {
             guild.owner.send(message);
         } else {

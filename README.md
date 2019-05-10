@@ -22,6 +22,7 @@ module.exports = {
     config: {
         prefix: "am:", // This is the default prefix used by AstralMod.
         bprefix: "am#", // This is the default prefix used by AstralMod when it is running as AstralMod Blueprint.
+        name: "AstralMod", // This is the name that AstralMod uses to refer to itself.
         pinToPinEmoji: "📌", // This is used as the emoji for the Portable Pins and the Pin to Pin feature. You can generally leave this as the default, but if you have other bots that interpret the 📌 emoji as something else, you might want to change it.
         calcProcess: "/usr/bin/thecalculator", // This is a path to the compiled binary for theCalculator, used for calculating expressions in 'am:calc'. You can leave this blank, but 'am:calc' will be disabled. You can grab a copy of theCalculator at https://github.com/vicr123/thecalculator/releases.
         emojiServer: "" // This is the server ID of a server that has all of the AstralMod-specific emoji. More information about setting up the emoji can be found below. You can leave this blank, but all custom emoji will be replaced by ➡.
