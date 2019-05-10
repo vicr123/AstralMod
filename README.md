@@ -23,6 +23,8 @@ module.exports = {
         prefix: "am:", // This is the default prefix used by AstralMod.
         bprefix: "am#", // This is the default prefix used by AstralMod when it is running as AstralMod Blueprint.
         name: "AstralMod", // This is the name that AstralMod uses to refer to itself.
+        bname: "AstralMod Blueprint", // This is the name that AstralMod uses to refer to itself in blueprint mode.
+        version: "3.1", // This is the version number that AstralMod refers to itself as. When in blueprint mode, the version is not shown (and logs say 'Blueprint').
         pinToPinEmoji: "📌", // This is used as the emoji for the Portable Pins and the Pin to Pin feature. You can generally leave this as the default, but if you have other bots that interpret the 📌 emoji as something else, you might want to change it.
         calcProcess: "/usr/bin/thecalculator", // This is a path to the compiled binary for theCalculator, used for calculating expressions in 'am:calc'. You can leave this blank, but 'am:calc' will be disabled. You can grab a copy of theCalculator at https://github.com/vicr123/thecalculator/releases.
         emojiServer: "" // This is the server ID of a server that has all of the AstralMod-specific emoji. More information about setting up the emoji can be found below. You can leave this blank, but all custom emoji will be replaced by ➡.
@@ -45,6 +47,7 @@ Set up a server and upload the the emoji in the `/emoji` folder to it. You can c
 - `--blueprint` Runs AstralMod as AstralMod Blueprint. The version number is replaced with "Blueprint" and the prefix is changed.
 - `--debug` Enables debugging output in the console
 - `--nowelcome` Disables the welcome message that AstralMod sends when it joins a new server
+- `--nousername` Stops AstralMod from changing its username to the one specified in the config
 - `--novacuum` Disables the periodic cleanup of the settings file
 - `--httpserver` Enables the web interface, accessible at http://127.0.0.1:28931
 

@@ -292,7 +292,7 @@
     "HELP_CONTENTS": "{{name}} Help Contents",
     "HELP_CONTENTS_INTRODUCTION": "Here are some things you can try. For more information, type `{{prefix}}help [command]`",
     "HELP_CORE_COMMANDS": "{{name}} Core Commands",
-    "HELP_FOOTER": "{{name}} {{amVersion}}. Moderator commands denoted with bold text.",
+    "HELP_FOOTER": "{{name}}. Moderator commands denoted with bold text.",
     "HELP_UNAVAILABLE": "Couldn't obtain help for that command.",
     "HELP_COMMAND_TITLE": "Command Help",
     "HELP_COMMAND_FOR": "for {{title}}",
@@ -446,9 +446,8 @@
 
     "UPTIME": "{{emoji}} {{name}} has been up for about {{time, humanize}} ({{time, d[d] HH:mm:ss}})",
     
-    "VERSION": "**{{name}} {{version}}**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later.",
+    "VERSION": "**{{name}}**\nDiscord Bot\n\nLicensed under the GNU General Public License, version 3 or later.",
     
-    "ABOUT_TITLE": "{{name}} {{version}}",
     "ABOUT_ABOUT": "Discord Bot",
     "ABOUT_FILE_BUG": "File a bug",
     "ABOUT_FILE_BUG_CONTENT": "File a bug at the [GitHub Repository]{{link}} for {{name}}.",
@@ -456,8 +455,8 @@
     "ABOUT_SOURCE_CONTENT": "Source code for {{name}} is available at the [GitHub Repository]{{link}}, licensed under the GNU General Public License.",
     "ABOUT_CONTRIBUTORS": "Contributors",
     "ABOUT_CONTRIBUTORS_CONTENT": "{{name}} is possible due to the work of these wonderful people: {{contributors}}",
-    "ABOUT_THANKS": "{{name}} {{version}}. Thanks for using {{name}}!",
-    
+    "ABOUT_THANKS": "{{name}}. Thanks for using {{name}}!",
+
     "WARN_NO_USER_FOUND": "I couldn't find a user with that name on this server.",
     "WARN_ENTER_REASON": "{{emoji}} Enter a reason for warning {{user}} or `cancel`.",
     "WARN_ALREADY_WARNING": "{{user}} is already warning someone right now. Please wait for them to finish first.",
