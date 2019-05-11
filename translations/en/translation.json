@@ -546,6 +546,7 @@
     "CONFIG_NICK_MODERATION_TITLE": "**{{number}}** — Nickname requests",
     "CONFIG_FILTERING_TITLE": "**{{number}}** — Expletive filtering",
     "CONFIG_PIN_TO_PIN_TITLE": "**{{number}}** — Pin to pin",
+    "CONFIG_BOT_LOGGING": "**{{number}}** — Bot logging",
     "CONFIG_NEW_USER_NOTIFICATION_TITLE": "**{{number}}** — New user alert",
     "CONFIG_FOOTER": "{{exit}} — Exit Configuration | {{reset}} — Reset {{name}} Settingss",
     "CONFIG_CANCEL_CONFIGURATION": "Returning to main menu.",
