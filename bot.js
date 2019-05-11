@@ -2536,6 +2536,11 @@ function getSingleConfigureWelcomeText(guild, author) {
     } else {
         embed.addField($("CONFIG_NEW_USER_NOTIFICATION_TITLE", {number: "D"}), $("CONFIG_ENABLED"), true);
     }
+    if (guildSetting.dontLogBots == null || guildSetting.dontLogBots == false) {
+        embed.addField($("CONFIG_BOT_LOGGING", {number: "E"}), $("CONFIG_ENABLED"), true);
+    } else {
+        embed.addField($("CONFIG_BOT_LOGGING", {number: "E"}), $("CONFIG_DISABLED"), true);
+    }
 
     embed.setFooter($("CONFIG_FOOTER", {exit: "<", reset: "<<"}));
     embed.setColor(consts.colors.info)
@@ -2662,6 +2667,12 @@ function processSingleConfigure(message, guild) {
                     guildSetting.pinToPin = !guildSetting.pinToPin;
                         
                     message.author.send($("CONFIG_PINTOPIN_TOGGLED", {emoji: consts.config.pinToPinEmoji}));
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                    break;
+                case "e": //dont log bots
+                    guildSetting.dontLogBots = !guildSetting.dontLogBots;
+                        
+                    message.author.send($("CONFIG_DONTLOGBOTS_TOGGLED"));
                     message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
                 case ">": //Reset AstralMod
@@ -3416,7 +3427,13 @@ function parseCleanContent(content) {
     return content;
 }
 
+
 function messageDeleted(message) {
+    if (settings.guilds[message.guild.id].dontLogBots == true){
+        if(message.author.bot){
+            return
+        }
+    }  
     var channel = null;
     if (message.guild != null) {
         if (settings.guilds[message.guild.id].chatLogs != null) {
@@ -3428,6 +3445,7 @@ function messageDeleted(message) {
             }
         }
     }
+    
 
     if (channel != null) {
         if (settings.guilds[message.guild.id].blocked[message.channel.id].includes("log")) { //If the channel the message was in has logs blocked (or the message was in a log channel, which shouldn't get logged either)
