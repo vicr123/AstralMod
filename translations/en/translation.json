@@ -546,6 +546,7 @@
     "CONFIG_NICK_MODERATION_TITLE": "**{{number}}** — Nickname requests",
     "CONFIG_FILTERING_TITLE": "**{{number}}** — Expletive filtering",
     "CONFIG_PIN_TO_PIN_TITLE": "**{{number}}** — Pin to pin",
+    "CONFIG_BOT_LOGGING": "**{{number}}** — Bot logging",
     "CONFIG_NEW_USER_NOTIFICATION_TITLE": "**{{number}}** — New user alert",
     "CONFIG_FOOTER": "{{exit}} — Exit Configuration | {{reset}} — Reset {{name}} Settingss",
     "CONFIG_CANCEL_CONFIGURATION": "Returning to main menu.",
@@ -606,6 +607,8 @@
     "CONFIG_FILTERING_OFF": "OK, I won't filter expletive words in my messages from now on.",
     "CONFIG_FILTERING_ON": "OK, I'll filter expletive words in my messages from now on.",
     "CONFIG_PINTOPIN_TOGGLED": "OK, I've toggled people from using the {{emoji}} emoji to pin messages.",
+    "CONFIG_DONTLOGBOT_TOGGLED": "OK, I've toggled the logging of messages sent by bot users.",
+    "CONFIG_RESET_ASTRALMOD_CONFIRMATION": "**Reset AstralMod**\nResetting AstralMod for this server. This will clear all settings **and warnings** for this server and you'll need to set up AstralMod again to use it.\nTo reset AstralMod, respond with `Reset AstralMod`."
     "CONFIG_NEWUSERALERT_TOGGLED": "OK, I'll notify staff when a user created in the last 24 hours joins the server.",
     "CONFIG_RESET_{{name}}_CONFIRMATION": "**Reset {{name}}**\nResetting {{name}} for this server. This will clear all settings **and warnings** for this server and you'll need to set up {{name}} again to use it.\nTo reset {{name}}, respond with `Reset {{name}}`."
 }
