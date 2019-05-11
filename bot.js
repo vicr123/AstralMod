@@ -3428,6 +3428,11 @@ function messageDeleted(message) {
             }
         }
     }
+    if (settings.guilds[message.guild.id].logBots == true){
+        if(message.author.bot){
+            return
+        }
+    }
 
     if (channel != null) {
         if (settings.guilds[message.guild.id].blocked[message.channel.id].includes("log")) { //If the channel the message was in has logs blocked (or the message was in a log channel, which shouldn't get logged either)
