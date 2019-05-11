@@ -3416,7 +3416,7 @@ function parseCleanContent(content) {
     return content;
 }
 
-if (settings.guilds[message.guild.id].logBots == true){
+if (settings.guilds[message.guild.id].dontLogBots == true){
     if(message.author.bot){
         return
     }
