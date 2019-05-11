@@ -93,7 +93,7 @@ async function processEval(message) {
             splitOptions.prepend = "```js\n";
         }
 
-        let mess = await message.channel.send(m, {
+        let mess = await message.channel.send(m.replace(client.token, "[client token redacted]"), {
             split: splitOptions
         })
 

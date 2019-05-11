@@ -230,6 +230,73 @@ function processCommand(message, isMod, command, options) {
                 }
             }
         });
+    } else if (command.startsWith("graph ")) {
+        let expr = command.substr(6);
+
+        sendPreloader($("GRAPH_PLOTTING"), message.channel).then(messageToEdit => {
+            let calcProcess;
+            if (consts.config.calcProcess == null) {
+                calcProcess = "/usr/bin/thecalculator";
+            } else {
+                calcProcess = consts.config.calcProcess;
+            }
+
+            let amArgs = expr.split(" ");
+
+            let args = [
+                "-g",
+            ]
+
+            let argDefs = [
+                "--cx",
+                "--cy",
+                "--sx",
+                "--sy"
+            ];
+
+            for (let arg of argDefs) {
+                if (amArgs.includes(arg)) {
+                    let argIndex = amArgs.indexOf(arg);
+                    if (amArgs.length >= argIndex + 1) {
+                        args.push(arg);
+                        args.push(amArgs[argIndex + 1]);
+
+                        amArgs.splice(argIndex, 2);
+                    }
+                }
+            }
+
+            args.push("--");
+            args.push("500");
+            args.push("500");
+
+            for (let e of amArgs) {
+                args.push(e);
+            }
+
+            require('child_process').execFile(calcProcess, args, {
+                env: {
+                    "LANG": options.locale,
+                    "LANGUAGE": options.locale
+                },
+                encoding: "buffer"
+            }, function(err, stdout, stderr) {
+                if (err) {
+                    messageToEdit.edit($("GRAPH_ERROR", {emoji: ":large_orange_diamond:"}));
+                } else {
+                    let embed = new Discord.RichEmbed();
+                    embed.attachFile(new Discord.Attachment(stdout, "graph.png"));
+                    embed.setAuthor("theCalculator", "https://vicr123.com/images/thecalculator.svg");
+                    embed.setColor(consts.colors.none);
+                    embed.setDescription($("GRAPH_DESC"));
+                    embed.setImage("attachment://graph.png");
+                    message.reply($("GRAPH_RESULTS"), {embed: embed}).then(function(message) {
+                        messageToEdit.delete();
+                    });
+                }
+            });
+        });
+        
     } else if (command == "tr") {
         let embed = new Discord.RichEmbed();
         embed.setColor(consts.colors.done);
@@ -346,6 +413,7 @@ module.exports = {
                 "setunit",
                 "sinfo",
                 "calc",
+                "graph",
                 "tr"
             ],
             modCommands: [
@@ -380,6 +448,13 @@ module.exports = {
                 help.usageText = prefix(message.guild.id) + "calc expression";
                 help.helpText = h$("CALC_HELPTEXT");
                 help.remarks = h$("CALC_REMARKS");
+                break;
+            case "graph":
+                help.title = prefix(message.guild.id) + "graph";
+                help.usageText = prefix(message.guild.id) + "graph expressions...";
+                help.helpText = h$("GRAPH_HELPTEXT");
+                help.remarks = h$("GRAPH_REMARKS");
+                help.availableOptions = h$("GRAPH_AVAILABLEOPTIONS");
                 break;
             case "tr":
                 help.title = prefix(message.guild.id) + "tr";

@@ -1,24 +1,64 @@
 <html>
     <head>
         <title>AstralMod Console</title>
+        <style>
+        #status {
+            overflow: hidden;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            width: 150%;
+            background: rgb(234, 231, 231);
+        }
+</style>
     </head>
-    <body>
-        <h1>AstralMod Console</h1>
-        <div id="commandBox">
-            <input type="text" id="nextCommand" />
-            <button onclick="sendCommand()" >Go</button>
+    <body style="overflow: hidden;">
+        <h1 style="font-family: monospace">AstralMod Console</h1>
+        <div class="wrapper">
+            <div style="height:calc(100% - 80px); overflow: scroll; display: flex; flex-direction: column-reverse;" id="output"></div>
+            <div id="status">
+                <input type="text" id="nextCommand" style="float:left; width: calc(100vw - 40px);" />
+                <button id="clickme" onclick="sendCommand()" style="width:40px">Go</button>               
+            </div>
         </div>
-        <div id="output">
-        </div>
-
+            <!-- <div id="output" style="height: 90%; max-height: 90%; width: 100%; overflow:scroll"></div>       -->
         <script>
+            const socket = new WebSocket('ws://localhost:28931');
+            const textbox = document.getElementById("nextCommand");
+            const output = document.getElementById("output");
+
+            function onMessage(e) {
+                var payload = JSON.parse(e.data)
+                var newNode = document.createElement('div');   
+                var code = document.createElement('code');
+                code.innerHTML = payload.msg;
+                code.style.color = payload.color
+                
+                newNode.append(code);
+                return output.insertBefore(newNode, output.firstChild);
+            }
+
+            socket.onmessage = onMessage;
+            
+            socket.onclose = () => {
+                onMessage({data: JSON.stringify({msg: "AstralMod has closed.", color: "black"})}).style.fontStyle = "italic";
+                document.getElementById("status").remove();
+            }
+            
+            textbox.addEventListener("keyup", function(event) {
+                event.preventDefault();
+                if (event.keyCode === 13) {
+                    document.getElementById("clickme").click();
+                }
+            });
+
             function sendCommand() {
                 var textbox = document.getElementById("nextCommand");
-                var httpRequest = new XMLHttpRequest();
-                httpRequest.open("POST", "http://" + window.location.host + "/runCommand");
-                httpRequest.send(textbox.value);
+                socket.send(textbox.value);
                 textbox.value = "";
             }
+
         </script>
     </body>
 </html>

@@ -125,7 +125,7 @@ module.exports = {
         switch (helpCmd) {
             case "retrsettings":
                 help.title = prefix(message.guild.id) + "retrsettings";
-                help.helpText = $("RETRSETTINGS_HELPTEXT");
+                help.helpText = h$("RETRSETTINGS_HELPTEXT");
                 break;
             case "resetsettings":
                 help.title = prefix(message.guild.id) + "resetsettings";
