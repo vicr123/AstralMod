@@ -3416,6 +3416,12 @@ function parseCleanContent(content) {
     return content;
 }
 
+if (settings.guilds[message.guild.id].logBots == true){
+    if(message.author.bot){
+        return
+    }
+}
+
 function messageDeleted(message) {
     var channel = null;
     if (message.guild != null) {
@@ -3428,11 +3434,7 @@ function messageDeleted(message) {
             }
         }
     }
-    if (settings.guilds[message.guild.id].logBots == true){
-        if(message.author.bot){
-            return
-        }
-    }
+    
 
     if (channel != null) {
         if (settings.guilds[message.guild.id].blocked[message.channel.id].includes("log")) { //If the channel the message was in has logs blocked (or the message was in a log channel, which shouldn't get logged either)
