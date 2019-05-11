@@ -3427,13 +3427,13 @@ function parseCleanContent(content) {
     return content;
 }
 
-if (settings.guilds[message.guild.id].dontLogBots == true){
-    if(message.author.bot){
-        return
-    }
-}
 
 function messageDeleted(message) {
+    if (settings.guilds[message.guild.id].dontLogBots == true){
+        if(message.author.bot){
+            return
+        }
+    }  
     var channel = null;
     if (message.guild != null) {
         if (settings.guilds[message.guild.id].chatLogs != null) {
