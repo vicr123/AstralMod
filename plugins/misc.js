@@ -36,7 +36,9 @@ function obtainPic(user, channel, $) {
 function processCommand(message, isMod, command, options) {
     let $ = _[options.locale];
 
-    if (command == "pic") {
+    if (command == "dab") {
+        message.reply("dab on them haters ~dab~ :joy:");
+    } else if (command == "pic") {
         obtainPic(message.author, message.channel, $);
     } else if (command.startsWith("pic ")) {
         var user = command.substr(4);
