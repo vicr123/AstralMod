@@ -193,6 +193,10 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                 q: location
             }).then(function(response) {
                 //TODO: Check if the response is null
+                if (response.length == 0) {
+                    throw new Error("No location");
+                }
+
                 return Promise.resolve({
                     lat: response[0].lat,
                     lon: response[0].lon,
@@ -533,6 +537,8 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
             message.channel.send(e).then(function() {
                 messageToEdit.delete();
             });
+        }).catch(function(err) {
+            messageToEdit.edit(":large_orange_diamond: No dice :(");
         });
     });
 }
