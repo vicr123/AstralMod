@@ -26,9 +26,9 @@ const readline = require('readline');
 const events = require('events');
 const blessed = require('blessed');
 const moment = require('moment');
-require("moment-duration-format");
 const http = require('http');
-const https = require('https');
+require("moment-duration-format");
+const WebSocketServer = require('websocket').server;
 const crypto = require('crypto');
 const client = new Discord.Client({
     restTimeOffset: 10,
@@ -37,30 +37,38 @@ const client = new Discord.Client({
 const i18next = require('i18next');
 let i18nextbackend = require('i18next-node-fs-backend');
 
-global.shutdown = () => {
+global.shutdown = () => {    
     if (global.settings != null) {
         log("Saving settings...");
         try {
-            var contents = JSON.stringify(settings, null, 4);
+
+            var contents = JSON.stringify(settings);
     
             //Encrypt the contents
             let iv = Buffer.from(crypto.randomBytes(16)).toString("hex").slice(0, 16);
+            fs.writeFileSync("iv", iv);
     
+            /**@type {crypto.Cipher} */
             var cipher = crypto.createCipheriv(cipherAlg, settingsKey, iv);
-            var settingsJson = Buffer.concat([cipher.update(Buffer.from(contents, "utf8"), cipher.final())]);
+            var settingsJson = Buffer.concat([cipher.update(contents, "utf8"), cipher.final()]);
     
             fs.writeFileSync("settings.json", settingsJson, "utf8");
-            fs.writeFileSync("iv", iv);
             log("Settings saved!", logType.good);
         } catch (exception) {
             log("Settings couldn't be saved. You may lose some settings.", logType.critical);
+            log(exception, logType.critical);
         }
     }
         
     log("Now exiting AstralMod.", logType.good);
 
     client.user.setStatus("invisible").then((user) => {
-        // log(user.presence.status);
+        try {
+            global.wsServer.closeAllConnections();
+        } catch (ex) { 
+            log(ex, logType.warning);
+        }
+
         process.exit();
     })
 }
@@ -77,13 +85,23 @@ global.prefix = function(id) {
     
     return defaultPrefix;
 }
+
+global.displayName = function() {
+    if (amVersion == "Blueprint") {
+        return name;
+    }
     
-if (process.argv.indexOf("--blueprint") == -1) {
-    global.amVersion = "3.0";
-    global.defaultPrefix = consts.config.prefix;
-} else {
+    return `${name} ${amVersion}`
+}
+    
+if (process.argv.includes("--blueprint")) {
     amVersion = "Blueprint";
     global.defaultPrefix = consts.config.bprefix;
+    global.name = consts.config.bname
+} else {
+    global.amVersion = consts.config.version;
+    global.defaultPrefix = consts.config.prefix;
+    global.name = consts.config.name;
 }
 
 global.botOwner = undefined;
@@ -93,6 +111,7 @@ global.tempMods = {};
 let doNotDeleteGuilds = [];
 
 let availableTranslations = fs.readdirSync("translations");
+
 
 availableTranslations.getTranslation = function(language) {
     language = language.toLowerCase()
@@ -175,7 +194,8 @@ i18next.use(i18nextbackend).init({
             if (format == "bold") return "**" + value + "**";
             return value;
         },
-        escapeValue: false
+        escapeValue: false,
+        defaultVariables: { name: global.name, version: amVersion }
     }
 });
 
@@ -930,7 +950,6 @@ global.log = function(logMessage, type = logType.debug) {
     } else {
         logMessage = logMessage.toString();
     }
-
     //Log a message to the console
     if (type == logType.debug) {
         if (process.argv.indexOf("--debug") == -1) {
@@ -940,9 +959,9 @@ global.log = function(logMessage, type = logType.debug) {
 
     var logFormatting;
     var logString;
+    var logColor;
 
     var lines = logMessage.split("\n");
-
 
     for (i = 0; i < lines.length; i++) {
         switch (type) {
@@ -956,6 +975,7 @@ global.log = function(logMessage, type = logType.debug) {
                 }
                 logString += lines[i];
                 logFormatting = "\x1b[1m\x1b[34m";
+                logColor = "blue";
                 break;
             case logType.info:
                 if (i == 0) {
@@ -967,6 +987,7 @@ global.log = function(logMessage, type = logType.debug) {
                 }
                 logString += lines[i];
                 logFormatting = "\x1b[1m\x1b[37m";
+                logColor = "black";
                 break;
             case logType.warning:
                 if (i == 0) {
@@ -978,6 +999,7 @@ global.log = function(logMessage, type = logType.debug) {
                 }
                 logString += lines[i];
                 logFormatting = "\x1b[1m\x1b[33m";
+                logColor = "darkgoldenrod";
                 break;
             case logType.critical:
                 if (i == 0) {
@@ -989,6 +1011,7 @@ global.log = function(logMessage, type = logType.debug) {
                 }
                 logString += lines[i];
                 logFormatting = "\x1b[1m\x1b[31m";
+                logColor = "red";
                 break;
             case logType.good:
                 if (i == 0) {
@@ -1000,10 +1023,20 @@ global.log = function(logMessage, type = logType.debug) {
                 }
                 logString += lines[i];
                 logFormatting = "\x1b[1m\x1b[32m";
+                logColor = "green";
                 break;
         }
 
         var logOutput = logFormatting + logString + "\x1b[0m";
+
+        try {
+            // Remove all the ANSI color codes and replace them with the color information the client-side javascript will parse
+            global.wsServer.broadcast(JSON.stringify({ msg: logOutput.replace(/\x1b\[[0-9;]*m/g, ""), color: logColor }));
+        } catch (ex) { 
+            if (global.wsServer)
+                log(ex, logType.warning)
+        }
+    
 
         logBox.log("[" + new Date().toLocaleTimeString("us", {
             hour12: false
@@ -1035,15 +1068,8 @@ global.handleUnexpectedRejection = function(error) {
 }
 
 process.on('uncaughtException', function(err) {
-    //Uncaught Exception
-
-    if (err.code == "ECONNRESET") {
-        log("Uncaught Exception: ECONNRESET", logType.critical);
-        log(err.stack, logType.critical);
-    } else {
-        log("Uncaught Exception:", logType.critical);
-        log(err.stack, logType.critical);
-    }
+    log("Uncaught Exception: " + err.code, logType.critical);
+    log(err.stack, logType.critical);
 });
 
 var stdinInterface = readline.createInterface({
@@ -1213,7 +1239,7 @@ function processConsoleInput(line) {
                     channel = guild.channels.array()[0];
                 }
 
-                if (channel != null) {
+                if (channel != null && channel.type == "text") {
                     channel.send("SERVICE ANNOUNCEMENT: " + broadcast);
                 }
             }
@@ -1990,7 +2016,7 @@ function processAmCommand(message, options, command) {
         }
         return true;
     } else if (command == "version") {
-        message.channel.send($("VERSION", {version: amVersion}));
+        message.channel.send($("VERSION", {name: displayName()}));
         return true;
     } else if (command == "about") {
         let embed = new Discord.RichEmbed();
@@ -1999,8 +2025,8 @@ function processAmCommand(message, options, command) {
         embed.setDescription($("ABOUT_ABOUT"));
         embed.addField($("ABOUT_FILE_BUG"), $("ABOUT_FILE_BUG_CONTENT", {link: "(https://github.com/vicr123/AstralMod/issues)"})); 
         embed.addField($("ABOUT_SOURCE"), $("ABOUT_SOURCE_CONTENT", {link: "(https://github.com/vicr123/AstralMod/issues)"})); 
-        embed.addField($("ABOUT_CONTRIBUTORS"), $("ABOUT_CONTRIBUTORS_CONTENT", {contributors: "\n- Blake#0007\n- reflectronic#5190"}));
-        embed.setFooter($("ABOUT_THANKS", {version: amVersion}));
+        embed.addField($("ABOUT_CONTRIBUTORS"), $("ABOUT_CONTRIBUTORS_CONTENT", {contributors: "\n- Blake#0007\n- reflectronic#6230"}));
+        embed.setFooter($("ABOUT_THANKS", {name: displayName()}));
         message.channel.send(embed);
         return true;
     } else if (command == "setlocale") {
@@ -2116,7 +2142,8 @@ function processAmCommand(message, options, command) {
             }
         }
 
-        embed.setFooter($("HELP_FOOTER", {amVersion: amVersion}));
+        embed.setFooter($("HELP_FOOTER", {name: displayName()}));
+
         message.channel.send("", { embed: embed });
         return true;
     } else if (command.startsWith("sudo")) {
@@ -2335,12 +2362,29 @@ function processAmCommand(message, options, command) {
                 embed.addField($("HELP_COMMAND_REMARKS"), help.remarks);
             }
         }
-        embed.setFooter("AstralMod " + amVersion);
+
+        embed.setFooter(displayName());
         message.channel.send("", { embed: embed });
         return true;
-    } else if (command.startsWith("throw ")) {
-        var msg = command.substr(6);
+    } else if (command.startsWith("critical ") && process.argv.includes("--debug")) {
+        var msg = command.substr(9);
         throw new Error(msg);
+        return true;
+    } else if (command.startsWith("warn ") && process.argv.includes("--debug")) {
+        var msg = command.substr(5);
+        log(msg, logType.warning);
+        return true;
+    } else if (command.startsWith("good ") && process.argv.includes("--debug")) {
+        var msg = command.substr(5);
+        log(msg, logType.good);
+        return true;
+    } else if (command.startsWith("info ") && process.argv.includes("--debug")) {
+        var msg = command.substr(5);
+        log(msg, logType.info);
+        return true;
+    } else if (command.startsWith("debug ") && process.argv.includes("--debug")) {
+        var msg = command.substr(6);
+        log(msg, logType.debug);
         return true;
     } else if (command == "shoo") {
         if (message.author.id == global.botOwner.id | message.member.hasPermission(Discord.Permissions.FLAGS.KICK_MEMBERS, false, true, true)) {
@@ -2492,6 +2536,11 @@ function getSingleConfigureWelcomeText(guild, author) {
     } else {
         embed.addField($("CONFIG_NEW_USER_NOTIFICATION_TITLE", {number: "D"}), $("CONFIG_ENABLED"), true);
     }
+    if (guildSetting.dontLogBots == null || guildSetting.dontLogBots == false) {
+        embed.addField($("CONFIG_BOT_LOGGING", {number: "E"}), $("CONFIG_ENABLED"), true);
+    } else {
+        embed.addField($("CONFIG_BOT_LOGGING", {number: "E"}), $("CONFIG_DISABLED"), true);
+    }
 
     embed.setFooter($("CONFIG_FOOTER", {exit: "<", reset: "<<"}));
     embed.setColor(consts.colors.info)
@@ -2618,6 +2667,12 @@ function processSingleConfigure(message, guild) {
                     guildSetting.pinToPin = !guildSetting.pinToPin;
                         
                     message.author.send($("CONFIG_PINTOPIN_TOGGLED", {emoji: consts.config.pinToPinEmoji}));
+                    message.author.send(getSingleConfigureWelcomeText(guild, message.author));
+                    break;
+                case "e": //dont log bots
+                    guildSetting.dontLogBots = !guildSetting.dontLogBots;
+                        
+                    message.author.send($("CONFIG_DONTLOGBOTS_TOGGLED"));
                     message.author.send(getSingleConfigureWelcomeText(guild, message.author));
                     break;
                 case ">": //Reset AstralMod
@@ -3289,7 +3344,7 @@ function newGuild(guild) {
         }
 
 
-        let message = ":wave: Welcome to AstralMod! To get started, set me up in `" + guild.name + "` by typing `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
+        let message = ":wave: Welcome to " + global.name + "! To get started, set me up in `" + guild.name + "` by typing `" + prefix(guild.id) + "config`. To see the help index, use `" + prefix(guild.id) + "help`.";
         if (channel == null) {
             guild.owner.send(message);
         } else {
@@ -3372,7 +3427,13 @@ function parseCleanContent(content) {
     return content;
 }
 
+
 function messageDeleted(message) {
+    if (settings.guilds[message.guild.id].dontLogBots == true){
+        if(message.author.bot){
+            return
+        }
+    }  
     var channel = null;
     if (message.guild != null) {
         if (settings.guilds[message.guild.id].chatLogs != null) {
@@ -3384,6 +3445,7 @@ function messageDeleted(message) {
             }
         }
     }
+    
 
     if (channel != null) {
         if (settings.guilds[message.guild.id].blocked[message.channel.id].includes("log")) { //If the channel the message was in has logs blocked (or the message was in a log channel, which shouldn't get logged either)
@@ -4072,8 +4134,12 @@ if (process.argv.indexOf("--debug") == -1) {
     });
 }
 
+log("Checking configuration...", logType.info);
+
+
 if (process.argv.indexOf("--httpserver") != -1) {
-    log("Initializing HTTP server");
+    log("Initializing HTTP Server...");
+
     var httpServer = http.createServer(function(req, res) {
         if (req.method == "GET") {
             if (req.url == "/") {
@@ -4083,25 +4149,25 @@ if (process.argv.indexOf("--httpserver") != -1) {
                 res.writeHead(400, "Not Found");
                 res.end();
             }
-        } else if (req.method == "POST") {
-            var body = "";
-            req.on('data', function(chunk) {
-                body += chunk;
-            });
-            req.on('end', function() {
-                var command = body;
-                textBox.setValue("> " + command);
-                textBox.submit();
-
-                res.writeHead(204, "No Content");
-                res.end();
-            });
         }
     });
     httpServer.listen(28931);
-}
 
-log("Checking configuration...", logType.info);
+    global.wsServer = new WebSocketServer({
+        httpServer: httpServer
+    });
+
+    wsServer.on('request', function(request) {
+        var connection = request.accept(null, request.origin);
+        connection.on('message', function(message) {
+            try {
+                processConsoleInput(message.utf8Data);
+            } catch (e) {
+
+            }
+        });
+    });
+}
 
 const requireDiscordVersion = "11.4.2";
 if (Discord.version != requireDiscordVersion) {
@@ -4122,7 +4188,11 @@ if (Discord.version != requireDiscordVersion) {
         ]
         try {
             if (consts.keys.token != null) {
-                client.login(consts.keys.token).catch(function() {
+                client.login(consts.keys.token).then(() => {
+                    if (!process.argv.includes("--nousername")) {
+                        client.user.setUsername(global.name)
+                    }
+                }).catch(function() {
                     log("Couldn't establish a connection to Discord.", logType.critical);
                 });
             } else {
