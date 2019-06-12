@@ -270,8 +270,10 @@ function processCommand(message, isMod, command, options) {
             args.push("500");
             args.push("500");
 
-            for (let e of amArgs) {
-                args.push(e);
+            if (amArgs.length != 0) {
+                for (let e of amArgs.join(" ").split(":")) {
+                    args.push(e.replace(" ", ""));
+                }
             }
 
             require('child_process').execFile(calcProcess, args, {
