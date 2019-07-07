@@ -1,10 +1,16 @@
-# AstralMod
-Discord Moderation Bot for bits & Bytes, theShell and many other servers
+<p style="text-align:center;" align="center">
+    <img src="icons/astralmod-2019-new.png" style="border-radius:15px;">
+</p>
+<h1 style="text-align:center;" align="center">AstralMod</h1>
 
-#### [Invite AstralMod to your server](https://discordapp.com/oauth2/authorize?client_id=282048599574052864&scope=bot&permissions=461843558)
+<p align="center">Discord Moderation Bot for bits & Bytes, theShell and many other servers</p>
 
 ## Commands
 For a full list of commands, use `am:help` in a channel. Use `am:help [command]` to look up help for a specific command. To get help with terminal commands, type `help` into the terminal.
+
+## Invite
+Would you like to try AstralMod for yourself, Good you can <a href="https://discordapp.com/oauth2/authorize?client_id=282048599574052864&scope=bot&permissions=461843558"><b align="center">Invite AstralMod to your server</b></a>. Try `am:config` to setup.
+
 
 ## Running AstralMod yourself
 1. Make sure you have [Node.js](https://nodejs.org/en/) installed. If it's recent enough it should work.
