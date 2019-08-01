@@ -448,7 +448,7 @@
     "ABOUT_FILE_BUG": "Rapporteer een bug",
     "ABOUT_FILE_BUG_CONTENT": "Rapporteer een bug bij de [GitHub-repository]{{link}} voor {{name}}.",
     "ABOUT_SOURCE": "Bron",
-    "ABOUT_SOURCE_CONTENT": "Broncode voor {{name}} is beschikbaar bij de [GitHub-repository]{{link}}, gelicenceerd onder de GNU General Public License.",
+    "ABOUT_SOURCE_CONTENT": "Broncode voor {{name}} is beschikbaar bij de [GitHub-repository]{{link}}, gelicenseerd onder de GNU General Public License.",
     "ABOUT_CONTRIBUTORS": "Bijdragers",
     "ABOUT_CONTRIBUTORS_CONTENT": "{{name}} is mogelijk door het werk van deze geweldige mensen: {{contributors}}",
     "ABOUT_THANKS": "{{name}}. Bedankt voor het gebruiken van {{name}}!",
