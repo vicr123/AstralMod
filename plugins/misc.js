@@ -66,6 +66,15 @@ function processCommand(message, isMod, command, options) {
         } else if (units.toLowerCase() === "24" || units.toLowerCase() === "24h" || units.toLowerCase() === "24hr") {
             settings.users[message.author.id].timeunit = "24h";
             message.reply($("SETUNIT_24"));
+        } else if (units.toLowerCase() === "celsius") {
+            settings.users[message.author.id].temperatureunit = "celsius";
+            message.reply($("SETUNIT_CELSIUS"));
+        } else if (units.toLowerCase() === "fahrenheit") {
+            settings.users[message.author.id].temperatureunit = "fahrenheit";
+            message.reply($("SETUNIT_FAHRENHEIT"));
+        } else if (units.toLowerCase() === "kelvin") {
+            settings.users[message.author.id].temperatureunit = "kelvin";
+            message.reply($("SETUNIT_KELVIN"));
         } else {
             throw new UserInputError($("SETUNIT_INVALID_UNIT"));
         }

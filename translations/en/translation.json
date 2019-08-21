@@ -350,10 +350,14 @@
     
     "SETUNIT_IMPERIAL": "OK, we'll use the imperial system for your units from now on",
     "SETUNIT_METRIC": "OK, we'll use the metric system for your units from now on",
-    "SETUNIT_INVALID_UNIT": "Units need to be `metric`, `imperial`, `12h` or `24h`",
+    "SETUNIT_INVALID_UNIT": "Units need to be `metric`, `imperial`, `12h`, `24h`, `celsius`, `fahrenheit` or `kelvin`",
 
     "SETUNIT_12": "OK, we'll use 12 hours for your time from now on",
     "SETUNIT_24": "OK, we'll use 24 hours for your time from now on",
+
+    "SETUNIT_CELSIUS": "OK, we'll use Celsius for your temperature from now on",
+    "SETUNIT_FAHRENHEIT": "OK, we'll use Fahrenheit for your temperature from now on",
+    "SETUNIT_KELVIN": "OK, we'll use Kelvin for your temperature from now on",
     
     "SHOO_NO_PERMS": "Only people who have kicking permissions can use this command.",
     "SHOO_TITLE": "Kicking {{name}} :(",

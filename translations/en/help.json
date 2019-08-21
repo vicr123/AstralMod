@@ -54,7 +54,7 @@
     "PIC_HELPTEXT": "Gets someone's profile picture",
     "PIC_PARAM1": "*Optional Parameter*\nThe user that you want to get the profile picture of. If no user is specified, your profile picture will be returned",
     "SETUNIT_HELPTEXT": "Sets the units that you prefer {{name}} to use",
-    "SETUNIT_PARAM1": "Either `metric`, `imperial`, `24(hr)`, or `12(hr)`",
+    "SETUNIT_PARAM1": "Either `metric`, `imperial`, `24(hr)`, `12(hr)`, `celsius`, `fahrenheit` or `kelvin`",
     "SETUNIT_REMARKS": "If you want to set the language that you prefer {{name}} to use, use {{prefix}}setlocale.",
     "SINFO_HELPTEXT": "Retrieves miscellaneous information about the current server",
     "CALC_HELPTEXT": "Invokes theCalculator and calculates mathematical expressions",
