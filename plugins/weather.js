@@ -182,6 +182,32 @@ function getDataFromCode(code, ctx, $) {
     }
 }
 
+function convertTemperatureUnit(celsius, target, decimalpoints = 0) {
+    let result;
+    switch (target) {
+        case "fahrenheit":
+            result = celsius * 1.8 + 32;
+            break;
+        case "kelvin":
+            result = celsius + 273.15;
+            break;
+        default:
+            result = celsius;
+    }
+    return result.toFixed(decimalpoints);
+}
+
+function getTemperatureUnitSymbol(unit) {
+    switch (unit) {
+        case "fahrenheit":
+            return " °F"
+        case "kelvin":
+            return " K"
+        default:
+            return " °C"
+    }
+}
+
 function sendCurrentWeather(message, location, type, options, user = "", skiiness = false) {
     let $ = _[options.locale];
     sendPreloader($("WEATHER_PREPARING"), message.channel).then(messageToEdit => {
@@ -262,7 +288,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
 
                 fill = fills[display.background];
 
-                let tempUnit = "°C";
+                let tempUnit = settings.users[message.author.id].temperatureunit;
                 let speedUnit = "km/h";
 
                 ctx.fillStyle = fill.primary;
@@ -371,7 +397,7 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                 }
 
                 ctx.font = "30px Contemporary";
-                let currentTemp = (currentWeather.hasOwnProperty("temperature") ? currentWeather.temperature.value : "---") + tempUnit;
+                let currentTemp = (currentWeather.hasOwnProperty("temperature") ? convertTemperatureUnit(parseFloat(currentWeather.temperature.value), tempUnit, 1) : "---") + getTemperatureUnitSymbol(tempUnit);
                 let tempWidth = ctx.measureText(currentTemp);
                 ctx.fillText(currentTemp, 175 - tempWidth.width / 2, 315);
 
@@ -508,8 +534,9 @@ function sendCurrentWeather(message, location, type, options, user = "", skiines
                     ctx.drawImage(display.icon, 380, (current - 1) * 82 + 9, 64, 64);
 
                     //Draw temperatures
-                    ctx.fillText((data.hasOwnProperty("maxTemperature") ? parseFloat(data.maxTemperature.value).toFixed() : "---") + "°", 450, (current - 1) * 82 + 30);
-                    ctx.fillText((data.hasOwnProperty("minTemperature") ? parseFloat(data.minTemperature.value).toFixed() : "---") + "°", 450, (current - 1) * 82 + 60);
+                    let tempUnit = settings.users[message.author.id].temperatureunit;
+                    ctx.fillText((data.hasOwnProperty("maxTemperature") ? convertTemperatureUnit(parseFloat(data.maxTemperature.value), tempUnit) : "---") + getTemperatureUnitSymbol(tempUnit), 450, (current - 1) * 82 + 30);
+                    ctx.fillText((data.hasOwnProperty("minTemperature") ? convertTemperatureUnit(parseFloat(data.minTemperature.value), tempUnit) : "---") + getTemperatureUnitSymbol(tempUnit), 450, (current - 1) * 82 + 60);
 
                     ctx.beginPath();
                     ctx.moveTo(350, current * 82);
