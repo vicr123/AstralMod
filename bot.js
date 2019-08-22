@@ -62,15 +62,19 @@ global.shutdown = () => {
         
     log("Now exiting AstralMod.", logType.good);
 
-    client.user.setStatus("invisible").then((user) => {
-        try {
-            global.wsServer.closeAllConnections();
-        } catch (ex) {
-            log(ex, logType.warning);
-        }
+    if (client.user !== null) {
+        client.user.setStatus("invisible").then((user) => {
+            try {
+                global.wsServer.closeAllConnections();
+            } catch (ex) {
+                log(ex, logType.warning);
+            }
 
-        process.exit();
-    }).catch(() => process.exit())
+            process.exit();
+        })
+    }
+
+    process.exit();
 }
 
 process.on("SIGINT", shutdown);
