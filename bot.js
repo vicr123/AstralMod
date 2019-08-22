@@ -72,9 +72,9 @@ global.shutdown = () => {
 
             process.exit();
         })
+    } else {
+        process.exit();
     }
-
-    process.exit();
 }
 
 process.on("SIGINT", shutdown);
