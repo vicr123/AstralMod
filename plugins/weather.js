@@ -1,7 +1,7 @@
 /****************************************
  * 
  *   Weather: Plugin for AstralMod that contains weather functions
- *   Copyright (C) 2019 Victor Tran, John Tur, zBlake and lempamo
+ *   Copyright (C) 2019 Victor Tran, John Tur, zBlake, lempamo and Mart Koster
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
