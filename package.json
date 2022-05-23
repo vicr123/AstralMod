@@ -20,7 +20,7 @@
     "canvas": "^1.6.10",
     "discord.js": "^11.4.2",
     "erlpack": "github:discordapp/erlpack",
-    "hawk": "^7.0.10",
+    "hawk": "^9.0.1",
     "i18next": "^12.1.0",
     "i18next-node-fs-backend": "^2.1.0",
     "libsodium-wrappers": "^0.7.3",
