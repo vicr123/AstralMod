@@ -25,7 +25,7 @@
     "i18next-node-fs-backend": "^2.1.0",
     "libsodium-wrappers": "^0.7.3",
     "localize": "^0.4.7",
-    "moment": "^2.21.0",
+    "moment": "^2.29.4",
     "moment-duration-format": "^2.2.2",
     "openweathermap-js": "^1.0.1",
     "opusscript": "0.0.3",
